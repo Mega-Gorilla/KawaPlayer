@@ -1,6 +1,5 @@
 using VRC.SDKBase;
 using VRC.SDK3.Components.Video;
-using UnityEngine;
 
 namespace Yamadev.YamaStream
 {
@@ -9,7 +8,6 @@ namespace Yamadev.YamaStream
         public override void OnVideoReady()
         {
             _errorRetryCount = 0;
-            Debug.LogWarning($"[YamaStream] OnVideoReady fired. State: {State}, URL: {Track.GetUrl()}");
             if (State == PlayerState.Playing) Play(true);
 
             if (Networking.IsOwner(gameObject) && !_isLocal && !_reloading)
