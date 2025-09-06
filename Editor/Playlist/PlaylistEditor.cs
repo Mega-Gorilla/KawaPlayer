@@ -228,7 +228,19 @@ namespace Yamadev.YamaStream.Editor
                 }
                 using (new EditorGUILayout.VerticalScope())
                 {
-                    EditorGUILayout.LabelField(Localization.Get("playlistTracks"), Styles.Bold);
+                    using (new EditorGUILayout.HorizontalScope())
+                    {
+                        using (new EditorGUI.DisabledScope(_selectedPlaylist == null))
+                        {
+                            EditorGUILayout.LabelField(Localization.Get("playlistTracks"), Styles.Bold);
+                            GUILayout.FlexibleSpace();
+                            if (GUILayout.Button(Localization.Get("reverse"), GUILayout.ExpandWidth(false)))
+                            {
+                                _selectedPlaylist.Tracks.Reverse();
+                                _isDirty = true;
+                            }
+                        }
+                    }
                     _rightScrollPos = EditorGUILayout.BeginScrollView(_rightScrollPos, GUI.skin.box);
                     if (_player != null) _playlistTracksTable?.DoLayoutList();
                     GUILayout.FlexibleSpace();
