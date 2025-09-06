@@ -90,6 +90,7 @@ namespace Yamadev.YamaStream.UI
         public void SetLanguageKorean() => SetLanguage("ko");
         public void SetLanguageEnglish() => SetLanguage("en");
         public void SetLanguageSpanish() => SetLanguage("es-CL");
+        public void SetLanguageUkranian() => SetLanguage("uk-UA");
 
         public void SetLanguage(string language)
         {

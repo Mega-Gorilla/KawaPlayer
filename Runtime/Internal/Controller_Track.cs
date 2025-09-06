@@ -66,7 +66,13 @@ namespace Yamadev.YamaStream
             _reloading = isReload;
             Handler.Stop();
 
-            if (!isReload) PlayerType = track.GetPlayerType();
+            var currentPlayerType = track.GetPlayerType();
+            if (!isReload && PlayerType != currentPlayerType)
+            {
+                var oldStatus = _state;
+                PlayerType = track.GetPlayerType();
+                _state = (byte)PlayerState.Playing;
+            }
             Track = track;
             ResolveTrack.Invoke();
 

@@ -138,7 +138,7 @@ namespace Yamadev.YamaStream.Editor
         {
             if (selected.index >= _playlists.Count)
             {
-                _selectedPlaylist.Tracks = null;
+                _selectedPlaylist = null;
                 _playlistTracksTable = null;
                 return;
             }

@@ -17,18 +17,32 @@ namespace Yamadev.YamaStream
 
         public string GetVideoInfo(VRCUrl url)
         {
-            if (string.IsNullOrEmpty(url.Get())) return string.Empty;
-            if (_info.TryGetValue(url.Get(), TokenType.String, out var info)) return info.String;
+            if (string.IsNullOrEmpty(url.Get()))
+            {
+                return string.Empty;
+            }
+
+            if (_info.TryGetValue(url.Get(), TokenType.String, out var info))
+            {
+                return info.String;
+            }
+
             DownloadVideoInfo(url);
+
             return string.Empty;
         }
 
         private bool IsSupportedUrl(string url)
         {
-            if (url.StartsWith("https://www.youtube.com") || url.StartsWith("https://youtube.com") || url.StartsWith("https://youtu.be"))
+            if (url.StartsWith("https://www.youtube.com") || url.StartsWith("https://youtube.com"))
+            {
                 return true;
+            }
             if (url.StartsWith("https://www.twitch.tv") || url.StartsWith("https://twitch.tv"))
+            {
                 return true;
+            }
+
             return false;
         }
 
@@ -41,15 +55,24 @@ namespace Yamadev.YamaStream
         public override void OnStringLoadSuccess(IVRCStringDownload result)
         {
             string urlStr = result.Url.Get();
-            if (urlStr.StartsWith("https://www.youtube.com") || urlStr.StartsWith("https://youtube.com") || urlStr.StartsWith("https://youtu.be"))
+            if (urlStr.StartsWith("https://www.youtube.com") || urlStr.StartsWith("https://youtube.com"))
             {
                 _info.SetValue(urlStr, YouTube.GetTitleFromHtml(result.Result));
             }
             else if (urlStr.StartsWith("https://www.twitch.tv") || urlStr.StartsWith("https://twitch.tv"))
+            {
                 _info.SetValue(urlStr, GetTwitchTitleFromTwitch(result.Result));
-            else _info.SetValue(urlStr, string.Empty);
+            }
+            else
+            {
+                _info.SetValue(urlStr, string.Empty);
+            }
 
-            if (!_controller.Track.HasTitle()) _controller.Track.SetTitle(GetVideoInfo(_controller.Track.GetVRCUrl()));
+            if (!_controller.Track.HasTitle())
+            {
+                _controller.Track.SetTitle(GetVideoInfo(_controller.Track.GetVRCUrl()));
+            }
+
             _controller.SendCustomVideoEvent(nameof(OnVideoInfoLoaded));
         }
 
@@ -62,7 +85,9 @@ namespace Yamadev.YamaStream
         public override void OnUrlChanged()
         {
             if (_controller.Track.GetTitle() == string.Empty)
+            {
                 DownloadVideoInfo(_controller.Track.GetVRCUrl());
+            }
         }
 
         #region HTML parser
