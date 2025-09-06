@@ -58,6 +58,7 @@ namespace Yamadev.YamaStream.Editor
                 // AutoAssignAdditiveLightVolumes(player, tvgi);
                 var instances = player.TargetLightVolumes.Select(lv => lv.LightVolumeInstance).ToArray();
                 tvgi.TargetLightVolumes = instances;
+                tvgi.TargetPointLightVolumes = new PointLightVolumeInstance[0];
 
                 var crt = CreateNewCustomRenderTexture();
                 tvgi.TargetRenderTexture = crt;
