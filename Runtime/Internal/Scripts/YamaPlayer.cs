@@ -1,5 +1,8 @@
 ﻿using UnityEngine;
+
+#if USE_VRCLV
 using VRCLightVolumes;
+#endif
 
 namespace Yamadev.YamaStream.Script
 {

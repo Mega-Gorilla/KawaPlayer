@@ -50,8 +50,10 @@ namespace Yamadev.YamaStream.Editor
             foreach (var target in checkTargets)
             {
                 if (target == null) continue;
+
                 string targetPath = AssetDatabase.GetAssetPath(target);
                 if (string.IsNullOrEmpty(targetPath)) continue;
+
                 string checkedKey = $"{CheckedKeyBase}_{VersionManager.Version}_{targetPath}";
                 if (SessionState.GetBool(checkedKey, false)) continue;
 
