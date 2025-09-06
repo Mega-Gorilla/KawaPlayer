@@ -257,7 +257,6 @@ namespace Yamadev.YamaStream.Editor
 
         void DrawPlaylistSettings()
         {
-            if (_selectedPlaylist == null) return;
             EditorGUILayout.LabelField("プレイリスト設定", Styles.Bold);
             using (new GUILayout.VerticalScope(GUI.skin.box))
             {
@@ -268,20 +267,27 @@ namespace Yamadev.YamaStream.Editor
                 using (new EditorGUILayout.HorizontalScope())
                 {
                     _defaultTrackMode = (VideoPlayerType)EditorGUILayout.Popup(Localization.Get("videoPlayerType"), (int)_defaultTrackMode, Enum.GetNames(typeof(VideoPlayerType)));
-                    if (GUILayout.Button(Localization.Get("applyForAll"), GUILayout.ExpandWidth(false)))
+                    using (new EditorGUI.DisabledScope(_selectedPlaylist == null))
                     {
-                        for (int i = 0; i < _selectedPlaylist.Tracks.Count; i++)
-                            _selectedPlaylist.Tracks[i].Mode = _defaultTrackMode;
-                        _isDirty = true;
+                        if (GUILayout.Button(Localization.Get("applyForAll"), GUILayout.ExpandWidth(false)))
+                        {
+                            for (int i = 0; i < _selectedPlaylist.Tracks.Count; i++)
+                                _selectedPlaylist.Tracks[i].Mode = _defaultTrackMode;
+                            _isDirty = true;
+                        }
                     }
                 }
                 _useYoutubePlaylistName = EditorGUILayout.Toggle(Localization.Get("overwritePlaylistName"), _useYoutubePlaylistName);
                 using (new EditorGUILayout.HorizontalScope())
                 {
-                    _selectedPlaylist.YoutubeListId = EditorGUILayout.TextField(_selectedPlaylist.YoutubeListId);
-                    if (GUILayout.Button(Localization.Get("loadYoutubePlaylist"), GUILayout.ExpandWidth(false)))
+                    using (new EditorGUI.DisabledScope(_selectedPlaylist == null))
                     {
-                        ReadYouTubePlaylist().Forget();
+                        var youtubeListId = EditorGUILayout.TextField(_selectedPlaylist?.YoutubeListId ?? "");
+                        if (_selectedPlaylist != null) _selectedPlaylist.YoutubeListId = youtubeListId;
+                        if (GUILayout.Button(Localization.Get("loadYoutubePlaylist"), GUILayout.ExpandWidth(false)))
+                        {
+                            ReadYouTubePlaylist().Forget();
+                        }
                     }
                 }
             }
