@@ -59,9 +59,12 @@ namespace Yamadev.YamaStream.Editor
                 EditorGUILayout.PropertyField(_yamaPlayer);
             }
 
-            using (new SectionScope())
+            if (_vrcPickup)
             {
-                DrawPickupSettings();
+                using (new SectionScope())
+                {
+                    DrawPickupSettings();
+                }
             }
 
             DrawUISettings();
