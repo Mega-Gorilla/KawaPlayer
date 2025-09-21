@@ -38,6 +38,8 @@ namespace Yamadev.YamaStream.Editor
             set => _uiShape.gameObject.SetActive(!value);
         }
 
+        public bool HasIdleImage => _idle.objectReferenceValue != null;
+
         public UISettings(UIController uiController)
         {
             _uiController = uiController;

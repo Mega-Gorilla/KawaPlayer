@@ -51,7 +51,7 @@ namespace Yamadev.YamaStream
                 Stop();
             }
 
-            _state = (byte)PlayerState.Playing;
+            _state = _slideMode ? (byte)PlayerState.Paused : (byte)PlayerState.Playing;
             LoadTrack(track);
         }
 
@@ -69,9 +69,9 @@ namespace Yamadev.YamaStream
             var currentPlayerType = track.GetPlayerType();
             if (!isReload && PlayerType != currentPlayerType)
             {
-                var oldStatus = _state;
+                var currentStatus = _state;
                 PlayerType = track.GetPlayerType();
-                _state = (byte)PlayerState.Playing;
+                _state = currentStatus;
             }
             Track = track;
             ResolveTrack.Invoke();

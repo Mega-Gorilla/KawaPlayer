@@ -49,6 +49,26 @@ namespace Yamadev.YamaStream
             _lastSync = Time.time;
         }
 
+        [Obsolete(".")]
+        public string[] KaraokeMembers
+        {
+            get => new string[0];
+            set { }
+        }
+
+        [Obsolete(".")]
+        public KaraokeMode KaraokeMode
+        {
+            get => KaraokeMode.None;
+            set { }
+        }
+
+        [Obsolete(".")]
+        public float NetworkDelay => 0;
+
+        [Obsolete(".")]
+        public float KaraokeDelay => 0;
+
         [Obsolete("Use EnsureVideoTime instead.")]
         public void DoSync(bool force = false) => EnsureVideoTime(force);
 

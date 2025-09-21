@@ -56,7 +56,7 @@ namespace Yamadev.YamaStream.Editor
 
             using (new SectionScope())
             {
-                EditorGUILayout.PropertyField(_yamaPlayer);
+                DrawTargetPlayerSettings();
             }
 
             if (_vrcPickup)
@@ -96,9 +96,12 @@ namespace Yamadev.YamaStream.Editor
                 _uiSettings.DrawFontSettings();
             }
 
-            using (new SectionScope("Idle Image"))
+            if (_uiSettings.HasIdleImage)
             {
-                _uiSettings.DrawIdleImageSettings();
+                using (new SectionScope("Idle Image"))
+                {
+                    _uiSettings.DrawIdleImageSettings();
+                }
             }
 
             using (new SectionScope())
