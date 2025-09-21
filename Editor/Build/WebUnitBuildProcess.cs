@@ -23,7 +23,10 @@ namespace Yamadev.YamaStream.Editor
             foreach (UIController uiController in Utils.FindComponentsInHierarthy<UIController>())
             {
                 VRCUrlInputField dynamicUrlInputField = uiController.GetProgramVariable("_dynamicPlaylistUrlInput") as VRCUrlInputField;
-                dynamicUrlInputField.gameObject.SetActive(dynamicUrlInputField != null);
+                if (dynamicUrlInputField != null)
+                {
+                    dynamicUrlInputField.gameObject.SetActive(true);
+                }
             }
         }
     }
