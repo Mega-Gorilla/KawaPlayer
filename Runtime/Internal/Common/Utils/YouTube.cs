@@ -58,35 +58,6 @@ namespace Yamadev.YamaStream
 
     public static class YouTube
     {
-        public static YouTubePlaylist ParsePlaylist(string playlistJson)
-        {
-            if (string.IsNullOrEmpty(playlistJson) || !VRCJson.TryDeserializeFromJson(playlistJson, out var json))
-            {
-                return YouTubePlaylist.Empty();
-            }
-
-            var tracks = DataList<Track>.New();
-            DataDictionary dict = json.DataDictionary["playlist"].DataDictionary;
-            string playlistName = dict["title"].String;
-            DataList contents = dict["contents"].DataList;
-
-            for (int i = 0; i < contents.Count; i++)
-            {
-                if (contents[i].DataDictionary.TryGetValue("playlistPanelVideoRenderer", out var renderer))
-                {
-                    // Play both video and live in AVPro video player.
-                    bool isLive = renderer.DataDictionary.TryGetValue("badges", out var badges) &&
-                        badges.DataList.TryGetValue(0, out var badge) &&
-                        badge.DataDictionary["metadataBadgeRenderer"].DataDictionary["icon"].DataDictionary["iconType"].String == "LIVE";
-                    string title = renderer.DataDictionary["title"].DataDictionary["simpleText"].String;
-                    string url = $"https://www.youtube.com/watch?v={renderer.DataDictionary["videoId"].String}";
-                    tracks.Add(Track.New(VideoPlayerType.AVProVideoPlayer, title, VRCUrl.Empty, url));
-                }
-            }
-
-            return YouTubePlaylist.New(playlistName, tracks);
-        }
-
         public static YouTubePlaylist GetPlaylistFromHtml(string html)
         {
             if (string.IsNullOrEmpty(html)) return YouTubePlaylist.Empty();
