@@ -87,28 +87,6 @@ namespace Yamadev.YamaStream
             return YouTubePlaylist.New(playlistName, tracks);
         }
 
-        public static DataList<Track> ParsePlaylistRenderer(string playlistJson)
-        {
-            var tracks = DataList<Track>.New();
-
-            if (string.IsNullOrEmpty(playlistJson) || !VRCJson.TryDeserializeFromJson(playlistJson, out var json)) return tracks;
-            DataList contents = json.DataDictionary["playlistVideoListRenderer"].DataDictionary["contents"].DataList;
-
-            for (int i = 0; i < contents.Count; i++)
-            {
-                DataDictionary renderer = contents[i].DataDictionary["playlistVideoRenderer"].DataDictionary;
-                // VRCUrl.TryCreateAllowlistedVRCUrl($"https://www.youtube.com/watch?v={renderer["videoId"].String}", out VRCUrl outputUrl);
-                // Play both video and live in AVPro video player.
-                bool isLive = renderer["thumbnailOverlays"].DataList[0].DataDictionary.TryGetValue("thumbnailOverlayTimeStatusRenderer", out var thu) &&
-                    thu.DataDictionary["style"] == "LIVE";
-                string title = renderer["title"].DataDictionary["runs"].DataList[0].DataDictionary["text"].String;
-                string url = $"https://www.youtube.com/watch?v={renderer["videoId"].String}";
-                tracks.Add(Track.New(VideoPlayerType.AVProVideoPlayer, title, VRCUrl.Empty, url));
-            }
-
-            return tracks;
-        }
-
         public static YouTubePlaylist GetPlaylistFromHtml(string html)
         {
             if (string.IsNullOrEmpty(html)) return YouTubePlaylist.Empty();
@@ -119,7 +97,7 @@ namespace Yamadev.YamaStream
             string ytJson = dataMatch.Groups[1].Value;
 
             string playlistName = string.Empty;
-            var nameMatch = Regex.Match(ytJson, @"""pageHeaderRenderer""[\s\S]*?""pageTitle""\s*:\s*""([^""]+)""", RegexOptions.IgnoreCase);
+            var nameMatch = Regex.Match(ytJson, @"""playlist""[\s\S]*?""title""\s*:\s*""([^""]+)""", RegexOptions.IgnoreCase);
             if (nameMatch.Success)
             {
                 playlistName = nameMatch.Groups[1].Value;
@@ -127,36 +105,61 @@ namespace Yamadev.YamaStream
             else
             {
                 var metaNameMatch = Regex.Match(ytJson, @"""playlistMetadataRenderer""[\s\S]*?""title""\s*:\s*""([^""]+)""", RegexOptions.IgnoreCase);
-                if (metaNameMatch.Success) playlistName = metaNameMatch.Groups[1].Value;
+                if (metaNameMatch.Success)
+                {
+                    playlistName = metaNameMatch.Groups[1].Value;
+                }
             }
 
             var tracks = DataList<Track>.New();
 
-            var panelMatches = Regex.Matches(ytJson, @"""playlistPanelVideoRenderer""\s*:\s*(\{[\s\S]*?\})", RegexOptions.IgnoreCase);
-            for (int i = 0; i < panelMatches.Count; i++)
+            var plMatch = Regex.Match(ytJson, @"""playlist""\s*:\s*(\{.*\})", RegexOptions.IgnoreCase);
+            if (plMatch.Success)
             {
-                string block = panelMatches[i].Groups[1].Value;
-                var idMatch = Regex.Match(block, @"""videoId""\s*:\s*""([^""]+)""", RegexOptions.IgnoreCase);
-                var titleMatch = Regex.Match(block, @"""title""\s*:\s*\{[\s\S]*?""simpleText""\s*:\s*""([^""]+)""", RegexOptions.IgnoreCase);
-                if (idMatch.Success && titleMatch.Success)
+                string plJson = plMatch.Groups[1].Value;
+                if (VRCJson.TryDeserializeFromJson(plJson, out var plp) &&
+                    plp.TokenType == TokenType.DataDictionary &&
+                    plp.DataDictionary.TryGetValue("playlist", out var pl) &&
+                    pl.TokenType == TokenType.DataDictionary &&
+                    pl.DataDictionary.TryGetValue("contents", out var contents) &&
+                    contents.TokenType == TokenType.DataList)
                 {
-                    string url = "https://www.youtube.com/watch?v=" + idMatch.Groups[1].Value;
-                    tracks.Add(Track.New(VideoPlayerType.AVProVideoPlayer, titleMatch.Groups[1].Value, VRCUrl.Empty, url));
+                    for (int i = 0; i < contents.DataList.Count; i++)
+                    {
+                        if (contents.DataList[i].TokenType == TokenType.DataDictionary &&
+                            contents.DataList[i].DataDictionary.TryGetValue("playlistPanelVideoRenderer", out var pv) &&
+                            pv.TokenType == TokenType.DataDictionary &&
+                            pv.DataDictionary.TryGetValue("videoId", out var videoId) &&
+                            videoId.TokenType == TokenType.String &&
+                            pv.DataDictionary.TryGetValue("title", out var title) &&
+                            title.TokenType == TokenType.DataDictionary &&
+                            title.DataDictionary.TryGetValue("simpleText", out var simpleText) &&
+                            simpleText.TokenType == TokenType.String)
+                        {
+                            tracks.Add(Track.New(VideoPlayerType.AVProVideoPlayer, simpleText.String, VRCUrl.Empty, "https://www.youtube.com/watch?v=" + videoId.String));
+                        }
+                    }
                 }
             }
 
-            if (panelMatches.Count == 0)
+            if (!plMatch.Success)
             {
-                var videoMatches = Regex.Matches(ytJson, @"""playlistVideoRenderer""\s*:\s*(\{[\s\S]*?\})", RegexOptions.IgnoreCase);
-                for (int i = 0; i < videoMatches.Count; i++)
+                var pvMatch = Regex.Match(ytJson, @"""playlistVideoListRenderer""\s*:\s*(\{.*\})", RegexOptions.IgnoreCase);
+                if (pvMatch.Success)
                 {
-                    string block = videoMatches[i].Groups[1].Value;
-                    var idMatch = Regex.Match(block, @"""videoId""\s*:\s*""([^""]+)""", RegexOptions.IgnoreCase);
-                    var titleMatch = Regex.Match(block, @"""title""\s*:\s*\{[\s\S]*?""runs""\s*:\s*\[\s*\{[\s\S]*?""text""\s*:\s*""([^""]+)""", RegexOptions.IgnoreCase);
-                    if (idMatch.Success && titleMatch.Success)
+                    string pvJson = pvMatch.Groups[1].Value;
+                    if (VRCJson.TryDeserializeFromJson(pvJson, out var pv) &&
+                        pv.TokenType == TokenType.DataDictionary &&
+                        pv.DataDictionary.TryGetValue("contents", out var contents) &&
+                        contents.TokenType == TokenType.DataList)
                     {
-                        string url = "https://www.youtube.com/watch?v=" + idMatch.Groups[1].Value;
-                        tracks.Add(Track.New(VideoPlayerType.AVProVideoPlayer, titleMatch.Groups[1].Value, VRCUrl.Empty, url));
+                        for (int j = 0; j < contents.DataList.Count; j++)
+                        {
+                            var renderer = contents.DataList[j].DataDictionary["playlistVideoRenderer"].DataDictionary;
+                            string title = renderer["title"].DataDictionary["runs"].DataList[0].DataDictionary["text"].String;
+                            string url = "https://www.youtube.com/watch?v=" + renderer["videoId"].String;
+                            tracks.Add(Track.New(VideoPlayerType.AVProVideoPlayer, title, VRCUrl.Empty, url));
+                        }
                     }
                 }
             }
