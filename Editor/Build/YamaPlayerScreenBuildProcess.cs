@@ -27,12 +27,44 @@ namespace Yamadev.YamaStream.Editor
             }
         }
 
+        private Controller TryFindController(YamaPlayerScreen screen)
+        {
+            if (screen.controller != null) return screen.controller;
+
+            var parentPlayer = screen.GetComponentInParent<YamaPlayer>();
+            if (parentPlayer != null)
+            {
+                return parentPlayer.GetComponentInChildren<Controller>();
+            }
+
+            var parentController = screen.GetComponentInParent<YamaPlayerController>();
+            if (parentController != null && parentController.YamaPlayer != null)
+            {
+                return parentController.YamaPlayer.GetComponentInChildren<Controller>();
+            }
+
+            return null;
+        }
+
         private void SetupScreen(YamaPlayerScreen screen)
         {
-            if (screen == null || screen.controller == null)
+            if (screen == null)
             {
-                Debug.LogWarning("YamaPlayerScreen or its controller is null, skipping setup.");
+                Debug.LogWarning("YamaPlayerScreen is null, skipping setup.");
                 return;
+            }
+
+            if (screen.controller == null)
+            {
+                var foundController = TryFindController(screen);
+                if (foundController != null)
+                {
+                    screen.controller = foundController;
+                }
+                else
+                {
+                    Debug.LogWarning("YamaPlayerScreen's controller is null, skipping setup.");
+                }
             }
 
             screen.controller.AddScreen(screen.Type, screen.Reference);
