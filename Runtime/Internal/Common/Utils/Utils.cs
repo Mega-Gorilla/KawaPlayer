@@ -1,9 +1,6 @@
 ﻿using System;
-using UdonSharp;
 using UnityEngine;
 using VRC.SDKBase;
-using VRC.Udon;
-using VRC.Udon.Common.Interfaces;
 
 namespace Yamadev.YamaStream
 {
@@ -27,42 +24,7 @@ namespace Yamadev.YamaStream
 
         public static bool IsValid(this VRCUrl url) => url.Get().IsValidUrl();
 
-        public static string GetSubString(string str, char end)
-        {
-            string temp = "";
-            bool escape = false;
-            for (int i = 0; i < str.Length; i++)
-            {
-                if (str[i] == end)
-                {
-                    if (escape) escape = false;
-                    else return temp;
-                }
-                else
-                {
-                    if (str[i] == '\\') escape = true;
-                    else temp += str[i];
-                }
-            }
-            return temp;
-        }
-
-        public static string FindPairBrackets(string str, int start)
-        {
-            if (start > str.Length) return string.Empty;
-            int end = start;
-            int count = 0;
-            while (end < str.Length)
-            {
-                if (str[end] == '{') count++;
-                else if (str[end] == '}') count--;
-                if (count == 0) return str.Substring(start, end - start + 1);
-                end++;
-            }
-            return string.Empty;
-        }
-        
-        public static DateTime ParseTimestamp(this int timestamp) => 
+        public static DateTime ParseTimestamp(this int timestamp) =>
             new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).AddSeconds(timestamp).ToLocalTime();
 
         public static void Resize<T>(ref T[] array, int newSize)
