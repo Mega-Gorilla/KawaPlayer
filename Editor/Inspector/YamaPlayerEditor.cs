@@ -45,7 +45,10 @@ namespace Yamadev.YamaStream.Editor
             _permission = _target.GetComponentInChildren<Permission>(true);
             _playlists = _target.GetComponentsInChildren<PlayList>();
 
-            _uiSettings = new UISettings(_uiController);
+            if (_uiController != null)
+            {
+                _uiSettings = new UISettings(_uiController);
+            }
             _controllerSettings = new ControllerSettings(_controller);
             _autoPlaySettings = new AutoPlaySettings(_autoPlay, _playlists);
             _permissionSettings = new PermissionSettings(_permission);
@@ -59,14 +62,17 @@ namespace Yamadev.YamaStream.Editor
                 _useLowLatency = _avProSerializedObject.FindProperty("useLowLatency");
             }
 
-            _tabScope = new TabScope(new List<TabScope.Tab>()
+            var tabs = new List<TabScope.Tab>();
+            if (_uiSettings != null)
             {
-                new TabScope.Tab("UI", DrawUISettings),
-                new TabScope.Tab("Settings", DrawPlayerSettings),
-                new TabScope.Tab("Playlist", DrawPlaylistSettings),
-                new TabScope.Tab("Permission", DrawPermissionSettings),
-                new TabScope.Tab("Version", DrawVersionSettings),
-            });
+                tabs.Add(new TabScope.Tab("UI", DrawUISettings));
+            }
+            tabs.Add(new TabScope.Tab("Settings", DrawPlayerSettings));
+            tabs.Add(new TabScope.Tab("Playlist", DrawPlaylistSettings));
+            tabs.Add(new TabScope.Tab("Permission", DrawPermissionSettings));
+            tabs.Add(new TabScope.Tab("Version", DrawVersionSettings));
+
+            _tabScope = new TabScope(tabs);
         }
 
         public override void OnInspectorGUI()
@@ -97,16 +103,20 @@ namespace Yamadev.YamaStream.Editor
 
         private void DrawEasyModeSettings()
         {
-            using (new SectionScope("UI"))
+
+            if (_uiSettings != null)
             {
-                if (_uiSettings.UIDisabled)
+                using (new SectionScope("UI"))
                 {
-                    _uiSettings.DrawUIDisabledMessage();
-                }
-                else
-                {
-                    _uiSettings.DrawColorSettings();
-                    _uiSettings.DrawIdleImageSettings();
+                    if (_uiSettings.UIDisabled)
+                    {
+                        _uiSettings.DrawUIDisabledMessage();
+                    }
+                    else
+                    {
+                        _uiSettings.DrawColorSettings();
+                        _uiSettings.DrawIdleImageSettings();
+                    }
                 }
             }
 
