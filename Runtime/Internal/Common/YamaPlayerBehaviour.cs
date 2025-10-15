@@ -19,13 +19,13 @@ namespace Yamadev.YamaStream
             }
         }
 
-        protected bool _isObjectOwner => _localPlayer != null && Networking.IsOwner(gameObject);
+        protected bool _isObjectOwner => _isLocalPlayerValid && Networking.IsOwner(gameObject);
 
-        protected bool _isInstanceOwner => _localPlayer != null && _localPlayer.isInstanceOwner;
+        protected bool _isInstanceOwner => _isLocalPlayerValid && _localPlayer.isInstanceOwner;
 
-        protected bool _isMaster => _localPlayer != null && _localPlayer.isMaster;
+        protected bool _isMaster => _isLocalPlayerValid && _localPlayer.isMaster;
 
-        protected bool _isInVR => _localPlayer != null && _localPlayer.IsUserInVR();
+        protected bool _isInVR => _isLocalPlayerValid && _localPlayer.IsUserInVR();
 
         public void TakeOwnership()
         {

@@ -31,7 +31,8 @@ namespace Yamadev.YamaStream.UI
         [SerializeField] Toggle _modalAVProPlayer;
         [SerializeField] Toggle _modalImageViewer;
 
-        [SerializeField] Animator _animator;
+        [SerializeField] Animator _userUIanimator;
+        [SerializeField] Animator _systemUIAnimator;
 
         [SerializeField] VRCUrlInputField _urlInputField;
         [SerializeField] VRCUrlInputField _urlInputFieldTop;
@@ -104,7 +105,6 @@ namespace Yamadev.YamaStream.UI
         [SerializeField] Toggle _slide2s;
         [SerializeField] Toggle _slide3s;
 
-        private BoxCollider _uiBoxCollider;
         private string _timeFormat = @"hh\:mm\:ss";
         private bool _progressDrag = false;
         private int _permissionIndex = -1;
@@ -119,8 +119,7 @@ namespace Yamadev.YamaStream.UI
             if (Utilities.IsValid(_versionText)) _versionText.text = $"YamaPlayer v{_controller.Version}";
             if (Utilities.IsValid(_updateLog) && Utilities.IsValid(_updateLogFile)) _updateLog.text = _updateLogFile.text;
             if (Utilities.IsValid(_idle) && Utilities.IsValid(_idleImage)) _idle.sprite = _idleImage;
-            if (Utilities.IsValid(_animator) && _defaultPlaylistOpen) _animator.SetTrigger("TogglePlaylist");
-            _uiBoxCollider = GetComponentInChildren<BoxCollider>();
+            if (Utilities.IsValid(_userUIanimator) && _defaultPlaylistOpen) _userUIanimator.SetTrigger("TogglePlaylist");
         }
 
         void Update()
@@ -128,8 +127,8 @@ namespace Yamadev.YamaStream.UI
             if (Utilities.IsValid(_volumeHelper) && Utilities.IsValid(_volumeTooltip))
                 _volumeTooltip.text = $"{Mathf.Ceil(_volumeHelper.Percent * 100)}%";
             if (!_controller.Stopped) UpdateProgressView();
-            if (Utilities.IsValid(_uiBoxCollider))
-                _uiBoxCollider.enabled = !OutOfDistance && (!_disableUIOnPickUp || !Networking.LocalPlayer.PickUpInHand());
+            if (Utilities.IsValid(_canvasCollider))
+                _canvasCollider.enabled = !OutOfDistance && (!_disableUIOnPickUp || !Networking.LocalPlayer.PickUpInHand());
         }
 
         private bool OutOfDistance => _disableUIDistance > 0 &&
@@ -646,7 +645,7 @@ namespace Yamadev.YamaStream.UI
         private void UpdateErrorView(VideoError videoError)
         {
             if (Utilities.IsValid(_loading)) _loading.SetActive(true);
-            if (Utilities.IsValid(_animator)) _animator.SetBool("Loading", false);
+            if (Utilities.IsValid(_userUIanimator)) _userUIanimator.SetBool("Loading", false);
             if (!_message) return;
             switch (videoError)
             {
@@ -673,7 +672,7 @@ namespace Yamadev.YamaStream.UI
         private void UpdateLoadingView()
         {
             if (Utilities.IsValid(_loading)) _loading.SetActive(_controller.IsLoading);
-            if (Utilities.IsValid(_animator)) _animator.SetBool("Loading", _controller.IsLoading);
+            if (Utilities.IsValid(_userUIanimator)) _userUIanimator.SetBool("Loading", _controller.IsLoading);
             if (Utilities.IsValid(_message)) _message.text = I18n.GetValue("videoLoadingMessage");
         }
 

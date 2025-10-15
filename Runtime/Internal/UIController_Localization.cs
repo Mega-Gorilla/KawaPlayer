@@ -66,6 +66,8 @@ namespace Yamadev.YamaStream.UI
         [SerializeField] private Text _slide3sText;
         [SerializeField] private Text _permissionTitle;
         [SerializeField] private Text _permissionDesc;
+        [SerializeField] private Text _lockUi;
+        [SerializeField] private Text _unlockUiMessage;
 
         private Localization _i18n;
 
@@ -166,6 +168,12 @@ namespace Yamadev.YamaStream.UI
             if (Utilities.IsValid(_addLiveLink)) _addLiveLink.text = I18n.GetValue("addLiveLink");
             if (Utilities.IsValid(_permissionTitle)) _permissionTitle.text = I18n.GetValue("permission");
             if (Utilities.IsValid(_permissionDesc)) _permissionDesc.text = $"<color=#64B5F6>Owner</color>\t\t\t{I18n.GetValue("ownerPermission")}\r\n<color=#BA68C8>Admin</color>\t\t\t{I18n.GetValue("adminPermission")}\r\n<color=#81C784>Editor</color>\t\t\t{I18n.GetValue("editorPermission")}\r\n<color=#FFB74D>Viewer</color>\t\t\t{I18n.GetValue("viewerPermission")}";
+            if (Utilities.IsValid(_lockUi)) _lockUi.text = I18n.GetValue("lockUi");
+            if (Utilities.IsValid(_unlockUiMessage))
+            {
+                if (_isInVR) _unlockUiMessage.text = I18n.GetValue("unlockUiVr");
+                else _unlockUiMessage.text = I18n.GetValue("unlockUiDesktop");
+            }
 
             if (Utilities.IsValid(_playlistTracks))
             {

@@ -95,7 +95,10 @@
                 "back": "戻る",
                 "moveUp": "上へ移動",
                 "moveDown": "下へ移動",
-                "remove": "削除"
+                "remove": "削除",
+                "lockUi": "UIロック",
+                "unlockUiVr": "ロック解除するにはコントローラーを画面に向けてトリガーを長押ししてください...",
+                "unlockUiDesktop": "ロック解除するにはカーソルを画面に向けて左クリックを長押ししてください..."
         },
         "en": {
                 "options": "Options",
@@ -193,7 +196,10 @@
                 "back": "Back",
                 "moveUp": "Move up",
                 "moveDown": "Move down",
-                "remove": "Remove"
+                "remove": "Remove",
+                "lockUi": "Lock UI",
+                "unlockUiVr": "Please press and hold the trigger while looking at the screen to unlock...",
+                "unlockUiDesktop": "Please press and hold the left click while looking at the screen to unlock..."
         },
         "zh-CN": {
                 "options": "选项",
@@ -291,7 +297,10 @@
                 "back": "返回",
                 "moveUp": "向上移动",
                 "moveDown": "向下移动",
-                "remove": "移除"
+                "remove": "移除",
+                "lockUi": "锁定UI",
+                "unlockUiVr": "请将控制器对准屏幕并长按触发器以解锁...",
+                "unlockUiDesktop": "请将光标对准屏幕并长按左键以解锁..."
         },
         "zh-TW": {
                 "options": "選項",
@@ -391,7 +400,10 @@
                 "back": "返回",
                 "moveUp": "往上移動",
                 "moveDown": "往下移動",
-                "remove": "刪除"
+                "remove": "刪除",
+                "lockUi": "鎖定UI",
+                "unlockUiVr": "請將控制器對準螢幕並長按觸發器以解鎖...",
+                "unlockUiDesktop": "請將光標對準螢幕並長按左鍵以解鎖..."
         },
         "ko": {
                 "options": "옵션",
@@ -489,7 +501,10 @@
                 "back": "뒤로가기",
                 "moveUp": "위로 이동",
                 "moveDown": "아래로 이동",
-                "remove": "삭제"
+                "remove": "삭제",
+                "lockUi": "UI 잠금",
+                "unlockUiVr": "화면에 바라보고 트리거를 길게 누르세요...",
+                "unlockUiDesktop": "화면에 바라보고 왼쪽 클릭을 길게 누르세요..."
         },
         "es-CL": {
                 "options": "Opciones",
@@ -587,7 +602,10 @@
                 "back": "Atrás",
                 "moveUp": "Mover hacia arriba",
                 "moveDown": "Mover hacia abajo",
-                "remove": "Eliminar"
+                "remove": "Eliminar",
+                "lockUi": "Bloqueo de UI",
+                "unlockUiVr": "Por favor, mantenga presionado el gatillo mientras mira la pantalla para desbloquear...",
+                "unlockUiDesktop": "Por favor, mantenga presionado el clic izquierdo mientras mira la pantalla para desbloquear..."
         },
         "uk-UA": {
                 "options": "Опції",
@@ -688,6 +706,9 @@
                 "back": "Назад",
                 "moveUp": "Перемістити вгору",
                 "moveDown": "Перемістити вниз",
-                "remove": "Видалити"
+                "remove": "Видалити",
+                "lockUi": "Блокування UI",
+                "unlockUiVr": "Будь ласка, утримуйте натиснутим скибочку, поглядаючи на екран, щоб розблокувати...",
+                "unlockUiDesktop": "Будь ласка, утримуйте натиснутим лівий клік, поглядаючи на екран, щоб розблокувати..."
         }
 }

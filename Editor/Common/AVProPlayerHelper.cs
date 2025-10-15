@@ -19,7 +19,7 @@ namespace Yamadev.YamaStream.Editor
         };
 
         private const string AVProDebugSymbol = "AVPRO_DEBUG";
-        private const string AVProReleaseUrl = "https://github.com/RenderHeads/UnityPlugin-AVProVideo/releases/download/3.2.6/UnityPlugin-AVProVideo-v3.2.6-Trial.unitypackage";
+        private const string AVProReleaseUrl = "https://github.com/RenderHeads/UnityPlugin-AVProVideo/releases/download/3.2.9/UnityPlugin-AVProVideo-v3.2.9-Trial.unitypackage";
 
         private static bool AVProHelperImported => Utils.FindType("RenderHeads.Media.AVProVideo.MediaPlayer", true) != null;
         private static bool AVProImported => Utils.FindType("RenderHeads.Media.AVProVideo.VideoTrack", true) != null;

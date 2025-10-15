@@ -21,11 +21,15 @@ namespace Yamadev.YamaStream.UI
 
         public override void PostLateUpdate()
         {
-            Vector3 localPosition = _trans.InverseTransformPoint(_inputController.GetMousePosition());
+            Vector3 mousePosition = _inputController.GetMousePosition();
+            Vector3 localPosition = _trans.InverseTransformPoint(mousePosition);
             float localX = localPosition.x + (_trans.rect.width * (1 - _trans.pivot.x));
             _percent = localX / _trans.rect.width;
 
-            if (_trans.rect.Contains(localPosition)) _tooltip.gameObject.SetActive(true);
+            if (_trans.rect.Contains(localPosition))
+            {
+                _tooltip.gameObject.SetActive(true);
+            }
             else
             {
                 _tooltip.gameObject.SetActive(false);
