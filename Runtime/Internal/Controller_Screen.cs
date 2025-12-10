@@ -10,11 +10,14 @@ namespace Yamadev.YamaStream
     {
         [SerializeField] private int _maxResolution;
         [SerializeField] private bool _mirrorFlip = true;
+        [SerializeField] private bool _useGlobalTexture = true;
         [SerializeField, Range(0f, 1f)] private float _emission = 1f;
         [SerializeField] private ScreenType[] _screenTypes;
         [SerializeField] private Object[] _screens;
         [SerializeField] private string[] _textureProperties;
         private MaterialPropertyBlock _propertyBlock;
+        private string _globalTextureName = "_Udon_VideoTex";
+        private int _globalTextureId;
 
         private void InitializePropertyBlock()
         {
@@ -30,6 +33,9 @@ namespace Yamadev.YamaStream
 
             _propertyBlock.SetInt("_MirrorFlip", _mirrorFlip ? 1 : 0);
             _propertyBlock.SetFloat("_Emission", _emission);
+            
+            if (_useGlobalTexture)
+                _globalTextureId = VRCShader.PropertyToID(globalTextureName);
         }
 
         public Texture Texture => Handler.Texture;
@@ -73,6 +79,9 @@ namespace Yamadev.YamaStream
 
         public override void OnTextureUpdated(Texture texture)
         {
+            if (_useGlobalTexture)
+                VRCShader.SetGlobalTexture(_globalTextureId, Texture);
+            
             InitializePropertyBlock();
 
             for (int i = 0; i < _screens.Length; i++)

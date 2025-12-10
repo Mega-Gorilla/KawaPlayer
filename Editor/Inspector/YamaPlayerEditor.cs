@@ -222,6 +222,7 @@ namespace Yamadev.YamaStream.Editor
                 _externalSettings.DrawAudioLinkSettings();
                 _externalSettings.DrawLTCGISettings();
                 _externalSettings.DrawLVTVGISettings();
+                _externalSettings.DrawGlobalTextureSettings();
             }
 
             using (new SectionScope(Localization.Get("screenSettings"), false))

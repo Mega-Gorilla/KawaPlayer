@@ -152,7 +152,8 @@
     "color": "カラー",
     "useLightVolumes": "Light Volumeを使用",
     "playerSettings": "動画プレイヤー設定",
-    "targetLightVolumes": "対象のLight Volume"
+    "targetLightVolumes": "対象のLight Volume",
+    "useGlobalTexture": "グローバルビデオテクスチャを使用する"
   },
   "en-US": {
     "ui": "UI",
@@ -307,7 +308,8 @@
     "color": "Color",
     "useLightVolumes": "Use Light Volume",
     "playerSettings": "Player Settings",
-    "targetLightVolumes": "Target Light Volumes"
+    "targetLightVolumes": "Target Light Volumes",
+    "useGlobalTexture": "Use global video texture"
   },
   "zh-CN": {
     "ui": "UI",
@@ -462,7 +464,8 @@
     "color": "颜色",
     "useLightVolumes": "使用Light Volume",
     "playerSettings": "播放器设置",
-    "targetLightVolumes": "目標Light Volume"
+    "targetLightVolumes": "目標Light Volume",
+    "useGlobalTexture": "使用全局视频纹理"
   },
   "zh-TW": {
     "ui": "UI",
@@ -617,7 +620,8 @@
     "color": "顏色",
     "useLightVolumes": "使用Light Volume",
     "playerSettings": "播放器設定",
-    "targetLightVolumes": "目標Light Volume"
+    "targetLightVolumes": "目標Light Volume",
+    "useGlobalTexture": "使用全域影片紋理"
   },
   "ko-KR": {
     "ui": "UI",
@@ -772,7 +776,8 @@
     "color": "색상",
     "useLightVolumes": "Light Volume 사용",
     "playerSettings": "플레이어 설정",
-    "targetLightVolumes": "대상 Light Volume"
+    "targetLightVolumes": "대상 Light Volume",
+    "useGlobalTexture": "글로벌 비디오 텍스쳐 사용"
   },
   "es-CL": {
     "ui": "Interfaz",
@@ -927,6 +932,7 @@
     "color": "Color",
     "useLightVolumes": "Usar Light Volume",
     "playerSettings": "Configuración del Reproductor",
-    "targetLightVolumes": "Volúmenes de Luz Objetivo"
+    "targetLightVolumes": "Volúmenes de Luz Objetivo",
+    "useGlobalTexture": "Usar textura de video global"
   }
 }

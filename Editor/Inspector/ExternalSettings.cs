@@ -23,6 +23,7 @@ namespace Yamadev.YamaStream.Editor
         private readonly SerializedProperty _useLTCGI;
         private readonly SerializedProperty _useLightVolumes;
         private readonly SerializedProperty _targetLightVolumes;
+        private readonly SerializedProperty _useGlobalTexture;
 
         public bool IsValid => _controller != null && _controllerSerializedObject != null;
 
@@ -45,6 +46,7 @@ namespace Yamadev.YamaStream.Editor
 
                 _useAudioLink = _controllerSerializedObject.FindProperty("_useAudioLink");
                 _audioLink = _controllerSerializedObject.FindProperty("_audioLink");
+                _useGlobalTexture = _controllerSerializedObject.FindProperty("_useGlobalTexture");
             }
         }
 
@@ -166,6 +168,11 @@ namespace Yamadev.YamaStream.Editor
 #else
             EditorGUILayout.LabelField("Light Volumes", Localization.Get("vrclvNotImported"));
 #endif
+        }
+        
+        public void DrawGlobalTextureSettings()
+        {
+            EditorGUILayout.PropertyField(_useGlobalTexture, Localization.GetLayout("useGlobalTexture"));
         }
 
         public void ApplyModifiedProperties()
