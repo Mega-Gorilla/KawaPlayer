@@ -127,8 +127,6 @@ namespace Yamadev.YamaStream.UI
             if (Utilities.IsValid(_volumeHelper) && Utilities.IsValid(_volumeTooltip))
                 _volumeTooltip.text = $"{Mathf.Ceil(_volumeHelper.Percent * 100)}%";
             if (!_controller.Stopped) UpdateProgressView();
-            if (Utilities.IsValid(_canvasCollider))
-                _canvasCollider.enabled = !OutOfDistance && (!_disableUIOnPickUp || !Networking.LocalPlayer.PickUpInHand());
         }
 
         private bool OutOfDistance => _disableUIDistance > 0 &&

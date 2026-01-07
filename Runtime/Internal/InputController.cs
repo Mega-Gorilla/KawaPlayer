@@ -10,6 +10,10 @@ namespace Yamadev.YamaStream
     [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
     public class InputController : UdonSharpBehaviour
     {
+        private const float MAX_RAY_DISTANCE = 100f;
+        private const int HIT_BUFFER_SIZE = 32;
+        
+        private RaycastHit[] _hitBuffer;
         private bool _rightHand = true;
         private bool _isVr = false;
         private bool _initialized = false;
@@ -22,6 +26,7 @@ namespace Yamadev.YamaStream
             if (_initialized || !Utilities.IsValid(Networking.LocalPlayer)) return;
             _localPlayer = Networking.LocalPlayer;
             _isVr = _localPlayer.IsUserInVR();
+            _hitBuffer = new RaycastHit[HIT_BUFFER_SIZE];
             _initialized = true;
         }
 
@@ -45,24 +50,32 @@ namespace Yamadev.YamaStream
             return GetRayPoint(trackingData.position, rotation * Vector3.forward);
         }
 
-        private static Vector3 GetRayPoint(Vector3 origin, Vector3 direction)
+        private Vector3 GetRayPoint(Vector3 origin, Vector3 direction)
         {
-            RaycastHit[] hits = Physics.RaycastAll(origin, direction, Mathf.Infinity);
-            float distance = Mathf.Infinity;
+            int hitCount = Physics.RaycastNonAlloc(origin, direction, _hitBuffer, MAX_RAY_DISTANCE);
+            
+            float closestPhysicsDistance = float.MaxValue;
             Vector3 uiPoint = Vector3.zero;
-            float uiDistance = Mathf.Infinity;
-            foreach (RaycastHit hit in hits)
+            float uiDistance = float.MaxValue;
+            
+            for (int i = 0; i < hitCount; i++)
             {
+                RaycastHit hit = _hitBuffer[i];
                 if (hit.collider == null) continue;
-                if (!hit.collider.isTrigger && hit.distance < distance) distance = hit.distance;
+                
+                if (!hit.collider.isTrigger && hit.distance < closestPhysicsDistance)
+                {
+                    closestPhysicsDistance = hit.distance;
+                }
+                
                 if (hit.collider.GetComponent<RectTransform>() != null && hit.distance < uiDistance)
                 {
                     uiDistance = hit.distance;
                     uiPoint = hit.point;
                 }
-
             }
-            return distance < uiDistance ? Vector3.zero : uiPoint;
+            
+            return closestPhysicsDistance < uiDistance ? Vector3.zero : uiPoint;
         }
 
         public override void InputUse(bool value, UdonInputEventArgs args)

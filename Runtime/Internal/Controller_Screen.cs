@@ -35,7 +35,7 @@ namespace Yamadev.YamaStream
             _propertyBlock.SetFloat("_Emission", _emission);
             
             if (_useGlobalTexture)
-                _globalTextureId = VRCShader.PropertyToID(globalTextureName);
+                _globalTextureId = VRCShader.PropertyToID(_globalTextureName);
         }
 
         public Texture Texture => Handler.Texture;
