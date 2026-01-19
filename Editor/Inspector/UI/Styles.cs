@@ -41,7 +41,7 @@ namespace Yamadev.YamaStream.Editor
 
         public static bool DisplayConfirmDialog(string title, string message)
         {
-            return EditorUtility.DisplayDialog(title, message, Localization.Get("yes"), Localization.Get("no"));
+            return EditorUtility.DisplayDialog(title, message, EditorLocalization.Get("yes"), EditorLocalization.Get("no"));
         }
     }
 }

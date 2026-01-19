@@ -1,0 +1,42 @@
+{
+  "ja": {
+    "module.audioLinkAdaptor.name": "AudioLink アダプター",
+    "module.audioLinkAdaptor.description": "AudioLinkの動画連動を自動設定します",
+    "module.audioLinkAdaptor.defaultAudioLinkEnabled": "デフォルトでAudioLinkを有効にする"
+  },
+  "en": {
+    "module.audioLinkAdaptor.name": "AudioLink Adaptor",
+    "module.audioLinkAdaptor.description": "Automatically configures AudioLink video integration",
+    "module.audioLinkAdaptor.defaultAudioLinkEnabled": "Default to enable AudioLink"
+  },
+  "ko": {
+    "module.audioLinkAdaptor.name": "AudioLink 어댑터",
+    "module.audioLinkAdaptor.description": "AudioLink 비디오 연동을 자동으로 설정합니다",
+    "module.audioLinkAdaptor.defaultAudioLinkEnabled": "기본적으로 AudioLink를 활성화합니다"
+  },
+  "zh-CN": {
+    "module.audioLinkAdaptor.name": "AudioLink 适配器",
+    "module.audioLinkAdaptor.description": "自动配置AudioLink视频联动",
+    "module.audioLinkAdaptor.defaultAudioLinkEnabled": "默认启用AudioLink"
+  },
+  "zh-TW": {
+    "module.audioLinkAdaptor.name": "AudioLink 適配器",
+    "module.audioLinkAdaptor.description": "自動設定AudioLink影片連動",
+    "module.audioLinkAdaptor.defaultAudioLinkEnabled": "預設啟用AudioLink"
+  },
+  "es": {
+    "module.audioLinkAdaptor.name": "Adaptador AudioLink",
+    "module.audioLinkAdaptor.description": "Configura automáticamente la integración de video AudioLink",
+    "module.audioLinkAdaptor.defaultAudioLinkEnabled": "Activar AudioLink por defecto"
+  },
+  "ru": {
+    "module.audioLinkAdaptor.name": "Адаптер AudioLink",
+    "module.audioLinkAdaptor.description": "Автоматически настраивает интеграцию видео AudioLink",
+    "module.audioLinkAdaptor.defaultAudioLinkEnabled": "Включить AudioLink по умолчанию"
+  },
+  "uk-UA": {
+    "module.audioLinkAdaptor.name": "Адаптер AudioLink",
+    "module.audioLinkAdaptor.description": "Автоматично налаштовує інтеграцію відео AudioLink",
+    "module.audioLinkAdaptor.defaultAudioLinkEnabled": "Увімкнути AudioLink за замовчуванням"
+  }
+}

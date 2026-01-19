@@ -32,7 +32,7 @@ namespace Yamadev.YamaStream.Editor
         }
         public static ColorPattern CreateCustom(Color primaryColor, Color secondaryColor)
         {
-            return new ColorPattern(Localization.Get("customColor"), primaryColor, secondaryColor);
+            return new ColorPattern(EditorLocalization.Get("customColor"), primaryColor, secondaryColor);
         }
     }
 

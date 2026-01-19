@@ -43,7 +43,7 @@ namespace Yamadev.YamaStream.Editor
                 EditorGUILayout.Space();
                 _current = GUILayout.Toolbar(
                     _current,
-                    _tabs.Select(x => Localization.GetLayout(x.title.ToLower())).ToArray(),
+                    _tabs.Select(x => EditorLocalization.GetLayout(x.title.ToLower())).ToArray(),
                     "LargeButton",
                     GUI.ToolbarButtonSize.Fixed
                     );

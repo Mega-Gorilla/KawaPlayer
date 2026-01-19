@@ -26,8 +26,18 @@
     ],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
-    "overrideReferences": false,
-    "precompiledReferences": [],
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "Microsoft.CodeAnalysis.dll",
+        "Microsoft.CodeAnalysis.CSharp.dll",
+        "System.Collections.Immutable.dll",
+        "VRCSDK3.dll",
+        "VRCSDKBase.dll",
+        "VRC.Utility.dll",
+        "Newtonsoft.Json.dll",
+        "vpm-core-lib.dll",
+        "SemanticVersioning.dll"
+    ],
     "autoReferenced": true,
     "defineConstraints": [],
     "versionDefines": [
@@ -35,21 +45,6 @@
             "name": "com.vrchat.core.vpm-resolver",
             "expression": "",
             "define": "USE_VPM_RESOLVER"
-        },
-        {
-            "name": "at.pimaker.ltcgi",
-            "expression": "",
-            "define": "USE_LTCGI"
-        },
-        {
-            "name": "red.sim.lightvolumes",
-            "expression": "",
-            "define": "USE_VRCLV"
-        },
-        {
-            "name": "com.llealloo.audiolink",
-            "expression": "",
-            "define": "USE_AUDIOLINK"
         }
     ],
     "noEngineReferences": false

@@ -1,0 +1,34 @@
+{
+  "ja": {
+    "module.lightVolumeAdaptor.name": "Light Volume アダプター",
+    "module.lightVolumeAdaptor.description": "VRC Light Volumesの動画連動を自動設定します"
+  },
+  "en": {
+    "module.lightVolumeAdaptor.name": "Light Volume Adaptor",
+    "module.lightVolumeAdaptor.description": "Automatically configures VRC Light Volumes video integration"
+  },
+  "ko": {
+    "module.lightVolumeAdaptor.name": "Light Volume 어댑터",
+    "module.lightVolumeAdaptor.description": "VRC Light Volumes 비디오 연동을 자동으로 설정합니다"
+  },
+  "zh-CN": {
+    "module.lightVolumeAdaptor.name": "Light Volume 适配器",
+    "module.lightVolumeAdaptor.description": "自动配置VRC Light Volumes视频联动"
+  },
+  "zh-TW": {
+    "module.lightVolumeAdaptor.name": "Light Volume 適配器",
+    "module.lightVolumeAdaptor.description": "自動設定VRC Light Volumes影片連動"
+  },
+  "es": {
+    "module.lightVolumeAdaptor.name": "Adaptador Light Volume",
+    "module.lightVolumeAdaptor.description": "Configura automáticamente la integración de video VRC Light Volumes"
+  },
+  "ru": {
+    "module.lightVolumeAdaptor.name": "Адаптер Light Volume",
+    "module.lightVolumeAdaptor.description": "Автоматически настраивает интеграцию видео VRC Light Volumes"
+  },
+  "uk-UA": {
+    "module.lightVolumeAdaptor.name": "Адаптер Light Volume",
+    "module.lightVolumeAdaptor.description": "Автоматично налаштовує інтеграцію відео VRC Light Volumes"
+  }
+}

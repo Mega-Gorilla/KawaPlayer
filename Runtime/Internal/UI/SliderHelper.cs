@@ -1,49 +1,62 @@
-﻿using UdonSharp;
+using UdonSharp;
 using UnityEngine;
+using VRC.Udon.Common;
+using static VRC.SDKBase.VRCPlayerApi;
 
 namespace Yamadev.YamaStream.UI
 {
-    [RequireComponent(typeof(RectTransform))]
-    [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
-    public class SliderHelper : UdonSharpBehaviour
+  [RequireComponent(typeof(RectTransform))]
+  [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
+  public class SliderHelper : YamaPlayerBehaviour
+  {
+    [SerializeField] private RectTransform _tooltip;
+    private RectTransform _rect;
+    private float _percent = 0f;
+    private bool _rightHand = true;
+
+    private void Start()
     {
-        [SerializeField] private InputController _inputController;
-        [SerializeField] private RectTransform _tooltip;
-        private RectTransform _trans;
-        private float _percent = 0f;
-
-        private void Start()
-        {
-            _trans = GetComponent<RectTransform>();
-        }
-
-        public float Percent => _percent;
-
-        public override void PostLateUpdate()
-        {
-            Vector3 mousePosition = _inputController.GetMousePosition();
-            
-            if (mousePosition == Vector3.zero)
-            {
-                _tooltip.gameObject.SetActive(false);
-                return;
-            }
-            
-            Vector3 localPosition = _trans.InverseTransformPoint(mousePosition);
-            
-            if (!_trans.rect.Contains(localPosition))
-            {
-                _tooltip.gameObject.SetActive(false);
-                return;
-            }
-            
-            float localX = localPosition.x + (_trans.rect.width * _trans.pivot.x);
-            _percent = Mathf.Clamp01(localX / _trans.rect.width);
-            
-            _tooltip.gameObject.SetActive(true);
-            Vector2 pos = _tooltip.anchoredPosition;
-            pos.x = _percent * _trans.rect.width;
-            _tooltip.anchoredPosition = pos;
-        }
+      _rect = GetComponent<RectTransform>();
     }
+
+    public float Percent => _percent;
+
+    public override void PostLateUpdate()
+    {
+      var trackingDataType = IsInVR ? (_rightHand ? TrackingDataType.RightHand : TrackingDataType.LeftHand) : TrackingDataType.Head;
+      Vector3 mousePosition = TrackingUtils.GetMousePosition(LocalPlayer, trackingDataType);
+
+      if (mousePosition == Vector3.zero)
+      {
+        _tooltip.gameObject.SetActive(false);
+        return;
+      }
+
+      Vector3 localPosition = _rect.InverseTransformPoint(mousePosition);
+
+      if (!_rect.rect.Contains(localPosition))
+      {
+        _tooltip.gameObject.SetActive(false);
+        return;
+      }
+
+      float localX = localPosition.x + (_rect.rect.width * _rect.pivot.x);
+      _percent = Mathf.Clamp01(localX / _rect.rect.width);
+
+      _tooltip.gameObject.SetActive(true);
+      Vector3 pos = _tooltip.localPosition;
+      pos.x = localPosition.x;
+      _tooltip.localPosition = pos;
+    }
+
+    public override void InputUse(bool value, UdonInputEventArgs args)
+    {
+      _rightHand = args.handType == HandType.RIGHT;
+    }
+
+    public override void InputGrab(bool value, UdonInputEventArgs args)
+    {
+      _rightHand = args.handType == HandType.RIGHT;
+    }
+  }
 }

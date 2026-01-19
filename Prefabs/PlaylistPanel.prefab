@@ -522,8 +522,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a40883b1bf6bf5543bb641824e65f870, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _uiController: {fileID: 0}
-  _colorType: 0
+  colorType: 0
 --- !u!1 &813400100380343145
 GameObject:
   m_ObjectHideFlags: 0
@@ -1279,8 +1278,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a40883b1bf6bf5543bb641824e65f870, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _uiController: {fileID: 0}
-  _colorType: 0
+  colorType: 0
 --- !u!1 &1947459247671510224
 GameObject:
   m_ObjectHideFlags: 0
@@ -1941,13 +1939,13 @@ MonoBehaviour:
     PrefabModificationsReferencedUnityObjects: []
     PrefabModifications: []
     SerializationNodes:
-    - Name: _varibaleObject
+    - Name: _variableObject
       Entry: 6
       Data: 
   _udonSharpBackingUdonBehaviour: {fileID: 6021484132070188364}
   _udon: {fileID: 2393138946571511015}
-  _varibaleName: _eventName
-  _varibaleValue: RemoveFromQueue
+  _variableName: _eventName
+  _variableValue: RemoveFromQueue
   _eventName: OnButtonClick
 --- !u!114 &6021484132070188364
 MonoBehaviour:
@@ -2062,8 +2060,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a40883b1bf6bf5543bb641824e65f870, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _uiController: {fileID: 0}
-  _colorType: 0
+  colorType: 0
 --- !u!1 &2645824441880504464
 GameObject:
   m_ObjectHideFlags: 0
@@ -2389,13 +2386,13 @@ MonoBehaviour:
     PrefabModificationsReferencedUnityObjects: []
     PrefabModifications: []
     SerializationNodes:
-    - Name: _varibaleObject
+    - Name: _variableObject
       Entry: 6
       Data: 
   _udonSharpBackingUdonBehaviour: {fileID: 7660602845788883146}
   _udon: {fileID: 2393138946571511015}
-  _varibaleName: _eventName
-  _varibaleValue: MoveUp
+  _variableName: _eventName
+  _variableValue: MoveUp
   _eventName: OnButtonClick
 --- !u!114 &7660602845788883146
 MonoBehaviour:
@@ -3993,13 +3990,13 @@ MonoBehaviour:
     PrefabModificationsReferencedUnityObjects: []
     PrefabModifications: []
     SerializationNodes:
-    - Name: _varibaleObject
+    - Name: _variableObject
       Entry: 6
       Data: 
   _udonSharpBackingUdonBehaviour: {fileID: 904353851611454137}
   _udon: {fileID: 5575827741807152191}
-  _varibaleName: _playlistTrackIndex
-  _varibaleValue: 
+  _variableName: _playlistTrackIndex
+  _variableValue: 
   _eventName: 
 --- !u!114 &904353851611454137
 MonoBehaviour:
@@ -4261,13 +4258,13 @@ MonoBehaviour:
     PrefabModificationsReferencedUnityObjects: []
     PrefabModifications: []
     SerializationNodes:
-    - Name: _varibaleObject
+    - Name: _variableObject
       Entry: 6
       Data: 
   _udonSharpBackingUdonBehaviour: {fileID: 1103770288069060303}
   _udon: {fileID: 5575827741807152191}
-  _varibaleName: _playlistIndex
-  _varibaleValue: 
+  _variableName: _playlistIndex
+  _variableValue: 
   _eventName: GeneratePlaylistTracks
 --- !u!114 &1103770288069060303
 MonoBehaviour:
@@ -4734,13 +4731,13 @@ MonoBehaviour:
     PrefabModificationsReferencedUnityObjects: []
     PrefabModifications: []
     SerializationNodes:
-    - Name: _varibaleObject
+    - Name: _variableObject
       Entry: 6
       Data: 
   _udonSharpBackingUdonBehaviour: {fileID: 7044600136403698491}
   _udon: {fileID: 2393138946571511015}
-  _varibaleName: _eventName
-  _varibaleValue: PlayPlaylistTrack
+  _variableName: _eventName
+  _variableValue: PlayPlaylistTrack
   _eventName: OnButtonClick
 --- !u!114 &7044600136403698491
 MonoBehaviour:
@@ -5397,10 +5394,10 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4136176054030910802}
-  - component: {fileID: 5575827741807152191}
   - component: {fileID: 861416682116435473}
-  - component: {fileID: 5336116289121026804}
-  - component: {fileID: 2021556197877650160}
+  - component: {fileID: 9112073617095419003}
+  - component: {fileID: 3634098459448852670}
+  - component: {fileID: 5575827741807152191}
   m_Layer: 0
   m_Name: UI
   m_TagString: Untagged
@@ -5424,175 +5421,6 @@ Transform:
   - {fileID: 2726077235879511445}
   m_Father: {fileID: 539302603107062331}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &5575827741807152191
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6978376773322934425}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 443ad46f8a75ed34f8f7e4c643779c0f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  serializationData:
-    SerializedFormat: 2
-    SerializedBytes: 
-    ReferencedUnityObjects: []
-    SerializedBytesString: 
-    Prefab: {fileID: 0}
-    PrefabModificationsReferencedUnityObjects: []
-    PrefabModifications: []
-    SerializationNodes: []
-  _udonSharpBackingUdonBehaviour: {fileID: 861416682116435473}
-  _controller: {fileID: 0}
-  _disableUIOnPickUp: 1
-  _disableUIDistance: 0
-  _font: {fileID: 0}
-  _updateLogFile: {fileID: 0}
-  _primaryColor: {r: 0.9372549, g: 0.38431373, b: 0.5686275, a: 1}
-  _secondaryColor: {r: 0.9686275, g: 0.7294118, b: 0.8117647, a: 0.1215686}
-  _ownerColor: {r: 0.39215687, g: 0.70980394, b: 0.9647059, a: 1}
-  _adminColor: {r: 0.7294118, g: 0.40784314, b: 0.78431374, a: 1}
-  _editorColor: {r: 0.5058824, g: 0.78039217, b: 0.5176471, a: 1}
-  _viewerColor: {r: 1, g: 0.7176471, b: 0.3019608, a: 1}
-  _modal: {fileID: 0}
-  _modalVideoPlayerSelector: {fileID: 0}
-  _modalUnityPlayer: {fileID: 0}
-  _modalAVProPlayer: {fileID: 0}
-  _modalImageViewer: {fileID: 0}
-  _animator: {fileID: 2776414891239276749}
-  _urlInputField: {fileID: 0}
-  _urlInputFieldTop: {fileID: 0}
-  _title: {fileID: 0}
-  _url: {fileID: 0}
-  _videoTime: {fileID: 0}
-  _duration: {fileID: 0}
-  _progress: {fileID: 0}
-  _progressHelper: {fileID: 0}
-  _progressTooltip: {fileID: 0}
-  _play: {fileID: 0}
-  _pause: {fileID: 0}
-  _loop: {fileID: 0}
-  _loopOff: {fileID: 0}
-  _inorderPlay: {fileID: 0}
-  _shufflePlay: {fileID: 0}
-  _mute: {fileID: 0}
-  _muteOff: {fileID: 0}
-  _volume: {fileID: 0}
-  _volumeHelper: {fileID: 0}
-  _volumeTooltip: {fileID: 0}
-  _audioLinkSettings: {fileID: 0}
-  _audioLinkOn: {fileID: 0}
-  _audioLinkOff: {fileID: 0}
-  _unityPlayer: {fileID: 0}
-  _avProPlayer: {fileID: 0}
-  _imageViewer: {fileID: 0}
-  _speedSlider: {fileID: 0}
-  _speedText: {fileID: 0}
-  _repeatSlider: {fileID: 0}
-  _repeatOff: {fileID: 0}
-  _repeat: {fileID: 0}
-  _repeatStartTime: {fileID: 0}
-  _repeatEndTime: {fileID: 0}
-  _localDelayText: {fileID: 0}
-  _permission: {fileID: 0}
-  _permissionEntry: {fileID: 0}
-  _permissionPage: {fileID: 0}
-  _loading: {fileID: 0}
-  _message: {fileID: 0}
-  _idle: {fileID: 0}
-  _idleImage: {fileID: 0}
-  _emissionSlider: {fileID: 0}
-  _emissionText: {fileID: 0}
-  _maxResolution144: {fileID: 0}
-  _maxResolution240: {fileID: 0}
-  _maxResolution360: {fileID: 0}
-  _maxResolution480: {fileID: 0}
-  _maxResolution720: {fileID: 0}
-  _maxResolution1080: {fileID: 0}
-  _maxResolution2160: {fileID: 0}
-  _maxResolution4320: {fileID: 0}
-  _mirrorInversion: {fileID: 0}
-  _mirrorInversionOff: {fileID: 0}
-  _versionText: {fileID: 0}
-  _updateLog: {fileID: 0}
-  _slideOn: {fileID: 0}
-  _slideOff: {fileID: 0}
-  _slide1s: {fileID: 0}
-  _slide2s: {fileID: 0}
-  _slide3s: {fileID: 0}
-  _translationTextFile: {fileID: 0}
-  _options: {fileID: 0}
-  _settings: {fileID: 0}
-  _playlist: {fileID: 0}
-  _videoSearch: {fileID: 0}
-  _version: {fileID: 0}
-  _returnToMain: {fileID: 0}
-  _inputUrl: {fileID: 0}
-  _loopPlayText: {fileID: 0}
-  _loopPlayText2: {fileID: 0}
-  _shufflePlayText: {fileID: 0}
-  _shufflePlayText2: {fileID: 0}
-  _imageViewerModalText: {fileID: 0}
-  _karaokeMember: {fileID: 0}
-  _settingsTitle: {fileID: 0}
-  _playback: {fileID: 0}
-  _videoAndAudio: {fileID: 0}
-  _other: {fileID: 0}
-  _videoPlayer: {fileID: 0}
-  _videoPlayerDesc: {fileID: 0}
-  _imageViewerText: {fileID: 0}
-  _playbackSpeed: {fileID: 0}
-  _playbackSpeedDesc: {fileID: 0}
-  _slower: {fileID: 0}
-  _faster: {fileID: 0}
-  _repeatPlay: {fileID: 0}
-  _repeatPlayDesc: {fileID: 0}
-  _repeatOnText: {fileID: 0}
-  _repeatOffText: {fileID: 0}
-  _maxResolution: {fileID: 0}
-  _maxResolutionDesc: {fileID: 0}
-  _mirrorInversionTitle: {fileID: 0}
-  _mirrorInversionDesc: {fileID: 0}
-  _mirrorInversionOnText: {fileID: 0}
-  _mirrorInversionOffText: {fileID: 0}
-  _brightness: {fileID: 0}
-  _brightnessDesc: {fileID: 0}
-  _audioLinkDesc: {fileID: 0}
-  _audioLinkOnText: {fileID: 0}
-  _audioLinkOffText: {fileID: 0}
-  _karaokeModeText: {fileID: 0}
-  _karaokeModeDesc: {fileID: 0}
-  _karaokeModeOnText: {fileID: 0}
-  _danceModeOnText: {fileID: 0}
-  _karaokeModeOffText: {fileID: 0}
-  _localDelay: {fileID: 0}
-  _localDelayDesc: {fileID: 0}
-  _languageSelect: {fileID: 0}
-  _slideMode: {fileID: 0}
-  _slideModeDesc: {fileID: 0}
-  _slideOnText: {fileID: 0}
-  _slideOffText: {fileID: 0}
-  _slideSeconds: {fileID: 0}
-  _slideSecondsDesc: {fileID: 0}
-  _slide1sText: {fileID: 0}
-  _slide2sText: {fileID: 0}
-  _slide3sText: {fileID: 0}
-  _permissionTitle: {fileID: 0}
-  _permissionDesc: {fileID: 0}
-  _defaultPlaylistOpen: 1
-  _playlistSelector: {fileID: 5313014072087675697}
-  _playlists: {fileID: 390868765318500462}
-  _playlistName: {fileID: 1506682586023338984}
-  _playlistTracks: {fileID: 4206336388409199517}
-  _dynamicPlaylistUrlInput: {fileID: 5870298216821374415}
-  _playlistTitle: {fileID: 3725726755817693324}
-  _playQueue: {fileID: 8249145463671161556}
-  _playHistory: {fileID: 3785397653698251658}
-  _addVideoLink: {fileID: 0}
-  _addLiveLink: {fileID: 0}
 --- !u!114 &861416682116435473
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5618,7 +5446,7 @@ MonoBehaviour:
   serializedPublicVariablesBytesString: Ai8AAAAAATIAAABWAFIAQwAuAFUAZABvAG4ALgBDAG8AbQBtAG8AbgAuAFUAZABvAG4AVgBhAHIAaQBhAGIAbABlAFQAYQBiAGwAZQAsACAAVgBSAEMALgBVAGQAbwBuAC4AQwBvAG0AbQBvAG4AAAAAAAYBAAAAAAAAACcBBAAAAHQAeQBwAGUAAWgAAABTAHkAcwB0AGUAbQAuAEMAbwBsAGwAZQBjAHQAaQBvAG4AcwAuAEcAZQBuAGUAcgBpAGMALgBMAGkAcwB0AGAAMQBbAFsAVgBSAEMALgBVAGQAbwBuAC4AQwBvAG0AbQBvAG4ALgBJAG4AdABlAHIAZgBhAGMAZQBzAC4ASQBVAGQAbwBuAFYAYQByAGkAYQBiAGwAZQAsACAAVgBSAEMALgBVAGQAbwBuAC4AQwBvAG0AbQBvAG4AXQBdACwAIABtAHMAYwBvAHIAbABpAGIAAQEJAAAAVgBhAHIAaQBhAGIAbABlAHMALwEAAAABaAAAAFMAeQBzAHQAZQBtAC4AQwBvAGwAbABlAGMAdABpAG8AbgBzAC4ARwBlAG4AZQByAGkAYwAuAEwAaQBzAHQAYAAxAFsAWwBWAFIAQwAuAFUAZABvAG4ALgBDAG8AbQBtAG8AbgAuAEkAbgB0AGUAcgBmAGEAYwBlAHMALgBJAFUAZABvAG4AVgBhAHIAaQBhAGIAbABlACwAIABWAFIAQwAuAFUAZABvAG4ALgBDAG8AbQBtAG8AbgBdAF0ALAAgAG0AcwBjAG8AcgBsAGkAYgABAAAABgEAAAAAAAAAAi8CAAAAAUkAAABWAFIAQwAuAFUAZABvAG4ALgBDAG8AbQBtAG8AbgAuAFUAZABvAG4AVgBhAHIAaQBhAGIAbABlAGAAMQBbAFsAUwB5AHMAdABlAG0ALgBJAG4AdAAzADIALAAgAG0AcwBjAG8AcgBsAGkAYgBdAF0ALAAgAFYAUgBDAC4AVQBkAG8AbgAuAEMAbwBtAG0AbwBuAAIAAAAGAgAAAAAAAAAnAQQAAAB0AHkAcABlAAEXAAAAUwB5AHMAdABlAG0ALgBTAHQAcgBpAG4AZwAsACAAbQBzAGMAbwByAGwAaQBiACcBCgAAAFMAeQBtAGIAbwBsAE4AYQBtAGUAAR8AAABfAF8AXwBVAGQAbwBuAFMAaABhAHIAcABCAGUAaABhAHYAaQBvAHUAcgBWAGUAcgBzAGkAbwBuAF8AXwBfACcBBAAAAHQAeQBwAGUAARYAAABTAHkAcwB0AGUAbQAuAEkAbgB0ADMAMgAsACAAbQBzAGMAbwByAGwAaQBiABcBBQAAAFYAYQBsAHUAZQACAAAABwUHBQcF
   publicVariablesUnityEngineObjects: []
   publicVariablesSerializationDataFormat: 0
---- !u!114 &5336116289121026804
+--- !u!114 &9112073617095419003
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -5627,7 +5455,102 @@ MonoBehaviour:
   m_GameObject: {fileID: 6978376773322934425}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7e2ecb530e1de304db8ff0957d429ba5, type: 3}
+  m_Script: {fileID: 11500000, guid: 4928b707e8c0a414ca5ed0136a38d9f2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  defaultColorSet: Blue
+  colorSets:
+  - colorSetName: Pink
+    primaryColor: {r: 0.9375, g: 0.3828125, b: 0.5703125, a: 1}
+    secondaryColor: {r: 0.96875, g: 0.73046875, b: 0.8125, a: 0.12109375}
+    infoColor: {r: 0, g: 0, b: 0, a: 0}
+    successColor: {r: 0, g: 0, b: 0, a: 0}
+    alermColor: {r: 0, g: 0, b: 0, a: 0}
+    errorColor: {r: 0, g: 0, b: 0, a: 0}
+  - colorSetName: Blue
+    primaryColor: {r: 0.011764706, g: 0.6627451, b: 0.95686275, a: 1}
+    secondaryColor: {r: 0.5058824, g: 0.83137256, b: 0.98039216, a: 0.12109375}
+    infoColor: {r: 0, g: 0, b: 0, a: 0}
+    successColor: {r: 0, g: 0, b: 0, a: 0}
+    alermColor: {r: 0, g: 0, b: 0, a: 0}
+    errorColor: {r: 0, g: 0, b: 0, a: 0}
+  - colorSetName: Green
+    primaryColor: {r: 0.29803923, g: 0.6862745, b: 0.3137255, a: 1}
+    secondaryColor: {r: 0.64705884, g: 0.8392157, b: 0.654902, a: 0.12109375}
+    infoColor: {r: 0, g: 0, b: 0, a: 0}
+    successColor: {r: 0, g: 0, b: 0, a: 0}
+    alermColor: {r: 0, g: 0, b: 0, a: 0}
+    errorColor: {r: 0, g: 0, b: 0, a: 0}
+  - colorSetName: Orange
+    primaryColor: {r: 1, g: 0.59607846, b: 0, a: 1}
+    secondaryColor: {r: 1, g: 0.8, b: 0.5019608, a: 0.12109375}
+    infoColor: {r: 0, g: 0, b: 0, a: 0}
+    successColor: {r: 0, g: 0, b: 0, a: 0}
+    alermColor: {r: 0, g: 0, b: 0, a: 0}
+    errorColor: {r: 0, g: 0, b: 0, a: 0}
+  - colorSetName: Purple
+    primaryColor: {r: 0.6117647, g: 0.15294118, b: 0.6901961, a: 1}
+    secondaryColor: {r: 0.80784315, g: 0.5764706, b: 0.84705883, a: 0.12109375}
+    infoColor: {r: 0, g: 0, b: 0, a: 0}
+    successColor: {r: 0, g: 0, b: 0, a: 0}
+    alermColor: {r: 0, g: 0, b: 0, a: 0}
+    errorColor: {r: 0, g: 0, b: 0, a: 0}
+--- !u!114 &3634098459448852670
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6978376773322934425}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f2072efb4e3356c4baae9af7d46e24a1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  defaultLanguage: 
+  languages:
+  - languageCode: ja
+    displayName: "\u65E5\u672C\u8A9E"
+    translationFile: {fileID: 4900000, guid: 37bfcae5fdc74fa498fd037802788dfd, type: 3}
+    font: {fileID: 12800000, guid: 6488e13b806b0524dbadc43e3a9bd5fb, type: 3}
+  - languageCode: en
+    displayName: English
+    translationFile: {fileID: 4900000, guid: 26e50dedecf23164b9bbbba8dbc4b5ad, type: 3}
+    font: {fileID: 12800000, guid: 6488e13b806b0524dbadc43e3a9bd5fb, type: 3}
+  - languageCode: zh-CN
+    displayName: "\u7B80\u4F53\u4E2D\u6587"
+    translationFile: {fileID: 4900000, guid: 3e67a564fc1cee849adaefc8dd1935d2, type: 3}
+    font: {fileID: 0}
+  - languageCode: zh-HK
+    displayName: "\u7E41\u9AD4\u4E2D\u6587"
+    translationFile: {fileID: 4900000, guid: 57bc1e7460cdc2342a8d490d628cb5ce, type: 3}
+    font: {fileID: 0}
+  - languageCode: ko
+    displayName: "\uD55C\uAD6D\uC5B4"
+    translationFile: {fileID: 4900000, guid: 7dca7e408a8a63941b87fef7b78b2949, type: 3}
+    font: {fileID: 0}
+  - languageCode: es
+    displayName: "Espa\xF1ol"
+    translationFile: {fileID: 4900000, guid: c4e9309b428765046891abf6ca8f9a7d, type: 3}
+    font: {fileID: 12800000, guid: 6488e13b806b0524dbadc43e3a9bd5fb, type: 3}
+  - languageCode: uk-UA
+    displayName: "\u0443\u043A\u0440\u0430\u0457\u043D\u0441\u044C\u043A\u0430 \u043C\u043E\u0432\u0430"
+    translationFile: {fileID: 4900000, guid: 6bec8f911f42bae48a1927826891c21d, type: 3}
+    font: {fileID: 0}
+  - languageCode: ru
+    displayName: "\u0440\u0443\u0441\u0441\u043A\u0438\u0439 \u044F\u0437\u044B\u043A"
+    translationFile: {fileID: 4900000, guid: 62de29f8e470c0d45a7fab55c4014ff9, type: 3}
+    font: {fileID: 0}
+--- !u!114 &5575827741807152191
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6978376773322934425}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 443ad46f8a75ed34f8f7e4c643779c0f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   serializationData:
@@ -5639,32 +5562,135 @@ MonoBehaviour:
     PrefabModificationsReferencedUnityObjects: []
     PrefabModifications: []
     SerializationNodes: []
-  _udonSharpBackingUdonBehaviour: {fileID: 2021556197877650160}
---- !u!114 &2021556197877650160
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6978376773322934425}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 45115577ef41a5b4ca741ed302693907, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  interactTextPlacement: {fileID: 0}
-  interactText: Use
-  interactTextGO: {fileID: 0}
-  proximity: 2
-  SynchronizePosition: 0
-  AllowCollisionOwnershipTransfer: 0
-  Reliable: 0
-  _syncMethod: 1
-  serializedProgramAsset: {fileID: 11400000, guid: d0376df01b3d340499bb49e0176c6429, type: 2}
-  programSource: {fileID: 11400000, guid: 0425897519794e7478e82ab39da26473, type: 2}
-  serializedPublicVariablesBytesString: Ai8AAAAAATIAAABWAFIAQwAuAFUAZABvAG4ALgBDAG8AbQBtAG8AbgAuAFUAZABvAG4AVgBhAHIAaQBhAGIAbABlAFQAYQBiAGwAZQAsACAAVgBSAEMALgBVAGQAbwBuAC4AQwBvAG0AbQBvAG4AAAAAAAYBAAAAAAAAACcBBAAAAHQAeQBwAGUAAWgAAABTAHkAcwB0AGUAbQAuAEMAbwBsAGwAZQBjAHQAaQBvAG4AcwAuAEcAZQBuAGUAcgBpAGMALgBMAGkAcwB0AGAAMQBbAFsAVgBSAEMALgBVAGQAbwBuAC4AQwBvAG0AbQBvAG4ALgBJAG4AdABlAHIAZgBhAGMAZQBzAC4ASQBVAGQAbwBuAFYAYQByAGkAYQBiAGwAZQAsACAAVgBSAEMALgBVAGQAbwBuAC4AQwBvAG0AbQBvAG4AXQBdACwAIABtAHMAYwBvAHIAbABpAGIAAQEJAAAAVgBhAHIAaQBhAGIAbABlAHMALwEAAAABaAAAAFMAeQBzAHQAZQBtAC4AQwBvAGwAbABlAGMAdABpAG8AbgBzAC4ARwBlAG4AZQByAGkAYwAuAEwAaQBzAHQAYAAxAFsAWwBWAFIAQwAuAFUAZABvAG4ALgBDAG8AbQBtAG8AbgAuAEkAbgB0AGUAcgBmAGEAYwBlAHMALgBJAFUAZABvAG4AVgBhAHIAaQBhAGIAbABlACwAIABWAFIAQwAuAFUAZABvAG4ALgBDAG8AbQBtAG8AbgBdAF0ALAAgAG0AcwBjAG8AcgBsAGkAYgABAAAABgEAAAAAAAAAAi8CAAAAAUkAAABWAFIAQwAuAFUAZABvAG4ALgBDAG8AbQBtAG8AbgAuAFUAZABvAG4AVgBhAHIAaQBhAGIAbABlAGAAMQBbAFsAUwB5AHMAdABlAG0ALgBJAG4AdAAzADIALAAgAG0AcwBjAG8AcgBsAGkAYgBdAF0ALAAgAFYAUgBDAC4AVQBkAG8AbgAuAEMAbwBtAG0AbwBuAAIAAAAGAgAAAAAAAAAnAQQAAAB0AHkAcABlAAEXAAAAUwB5AHMAdABlAG0ALgBTAHQAcgBpAG4AZwAsACAAbQBzAGMAbwByAGwAaQBiACcBCgAAAFMAeQBtAGIAbwBsAE4AYQBtAGUAAR8AAABfAF8AXwBVAGQAbwBuAFMAaABhAHIAcABCAGUAaABhAHYAaQBvAHUAcgBWAGUAcgBzAGkAbwBuAF8AXwBfACcBBAAAAHQAeQBwAGUAARYAAABTAHkAcwB0AGUAbQAuAEkAbgB0ADMAMgAsACAAbQBzAGMAbwByAGwAaQBiABcBBQAAAFYAYQBsAHUAZQACAAAABwUHBQcF
-  publicVariablesUnityEngineObjects: []
-  publicVariablesSerializationDataFormat: 0
+  _udonSharpBackingUdonBehaviour: {fileID: 861416682116435473}
+  _controller: {fileID: 0}
+  _primaryColor: {r: 0.9372549, g: 0.38431373, b: 0.5686275, a: 1}
+  _secondaryColor: {r: 0.9686275, g: 0.7294118, b: 0.8117647, a: 0.1215686}
+  _idleScreenImage: {fileID: 0}
+  _idleScreenSprite: {fileID: 0}
+  _userUIAnimator: {fileID: 0}
+  _systemUIAnimator: {fileID: 0}
+  _modalDialog: {fileID: 0}
+  _modalPlayerSelectorGroup: {fileID: 0}
+  _modalUnityPlayerToggle: {fileID: 0}
+  _modalAVProPlayerToggle: {fileID: 0}
+  _modalImageViewerToggle: {fileID: 0}
+  _urlInputFieldTop: {fileID: 0}
+  _trackTitleText: {fileID: 0}
+  _trackUrlText: {fileID: 0}
+  _urlInputField: {fileID: 0}
+  _loopOnButton: {fileID: 0}
+  _loopOffButton: {fileID: 0}
+  _shufflePlayButton: {fileID: 0}
+  _shufflePlayOffButton: {fileID: 0}
+  _reloadButton: {fileID: 0}
+  _lockButton: {fileID: 0}
+  _backwardButton: {fileID: 0}
+  _playButton: {fileID: 0}
+  _pauseButton: {fileID: 0}
+  _stopButton: {fileID: 0}
+  _forwardButton: {fileID: 0}
+  _muteButton: {fileID: 0}
+  _unmuteButton: {fileID: 0}
+  _volumeSlider: {fileID: 0}
+  _volumeSliderHelper: {fileID: 0}
+  _volumeTooltipButton: {fileID: 0}
+  _volumeTooltipText: {fileID: 0}
+  _progressSlider: {fileID: 0}
+  _currentTimeText: {fileID: 0}
+  _totalDurationText: {fileID: 0}
+  _progressSliderHelper: {fileID: 0}
+  _progressTooltipButton: {fileID: 0}
+  _progressTooltipText: {fileID: 0}
+  _unityPlayerToggle: {fileID: 0}
+  _avProPlayerToggle: {fileID: 0}
+  _imageViewerToggle: {fileID: 0}
+  _speedSlider: {fileID: 0}
+  _speedValueText: {fileID: 0}
+  _repeatRangeSlider: {fileID: 0}
+  _repeatOffToggle: {fileID: 0}
+  _repeatOnToggle: {fileID: 0}
+  _repeatStartTimeText: {fileID: 0}
+  _repeatEndTimeText: {fileID: 0}
+  _localDelayValueText: {fileID: 0}
+  _mirrorFlipOnToggle: {fileID: 0}
+  _mirrorFlipOffToggle: {fileID: 0}
+  _brightnessSlider: {fileID: 0}
+  _brightnessValueText: {fileID: 0}
+  _maxResolution360Toggle: {fileID: 0}
+  _maxResolution480Toggle: {fileID: 0}
+  _maxResolution720Toggle: {fileID: 0}
+  _maxResolution1080Toggle: {fileID: 0}
+  _maxResolution2160Toggle: {fileID: 0}
+  _maxResolution4320Toggle: {fileID: 0}
+  _loadingIndicator: {fileID: 0}
+  _statusMessageText: {fileID: 0}
+  _updateLogTextAsset: {fileID: 0}
+  _versionDisplayText: {fileID: 0}
+  _updateLogText: {fileID: 0}
+  _translationJsonFile: {fileID: 0}
+  _languageCodes: []
+  _fontAssets: []
+  _defaultLanguage: 
+  _languageEnglishToggle: {fileID: 0}
+  _languageJapaneseToggle: {fileID: 0}
+  _languageSimplifiedChineseToggle: {fileID: 0}
+  _languageTraditionalChineseToggle: {fileID: 0}
+  _languageKoreanToggle: {fileID: 0}
+  _languageSpanishToggle: {fileID: 0}
+  _languageUkranianToggle: {fileID: 0}
+  _languageRussianToggle: {fileID: 0}
+  _inputUrlLabel: {fileID: 0}
+  _loopLabel: {fileID: 0}
+  _loopLabel2: {fileID: 0}
+  _shuffleLabel: {fileID: 0}
+  _shuffleLabel2: {fileID: 0}
+  _reloadLabel: {fileID: 0}
+  _settingsLabel: {fileID: 0}
+  _versionLabel: {fileID: 0}
+  _lockUiLabel: {fileID: 0}
+  _tabQueueLabel: {fileID: 0}
+  _tabHistoryLabel: {fileID: 0}
+  _tabPlaylistsLabel: {fileID: 0}
+  _returnToMainLabel: {fileID: 0}
+  _tabPlaybackLabel: {fileID: 0}
+  _tabVideoAndAudioLabel: {fileID: 0}
+  _tabUiLabel: {fileID: 0}
+  _videoPlayerTitleLabel: {fileID: 0}
+  _videoPlayerDescLabel: {fileID: 0}
+  _unityVideoPlayerLabel: {fileID: 0}
+  _avproVideoPlayerLabel: {fileID: 0}
+  _imageViewerLabel: {fileID: 0}
+  _playbackSpeedTitleLabel: {fileID: 0}
+  _playbackSpeedDescLabel: {fileID: 0}
+  _playbackSpeedSlowerButtonLabel: {fileID: 0}
+  _playbackSpeedFasterButtonLabel: {fileID: 0}
+  _repeatPlayTitleLabel: {fileID: 0}
+  _repeatPlayDescLabel: {fileID: 0}
+  _repeatOffButtonLabel: {fileID: 0}
+  _repeatOnButtonLabel: {fileID: 0}
+  _localDelayTitleLabel: {fileID: 0}
+  _localDelayDescLabel: {fileID: 0}
+  _mirrorFlipTitleLabel: {fileID: 0}
+  _mirrorFlipDescLabel: {fileID: 0}
+  _mirrorFlipOnButtonLabel: {fileID: 0}
+  _mirrorFlipOffButtonLabel: {fileID: 0}
+  _brightnessTitleLabel: {fileID: 0}
+  _brightnessDescLabel: {fileID: 0}
+  _maxResolutionTitleLabel: {fileID: 0}
+  _maxResolutionDescLabel: {fileID: 0}
+  _languageSelectTitleLabel: {fileID: 0}
+  _unlockUiMessageLabel: {fileID: 0}
+  _lockDetectionRect: {fileID: 0}
+  _unlockProgressText: {fileID: 0}
+  _unlockHoldDuration: 0.6
+  _defaultPlaylistOpen: 1
+  _currentPlaylistNameText: {fileID: 1506682586023338984}
+  _playlistsListScroll: {fileID: 390868765318500462}
+  _playlistTracksScroll: {fileID: 4206336388409199517}
+  _queueTabToggle: {fileID: 8673830941789607226}
+  _historyTabToggle: {fileID: 3676002007885618477}
+  _playlistsTabToggle: {fileID: 9200218803660593543}
 --- !u!1 &7027038039443390193
 GameObject:
   m_ObjectHideFlags: 0
@@ -6188,13 +6214,13 @@ MonoBehaviour:
     PrefabModificationsReferencedUnityObjects: []
     PrefabModifications: []
     SerializationNodes:
-    - Name: _varibaleObject
+    - Name: _variableObject
       Entry: 6
       Data: 
   _udonSharpBackingUdonBehaviour: {fileID: 1892052285125146555}
   _udon: {fileID: 2393138946571511015}
-  _varibaleName: _eventName
-  _varibaleValue: AddPlaylistTrackToQueue
+  _variableName: _eventName
+  _variableValue: AddPlaylistTrackToQueue
   _eventName: OnButtonClick
 --- !u!114 &1892052285125146555
 MonoBehaviour:
@@ -7100,13 +7126,13 @@ MonoBehaviour:
     PrefabModificationsReferencedUnityObjects: []
     PrefabModifications: []
     SerializationNodes:
-    - Name: _varibaleObject
+    - Name: _variableObject
       Entry: 6
       Data: 
   _udonSharpBackingUdonBehaviour: {fileID: 8395240611933329125}
   _udon: {fileID: 2393138946571511015}
-  _varibaleName: _eventName
-  _varibaleValue: MoveDown
+  _variableName: _eventName
+  _variableValue: MoveDown
   _eventName: OnButtonClick
 --- !u!114 &8395240611933329125
 MonoBehaviour:
@@ -7221,8 +7247,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a40883b1bf6bf5543bb641824e65f870, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _uiController: {fileID: 0}
-  _colorType: 0
+  colorType: 0
 --- !u!1 &8851663739013978951
 GameObject:
   m_ObjectHideFlags: 0
