@@ -44,7 +44,10 @@ namespace Yamadev.YamaStream
       {
         _shuffle = value;
         if (Networking.IsOwner(gameObject) && !_isLocal) RequestSerialization();
-        foreach (YamaPlayerListener listener in EventListeners) listener.AfterShufflePlayChanged(_shuffle);
+        foreach (YamaPlayerListener listener in EventListeners)
+        {
+          if (Utilities.IsValid(listener)) listener.AfterShufflePlayChanged(_shuffle);
+        }
       }
     }
 
@@ -62,7 +65,7 @@ namespace Yamadev.YamaStream
     public void AddPlaylist(Playlist playlist)
     {
       _playlists = _playlists.Add(playlist);
-      foreach (YamaPlayerListener listener in EventListeners) listener.AfterPlaylistsUpdated();
+      foreach (YamaPlayerListener listener in EventListeners) if (Utilities.IsValid(listener)) listener.AfterPlaylistsUpdated();
     }
 
     public void PlayTrackFromQueue()
@@ -73,8 +76,6 @@ namespace Yamadev.YamaStream
       PlayTrack(track);
 
       _queue.RemoveTrack(0);
-      _activePlaylistIndex = -1;
-      _playingTrackIndex = -1;
     }
 
     public void PlayTrackFromHistory(int index)
@@ -83,9 +84,6 @@ namespace Yamadev.YamaStream
 
       var track = _history.GetTrack(index);
       PlayTrack(track);
-
-      _activePlaylistIndex = -1;
-      _playingTrackIndex = -1;
     }
 
     public void PlayTrack(Playlist playlist, int index)
@@ -96,11 +94,11 @@ namespace Yamadev.YamaStream
         return;
       }
 
-      var track = playlist.GetTrack(index);
-      PlayTrack(track);
-
       _activePlaylistIndex = Array.IndexOf(_playlists, playlist);
       _playingTrackIndex = index;
+
+      var track = playlist.GetTrack(index);
+      PlayTrack(track, false);
     }
 
     public void Backward()

@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using VRC.SDK3.Components.Video;
 using VRC.SDK3.Video.Components.Base;
 using VRC.SDKBase;
@@ -48,11 +48,11 @@ namespace Yamadev.YamaStream
       }
 
 #if UNITY_STANDALONE_WIN
-    if (_type == VideoPlayerType.AVProVideoPlayer)
-    {
+      if (_type == VideoPlayerType.AVProVideoPlayer)
+      {
         SendCustomEventDelayedFrames(nameof(BlitLastUpdate), 0, EventTiming.LateUpdate);
         return;
-    }
+      }
 #endif
 
       if (Utilities.IsValid(_listener)) _listener.AfterTextureUpdated(_videoTexture);
@@ -66,6 +66,17 @@ namespace Yamadev.YamaStream
         return _baseVideoPlayer.IsPlaying;
       }
     }
+
+    public override bool IsPaused
+    {
+      get
+      {
+        if (_stopped || _loading) return false;
+        return !IsPlaying;
+      }
+    }
+
+    public override bool IsStopped => _stopped;
 
     public override bool Loop
     {
@@ -179,12 +190,14 @@ namespace Yamadev.YamaStream
     {
       if (_stopped || IsPlaying || !Utilities.IsValid(_baseVideoPlayer)) return;
       _baseVideoPlayer.Play();
+      if (Utilities.IsValid(_listener)) _listener.AfterVideoPlayed();
     }
 
     public override void Pause()
     {
       if (_stopped || !IsPlaying || !Utilities.IsValid(_baseVideoPlayer)) return;
       _baseVideoPlayer.Pause();
+      if (Utilities.IsValid(_listener)) _listener.AfterVideoPaused();
     }
 
     public override void Stop()
@@ -203,6 +216,7 @@ namespace Yamadev.YamaStream
       }
 
       if (Utilities.IsValid(_listener)) _listener.AfterTextureUpdated(null);
+      if (Utilities.IsValid(_listener)) _listener.AfterVideoStopped();
     }
 
     public override Texture Texture => _blitTexture ?? _videoTexture;

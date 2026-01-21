@@ -28,6 +28,10 @@ namespace Yamadev.YamaStream
 
     public virtual bool IsPlaying { get; }
 
+    public virtual bool IsPaused { get; }
+
+    public virtual bool IsStopped { get; }
+
     public virtual bool Loop { get; set; }
 
     public virtual float Speed { get; set; }

@@ -1,6 +1,5 @@
 using UnityEngine;
 using UnityEngine.UI;
-using VRC.SDK3.Components;
 using VRC.SDKBase;
 
 namespace Yamadev.YamaStream.UI
@@ -29,7 +28,6 @@ namespace Yamadev.YamaStream.UI
 
     public void UpdatePlaylistsContent()
     {
-      Debug.Log($"playlist count: {_controller.Playlists.Length}, track count: {_controller.Playlists[0].TrackCount}");
       for (int i = 0; i < _playlistsListScroll.LineCount; i++)
       {
         if (_playlistsListScroll.Indexes[i] == _playlistsListScroll.LastIndexes[i] || _playlistsListScroll.Indexes[i] == -1) continue;

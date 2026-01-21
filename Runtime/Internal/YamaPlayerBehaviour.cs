@@ -15,13 +15,13 @@ namespace Yamadev.YamaStream
         protected bool IsMaster => IsLocalPlayerValid && LocalPlayer.isMaster;
         protected bool IsInVR => IsLocalPlayerValid && LocalPlayer.IsUserInVR();
 
-        public void TakeOwnership()
+        public virtual void TakeOwnership()
         {
             if (!IsLocalPlayerValid) return;
             if (!IsObjectOwner) Networking.SetOwner(LocalPlayer, gameObject);
         }
 
-        public void SyncVariables()
+        public virtual void SyncVariables()
         {
             if (!IsLocalPlayerValid) return;
             TakeOwnership();

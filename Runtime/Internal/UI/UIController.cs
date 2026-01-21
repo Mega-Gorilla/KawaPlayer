@@ -143,7 +143,11 @@ namespace Yamadev.YamaStream.UI
     public bool InvokeBeforeEvent(string eventName)
     {
       _actionCancelled = false;
-      _controller.SendCustomVideoEvent(eventName);
+      foreach (var listener in _controller.EventListeners)
+      {
+        if (Utilities.IsValid(listener)) listener.SendCustomEvent(eventName);
+        if (_actionCancelled) break;
+      }
       return !_actionCancelled;
     }
 
@@ -313,7 +317,7 @@ namespace Yamadev.YamaStream.UI
     {
       if (!InvokeBeforeEvent(nameof(BeforeUserAddTrackToQueue))) return;
 
-      _controller.Queue.TakeOwnership();
+      _controller.TakeOwnership();
       _controller.Queue.AddTrack(TrackUtils.NewTrack(playerType, "", url));
     }
 

@@ -1,16 +1,73 @@
 using VRC.SDKBase;
 using VRC.SDK3.Components.Video;
-using UnityEngine;
 
 namespace Yamadev.YamaStream
 {
   public partial class Controller
   {
+    public override void AfterVideoPlayed()
+    {
+      if (Networking.IsOwner(gameObject) && !_isLocal && !_reloading)
+      {
+        UpdateSyncedVideoTime(VideoTime);
+        RequestSerialization();
+      }
+
+      foreach (YamaPlayerListener listener in EventListeners)
+      {
+        if (Utilities.IsValid(listener)) listener.AfterVideoPlayed();
+      }
+      PrintLog($"{_playerType.GetString()}: Video play.");
+    }
+
+    public override void AfterVideoPaused()
+    {
+      if (Networking.IsOwner(gameObject) && !_isLocal && !_reloading)
+      {
+        UpdateSyncedVideoTime(VideoTime);
+        RequestSerialization();
+      }
+
+      foreach (YamaPlayerListener listener in EventListeners)
+      {
+        if (Utilities.IsValid(listener)) listener.AfterVideoPaused();
+      }
+      PrintLog($"{_playerType.GetString()}: Video pause.");
+    }
+
+    public override void AfterVideoStopped()
+    {
+      _reloading = false;
+      _errorRetryCount = 0;
+      _retryTargetUrl = VRCUrl.Empty;
+      _repeat = 0;
+
+      if (Networking.IsOwner(gameObject) && !_isLocal)
+      {
+        if (!string.IsNullOrEmpty(TrackUtils.GetUrl(Track).Get())) _history.AddTrack(Track);
+        Track = TrackUtils.CreateEmptyTrack();
+        _syncedVideoTime = 0f;
+        _networkDataTimeTicks = 0;
+        RequestSerialization();
+      }
+      else
+      {
+        Track = TrackUtils.CreateEmptyTrack();
+      }
+
+      foreach (YamaPlayerListener listener in EventListeners)
+      {
+        if (Utilities.IsValid(listener)) listener.AfterVideoStopped();
+      }
+      PrintLog($"{_playerType.GetString()}: Video stop.");
+    }
+
     public override void AfterVideoReady()
     {
       _errorRetryCount = 0;
       _retryTargetUrl = VRCUrl.Empty;
-      if (State == PlayerState.Playing) Play(true);
+      if (SyncedState == PlayerState.Playing) Play(true);
+      if (SyncedState == PlayerState.Idle) Stop(true);
 
       if (Networking.IsOwner(gameObject) && !_isLocal && !_reloading)
       {
@@ -19,14 +76,20 @@ namespace Yamadev.YamaStream
       }
       else EnsureVideoTime();
 
-      foreach (YamaPlayerListener listener in EventListeners) listener.AfterVideoReady();
+      foreach (YamaPlayerListener listener in EventListeners)
+      {
+        if (Utilities.IsValid(listener)) listener.AfterVideoReady();
+      }
       PrintLog($"{_playerType.GetString()}: Video ready.");
       _reloading = false;
     }
 
     public override void AfterVideoStarted()
     {
-      foreach (YamaPlayerListener listener in EventListeners) listener.AfterVideoStarted();
+      foreach (YamaPlayerListener listener in EventListeners)
+      {
+        if (Utilities.IsValid(listener)) listener.AfterVideoStarted();
+      }
       PrintLog($"{_playerType.GetString()}: Video start.");
     }
 
@@ -38,7 +101,10 @@ namespace Yamadev.YamaStream
         RequestSerialization();
       }
 
-      foreach (YamaPlayerListener listener in EventListeners) listener.AfterVideoLooped();
+      foreach (YamaPlayerListener listener in EventListeners)
+      {
+        if (Utilities.IsValid(listener)) listener.AfterVideoLooped();
+      }
       PrintLog($"{_playerType.GetString()}: Video loop.");
     }
 
@@ -58,7 +124,10 @@ namespace Yamadev.YamaStream
         Stop();
       }
 
-      foreach (YamaPlayerListener listener in EventListeners) listener.AfterVideoEnded();
+      foreach (YamaPlayerListener listener in EventListeners)
+      {
+        if (Utilities.IsValid(listener)) listener.AfterVideoEnded();
+      }
       PrintLog($"{_playerType.GetString()}: Video end.");
     }
 
@@ -67,7 +136,10 @@ namespace Yamadev.YamaStream
       PrintLog($"{_playerType.GetString()}: Video error {videoError}.");
 
       HandleErrorRetry(videoError);
-      foreach (YamaPlayerListener listener in EventListeners) listener.AfterVideoErrorOccurred(videoError);
+      foreach (YamaPlayerListener listener in EventListeners)
+      {
+        if (Utilities.IsValid(listener)) listener.AfterVideoErrorOccurred(videoError);
+      }
     }
 
     public void ErrorRetry()
@@ -89,7 +161,10 @@ namespace Yamadev.YamaStream
       }
 
       Handler.PlayUrl(currentUrl);
-      foreach (YamaPlayerListener listener in EventListeners) listener.AfterVideoRetry();
+      foreach (YamaPlayerListener listener in EventListeners)
+      {
+        if (Utilities.IsValid(listener)) listener.AfterVideoRetry();
+      }
     }
 
     private void HandleErrorRetry(VideoError videoError)
@@ -119,7 +194,10 @@ namespace Yamadev.YamaStream
 
     public override void OnOwnershipTransferred(VRCPlayerApi player)
     {
-      foreach (YamaPlayerListener listener in EventListeners) listener.AfterOwnerChanged();
+      foreach (YamaPlayerListener listener in EventListeners)
+      {
+        if (Utilities.IsValid(listener)) listener.AfterOwnerChanged();
+      }
     }
   }
 }

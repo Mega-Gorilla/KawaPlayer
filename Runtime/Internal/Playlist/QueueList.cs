@@ -135,9 +135,15 @@ namespace Yamadev.YamaStream
       _controller.SendCustomVideoEvent(nameof(AfterQueueUpdated));
     }
 
+    public override void TakeOwnership()
+    {
+      base.TakeOwnership();
+      if (Utilities.IsValid(_controller)) _controller.TakeOwnership();
+    }
+
     public override void AfterOwnerChanged()
     {
-      if (Networking.IsOwner(_controller.gameObject))
+      if (Utilities.IsValid(_controller) && Networking.IsOwner(_controller.gameObject))
       {
         TakeOwnership();
       }

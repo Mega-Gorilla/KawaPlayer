@@ -15,6 +15,7 @@ namespace Yamadev.YamaStream.Modules.PermissionManagement
   }
 
   [UdonBehaviourSyncMode(BehaviourSyncMode.Manual)]
+  [DefaultExecutionOrder(-900)]
   public class PermissionManagement : YamaPlayerModule
   {
     [SerializeField] private PlayerPermission _defaultPermission = PlayerPermission.Editor;

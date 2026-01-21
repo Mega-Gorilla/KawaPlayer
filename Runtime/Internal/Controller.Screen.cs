@@ -67,7 +67,10 @@ namespace Yamadev.YamaStream
         _maxResolution = value;
         if (Utilities.IsValid(Handler)) Handler.MaxResolution = value;
         if (!Stopped) SendCustomEventDelayedFrames(nameof(Reload), 0);
-        foreach (YamaPlayerListener listener in EventListeners) listener.AfterMaxResolutionChanged(value);
+        foreach (YamaPlayerListener listener in EventListeners)
+        {
+          if (Utilities.IsValid(listener)) listener.AfterMaxResolutionChanged(value);
+        }
       }
     }
 
@@ -78,7 +81,7 @@ namespace Yamadev.YamaStream
       {
         _mirrorFlip = value;
         UpdateScreenMaterial();
-        foreach (YamaPlayerListener listener in EventListeners) listener.AfterMirrorFlipChanged(value);
+        foreach (YamaPlayerListener listener in EventListeners) if (Utilities.IsValid(listener)) listener.AfterMirrorFlipChanged(value);
       }
     }
 
@@ -89,7 +92,10 @@ namespace Yamadev.YamaStream
       {
         _brightness = value;
         UpdateScreenMaterial();
-        foreach (YamaPlayerListener listener in EventListeners) listener.AfterBrightnessChanged(value);
+        foreach (YamaPlayerListener listener in EventListeners)
+        {
+          if (Utilities.IsValid(listener)) listener.AfterBrightnessChanged(value);
+        }
       }
     }
 
@@ -121,7 +127,10 @@ namespace Yamadev.YamaStream
             break;
         }
       }
-      foreach (YamaPlayerListener listener in EventListeners) listener.AfterTextureUpdated(texture);
+      foreach (YamaPlayerListener listener in EventListeners)
+      {
+        if (Utilities.IsValid(listener)) listener.AfterTextureUpdated(texture);
+      }
     }
 
     public void AddScreen(ScreenType screenType, Object screen, string textureProperty = "_MainTex")

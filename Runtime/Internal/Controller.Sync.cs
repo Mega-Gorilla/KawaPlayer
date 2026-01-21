@@ -14,26 +14,23 @@ namespace Yamadev.YamaStream
     private float _lastSync = 0;
     private float _localDelay = 0;
 
-    public byte SyncedState
+    private void ApplySyncedState()
     {
-      set
+      if (!Handler.IsReady) return;
+      switch (SyncedState)
       {
-        if (_state == value) return;
-        switch ((PlayerState)value)
-        {
-          case PlayerState.Idle:
-            Stop();
-            _state = (byte)PlayerState.Idle;
-            break;
-          case PlayerState.Playing:
-            Play();
-            _state = (byte)PlayerState.Playing;
-            break;
-          case PlayerState.Paused:
-            Pause();
-            _state = (byte)PlayerState.Paused;
-            break;
-        }
+        case PlayerState.Idle:
+          if (Stopped) return;
+          Handler.Stop();
+          break;
+        case PlayerState.Playing:
+          if (IsPlaying) return;
+          Handler.Play();
+          break;
+        case PlayerState.Paused:
+          if (Paused) return;
+          Handler.Pause();
+          break;
       }
     }
 
@@ -44,7 +41,10 @@ namespace Yamadev.YamaStream
       {
         _localDelay = value;
         EnsureVideoTime(true);
-        foreach (YamaPlayerListener listener in EventListeners) listener.AfterLocalDelayChanged(value);
+        foreach (YamaPlayerListener listener in EventListeners)
+        {
+          if (Utilities.IsValid(listener)) listener.AfterLocalDelayChanged(value);
+        }
       }
     }
 
@@ -92,9 +92,12 @@ namespace Yamadev.YamaStream
       {
         track = TrackUtils.NewTrack(_playerType, _title, _url);
       }
-      foreach (YamaPlayerListener listener in EventListeners) listener.AfterTrackSynced();
+      foreach (YamaPlayerListener listener in EventListeners)
+      {
+        if (Utilities.IsValid(listener)) listener.AfterTrackSynced();
+      }
 
-      if (_state != (byte)PlayerState.Idle && TrackUtils.GetUrl(track).Get() != TrackUtils.GetUrl(Track).Get())
+      if (_syncedState != (byte)PlayerState.Idle && TrackUtils.GetUrl(track).Get() != TrackUtils.GetUrl(Track).Get())
       {
         LoadTrack(track);
       }
@@ -103,6 +106,7 @@ namespace Yamadev.YamaStream
         EnsurePlayerType();
       }
 
+      ApplySyncedState();
       EnsureVideoTime();
     }
   }

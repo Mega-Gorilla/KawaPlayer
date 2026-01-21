@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using VRC.SDK3.Components.Video;
 using VRC.SDK3.Image;
 using VRC.SDKBase;
@@ -21,6 +21,17 @@ namespace Yamadev.YamaStream
     }
 
     public override bool IsPlaying => _isPlaying;
+
+    public override bool IsPaused
+    {
+      get
+      {
+        if (!_isReady || _loading) return false;
+        return !_isPlaying;
+      }
+    }
+
+    public override bool IsStopped => !_isReady && !_loading;
 
     public VRCImageDownloader ImageDownloader
     {
@@ -80,12 +91,16 @@ namespace Yamadev.YamaStream
 
     public override void Play()
     {
-      if (!_isPlaying) _isPlaying = true;
+      if (_isPlaying) return;
+      _isPlaying = true;
+      if (Utilities.IsValid(_listener)) _listener.AfterVideoPlayed();
     }
 
     public override void Pause()
     {
-      if (_isPlaying) _isPlaying = false;
+      if (!_isPlaying) return;
+      _isPlaying = false;
+      if (Utilities.IsValid(_listener)) _listener.AfterVideoPaused();
     }
 
     public override void Stop()
@@ -100,6 +115,7 @@ namespace Yamadev.YamaStream
         _imageDownloader.Dispose();
       }
       if (Utilities.IsValid(_listener)) _listener.AfterTextureUpdated(null);
+      if (Utilities.IsValid(_listener)) _listener.AfterVideoStopped();
     }
 
     public override Texture Texture => _texture;
