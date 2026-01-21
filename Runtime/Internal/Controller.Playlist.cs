@@ -44,8 +44,10 @@ namespace Yamadev.YamaStream
       {
         _shuffle = value;
         if (Networking.IsOwner(gameObject) && !_isLocal) RequestSerialization();
-        foreach (YamaPlayerListener listener in EventListeners)
+        int len = _listeners.Length;
+        for (int i = 0; i < len; i++)
         {
+          var listener = _listeners[i];
           if (Utilities.IsValid(listener)) listener.AfterShufflePlayChanged(_shuffle);
         }
       }
@@ -65,7 +67,12 @@ namespace Yamadev.YamaStream
     public void AddPlaylist(Playlist playlist)
     {
       _playlists = _playlists.Add(playlist);
-      foreach (YamaPlayerListener listener in EventListeners) if (Utilities.IsValid(listener)) listener.AfterPlaylistsUpdated();
+      int len = _listeners.Length;
+      for (int i = 0; i < len; i++)
+      {
+        var listener = _listeners[i];
+        if (Utilities.IsValid(listener)) listener.AfterPlaylistsUpdated();
+      }
     }
 
     public void PlayTrackFromQueue()

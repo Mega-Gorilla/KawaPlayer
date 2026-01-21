@@ -27,7 +27,7 @@ namespace Yamadev.YamaStream.Editor
     private SerializedProperty _mute;
     private SerializedProperty _loop;
     private SerializedProperty _shuffle;
-    private SerializedProperty _defaultPlayerEngine;
+    private SerializedProperty _videoPlayerHandlers;
     private SerializedProperty _retryAfterSeconds;
     private SerializedProperty _maxErrorRetry;
     private SerializedProperty _forwardInterval;
@@ -81,7 +81,7 @@ namespace Yamadev.YamaStream.Editor
         _mute = _controllerSerializedObject.FindProperty("_mute");
         _loop = _controllerSerializedObject.FindProperty("_loop");
         _shuffle = _controllerSerializedObject.FindProperty("_shuffle");
-        _defaultPlayerEngine = _controllerSerializedObject.FindProperty("_playerType");
+        _videoPlayerHandlers = _controllerSerializedObject.FindProperty("_videoPlayerHandlers");
         _retryAfterSeconds = _controllerSerializedObject.FindProperty("_retryAfterSeconds");
         _maxErrorRetry = _controllerSerializedObject.FindProperty("_maxErrorRetry");
         _forwardInterval = _controllerSerializedObject.FindProperty("_forwardInterval");
@@ -292,11 +292,50 @@ namespace Yamadev.YamaStream.Editor
       }
     }
 
+    private void DrawDefaultPlayerEngineDropdown()
+    {
+      if (_videoPlayerHandlers == null || _videoPlayerHandlers.arraySize == 0) return;
+
+      var handlers = new List<PlayerHandler>();
+      var displayNames = new List<string>();
+
+      for (int i = 0; i < _videoPlayerHandlers.arraySize; i++)
+      {
+        var handlerProp = _videoPlayerHandlers.GetArrayElementAtIndex(i);
+        var handler = handlerProp.objectReferenceValue as PlayerHandler;
+        if (handler != null)
+        {
+          handlers.Add(handler);
+          displayNames.Add(handler.Type.GetString());
+        }
+      }
+
+      if (handlers.Count == 0) return;
+
+      int currentIndex = 0;
+      int newIndex = EditorGUILayout.Popup(
+        EditorLocalization.GetLayout("settings.videoPlayerType.label"),
+        currentIndex,
+        displayNames.ToArray()
+      );
+
+      if (newIndex != currentIndex && newIndex < handlers.Count)
+      {
+        var selectedHandler = handlers[newIndex];
+        handlers.RemoveAt(newIndex);
+        handlers.Insert(0, selectedHandler);
+
+        for (int i = 0; i < handlers.Count; i++)
+        {
+          _videoPlayerHandlers.GetArrayElementAtIndex(i).objectReferenceValue = handlers[i];
+        }
+      }
+    }
+
     private void DrawVideoPlayerSettings()
     {
       EditorGUILayout.LabelField(EditorLocalization.Get("settings.player.label"), EditorStyles.boldLabel);
-      EditorGUILayout.PropertyField(_defaultPlayerEngine, EditorLocalization.GetLayout("settings.videoPlayerType.label"));
-      // EditorGUILayout.LabelField("　", EditorLocalization.Get("settings.videoPlayerType.desc"));
+      DrawDefaultPlayerEngineDropdown();
       EditorGUILayout.PropertyField(_localMode, EditorLocalization.GetLayout("settings.localMode.label"));
       EditorGUILayout.PropertyField(_loop, EditorLocalization.GetLayout("settings.playback.loop"));
       EditorGUILayout.PropertyField(_shuffle, EditorLocalization.GetLayout("settings.playlist.shuffle"));

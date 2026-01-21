@@ -41,8 +41,10 @@ namespace Yamadev.YamaStream
       {
         _localDelay = value;
         EnsureVideoTime(true);
-        foreach (YamaPlayerListener listener in EventListeners)
+        int len = _listeners.Length;
+        for (int i = 0; i < len; i++)
         {
+          var listener = _listeners[i];
           if (Utilities.IsValid(listener)) listener.AfterLocalDelayChanged(value);
         }
       }
@@ -92,8 +94,10 @@ namespace Yamadev.YamaStream
       {
         track = TrackUtils.NewTrack(_playerType, _title, _url);
       }
-      foreach (YamaPlayerListener listener in EventListeners)
+      int len = _listeners.Length;
+      for (int i = 0; i < len; i++)
       {
+        var listener = _listeners[i];
         if (Utilities.IsValid(listener)) listener.AfterTrackSynced();
       }
 
@@ -103,7 +107,7 @@ namespace Yamadev.YamaStream
       }
       else
       {
-        EnsurePlayerType();
+        SetPlayerType(_playerType);
       }
 
       ApplySyncedState();

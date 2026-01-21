@@ -1,4 +1,5 @@
 using UnityEngine;
+using VRC.SDKBase;
 
 namespace Yamadev.YamaStream
 {
@@ -7,13 +8,13 @@ namespace Yamadev.YamaStream
     public static bool TryFind(this Transform t, string n, out Transform result)
     {
       result = t.Find(n);
-      return result != null;
+      return Utilities.IsValid(result);
     }
 
     public static bool TryGetComponentLocal<T>(this Transform t, out T component)
     {
       component = t.GetComponent<T>();
-      return component != null;
+      return Utilities.IsValid(component);
     }
   }
 }

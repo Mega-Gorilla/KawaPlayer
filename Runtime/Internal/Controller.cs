@@ -19,15 +19,16 @@ namespace Yamadev.YamaStream
   {
     [SerializeField, HideInInspector] private string _version;
     [SerializeField] private PlayerHandler[] _videoPlayerHandlers;
+    [SerializeField] private bool _useFallbackHandler;
     [SerializeField] private string _timeFormat = @"hh\:mm\:ss";
     [SerializeField] private bool _isLocal;
     [SerializeField, Range(5f, 10f)] private float _retryAfterSeconds = 5.1f;
     [SerializeField, Range(0, 10)] private int _maxErrorRetry = 5;
-    [SerializeField, UdonSynced] private VideoPlayerType _playerType;
     [SerializeField, UdonSynced, FieldChangeCallback(nameof(Loop))] private bool _loop;
-    [UdonSynced] private byte _syncedState;
     [UdonSynced, FieldChangeCallback(nameof(Speed))] private float _speed = 1f;
     [UdonSynced, FieldChangeCallback(nameof(Repeat))] private ulong _repeat;
+    [UdonSynced] private byte _syncedState;
+    [UdonSynced] private VideoPlayerType _playerType;
     [UdonSynced] private string _title = string.Empty;
     [UdonSynced] private VRCUrl _url = VRCUrl.Empty;
     private object[] _track;
@@ -40,7 +41,6 @@ namespace Yamadev.YamaStream
 
     private void Start()
     {
-      EnsurePlayerHandler();
       SetupHandlers();
       ReadPlaylists();
 
@@ -87,9 +87,10 @@ namespace Yamadev.YamaStream
 
     public void SendCustomVideoEvent(string eventName)
     {
-      foreach (YamaPlayerListener listener in EventListeners)
+      int len = _listeners.Length;
+      for (int i = 0; i < len; i++)
       {
-        listener.SendCustomEvent(eventName);
+        _listeners[i].SendCustomEvent(eventName);
       }
     }
 
@@ -97,71 +98,66 @@ namespace Yamadev.YamaStream
     {
       get
       {
-        if (!Utilities.IsValid(_handler)) EnsurePlayerHandler();
+        if (!Utilities.IsValid(_handler))
+        {
+          _handler = _videoPlayerHandlers[0];
+        }
         return _handler;
       }
-    }
-
-    public VideoPlayerType PlayerType
-    {
-      get => _playerType;
       set
       {
-        if (_playerType == value) return;
-        _playerType = value;
-        EnsurePlayerType();
-
-        if (Networking.IsOwner(gameObject) && !_isLocal)
+        _handler = value;
+        if (Networking.IsOwner(gameObject) && !_isLocal) RequestSerialization();
+        int len = _listeners.Length;
+        for (int i = 0; i < len; i++)
         {
-          RequestSerialization();
+          var listener = _listeners[i];
+          if (Utilities.IsValid(listener)) listener.AfterPlayerHandlerChanged(_handler.Type);
         }
+        PrintLog($"Player handler changed to {_handler.Type.GetString()}.");
       }
     }
 
     private void RegisterHandlerListeners()
     {
-      foreach (PlayerHandler handler in _videoPlayerHandlers)
+      int len = _videoPlayerHandlers.Length;
+      for (int i = 0; i < len; i++)
       {
+        var handler = _videoPlayerHandlers[i];
         if (Utilities.IsValid(handler)) handler.SetListener(this);
       }
     }
 
-    private void EnsurePlayerHandler()
-    {
-      foreach (PlayerHandler handler in _videoPlayerHandlers)
-      {
-        if (!Utilities.IsValid(handler)) continue;
-        if (handler.Type == _playerType)
-        {
-          _handler = handler;
-          return;
-        }
-      }
-      _handler = null;
-      PrintError("No player handler found.");
-    }
-
     private void SetupHandlers()
     {
-      foreach (PlayerHandler handler in _videoPlayerHandlers)
+      if (!Utilities.IsValid(_handler)) _handler = _videoPlayerHandlers[0];
+
+      int len = _videoPlayerHandlers.Length;
+      for (int i = 0; i < len; i++)
       {
+        var handler = _videoPlayerHandlers[i];
         if (Utilities.IsValid(handler)) handler.Loop = _loop;
       }
     }
 
-    private void EnsurePlayerType()
+    public void SetPlayerType(VideoPlayerType playerType)
     {
-      if (Utilities.IsValid(Handler) && Handler.Type == _playerType) return;
+      if (Utilities.IsValid(Handler) && Handler.Type == playerType) return;
       Stop();
 
-      var oldPlayerType = Handler.Type;
-
-      EnsurePlayerHandler();
-      foreach (YamaPlayerListener listener in EventListeners)
+      int len = _videoPlayerHandlers.Length;
+      for (int i = 0; i < len; i++)
       {
-        if (Utilities.IsValid(listener)) listener.AfterPlayerHandlerChanged(_playerType);
+        var handler = _videoPlayerHandlers[i];
+        if (!Utilities.IsValid(handler)) continue;
+        if (handler.Type == playerType)
+        {
+          Handler = handler;
+          return;
+        }
       }
-      PrintLog($"Video player changed from {oldPlayerType.GetString()} to {_playerType.GetString()}.");
+
+      PrintError("Could not find player handler for player type: " + playerType.GetString());
     }
 
     public void Play(bool force = false)
@@ -198,11 +194,14 @@ namespace Yamadev.YamaStream
       set
       {
         _loop = value;
-        foreach (PlayerHandler handler in _videoPlayerHandlers) handler.Loop = _loop;
+        int handlerLen = _videoPlayerHandlers.Length;
+        for (int i = 0; i < handlerLen; i++) _videoPlayerHandlers[i].Loop = _loop;
 
         if (Networking.IsOwner(gameObject) && !_isLocal) RequestSerialization();
-        foreach (YamaPlayerListener listener in EventListeners)
+        int listenerLen = _listeners.Length;
+        for (int i = 0; i < listenerLen; i++)
         {
+          var listener = _listeners[i];
           if (Utilities.IsValid(listener)) listener.AfterLoopChanged(value);
         }
         PrintLog($"Loop changed to {_loop}.");
@@ -221,15 +220,21 @@ namespace Yamadev.YamaStream
           UpdateSyncedVideoTime(VideoTime);
           RequestSerialization();
         }
-        foreach (YamaPlayerListener listener in EventListeners) if (Utilities.IsValid(listener)) listener.AfterSpeedChanged(value);
+        int len = _listeners.Length;
+        for (int i = 0; i < len; i++)
+        {
+          var listener = _listeners[i];
+          if (Utilities.IsValid(listener)) listener.AfterSpeedChanged(value);
+        }
         PrintLog($"Speed changed to {_speed:F2}x.");
       }
     }
 
     public void UpdateSpeed()
     {
-      foreach (PlayerHandler handler in _videoPlayerHandlers) handler.Speed = _speed;
-      if (!Stopped && _playerType == VideoPlayerType.AVProVideoPlayer)
+      int len = _videoPlayerHandlers.Length;
+      for (int i = 0; i < len; i++) _videoPlayerHandlers[i].Speed = _speed;
+      if (!Stopped && Handler.Type == VideoPlayerType.AVProVideoPlayer)
         SendCustomEventDelayedFrames(nameof(Reload), 0);
       UpdateAudioPitch();
     }
@@ -248,8 +253,10 @@ namespace Yamadev.YamaStream
         _repeat = value;
         SendCustomEventDelayedFrames(nameof(CheckRepeat), 0);
         if (Networking.IsOwner(gameObject) && !_isLocal) RequestSerialization();
-        foreach (YamaPlayerListener listener in EventListeners)
+        int len = _listeners.Length;
+        for (int i = 0; i < len; i++)
         {
+          var listener = _listeners[i];
           if (Utilities.IsValid(listener)) listener.AfterRepeatChanged(value);
         }
         RepeatStatus status = RepeatStatus.New(_repeat);
@@ -277,11 +284,13 @@ namespace Yamadev.YamaStream
         RequestSerialization();
       }
 
-      foreach (YamaPlayerListener listener in EventListeners)
+      int len = _listeners.Length;
+      for (int i = 0; i < len; i++)
       {
+        var listener = _listeners[i];
         if (Utilities.IsValid(listener)) listener.AfterTimeChanged(time);
       }
-      PrintLog($"{_playerType.GetString()}: Set video time: {time}.");
+      PrintLog($"{Handler.Type.GetString()}: Set video time: {time}.");
     }
 
 
@@ -298,8 +307,10 @@ namespace Yamadev.YamaStream
       set
       {
         _track = value;
-        foreach (YamaPlayerListener listener in EventListeners)
+        int len = _listeners.Length;
+        for (int i = 0; i < len; i++)
         {
+          var listener = _listeners[i];
           if (Utilities.IsValid(listener)) listener.AfterTrackUpdated();
         }
       }
@@ -332,22 +343,8 @@ namespace Yamadev.YamaStream
       _reloading = isReload;
       if (!_reloading) Handler.Stop();
 
-      var currentPlayerType = TrackUtils.GetPlayerType(track);
-      if (!isReload && PlayerType != currentPlayerType)
-      {
-        var currentStatus = _syncedState;
-        var oldPlayerType = _playerType;
-
-        _playerType = currentPlayerType;
-        EnsurePlayerHandler();
-        foreach (YamaPlayerListener listener in EventListeners)
-        {
-          if (Utilities.IsValid(listener)) listener.AfterPlayerHandlerChanged(_playerType);
-        }
-        PrintLog($"Video player changed from {oldPlayerType.GetString()} to {_playerType.GetString()}.");
-
-        _syncedState = currentStatus;
-      }
+      var trackPlayerType = TrackUtils.GetPlayerType(track);
+      SetPlayerType(trackPlayerType);
       if (!_reloading) Track = track;
       Handler.LoadUrl(TrackUtils.GetUrl(track));
 
@@ -355,8 +352,11 @@ namespace Yamadev.YamaStream
       {
         RequestSerialization();
       }
-      foreach (YamaPlayerListener listener in EventListeners)
+
+      int len = _listeners.Length;
+      for (int i = 0; i < len; i++)
       {
+        var listener = _listeners[i];
         if (Utilities.IsValid(listener)) listener.AfterTrackLoaded();
       }
       PrintLog($"Load url: {TrackUtils.GetUrl(track)}.");

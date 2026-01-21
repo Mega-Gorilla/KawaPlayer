@@ -47,8 +47,10 @@ namespace Yamadev.YamaStream.Modules.SlideShower
         if (_slideMode) _controller.Pause();
         if (Networking.IsOwner(_controller.gameObject) && !_controller.IsLocal) RequestSerialization();
 
-        foreach (var listener in _listeners)
+        int len = _listeners.Length;
+        for (int i = 0; i < len; i++)
         {
+          var listener = _listeners[i];
           if (Utilities.IsValid(listener)) listener.SendCustomEvent("AfterSlideModeChanged");
         }
         PrintLog($"Slide mode changed to {_slideMode}.");
@@ -65,8 +67,10 @@ namespace Yamadev.YamaStream.Modules.SlideShower
         _slideSeconds = value;
         if (Networking.IsOwner(_controller.gameObject) && !_controller.IsLocal) RequestSerialization();
 
-        foreach (var listener in _listeners)
+        int len = _listeners.Length;
+        for (int i = 0; i < len; i++)
         {
+          var listener = _listeners[i];
           if (Utilities.IsValid(listener)) listener.SendCustomEvent("AfterSlideSecondsChanged");
         }
         PrintLog($"Slide seconds changed to {_slideSeconds}.");
@@ -130,8 +134,10 @@ namespace Yamadev.YamaStream.Modules.SlideShower
     #region Video Events
     public override void AfterVideoReady()
     {
-      foreach (var listener in _listeners)
+      int len = _listeners.Length;
+      for (int i = 0; i < len; i++)
       {
+        var listener = _listeners[i];
         if (Utilities.IsValid(listener)) listener.AfterVideoReady();
       }
     }
@@ -139,88 +145,110 @@ namespace Yamadev.YamaStream.Modules.SlideShower
     public override void AfterVideoStarted()
     {
       if (_slideMode) _controller.Pause();
-      foreach (var listener in _listeners)
+      int len = _listeners.Length;
+      for (int i = 0; i < len; i++)
       {
+        var listener = _listeners[i];
         if (Utilities.IsValid(listener)) listener.AfterVideoStarted();
       }
     }
 
     public override void AfterVideoEnded()
     {
-      foreach (var listener in _listeners)
+      int len = _listeners.Length;
+      for (int i = 0; i < len; i++)
       {
+        var listener = _listeners[i];
         if (Utilities.IsValid(listener)) listener.AfterVideoEnded();
       }
     }
 
     public override void AfterVideoPlayed()
     {
-      foreach (var listener in _listeners)
+      int len = _listeners.Length;
+      for (int i = 0; i < len; i++)
       {
+        var listener = _listeners[i];
         if (Utilities.IsValid(listener)) listener.AfterVideoPlayed();
       }
     }
 
     public override void AfterVideoPaused()
     {
-      foreach (var listener in _listeners)
+      int len = _listeners.Length;
+      for (int i = 0; i < len; i++)
       {
+        var listener = _listeners[i];
         if (Utilities.IsValid(listener)) listener.AfterVideoPaused();
       }
     }
 
     public override void AfterVideoStopped()
     {
-      foreach (var listener in _listeners)
+      int len = _listeners.Length;
+      for (int i = 0; i < len; i++)
       {
+        var listener = _listeners[i];
         if (Utilities.IsValid(listener)) listener.AfterVideoStopped();
       }
     }
 
     public override void AfterTrackLoaded()
     {
-      foreach (var listener in _listeners)
+      int len = _listeners.Length;
+      for (int i = 0; i < len; i++)
       {
+        var listener = _listeners[i];
         if (Utilities.IsValid(listener)) listener.AfterTrackLoaded();
       }
     }
 
     public override void AfterTimeChanged(float time)
     {
-      foreach (var listener in _listeners)
+      int len = _listeners.Length;
+      for (int i = 0; i < len; i++)
       {
+        var listener = _listeners[i];
         if (Utilities.IsValid(listener)) listener.AfterTimeChanged(time);
       }
     }
 
     public override void BeforeUserSetTime()
     {
-      foreach (var listener in _listeners)
+      int len = _listeners.Length;
+      for (int i = 0; i < len; i++)
       {
+        var listener = _listeners[i];
         if (Utilities.IsValid(listener)) listener.BeforeUserSetTime();
       }
     }
 
     public override void BeforeUserBackward()
     {
-      foreach (var listener in _listeners)
+      int len = _listeners.Length;
+      for (int i = 0; i < len; i++)
       {
+        var listener = _listeners[i];
         if (Utilities.IsValid(listener)) listener.BeforeUserBackward();
       }
     }
 
     public override void BeforeUserForward()
     {
-      foreach (var listener in _listeners)
+      int len = _listeners.Length;
+      for (int i = 0; i < len; i++)
       {
+        var listener = _listeners[i];
         if (Utilities.IsValid(listener)) listener.BeforeUserForward();
       }
     }
 
     public void AfterLanguageChanged()
     {
-      foreach (var listener in _listeners)
+      int len = _listeners.Length;
+      for (int i = 0; i < len; i++)
       {
+        var listener = _listeners[i];
         if (Utilities.IsValid(listener)) listener.SendCustomEvent("AfterLanguageChanged");
       }
     }

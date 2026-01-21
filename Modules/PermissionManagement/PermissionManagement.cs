@@ -58,7 +58,8 @@ namespace Yamadev.YamaStream.Modules.PermissionManagement
       set
       {
         _permission = value;
-        foreach (YamaPlayerListener listener in _listeners) listener.SendCustomEvent("AfterPermissionChanged");
+        int len = _listeners.Length;
+        for (int i = 0; i < len; i++) _listeners[i].SendCustomEvent("AfterPermissionChanged");
       }
     }
 
@@ -140,7 +141,8 @@ namespace Yamadev.YamaStream.Modules.PermissionManagement
 
     public void AfterLanguageChanged()
     {
-      foreach (var listener in _listeners) listener.SendCustomEvent("AfterLanguageChanged");
+      int len = _listeners.Length;
+      for (int i = 0; i < len; i++) _listeners[i].SendCustomEvent("AfterLanguageChanged");
     }
   }
 }

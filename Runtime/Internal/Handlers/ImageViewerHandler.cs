@@ -20,6 +20,8 @@ namespace Yamadev.YamaStream
       _imageDownloader = new VRCImageDownloader();
     }
 
+    public override bool IsLoading => _loading;
+
     public override bool IsPlaying => _isPlaying;
 
     public override bool IsPaused

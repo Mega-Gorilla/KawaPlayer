@@ -1,4 +1,4 @@
-﻿using UdonSharp;
+using UdonSharp;
 using UnityEngine;
 using UnityEngine.UI;
 using VRC.SDKBase;
@@ -69,7 +69,7 @@ namespace Yamadev.YamaStream.UI
     {
       if (_initialized) return;
       _scrollRect = GetComponent<ScrollRect>();
-      if (_template == null) _template = _scrollRect.content.GetChild(0).gameObject;
+      if (!Utilities.IsValid(_template)) _template = _scrollRect.content.GetChild(0).gameObject;
       _template.SetActive(false);
 
       _lineHeight = _template.GetComponent<RectTransform>().rect.height;

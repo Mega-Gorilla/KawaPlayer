@@ -10,10 +10,12 @@ namespace Yamadev.YamaStream
   public abstract class PlayerHandler : YamaPlayerBehaviour
   {
     [SerializeField] protected VideoPlayerType _type;
+    [SerializeField] protected PlayerHandler _fallbackHandler;
     protected VRCUrl _loadedUrl = VRCUrl.Empty;
     protected float _speed = 1f;
     protected bool _loading;
     protected YamaPlayerListener _listener;
+    protected bool _useFallbackHandler;
 
     public void SetListener(YamaPlayerListener listener)
     {
@@ -22,9 +24,26 @@ namespace Yamadev.YamaStream
 
     public VideoPlayerType Type => _type;
 
-    public bool IsLoading => _loading;
+    public PlayerHandler FallbackHandler => _fallbackHandler;
 
-    public VRCUrl LoadedUrl => _loadedUrl;
+
+    public virtual VRCUrl LoadedUrl => _loadedUrl;
+
+    public virtual bool UseFallbackHandler
+    {
+      get
+      {
+        if (!Utilities.IsValid(_fallbackHandler)) return false;
+        return _useFallbackHandler;
+      }
+      set
+      {
+        if (!Utilities.IsValid(_fallbackHandler) || _useFallbackHandler == value) return;
+        _useFallbackHandler = value;
+      }
+    }
+
+    public virtual bool IsLoading { get; }
 
     public virtual bool IsPlaying { get; }
 

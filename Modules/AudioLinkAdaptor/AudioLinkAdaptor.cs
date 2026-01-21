@@ -1,4 +1,4 @@
-﻿using UdonSharp;
+using UdonSharp;
 using UnityEngine;
 using VRC.SDKBase;
 using System;
@@ -168,7 +168,8 @@ namespace Yamadev.YamaStream.Modules.AudioLinkAdaptor
 
     public void AfterLanguageChanged()
     {
-      foreach (var listener in _listeners) listener.SendCustomEvent("AfterLanguageChanged");
+      int len = _listeners.Length;
+      for (int i = 0; i < len; i++) _listeners[i].SendCustomEvent("AfterLanguageChanged");
     }
 
 #endif

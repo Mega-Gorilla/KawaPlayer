@@ -1,4 +1,5 @@
 using System;
+using VRC.SDKBase;
 
 namespace Yamadev.YamaStream
 {
@@ -8,7 +9,7 @@ namespace Yamadev.YamaStream
     {
       if (newSize < 0) array = new T[0];
       T[] array2 = array;
-      if (array2 == null) array = new T[newSize];
+      if (!Utilities.IsValid(array2)) array = new T[newSize];
       else if (array2.Length != newSize)
       {
         T[] array3 = new T[newSize];

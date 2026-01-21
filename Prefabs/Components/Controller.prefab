@@ -135,6 +135,7 @@ MonoBehaviour:
     SerializationNodes: []
   _udonSharpBackingUdonBehaviour: {fileID: 8881296824453546644}
   _type: 0
+  _fallbackHandler: {fileID: 7626724300130756598}
   _textureName: _MainTex
   _useMaterial: 0
   _blitMaterial: {fileID: 0}
@@ -253,11 +254,11 @@ MonoBehaviour:
   - {fileID: 7411987779523232629}
   - {fileID: 7626724300130756598}
   - {fileID: 4001353197897885127}
+  _useFallbackHandler: 1
   _timeFormat: hh\:mm\:ss
   _isLocal: 0
   _retryAfterSeconds: 5.1
   _maxErrorRetry: 5
-  _playerType: 1
   _loop: 0
   _queue: {fileID: 9060510277436997253}
   _history: {fileID: 7213306719559895984}
@@ -568,6 +569,7 @@ MonoBehaviour:
     SerializationNodes: []
   _udonSharpBackingUdonBehaviour: {fileID: 6438658096325529388}
   _type: 1
+  _fallbackHandler: {fileID: 7411987779523232629}
   _textureName: _MainTex
   _useMaterial: 1
   _blitMaterial: {fileID: 2100000, guid: e3f249d178e05cf478f1114d3a4d4c3a, type: 2}
@@ -673,6 +675,7 @@ MonoBehaviour:
     SerializationNodes: []
   _udonSharpBackingUdonBehaviour: {fileID: 2701025559242790399}
   _type: 2
+  _fallbackHandler: {fileID: 0}
 --- !u!114 &2701025559242790399
 MonoBehaviour:
   m_ObjectHideFlags: 0

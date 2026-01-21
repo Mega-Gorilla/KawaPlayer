@@ -67,8 +67,10 @@ namespace Yamadev.YamaStream
         _maxResolution = value;
         if (Utilities.IsValid(Handler)) Handler.MaxResolution = value;
         if (!Stopped) SendCustomEventDelayedFrames(nameof(Reload), 0);
-        foreach (YamaPlayerListener listener in EventListeners)
+        int len = _listeners.Length;
+        for (int i = 0; i < len; i++)
         {
+          var listener = _listeners[i];
           if (Utilities.IsValid(listener)) listener.AfterMaxResolutionChanged(value);
         }
       }
@@ -81,7 +83,12 @@ namespace Yamadev.YamaStream
       {
         _mirrorFlip = value;
         UpdateScreenMaterial();
-        foreach (YamaPlayerListener listener in EventListeners) if (Utilities.IsValid(listener)) listener.AfterMirrorFlipChanged(value);
+        int len = _listeners.Length;
+        for (int i = 0; i < len; i++)
+        {
+          var listener = _listeners[i];
+          if (Utilities.IsValid(listener)) listener.AfterMirrorFlipChanged(value);
+        }
       }
     }
 
@@ -92,8 +99,10 @@ namespace Yamadev.YamaStream
       {
         _brightness = value;
         UpdateScreenMaterial();
-        foreach (YamaPlayerListener listener in EventListeners)
+        int len = _listeners.Length;
+        for (int i = 0; i < len; i++)
         {
+          var listener = _listeners[i];
           if (Utilities.IsValid(listener)) listener.AfterBrightnessChanged(value);
         }
       }
@@ -127,8 +136,10 @@ namespace Yamadev.YamaStream
             break;
         }
       }
-      foreach (YamaPlayerListener listener in EventListeners)
+      int len = _listeners.Length;
+      for (int i = 0; i < len; i++)
       {
+        var listener = _listeners[i];
         if (Utilities.IsValid(listener)) listener.AfterTextureUpdated(texture);
       }
     }

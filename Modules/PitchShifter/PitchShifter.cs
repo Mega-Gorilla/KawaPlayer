@@ -58,8 +58,10 @@ namespace Yamadev.YamaStream.Modules.PitchShifter
         }
 
         if (Networking.IsOwner(_controller.gameObject) && !_controller.IsLocal) RequestSerialization();
-        foreach (var listener in _listeners)
+        int len = _listeners.Length;
+        for (int i = 0; i < len; i++)
         {
+          var listener = _listeners[i];
           if (Utilities.IsValid(listener)) listener.SendCustomEvent("AfterSemitonesChanged");
         }
 
@@ -138,8 +140,11 @@ namespace Yamadev.YamaStream.Modules.PitchShifter
     {
       if (!Utilities.IsValid(_controller) || !Utilities.IsValid(_controller.AudioSources)) return;
 
-      foreach (var source in _controller.AudioSources)
+      var audioSources = _controller.AudioSources;
+      int len = audioSources.Length;
+      for (int i = 0; i < len; i++)
       {
+        var source = audioSources[i];
         if (Utilities.IsValid(source))
         {
           source.mute = mute;

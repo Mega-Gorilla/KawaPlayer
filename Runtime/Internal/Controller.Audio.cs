@@ -31,8 +31,10 @@ namespace Yamadev.YamaStream
         _volume = Mathf.Clamp01(value);
         UpdateAudioVolume();
         PrintLog($"Volume changed to {_volume * 100}%.");
-        foreach (YamaPlayerListener listener in EventListeners)
+        int len = _listeners.Length;
+        for (int i = 0; i < len; i++)
         {
+          var listener = _listeners[i];
           if (Utilities.IsValid(listener)) listener.AfterVolumeChanged(_volume);
         }
       }
@@ -46,8 +48,10 @@ namespace Yamadev.YamaStream
         _mute = value;
         UpdateAudioVolume();
         PrintLog($"Mute changed to {_mute}.");
-        foreach (YamaPlayerListener listener in EventListeners)
+        int len = _listeners.Length;
+        for (int i = 0; i < len; i++)
         {
+          var listener = _listeners[i];
           if (Utilities.IsValid(listener)) listener.AfterMuteChanged(_mute);
         }
       }
@@ -64,8 +68,10 @@ namespace Yamadev.YamaStream
 
     private void UpdateAudioVolume()
     {
-      foreach (AudioSource audioSource in AudioSources)
+      int len = _audioSources.Length;
+      for (int i = 0; i < len; i++)
       {
+        var audioSource = _audioSources[i];
         if (!Utilities.IsValid(audioSource)) continue;
 
         audioSource.volume = _volume;
@@ -76,8 +82,10 @@ namespace Yamadev.YamaStream
     private void UpdateAudioPitch()
     {
       var pitch = IsLive || Handler.Type == VideoPlayerType.UnityVideoPlayer ? 1f : _speed;
-      foreach (AudioSource audioSource in AudioSources)
+      int len = _audioSources.Length;
+      for (int i = 0; i < len; i++)
       {
+        var audioSource = _audioSources[i];
         if (!Utilities.IsValid(audioSource)) continue;
         audioSource.pitch = pitch;
       }

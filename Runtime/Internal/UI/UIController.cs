@@ -143,8 +143,11 @@ namespace Yamadev.YamaStream.UI
     public bool InvokeBeforeEvent(string eventName)
     {
       _actionCancelled = false;
-      foreach (var listener in _controller.EventListeners)
+      var listeners = _controller.EventListeners;
+      int len = listeners.Length;
+      for (int i = 0; i < len; i++)
       {
+        var listener = listeners[i];
         if (Utilities.IsValid(listener)) listener.SendCustomEvent(eventName);
         if (_actionCancelled) break;
       }
@@ -161,7 +164,7 @@ namespace Yamadev.YamaStream.UI
 
     public void SetUnityPlayer()
     {
-      if (_controller.PlayerType == VideoPlayerType.UnityVideoPlayer) return;
+      if (_controller.Handler.Type == VideoPlayerType.UnityVideoPlayer) return;
       if (!Utilities.IsValid(_modalDialog) || (_controller.Stopped && !_controller.IsLoading))
       {
         SetUnityPlayerInternal();
@@ -173,19 +176,23 @@ namespace Yamadev.YamaStream.UI
         GetTranslation("button.cancel"),
         GetTranslation("button.continue"),
         this,
-        null, // close event
+        nameof(UpdatePlayerSelector), // close event
         nameof(SetUnityPlayerInternal));
     }
 
     public void SetUnityPlayerInternal()
     {
-      if (!InvokeBeforeEvent(nameof(BeforeUserChangePlayerHandler))) return;
-      _controller.PlayerType = VideoPlayerType.UnityVideoPlayer;
+      if (!InvokeBeforeEvent(nameof(BeforeUserChangePlayerHandler)))
+      {
+        UpdateUI();
+        return;
+      }
+      _controller.SetPlayerType(VideoPlayerType.UnityVideoPlayer);
     }
 
     public void SetAVProPlayer()
     {
-      if (_controller.PlayerType == VideoPlayerType.AVProVideoPlayer) return;
+      if (_controller.Handler.Type == VideoPlayerType.AVProVideoPlayer) return;
       if (!Utilities.IsValid(_modalDialog) || (_controller.Stopped && !_controller.IsLoading))
       {
         SetAVProPlayerInternal();
@@ -197,19 +204,23 @@ namespace Yamadev.YamaStream.UI
         GetTranslation("button.cancel"),
         GetTranslation("button.continue"),
         this,
-        null, // close event
+        nameof(UpdatePlayerSelector), // close event
         nameof(SetAVProPlayerInternal));
     }
 
     public void SetAVProPlayerInternal()
     {
-      if (!InvokeBeforeEvent(nameof(BeforeUserChangePlayerHandler))) return;
-      _controller.PlayerType = VideoPlayerType.AVProVideoPlayer;
+      if (!InvokeBeforeEvent(nameof(BeforeUserChangePlayerHandler)))
+      {
+        UpdateUI();
+        return;
+      }
+      _controller.SetPlayerType(VideoPlayerType.AVProVideoPlayer);
     }
 
     public void SetImageViewer()
     {
-      if (_controller.PlayerType == VideoPlayerType.ImageViewer) return;
+      if (_controller.Handler.Type == VideoPlayerType.ImageViewer) return;
       if (!Utilities.IsValid(_modalDialog) || (_controller.Stopped && !_controller.IsLoading))
       {
         SetImageViewerInternal();
@@ -221,14 +232,18 @@ namespace Yamadev.YamaStream.UI
         GetTranslation("button.cancel"),
         GetTranslation("button.continue"),
         this,
-        null, // close event
+        nameof(UpdatePlayerSelector), // close event
         nameof(SetImageViewerInternal));
     }
 
     public void SetImageViewerInternal()
     {
-      if (!InvokeBeforeEvent(nameof(BeforeUserChangePlayerHandler))) return;
-      _controller.PlayerType = VideoPlayerType.ImageViewer;
+      if (!InvokeBeforeEvent(nameof(BeforeUserChangePlayerHandler)))
+      {
+        UpdateUI();
+        return;
+      }
+      _controller.SetPlayerType(VideoPlayerType.ImageViewer);
     }
 
     public void PlayUrl() => PlayUrlField(_urlInputField);
@@ -245,7 +260,7 @@ namespace Yamadev.YamaStream.UI
 
       if (!Utilities.IsValid(_modalDialog) || (_controller.Stopped && !_controller.IsLoading))
       {
-        PlayUrlInternal(_controller.PlayerType, urlInputField.GetUrl());
+        PlayUrlInternal(_controller.Handler.Type, urlInputField.GetUrl());
         urlInputField.SetUrl(VRCUrl.Empty);
         return;
       }
@@ -269,15 +284,15 @@ namespace Yamadev.YamaStream.UI
 
       if (Utilities.IsValid(_modalUnityPlayerToggle))
       {
-        _modalUnityPlayerToggle.isOn = _controller.PlayerType == VideoPlayerType.UnityVideoPlayer;
+        _modalUnityPlayerToggle.isOn = _controller.Handler.Type == VideoPlayerType.UnityVideoPlayer;
       }
       if (Utilities.IsValid(_modalAVProPlayerToggle))
       {
-        _modalAVProPlayerToggle.isOn = _controller.PlayerType == VideoPlayerType.AVProVideoPlayer;
+        _modalAVProPlayerToggle.isOn = _controller.Handler.Type == VideoPlayerType.AVProVideoPlayer;
       }
       if (Utilities.IsValid(_modalImageViewerToggle))
       {
-        _modalImageViewerToggle.isOn = _controller.PlayerType == VideoPlayerType.ImageViewer;
+        _modalImageViewerToggle.isOn = _controller.Handler.Type == VideoPlayerType.ImageViewer;
       }
 
       _modalPlayerSelectorGroup.gameObject.SetActive(true);
@@ -296,7 +311,7 @@ namespace Yamadev.YamaStream.UI
       if (Utilities.IsValid(_modalUnityPlayerToggle) && _modalUnityPlayerToggle.isOn) return VideoPlayerType.UnityVideoPlayer;
       if (Utilities.IsValid(_modalAVProPlayerToggle) && _modalAVProPlayerToggle.isOn) return VideoPlayerType.AVProVideoPlayer;
       if (Utilities.IsValid(_modalImageViewerToggle) && _modalImageViewerToggle.isOn) return VideoPlayerType.ImageViewer;
-      return _controller.PlayerType;
+      return _controller.Handler.Type;
     }
 
     public void AddUrlToQueueEvent()
@@ -315,7 +330,11 @@ namespace Yamadev.YamaStream.UI
 
     public void AddUrlToQueueEventInternal(VideoPlayerType playerType, VRCUrl url)
     {
-      if (!InvokeBeforeEvent(nameof(BeforeUserAddTrackToQueue))) return;
+      if (!InvokeBeforeEvent(nameof(BeforeUserAddTrackToQueue)))
+      {
+        UpdateUI();
+        return;
+      }
 
       _controller.TakeOwnership();
       _controller.Queue.AddTrack(TrackUtils.NewTrack(playerType, "", url));
@@ -337,16 +356,23 @@ namespace Yamadev.YamaStream.UI
 
     private void PlayUrlInternal(VideoPlayerType playerType, VRCUrl url)
     {
-      if (!InvokeBeforeEvent(nameof(BeforeUserPlayTrack))) return;
+      if (!InvokeBeforeEvent(nameof(BeforeUserPlayTrack)))
+      {
+        UpdateUI();
+        return;
+      }
 
       _controller.TakeOwnership();
-      _controller.ClearPlaylistIndexes();
       _controller.PlayTrack(TrackUtils.NewTrack(playerType, "", url));
     }
 
     public void Play()
     {
-      if (!InvokeBeforeEvent(nameof(BeforeUserPlayTrack))) return;
+      if (!InvokeBeforeEvent(nameof(BeforeUserPlayTrack)))
+      {
+        UpdateUI();
+        return;
+      }
 
       _controller.TakeOwnership();
       _controller.Play();
@@ -354,7 +380,11 @@ namespace Yamadev.YamaStream.UI
 
     public void Pause()
     {
-      if (!InvokeBeforeEvent(nameof(BeforeUserPauseVideo))) return;
+      if (!InvokeBeforeEvent(nameof(BeforeUserPauseVideo)))
+      {
+        UpdateUI();
+        return;
+      }
 
       _controller.TakeOwnership();
       _controller.Pause();
@@ -362,7 +392,11 @@ namespace Yamadev.YamaStream.UI
 
     public void Stop()
     {
-      if (!InvokeBeforeEvent(nameof(BeforeUserStopVideo))) return;
+      if (!InvokeBeforeEvent(nameof(BeforeUserStopVideo)))
+      {
+        UpdateUI();
+        return;
+      }
 
       _controller.TakeOwnership();
       _controller.ClearPlaylistIndexes();
@@ -375,7 +409,11 @@ namespace Yamadev.YamaStream.UI
     {
       _progressDrag = false;
       if (!_progressSlider || _controller.Stopped || _progressDrag) return;
-      if (!InvokeBeforeEvent(nameof(BeforeUserSetTime))) return;
+      if (!InvokeBeforeEvent(nameof(BeforeUserSetTime)))
+      {
+        UpdateUI();
+        return;
+      }
 
       _controller.TakeOwnership();
       _controller.SetTime(_controller.Duration * _progressSlider.value);
@@ -384,7 +422,11 @@ namespace Yamadev.YamaStream.UI
     public void SetTimeByHelper()
     {
       if (!_progressSliderHelper) return;
-      if (!InvokeBeforeEvent(nameof(BeforeUserSetTime))) return;
+      if (!InvokeBeforeEvent(nameof(BeforeUserSetTime)))
+      {
+        UpdateUI();
+        return;
+      }
 
       _controller.TakeOwnership();
       _controller.SetTime(_controller.Duration * _progressSliderHelper.Percent);
@@ -392,7 +434,11 @@ namespace Yamadev.YamaStream.UI
 
     public void Loop()
     {
-      if (!InvokeBeforeEvent(nameof(BeforeUserChangeLoop))) return;
+      if (!InvokeBeforeEvent(nameof(BeforeUserChangeLoop)))
+      {
+        UpdateUI();
+        return;
+      }
 
       _controller.TakeOwnership();
       _controller.Loop = true;
@@ -400,7 +446,11 @@ namespace Yamadev.YamaStream.UI
 
     public void LoopOff()
     {
-      if (!InvokeBeforeEvent(nameof(BeforeUserChangeLoop))) return;
+      if (!InvokeBeforeEvent(nameof(BeforeUserChangeLoop)))
+      {
+        UpdateUI();
+        return;
+      }
 
       _controller.TakeOwnership();
       _controller.Loop = false;
@@ -408,7 +458,11 @@ namespace Yamadev.YamaStream.UI
 
     public void Reload()
     {
-      if (!InvokeBeforeEvent(nameof(BeforeUserReloadVideo))) return;
+      if (!InvokeBeforeEvent(nameof(BeforeUserReloadVideo)))
+      {
+        UpdateUI();
+        return;
+      }
 
       _controller.Reload();
     }
@@ -419,7 +473,11 @@ namespace Yamadev.YamaStream.UI
 
     public void SetRepeat(bool on)
     {
-      if (!InvokeBeforeEvent(nameof(BeforeUserChangeRepeat))) return;
+      if (!InvokeBeforeEvent(nameof(BeforeUserChangeRepeat)))
+      {
+        UpdateUI();
+        return;
+      }
 
       RepeatStatus status = _controller.RepeatStatus;
       if (on) status.TurnOn();
@@ -459,7 +517,11 @@ namespace Yamadev.YamaStream.UI
 
     public void SetShuffle()
     {
-      if (!InvokeBeforeEvent(nameof(BeforeUserChangeShufflePlay))) return;
+      if (!InvokeBeforeEvent(nameof(BeforeUserChangeShufflePlay)))
+      {
+        UpdateUI();
+        return;
+      }
 
       _controller.TakeOwnership();
       _controller.ShufflePlay = true;
@@ -467,7 +529,11 @@ namespace Yamadev.YamaStream.UI
 
     public void SetShuffleOff()
     {
-      if (!InvokeBeforeEvent(nameof(BeforeUserChangeShufflePlay))) return;
+      if (!InvokeBeforeEvent(nameof(BeforeUserChangeShufflePlay)))
+      {
+        UpdateUI();
+        return;
+      }
 
       _controller.TakeOwnership();
       _controller.ShufflePlay = false;
@@ -475,7 +541,11 @@ namespace Yamadev.YamaStream.UI
 
     public void Backward()
     {
-      if (!InvokeBeforeEvent(nameof(BeforeUserBackward))) return;
+      if (!InvokeBeforeEvent(nameof(BeforeUserBackward)))
+      {
+        UpdateUI();
+        return;
+      }
 
       _controller.TakeOwnership();
       _controller.Backward();
@@ -483,7 +553,11 @@ namespace Yamadev.YamaStream.UI
 
     public void Forward()
     {
-      if (!InvokeBeforeEvent(nameof(BeforeUserForward))) return;
+      if (!InvokeBeforeEvent(nameof(BeforeUserForward)))
+      {
+        UpdateUI();
+        return;
+      }
 
       _controller.TakeOwnership();
       _controller.Forward();
@@ -492,7 +566,11 @@ namespace Yamadev.YamaStream.UI
     public void SetSpeed()
     {
       if (!Utilities.IsValid(_speedSlider)) return;
-      if (!InvokeBeforeEvent(nameof(BeforeUserChangeSpeed))) return;
+      if (!InvokeBeforeEvent(nameof(BeforeUserChangeSpeed)))
+      {
+        UpdateUI();
+        return;
+      }
 
       _controller.TakeOwnership();
       _controller.Speed = _speedSlider.value / 20f;
@@ -500,20 +578,32 @@ namespace Yamadev.YamaStream.UI
 
     public void Mute()
     {
-      if (!InvokeBeforeEvent(nameof(BeforeUserChangeMute))) return;
+      if (!InvokeBeforeEvent(nameof(BeforeUserChangeMute)))
+      {
+        UpdateUI();
+        return;
+      }
       _controller.Mute = true;
     }
 
     public void Unmute()
     {
-      if (!InvokeBeforeEvent(nameof(BeforeUserChangeMute))) return;
+      if (!InvokeBeforeEvent(nameof(BeforeUserChangeMute)))
+      {
+        UpdateUI();
+        return;
+      }
       _controller.Mute = false;
     }
 
     public void SetVolume()
     {
       if (!Utilities.IsValid(_volumeSlider)) return;
-      if (!InvokeBeforeEvent(nameof(BeforeUserChangeVolume))) return;
+      if (!InvokeBeforeEvent(nameof(BeforeUserChangeVolume)))
+      {
+        UpdateUI();
+        return;
+      }
 
       _controller.Volume = _volumeSlider.value;
     }
@@ -521,7 +611,11 @@ namespace Yamadev.YamaStream.UI
     public void SetVolumeByHelper()
     {
       if (!Utilities.IsValid(_volumeSliderHelper)) return;
-      if (!InvokeBeforeEvent(nameof(BeforeUserChangeVolume))) return;
+      if (!InvokeBeforeEvent(nameof(BeforeUserChangeVolume)))
+      {
+        UpdateUI();
+        return;
+      }
 
       _controller.Volume = _volumeSliderHelper.Percent;
     }
@@ -533,14 +627,22 @@ namespace Yamadev.YamaStream.UI
 
     private void SetLocalDelay(float value)
     {
-      if (!InvokeBeforeEvent(nameof(BeforeUserChangeLocalDelay))) return;
+      if (!InvokeBeforeEvent(nameof(BeforeUserChangeLocalDelay)))
+      {
+        UpdateUI();
+        return;
+      }
       _controller.LocalDelay = value;
     }
 
     public void SetBrightness()
     {
       if (!Utilities.IsValid(_brightnessSlider)) return;
-      if (!InvokeBeforeEvent(nameof(BeforeUserChangeBrightness))) return;
+      if (!InvokeBeforeEvent(nameof(BeforeUserChangeBrightness)))
+      {
+        UpdateUI();
+        return;
+      }
 
       _controller.Brightness = _brightnessSlider.value;
     }
@@ -548,14 +650,22 @@ namespace Yamadev.YamaStream.UI
     public void SetMirrorFlipOn()
     {
       if (!Utilities.IsValid(_mirrorFlipOnToggle) || !_mirrorFlipOnToggle.isOn) return;
-      if (!InvokeBeforeEvent(nameof(BeforeUserChangeMirrorFlip))) return;
+      if (!InvokeBeforeEvent(nameof(BeforeUserChangeMirrorFlip)))
+      {
+        UpdateUI();
+        return;
+      }
 
       _controller.MirrorFlip = true;
     }
     public void SetMirrorFlipOff()
     {
       if (!Utilities.IsValid(_mirrorFlipOffToggle) || !_mirrorFlipOffToggle.isOn) return;
-      if (!InvokeBeforeEvent(nameof(BeforeUserChangeMirrorFlip))) return;
+      if (!InvokeBeforeEvent(nameof(BeforeUserChangeMirrorFlip)))
+      {
+        UpdateUI();
+        return;
+      }
 
       _controller.MirrorFlip = false;
     }
@@ -568,7 +678,11 @@ namespace Yamadev.YamaStream.UI
     public void SetMaxResolution4320() => SetMaxResolution(4320);
     private void SetMaxResolution(int value)
     {
-      if (!InvokeBeforeEvent(nameof(BeforeUserChangeMaxResolution))) return;
+      if (!InvokeBeforeEvent(nameof(BeforeUserChangeMaxResolution)))
+      {
+        UpdateUI();
+        return;
+      }
       _controller.MaxResolution = value;
     }
 
@@ -593,7 +707,7 @@ namespace Yamadev.YamaStream.UI
 
       if (Utilities.IsValid(_totalDurationText))
       {
-        _totalDurationText.text = _controller.PlayerType == VideoPlayerType.ImageViewer ? "Image" : _controller.IsLive ? "Live" : _controller.FormatedDuration;
+        _totalDurationText.text = _controller.Handler.Type == VideoPlayerType.ImageViewer ? "Image" : _controller.IsLive ? "Live" : _controller.FormatedDuration;
       }
 
       if (Utilities.IsValid(_progressSlider) && !_progressDrag)
@@ -604,7 +718,7 @@ namespace Yamadev.YamaStream.UI
 
       if (Utilities.IsValid(_progressSliderHelper) && Utilities.IsValid(_progressTooltipText))
       {
-        var showTooltip = !_controller.Stopped && !_controller.IsLive && _controller.PlayerType != VideoPlayerType.ImageViewer;
+        var showTooltip = !_controller.Stopped && !_controller.IsLive && _controller.Handler.Type != VideoPlayerType.ImageViewer;
         _progressSliderHelper.gameObject.SetActive(showTooltip);
 
         if (showTooltip)
@@ -716,11 +830,11 @@ namespace Yamadev.YamaStream.UI
       if (Utilities.IsValid(_idleScreenImage) && Utilities.IsValid(_idleScreenSprite)) _idleScreenImage.sprite = _idleScreenSprite;
     }
 
-    private void UpdatePlayerSelector()
+    public void UpdatePlayerSelector()
     {
-      if (Utilities.IsValid(_unityPlayerToggle)) _unityPlayerToggle.SetIsOnWithoutNotify(_controller.PlayerType == VideoPlayerType.UnityVideoPlayer);
-      if (Utilities.IsValid(_avProPlayerToggle)) _avProPlayerToggle.SetIsOnWithoutNotify(_controller.PlayerType == VideoPlayerType.AVProVideoPlayer);
-      if (Utilities.IsValid(_imageViewerToggle)) _imageViewerToggle.SetIsOnWithoutNotify(_controller.PlayerType == VideoPlayerType.ImageViewer);
+      if (Utilities.IsValid(_unityPlayerToggle)) _unityPlayerToggle.SetIsOnWithoutNotify(_controller.Handler.Type == VideoPlayerType.UnityVideoPlayer);
+      if (Utilities.IsValid(_avProPlayerToggle)) _avProPlayerToggle.SetIsOnWithoutNotify(_controller.Handler.Type == VideoPlayerType.AVProVideoPlayer);
+      if (Utilities.IsValid(_imageViewerToggle)) _imageViewerToggle.SetIsOnWithoutNotify(_controller.Handler.Type == VideoPlayerType.ImageViewer);
     }
 
     #region Event Handlers

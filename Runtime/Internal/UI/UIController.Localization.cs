@@ -111,7 +111,7 @@ namespace Yamadev.YamaStream.UI
     public string GetTranslation(string key)
     {
       InitializeTranslation();
-      if (_translationData == null) return string.Empty;
+      if (!Utilities.IsValid(_translationData)) return string.Empty;
       if (_translationData.TryGetValue(_currentLanguage, out var langData) &&
           langData.TokenType == TokenType.DataDictionary &&
           langData.DataDictionary.TryGetValue(key, out var value))
@@ -124,7 +124,7 @@ namespace Yamadev.YamaStream.UI
     private string DetectUserLanguage()
     {
       string userLanguage = GetCurrentLanguage();
-      if (_translationData != null && _translationData.ContainsKey(userLanguage))
+      if (Utilities.IsValid(_translationData) && _translationData.ContainsKey(userLanguage))
       {
         return userLanguage;
       }
@@ -199,7 +199,7 @@ namespace Yamadev.YamaStream.UI
       InitializeTranslation();
       _currentLanguage = string.IsNullOrEmpty(language) ? DetectUserLanguage() : language;
 
-      if (_translationData != null && !_translationData.ContainsKey(_currentLanguage))
+      if (Utilities.IsValid(_translationData) && !_translationData.ContainsKey(_currentLanguage))
       {
         DataList keys = _translationData.GetKeys();
         _currentLanguage = keys.Count > 0 ? keys[0].String : "en";
@@ -217,7 +217,7 @@ namespace Yamadev.YamaStream.UI
     {
       Font font = null;
 
-      if (_languageCodes != null && _fontAssets != null)
+      if (Utilities.IsValid(_languageCodes) && Utilities.IsValid(_fontAssets))
       {
         for (int i = 0; i < _languageCodes.Length; i++)
         {
@@ -229,8 +229,11 @@ namespace Yamadev.YamaStream.UI
         }
       }
 
-      foreach (Text text in GetComponentsInChildren<Text>(true))
+      var texts = GetComponentsInChildren<Text>(true);
+      int len = texts.Length;
+      for (int i = 0; i < len; i++)
       {
+        var text = texts[i];
         if (Utilities.IsValid(text)) text.font = font;
       }
     }

@@ -45,14 +45,14 @@ namespace Yamadev.YamaStream
       for (int i = 0; i < hitCount; i++)
       {
         RaycastHit hit = hitBuffer[i];
-        if (hit.collider == null) continue;
+        if (!Utilities.IsValid(hit.collider)) continue;
 
         if (!hit.collider.isTrigger && hit.distance < closestPhysicsDistance)
         {
           closestPhysicsDistance = hit.distance;
         }
 
-        if (hit.collider.GetComponent<RectTransform>() != null && hit.collider.GetComponent(typeof(VRC_UiShape)) != null && hit.distance < uiDistance)
+        if (Utilities.IsValid(hit.collider.GetComponent<RectTransform>()) && Utilities.IsValid(hit.collider.GetComponent(typeof(VRC_UiShape))) && hit.distance < uiDistance)
         {
           uiDistance = hit.distance;
           uiPoint = hit.point;

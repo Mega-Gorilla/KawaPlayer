@@ -47,8 +47,10 @@ namespace Yamadev.YamaStream.Modules.VideoInfoDownloader
     {
       if (string.IsNullOrEmpty(url)) return string.Empty;
 
-      foreach (var provider in _providers)
+      int len = _providers.Length;
+      for (int i = 0; i < len; i++)
       {
+        var provider = _providers[i];
         if (Regex.IsMatch(url, provider["pattern"].String, RegexOptions.IgnoreCase))
         {
           return provider["provider"].String;
