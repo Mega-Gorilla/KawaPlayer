@@ -7,7 +7,11 @@
     "module.permissionManagement.ownerList": "オーナーリスト",
     "module.permissionManagement.grantToInstanceOwner": "インスタンスオーナーに権限を付与",
     "module.permissionManagement.grantToInstanceMaster": "インスタンスマスターに権限を付与",
-    "module.permissionManagement.hint": "プレイヤーの操作権限を設定します。オーナーリストに登録された表示名のユーザーはオーナー権限が付与されます。"
+    "module.permissionManagement.hint": "プレイヤーの操作権限を設定します。オーナーリストに登録された表示名のユーザーはオーナー権限が付与されます。",
+    "module.permissionManagement.desc.owner": "フル権限を持つ、この権限は変更することができない。",
+    "module.permissionManagement.desc.admin": "動画プレイヤーの操作権限に加え、ユーザーの権限を編集することができる。",
+    "module.permissionManagement.desc.editor": "動画の再生・停止など動画プレイヤーの操作はできる。",
+    "module.permissionManagement.desc.viewer": "動画の視聴のみ可能。"
   },
   "en": {
     "module.permissionManagement.name": "Permission Management",
@@ -17,7 +21,11 @@
     "module.permissionManagement.ownerList": "Owner List",
     "module.permissionManagement.grantToInstanceOwner": "Grant permission to instance owner",
     "module.permissionManagement.grantToInstanceMaster": "Grant permission to instance master",
-    "module.permissionManagement.hint": "Configure player operation permissions. Users with display names registered in the owner list will be granted owner permissions."
+    "module.permissionManagement.hint": "Configure player operation permissions. Users with display names registered in the owner list will be granted owner permissions.",
+    "module.permissionManagement.desc.owner": "Full permissions. This permission cannot be changed.",
+    "module.permissionManagement.desc.admin": "Can operate the video player and edit user permissions.",
+    "module.permissionManagement.desc.editor": "Can operate the video player (play, stop, etc.).",
+    "module.permissionManagement.desc.viewer": "Can only watch videos."
   },
   "ko": {
     "module.permissionManagement.name": "권한 관리",
@@ -27,7 +35,11 @@
     "module.permissionManagement.ownerList": "소유자 목록",
     "module.permissionManagement.grantToInstanceOwner": "인스턴스 소유자에게 권한 부여",
     "module.permissionManagement.grantToInstanceMaster": "인스턴스 마스터에게 권한 부여",
-    "module.permissionManagement.hint": "플레이어 조작 권한을 설정합니다. 소유자 목록에 등록된 표시 이름의 사용자에게 소유자 권한이 부여됩니다."
+    "module.permissionManagement.hint": "플레이어 조작 권한을 설정합니다. 소유자 목록에 등록된 표시 이름의 사용자에게 소유자 권한이 부여됩니다.",
+    "module.permissionManagement.desc.owner": "모든 권한을 가집니다. 이 권한은 변경할 수 없습니다.",
+    "module.permissionManagement.desc.admin": "비디오 플레이어 조작 및 사용자 권한 편집이 가능합니다.",
+    "module.permissionManagement.desc.editor": "비디오 플레이어 조작(재생, 정지 등)이 가능합니다.",
+    "module.permissionManagement.desc.viewer": "비디오 시청만 가능합니다."
   },
   "zh-CN": {
     "module.permissionManagement.name": "权限管理",
@@ -37,7 +49,11 @@
     "module.permissionManagement.ownerList": "所有者列表",
     "module.permissionManagement.grantToInstanceOwner": "向实例所有者授予权限",
     "module.permissionManagement.grantToInstanceMaster": "向实例主持人授予权限",
-    "module.permissionManagement.hint": "配置播放器操作权限。所有者列表中注册的显示名称用户将被授予所有者权限。"
+    "module.permissionManagement.hint": "配置播放器操作权限。所有者列表中注册的显示名称用户将被授予所有者权限。",
+    "module.permissionManagement.desc.owner": "拥有全部权限，此权限无法更改。",
+    "module.permissionManagement.desc.admin": "可以操作视频播放器并编辑用户权限。",
+    "module.permissionManagement.desc.editor": "可以操作视频播放器（播放、停止等）。",
+    "module.permissionManagement.desc.viewer": "只能观看视频。"
   },
   "zh-TW": {
     "module.permissionManagement.name": "權限管理",
@@ -47,7 +63,11 @@
     "module.permissionManagement.ownerList": "擁有者清單",
     "module.permissionManagement.grantToInstanceOwner": "向實例擁有者授予權限",
     "module.permissionManagement.grantToInstanceMaster": "向實例主持人授予權限",
-    "module.permissionManagement.hint": "配置播放器操作權限。擁有者清單中註冊的顯示名稱用戶將被授予擁有者權限。"
+    "module.permissionManagement.hint": "配置播放器操作權限。擁有者清單中註冊的顯示名稱用戶將被授予擁有者權限。",
+    "module.permissionManagement.desc.owner": "擁有全部權限，此權限無法更改。",
+    "module.permissionManagement.desc.admin": "可以操作影片播放器並編輯用戶權限。",
+    "module.permissionManagement.desc.editor": "可以操作影片播放器（播放、停止等）。",
+    "module.permissionManagement.desc.viewer": "只能觀看影片。"
   },
   "ru": {
     "module.permissionManagement.name": "Управление разрешениями",
@@ -57,7 +77,11 @@
     "module.permissionManagement.ownerList": "Список владельцев",
     "module.permissionManagement.grantToInstanceOwner": "Предоставить разрешение владельцу инстанса",
     "module.permissionManagement.grantToInstanceMaster": "Предоставить разрешение мастеру инстанса",
-    "module.permissionManagement.hint": "Настройте разрешения для операций игроков. Пользователям с отображаемыми именами из списка владельцев будут предоставлены права владельца."
+    "module.permissionManagement.hint": "Настройте разрешения для операций игроков. Пользователям с отображаемыми именами из списка владельцев будут предоставлены права владельца.",
+    "module.permissionManagement.desc.owner": "Полные права. Это разрешение нельзя изменить.",
+    "module.permissionManagement.desc.admin": "Может управлять видеоплеером и редактировать права пользователей.",
+    "module.permissionManagement.desc.editor": "Может управлять видеоплеером (воспроизведение, остановка и т.д.).",
+    "module.permissionManagement.desc.viewer": "Может только смотреть видео."
   },
   "uk-UA": {
     "module.permissionManagement.name": "Управління дозволами",
@@ -67,7 +91,11 @@
     "module.permissionManagement.ownerList": "Список власників",
     "module.permissionManagement.grantToInstanceOwner": "Надати дозвіл власнику інстансу",
     "module.permissionManagement.grantToInstanceMaster": "Надати дозвіл майстру інстансу",
-    "module.permissionManagement.hint": "Налаштуйте дозволи на операції гравців. Користувачам з відображуваними іменами зі списку власників будуть надані права власника."
+    "module.permissionManagement.hint": "Налаштуйте дозволи на операції гравців. Користувачам з відображуваними іменами зі списку власників будуть надані права власника.",
+    "module.permissionManagement.desc.owner": "Повні права. Цей дозвіл не можна змінити.",
+    "module.permissionManagement.desc.admin": "Може керувати відеоплеєром та редагувати права користувачів.",
+    "module.permissionManagement.desc.editor": "Може керувати відеоплеєром (відтворення, зупинка тощо).",
+    "module.permissionManagement.desc.viewer": "Може лише дивитися відео."
   },
   "es": {
     "module.permissionManagement.name": "Gestión de permisos",
@@ -77,6 +105,10 @@
     "module.permissionManagement.ownerList": "Lista de propietarios",
     "module.permissionManagement.grantToInstanceOwner": "Otorgar permiso al propietario de la instancia",
     "module.permissionManagement.grantToInstanceMaster": "Otorgar permiso al maestro de la instancia",
-    "module.permissionManagement.hint": "Configure los permisos de operación del reproductor. Los usuarios con nombres mostrados registrados en la lista de propietarios recibirán permisos de propietario."
+    "module.permissionManagement.hint": "Configure los permisos de operación del reproductor. Los usuarios con nombres mostrados registrados en la lista de propietarios recibirán permisos de propietario.",
+    "module.permissionManagement.desc.owner": "Permisos completos. Este permiso no se puede cambiar.",
+    "module.permissionManagement.desc.admin": "Puede operar el reproductor de video y editar permisos de usuarios.",
+    "module.permissionManagement.desc.editor": "Puede operar el reproductor de video (reproducir, detener, etc.).",
+    "module.permissionManagement.desc.viewer": "Solo puede ver videos."
   }
 }

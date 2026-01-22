@@ -2208,8 +2208,8 @@ MonoBehaviour:
       Entry: 6
       Data: 
   _udonSharpBackingUdonBehaviour: {fileID: 1848227225282256828}
-  _udon: {fileID: 0}
-  _variableName: 
+  _udon: {fileID: 8578190019518839859}
+  _variableName: _permissionIndex
   _variableValue: 
   _eventName: SetPermission
 --- !u!114 &1848227225282256828

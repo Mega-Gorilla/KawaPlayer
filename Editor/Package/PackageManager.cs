@@ -97,6 +97,8 @@ namespace Yamadev.YamaStream.Editor
       }
 
       return await VpmResolver.UpdatePackage(PackageName, NewestVersion);
+#else
+      return false;
 #endif
     }
   }

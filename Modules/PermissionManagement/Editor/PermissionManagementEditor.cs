@@ -62,6 +62,12 @@ namespace Yamadev.YamaStream.Modules.PermissionManagement.Editor
 
       serializedObject.Update();
 
+      EditorGUILayout.LabelField("Owner:\t\t" + EditorLocalization.Get("module.permissionManagement.desc.owner"));
+      EditorGUILayout.LabelField("Admin:\t\t" + EditorLocalization.Get("module.permissionManagement.desc.admin"));
+      EditorGUILayout.LabelField("Editor:\t\t" + EditorLocalization.Get("module.permissionManagement.desc.editor"));
+      EditorGUILayout.LabelField("Viewer:\t\t" + EditorLocalization.Get("module.permissionManagement.desc.viewer"));
+      EditorGUILayout.Space(SpaceSmall);
+
       EditorGUILayout.PropertyField(
         _defaultPermissionProperty,
         new GUIContent(EditorLocalization.Get("module.permissionManagement.defaultPermission"))

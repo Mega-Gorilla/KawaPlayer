@@ -15,6 +15,8 @@ namespace Yamadev.YamaStream.Modules.PitchShifter
     private const float VOLUME_SCALE = 0.001f;
     private const float VOLUME_MULTIPLIER = 1000f;
 
+    protected override bool IsSyncedModule => true;
+
     private AudioSource _inputSource;
     private AudioClip[] _outputClips;
     private float[] _readBufferL;
@@ -411,20 +413,6 @@ namespace Yamadev.YamaStream.Modules.PitchShifter
     public override void AfterTimeChanged(float time)
     {
       StopAllOutputs();
-    }
-
-    public override void TakeOwnership()
-    {
-      base.TakeOwnership();
-      if (Utilities.IsValid(_controller)) _controller.TakeOwnership();
-    }
-
-    public override void AfterOwnerChanged()
-    {
-      if (Utilities.IsValid(_controller) && Networking.IsOwner(_controller.gameObject))
-      {
-        TakeOwnership();
-      }
     }
   }
 }

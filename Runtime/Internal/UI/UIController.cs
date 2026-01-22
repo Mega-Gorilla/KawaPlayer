@@ -137,7 +137,7 @@ namespace Yamadev.YamaStream.UI
       {
         _volumeTooltipText.text = $"{Mathf.Ceil(_volumeSliderHelper.Percent * 100)}%";
       }
-      if (!_controller.Stopped) UpdateProgressView();
+      if (_controller.IsPlaying) UpdateProgressView();
     }
 
     public bool InvokeBeforeEvent(string eventName)

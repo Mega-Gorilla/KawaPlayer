@@ -41,6 +41,12 @@ namespace Yamadev.YamaStream
 
     private void Start()
     {
+      if (!Utilities.IsValid(_videoPlayerHandlers) || _videoPlayerHandlers.Length == 0)
+      {
+        PrintError($"Video player handlers are not assigned to {name}");
+        return;
+      }
+
       SetupHandlers();
       ReadPlaylists();
 

@@ -240,14 +240,14 @@ namespace Yamadev.YamaStream.UI
 
     private void UpdateTranslationToggles()
     {
-      if (Utilities.IsValid(_languageEnglishToggle)) _languageEnglishToggle.isOn = _currentLanguage == "en";
-      if (Utilities.IsValid(_languageJapaneseToggle)) _languageJapaneseToggle.isOn = _currentLanguage == "ja";
-      if (Utilities.IsValid(_languageSimplifiedChineseToggle)) _languageSimplifiedChineseToggle.isOn = _currentLanguage == "zh-CN";
-      if (Utilities.IsValid(_languageTraditionalChineseToggle)) _languageTraditionalChineseToggle.isOn = _currentLanguage == "zh-HK";
-      if (Utilities.IsValid(_languageKoreanToggle)) _languageKoreanToggle.isOn = _currentLanguage == "ko";
-      if (Utilities.IsValid(_languageSpanishToggle)) _languageSpanishToggle.isOn = _currentLanguage == "es";
-      if (Utilities.IsValid(_languageUkranianToggle)) _languageUkranianToggle.isOn = _currentLanguage == "uk-UA";
-      if (Utilities.IsValid(_languageRussianToggle)) _languageRussianToggle.isOn = _currentLanguage == "ru";
+      if (Utilities.IsValid(_languageEnglishToggle)) _languageEnglishToggle.SetIsOnWithoutNotify(_currentLanguage == "en");
+      if (Utilities.IsValid(_languageJapaneseToggle)) _languageJapaneseToggle.SetIsOnWithoutNotify(_currentLanguage == "ja");
+      if (Utilities.IsValid(_languageSimplifiedChineseToggle)) _languageSimplifiedChineseToggle.SetIsOnWithoutNotify(_currentLanguage == "zh-CN");
+      if (Utilities.IsValid(_languageTraditionalChineseToggle)) _languageTraditionalChineseToggle.SetIsOnWithoutNotify(_currentLanguage == "zh-HK");
+      if (Utilities.IsValid(_languageKoreanToggle)) _languageKoreanToggle.SetIsOnWithoutNotify(_currentLanguage == "ko");
+      if (Utilities.IsValid(_languageSpanishToggle)) _languageSpanishToggle.SetIsOnWithoutNotify(_currentLanguage == "es");
+      if (Utilities.IsValid(_languageUkranianToggle)) _languageUkranianToggle.SetIsOnWithoutNotify(_currentLanguage == "uk-UA");
+      if (Utilities.IsValid(_languageRussianToggle)) _languageRussianToggle.SetIsOnWithoutNotify(_currentLanguage == "ru");
     }
 
     private void UpdateTranslation()

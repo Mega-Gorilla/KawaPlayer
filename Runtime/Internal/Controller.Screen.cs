@@ -27,6 +27,12 @@ namespace Yamadev.YamaStream
 
     private void InitializeScreen()
     {
+      if (_screenTypes.Length != ScreenCount || _textureProperties.Length != ScreenCount)
+      {
+        PrintError($"Screen types or texture properties count does not match the screen count in {name}");
+        return;
+      }
+
       UpdateScreenMaterial();
       if (Utilities.IsValid(Handler)) Handler.MaxResolution = _maxResolution;
     }
@@ -57,6 +63,7 @@ namespace Yamadev.YamaStream
     }
 
     public Object[] Screens => _screens;
+
     public int ScreenCount => _screens.Length;
 
     public int MaxResolution
@@ -125,7 +132,8 @@ namespace Yamadev.YamaStream
 
     public override void AfterTextureUpdated(Texture texture)
     {
-      for (int i = 0; i < _screens.Length; i++)
+      int screenCount = _screens.Length;
+      for (int i = 0; i < screenCount; i++)
       {
         if (!Utilities.IsValid(_screens[i])) continue;
 
@@ -151,8 +159,8 @@ namespace Yamadev.YamaStream
             break;
         }
       }
-      int len = _listeners.Length;
-      for (int i = 0; i < len; i++)
+      int listenerCount = _listeners.Length;
+      for (int i = 0; i < listenerCount; i++)
       {
         var listener = _listeners[i];
         if (Utilities.IsValid(listener)) listener.AfterTextureUpdated(texture);

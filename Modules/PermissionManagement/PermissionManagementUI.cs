@@ -1,3 +1,4 @@
+using System;
 using UdonSharp;
 using UnityEngine;
 using UnityEngine.UI;
@@ -150,16 +151,11 @@ namespace Yamadev.YamaStream.Modules.PermissionManagement
       }
     }
 
-    public void SetPermissionIndex(int index)
-    {
-      _permissionIndex = index;
-    }
-
     public void SetPermission()
     {
       if (!Utilities.IsValid(_permissionManagement) || !Utilities.IsValid(_permissionScroll) || _permissionIndex < 0) return;
 
-      int cellIndex = System.Array.IndexOf(_permissionScroll.Indexes, _permissionIndex);
+      int cellIndex = Array.IndexOf(_permissionScroll.Indexes, _permissionIndex);
       if (cellIndex < 0) return;
 
       ScrollRect scrollRect = _permissionScroll.GetComponent<ScrollRect>();

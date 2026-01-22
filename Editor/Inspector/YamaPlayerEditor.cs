@@ -288,7 +288,7 @@ namespace Yamadev.YamaStream.Editor
 
       if (_idleScreenSprite != null)
       {
-        EditorGUILayout.PropertyField(_idleScreenSprite, EditorLocalization.GetLayout("settings.ui.idleScreenSprite"));
+        EditorGUILayout.PropertyField(_idleScreenSprite, EditorLocalization.GetLayout("settings.ui.idleScreenSprite", "settings.ui.idleScreenSprite.tooltip"));
       }
     }
 
@@ -314,7 +314,7 @@ namespace Yamadev.YamaStream.Editor
 
       int currentIndex = 0;
       int newIndex = EditorGUILayout.Popup(
-        EditorLocalization.GetLayout("settings.videoPlayerType.label"),
+        EditorLocalization.GetLayout("settings.videoPlayerType.label", "settings.videoPlayerType.tooltip"),
         currentIndex,
         displayNames.ToArray()
       );
@@ -336,16 +336,16 @@ namespace Yamadev.YamaStream.Editor
     {
       EditorGUILayout.LabelField(EditorLocalization.Get("settings.player.label"), EditorStyles.boldLabel);
       DrawDefaultPlayerEngineDropdown();
-      EditorGUILayout.PropertyField(_localMode, EditorLocalization.GetLayout("settings.localMode.label"));
-      EditorGUILayout.PropertyField(_loop, EditorLocalization.GetLayout("settings.playback.loop"));
-      EditorGUILayout.PropertyField(_shuffle, EditorLocalization.GetLayout("settings.playlist.shuffle"));
-      EditorGUILayout.PropertyField(_mirrorFlip, EditorLocalization.GetLayout("settings.video.mirrorInverse"));
-      EditorGUILayout.PropertyField(_brightness, EditorLocalization.GetLayout("settings.video.brightness"));
-      EditorGUILayout.PropertyField(_mute, EditorLocalization.GetLayout("settings.audio.mute"));
-      EditorGUILayout.PropertyField(_volume, EditorLocalization.GetLayout("settings.audio.volume"));
-      EditorGUILayout.PropertyField(_retryAfterSeconds, EditorLocalization.GetLayout("settings.playback.retryInterval"));
-      EditorGUILayout.PropertyField(_maxErrorRetry, EditorLocalization.GetLayout("settings.playback.maxRetry"));
-      EditorGUILayout.PropertyField(_useLowLatency, EditorLocalization.GetLayout("settings.playback.lowLatency"));
+      EditorGUILayout.PropertyField(_localMode, EditorLocalization.GetLayout("settings.localMode.label", "settings.localMode.tooltip"));
+      EditorGUILayout.PropertyField(_loop, EditorLocalization.GetLayout("settings.playback.loop", "settings.playback.loop.tooltip"));
+      EditorGUILayout.PropertyField(_shuffle, EditorLocalization.GetLayout("settings.playlist.shuffle", "settings.playlist.shuffle.tooltip"));
+      EditorGUILayout.PropertyField(_mirrorFlip, EditorLocalization.GetLayout("settings.video.mirrorFlip", "settings.video.mirrorFlip.tooltip"));
+      EditorGUILayout.PropertyField(_brightness, EditorLocalization.GetLayout("settings.video.brightness", "settings.video.brightness.tooltip"));
+      EditorGUILayout.PropertyField(_mute, EditorLocalization.GetLayout("settings.audio.mute", "settings.audio.mute.tooltip"));
+      EditorGUILayout.PropertyField(_volume, EditorLocalization.GetLayout("settings.audio.volume", "settings.audio.volume.tooltip"));
+      EditorGUILayout.PropertyField(_retryAfterSeconds, EditorLocalization.GetLayout("settings.playback.retryInterval", "settings.playback.retryInterval.tooltip"));
+      EditorGUILayout.PropertyField(_maxErrorRetry, EditorLocalization.GetLayout("settings.playback.maxRetry", "settings.playback.maxRetry.tooltip"));
+      EditorGUILayout.PropertyField(_useLowLatency, EditorLocalization.GetLayout("settings.playback.lowLatency", "settings.playback.lowLatency.tooltip"));
       DrawScreenSettings();
       DrawSpeakerSettings();
     }
@@ -380,7 +380,7 @@ namespace Yamadev.YamaStream.Editor
       EditorGUILayout.LabelField(EditorLocalization.Get("settings.playlist.label"), EditorStyles.boldLabel);
       using (new EditorGUILayout.HorizontalScope())
       {
-        EditorGUILayout.PropertyField(_forwardInterval, EditorLocalization.GetLayout("settings.playlist.interval"));
+        EditorGUILayout.PropertyField(_forwardInterval, EditorLocalization.GetLayout("settings.playlist.interval", "settings.playlist.interval.tooltip"));
         EditorGUILayout.LabelField("秒", GUILayout.Width(20));
       }
       if (GUILayout.Button(EditorLocalization.Get("settings.playlist.edit")))
@@ -495,7 +495,7 @@ namespace Yamadev.YamaStream.Editor
     {
 #if USE_VPM_RESOLVER
       EditorGUILayout.LabelField(EditorLocalization.Get("update.label"), EditorStyles.boldLabel);
-      PackageManager.CheckBetaVersion = EditorGUILayout.Toggle(EditorLocalization.GetLayout("update.checkBeta"), PackageManager.CheckBetaVersion);
+      PackageManager.CheckBetaVersion = EditorGUILayout.Toggle(EditorLocalization.GetLayout("update.checkBeta", "update.checkBeta.tooltip"), PackageManager.CheckBetaVersion);
       EditorGUILayout.LabelField(EditorLocalization.Get("update.current"), PackageManager.Version);
       EditorGUILayout.LabelField(EditorLocalization.Get("update.newest"), string.IsNullOrEmpty(PackageManager.NewestVersion) ? "-" : PackageManager.NewestVersion);
 
@@ -574,7 +574,7 @@ namespace Yamadev.YamaStream.Editor
 
       using (var check = new EditorGUI.ChangeCheckScope())
       {
-        EditorGUI.PropertyField(rect, screen, EditorLocalization.GetLayout("label.screen"));
+        EditorGUI.PropertyField(rect, screen, EditorLocalization.GetLayout("label.screen", "label.screen.tooltip"));
         if (check.changed)
         {
           HandleScreenTypeChange(screen, screenType, textureProperty);
@@ -582,7 +582,7 @@ namespace Yamadev.YamaStream.Editor
       }
 
       rect.y += EditorGUIUtility.standardVerticalSpacing + EditorGUIUtility.singleLineHeight;
-      EditorGUI.PropertyField(rect, textureProperty, EditorLocalization.GetLayout("settings.screen.mainTextureProperty"));
+      EditorGUI.PropertyField(rect, textureProperty, EditorLocalization.GetLayout("settings.screen.mainTextureProperty", "settings.screen.mainTextureProperty.tooltip"));
     }
 
     private void HandleScreenTypeChange(SerializedProperty screen, SerializedProperty screenType, SerializedProperty textureProperty)

@@ -125,6 +125,9 @@ namespace Yamadev.YamaStream.Editor
 
     public static GUIContent GetLayout(string key) => new GUIContent(Get(key));
 
+    public static GUIContent GetLayout(string labelKey, string tooltipKey) =>
+        new GUIContent(Get(labelKey), Get(tooltipKey));
+
     public static string GetLanguageName(string languageCode)
     {
       var found = SupportedLanguages.FirstOrDefault(l => l.code == languageCode);

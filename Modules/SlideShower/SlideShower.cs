@@ -13,6 +13,8 @@ namespace Yamadev.YamaStream.Modules.SlideShower
     private YamaPlayerListener[] _listeners = new YamaPlayerListener[0];
     private int _lastSetPageFrame = 0;
 
+    protected override bool IsSyncedModule => true;
+
     public void AddListener(YamaPlayerListener listener)
     {
       if (!Utilities.IsValid(listener) || Array.IndexOf(_listeners, listener) >= 0) return;
@@ -115,20 +117,6 @@ namespace Yamadev.YamaStream.Modules.SlideShower
     public void ToggleSlideMode()
     {
       SlideMode = !_slideMode;
-    }
-
-    public override void TakeOwnership()
-    {
-      base.TakeOwnership();
-      if (Utilities.IsValid(_controller)) _controller.TakeOwnership();
-    }
-
-    public override void AfterOwnerChanged()
-    {
-      if (Utilities.IsValid(_controller) && Networking.IsOwner(_controller.gameObject))
-      {
-        TakeOwnership();
-      }
     }
 
     #region Video Events
