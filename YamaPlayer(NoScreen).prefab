@@ -302,6 +302,7 @@ MonoBehaviour:
   _timeFormat: hh\:mm\:ss
   _isLocal: 0
   _version: 
+  _useFallbackHandler: 1
   _videoPlayerType: 1
   _loop: 0
   _slideMode: 0
@@ -1090,6 +1091,7 @@ MonoBehaviour:
   _textureName: _MainTex
   _useMaterial: 1
   _blitMaterial: {fileID: 2100000, guid: e3f249d178e05cf478f1114d3a4d4c3a, type: 2}
+  _fallbackHandle: {fileID: 3237197313190233296}
 --- !u!114 &226711944894683836
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1477,6 +1479,7 @@ MonoBehaviour:
   _textureName: _MainTex
   _useMaterial: 0
   _blitMaterial: {fileID: 0}
+  _fallbackHandle: {fileID: 6587542650320799256}
 --- !u!114 &7419887342041119983
 MonoBehaviour:
   m_ObjectHideFlags: 0
