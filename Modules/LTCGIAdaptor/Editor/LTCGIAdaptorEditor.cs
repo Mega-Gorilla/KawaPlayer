@@ -16,6 +16,9 @@ namespace Yamadev.YamaStream.Modules.LTCGIAdaptor.Editor
 #if LTCGI_INCLUDED
     private List<ScreenInfo> _targetScreens = new List<ScreenInfo>();
 
+    private static readonly Color ActiveColor = new Color(0.4f, 0.8f, 0.4f);
+    private static Color InactiveColor => EditorGUIUtility.isProSkin ? new Color(0.55f, 0.55f, 0.55f) : new Color(0.45f, 0.45f, 0.45f);
+
     private class ScreenInfo
     {
       public YamaPlayerScreen Screen;
@@ -125,10 +128,13 @@ namespace Yamadev.YamaStream.Modules.LTCGIAdaptor.Editor
       var rowRect = EditorGUILayout.BeginVertical();
       EditorGUI.DrawRect(rowRect, rowBgColor);
 
+      var statusBarRect = new Rect(rowRect.x, rowRect.y, 3, rowRect.height);
+      EditorGUI.DrawRect(statusBarRect, info.IsEnabled ? ActiveColor : InactiveColor);
+
       var rowHeight = 26f;
       using (new EditorGUILayout.HorizontalScope(GUILayout.Height(rowHeight)))
       {
-        GUILayout.Space(8);
+        GUILayout.Space(10);
 
         var iconStyle = new GUIStyle(GUIStyle.none) { alignment = TextAnchor.MiddleCenter };
         var iconContent = EditorGUIUtility.IconContent("d_MeshRenderer Icon");
@@ -201,6 +207,11 @@ namespace Yamadev.YamaStream.Modules.LTCGIAdaptor.Editor
         info.LtcgiScreen.enabled = true;
       }
 
+      if (LTCGI_Controller.Singleton != null)
+      {
+        LTCGI_Controller.Singleton.UpdateMaterials();
+      }
+
       EditorUtility.SetDirty(info.Screen.gameObject);
       RefreshScreenList();
     }
@@ -212,8 +223,26 @@ namespace Yamadev.YamaStream.Modules.LTCGIAdaptor.Editor
       Undo.RecordObject(info.LtcgiScreen, "Disable LTCGI Screen");
       info.LtcgiScreen.enabled = false;
 
+      if (LTCGI_Controller.Singleton != null)
+      {
+        LTCGI_Controller.Singleton.UpdateMaterials();
+      }
+
       EditorUtility.SetDirty(info.LtcgiScreen);
       RefreshScreenList();
+    }
+#else
+    private void OnEnable()
+    {
+      Title = EditorLocalization.Get("module.ltcgiAdaptor.title");
+      ShowHeader = false;
+    }
+
+    public override void OnInspectorGUI()
+    {
+      base.OnInspectorGUI();
+      Title = EditorLocalization.Get("module.ltcgiAdaptor.title");
+      EditorGUILayout.HelpBox(EditorLocalization.Get("module.ltcgiAdaptor.notInstalled"), MessageType.Warning);
     }
 #endif
   }

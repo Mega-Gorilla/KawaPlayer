@@ -13,9 +13,9 @@ namespace Yamadev.YamaStream.Modules.AudioLinkAdaptor
   public class AudioLinkAdaptor : YamaPlayerModule
   {
 #if AUDIOLINK_V1
-    [SerializeField, HideInInspector] private AudioLink.AudioLink _audioLink;
+    [SerializeField] private AudioLink.AudioLink _audioLink;
 #else
-    [SerializeField, HideInInspector] private UdonSharpBehaviour _audioLink;
+    [SerializeField] private UdonSharpBehaviour _audioLink;
 #endif
 
 #if AUDIOLINK_V1
