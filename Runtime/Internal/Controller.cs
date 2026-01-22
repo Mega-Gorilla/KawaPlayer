@@ -1,4 +1,4 @@
-﻿
+
 using System;
 using UdonSharp;
 using UnityEngine;
@@ -22,6 +22,7 @@ namespace Yamadev.YamaStream
         [SerializeField] string _timeFormat = @"hh\:mm\:ss";
         [SerializeField] bool _isLocal;
         [SerializeField] string _version;
+        [SerializeField] bool _useFallbackHandler;
         [SerializeField, UdonSynced, FieldChangeCallback(nameof(VideoPlayerType))] VideoPlayerType _videoPlayerType;
         [SerializeField, UdonSynced, FieldChangeCallback(nameof(Loop))] bool _loop;
         [SerializeField, UdonSynced, FieldChangeCallback(nameof(SlideMode))] bool _slideMode;
@@ -32,16 +33,17 @@ namespace Yamadev.YamaStream
         [UdonSynced, FieldChangeCallback(nameof(Repeat))] Vector3 _repeat = new Vector3(0f, 0f, 999999f);
         Listener[] _listeners = { };
         int _errorRetryCount = 0;
+        VRCUrl _retryTargetUrl = VRCUrl.Empty;
         bool _isReload;
         float _lastSetTime = 0f;
-        float _repeatCooling = 0.6f; 
+        float _repeatCooling = 0.6f;
         bool _initialized;
 
         void Start() => initialize();
 
         void Update()
         {
-            if (OutOfRepeat(VideoTime) && Time.time - _lastSetTime > _repeatCooling) 
+            if (OutOfRepeat(VideoTime) && Time.time - _lastSetTime > _repeatCooling)
                 SetTime(Repeat.ToRepeatStatus().GetStartTime());
             if (IsPlaying && Time.time - _syncFrequency > _lastSync) DoSync();
         }
@@ -76,7 +78,7 @@ namespace Yamadev.YamaStream
         public VideoPlayerType VideoPlayerType
         {
             get => _videoPlayerType;
-            set 
+            set
             {
                 if (_videoPlayerType == value) return;
                 VideoPlayerHandle.Stop();
@@ -91,7 +93,7 @@ namespace Yamadev.YamaStream
         {
             get
             {
-                foreach (VideoPlayerHandle handle in _videoPlayerHandles) 
+                foreach (VideoPlayerHandle handle in _videoPlayerHandles)
                     if (handle.VideoPlayerType == _videoPlayerType) return handle;
                 return null;
             }
@@ -157,7 +159,7 @@ namespace Yamadev.YamaStream
         public int SlidePage => _slideMode && !_stopped ? Mathf.FloorToInt(VideoTime) / _slideSeconds + 1 : 0;
 
         public int SlidePageCount => _slideMode ? Mathf.FloorToInt(Duration) / _slideSeconds : 0;
-        
+
         public bool Loop
         {
             get => _loop;
@@ -179,7 +181,7 @@ namespace Yamadev.YamaStream
         {
             _videoPlayerAnimator.SetFloat("Speed", _speed);
             _videoPlayerAnimator.Update(0f);
-            if (!_stopped && _videoPlayerType == VideoPlayerType.AVProVideoPlayer) 
+            if (!_stopped && _videoPlayerType == VideoPlayerType.AVProVideoPlayer && !VideoPlayerHandle.UseFallbackHandle)
                 SendCustomEventDelayedFrames(nameof(Reload), 1);
             UpdateAudio();
         }
@@ -237,14 +239,69 @@ namespace Yamadev.YamaStream
 
         public void ErrorRetry()
         {
-            if (IsPlaying || !Track.GetUrl().IsValidUrl()) return;
-            if (Time.time - LastLoaded < _retryAfterSeconds)
+            var currentUrl = Track.GetVRCUrl();
+
+            if (VRCUrl.IsNullOrEmpty(_retryTargetUrl) || _retryTargetUrl != currentUrl)
             {
-                SendCustomEventDelayedFrames(nameof(ErrorRetry), 0);
+                _errorRetryCount = 0;
+                _retryTargetUrl = VRCUrl.Empty;
+                PrintLog("Retry cancelled: track has changed.");
                 return;
             }
+
+            if (IsPlaying || !currentUrl.Get().IsValidUrl())
+            {
+                _retryTargetUrl = VRCUrl.Empty;
+                return;
+            }
+
             _resolveTrack.Invoke();
             foreach (Listener listener in _listeners) listener.OnVideoRetry();
+        }
+
+        void HandleErrorRetry(VideoError videoError)
+        {
+            switch (videoError)
+            {
+                case VideoError.AccessDenied:
+                    PrintLog("Access denied - no retry will be attempted");
+                    _errorRetryCount = 0;
+                    _retryTargetUrl = VRCUrl.Empty;
+                    return;
+                case VideoError.InvalidURL:
+                    PrintLog("Invalid URL - no retry will be attempted");
+                    _errorRetryCount = 0;
+                    _retryTargetUrl = VRCUrl.Empty;
+                    return;
+                case VideoError.PlayerError:
+                    if (_errorRetryCount == 0)
+                    {
+                        if (_useFallbackHandler && Utilities.IsValid(VideoPlayerHandle.FallbackHandle))
+                        {
+                            VideoPlayerHandle.UseFallbackHandle = true;
+                            PrintLog($"Switching to fallback handler: {VideoPlayerHandle.FallbackHandle.VideoPlayerType}");
+                        }
+                    }
+                    else
+                    {
+                        VideoPlayerHandle.UseFallbackHandle = false;
+                    }
+                    break;
+            }
+
+            if (_errorRetryCount < _maxErrorRetry)
+            {
+                _errorRetryCount++;
+                _retryTargetUrl = Track.GetVRCUrl();
+                PrintLog($"Scheduling retry {_errorRetryCount}/{_maxErrorRetry} in {_retryAfterSeconds} seconds");
+                SendCustomEventDelayedSeconds(nameof(ErrorRetry), _retryAfterSeconds);
+            }
+            else
+            {
+                _errorRetryCount = 0;
+                _retryTargetUrl = VRCUrl.Empty;
+                PrintLog($"Maximum retry count ({_maxErrorRetry}) reached. Stopping retry attempts.");
+            }
         }
 
         public void SetPage(int page)
@@ -293,9 +350,10 @@ namespace Yamadev.YamaStream
             PrintLog($"{_videoPlayerType}: Video ready.");
         }
 
-        public override void OnVideoStart() 
+        public override void OnVideoStart()
         {
             _errorRetryCount = 0;
+            _retryTargetUrl = VRCUrl.Empty;
             _stopped = false;
             if (_paused || _slideMode) VideoPlayerHandle.Pause();
             else VideoPlayerHandle.Play();
@@ -338,7 +396,9 @@ namespace Yamadev.YamaStream
                 _paused = false;
                 _stopped = true;
                 _errorRetryCount = 0;
+                _retryTargetUrl = VRCUrl.Empty;
                 _repeat = new Vector3(0f, 0f, 999999f);
+                VideoPlayerHandle.UseFallbackHandle = false;
                 if (!string.IsNullOrEmpty(Track.GetUrl())) _history.AddTrack(Track);
                 Track = Track.New(_videoPlayerType, string.Empty, VRCUrl.Empty);
 #if AUDIOLINK_V1
@@ -376,20 +436,13 @@ namespace Yamadev.YamaStream
 
         public override void OnVideoError(VideoError videoError)
         {
+            PrintLog($"{_videoPlayerType}: Video error {videoError}.");
 #if AUDIOLINK_V1
             if (_audioLink != null && _useAudioLink)
                 _audioLink.SetMediaPlaying(MediaPlaying.Error);
 #endif
-            if (videoError != VideoError.AccessDenied)
-            {
-                if (_errorRetryCount < _maxErrorRetry)
-                {
-                    _errorRetryCount++;
-                    SendCustomEventDelayedFrames(nameof(ErrorRetry), 0);
-                } else _errorRetryCount = 0;
-            }
+            HandleErrorRetry(videoError);
             foreach (Listener listener in _listeners) listener.OnVideoError(videoError);
-            PrintLog($"{_videoPlayerType}: Video error {videoError}.");
         }
         #endregion
     }

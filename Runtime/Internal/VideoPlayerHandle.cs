@@ -17,12 +17,14 @@ namespace Yamadev.YamaStream
         [SerializeField] bool _useMaterial;
         // [SerializeField] bool _fixFlicker;
         [SerializeField] Material _blitMaterial;
+        [SerializeField] VideoPlayerHandle _fallbackHandle;
         BaseVRCVideoPlayer _baseVideoPlayer;
         Renderer _renderer;
         MaterialPropertyBlock _properties;
         Texture _texture;
         RenderTexture _blitTexture;
         Listener _listener;
+        bool _useFallbackHandle;
 
         VRCUrl _url = VRCUrl.Empty;
         bool _stopped = true;
@@ -59,36 +61,102 @@ namespace Yamadev.YamaStream
             set => _listener = value;
         }
 
+        public VideoPlayerHandle FallbackHandle => _fallbackHandle;
+
+        public bool UseFallbackHandle
+        {
+            get
+            {
+                if (!Utilities.IsValid(_fallbackHandle)) return false;
+                return _useFallbackHandle;
+            }
+            set
+            {
+                if (!Utilities.IsValid(_fallbackHandle) || _useFallbackHandle == value) return;
+                _useFallbackHandle = value;
+            }
+        }
+
         public bool IsPlaying
         {
             get
             {
+                if (UseFallbackHandle) return _fallbackHandle.IsPlaying;
                 if (BaseVideoPlayer == null) return false;
                 return BaseVideoPlayer.IsPlaying;
             }
         }
 
-        public bool IsLoading => _loading;
+        public bool IsLoading
+        {
+            get
+            {
+                if (UseFallbackHandle) return _fallbackHandle.IsLoading;
+                return _loading;
+            }
+        }
 
-        public bool IsLive => float.IsInfinity(Duration);
+        public bool IsLive
+        {
+            get
+            {
+                if (UseFallbackHandle) return _fallbackHandle.IsLive;
+                return float.IsInfinity(Duration);
+            }
+        }
 
         public float Duration
         {
-            get => BaseVideoPlayer.GetDuration();
+            get
+            {
+                if (UseFallbackHandle) return _fallbackHandle.Duration;
+                return BaseVideoPlayer.GetDuration();
+            }
         }
 
-        public float LastLoaded => _lastLoaded;
+        public float LastLoaded
+        {
+            get
+            {
+                if (UseFallbackHandle) return _fallbackHandle.LastLoaded;
+                return _lastLoaded;
+            }
+        }
 
         public bool Loop
         {
-            get => BaseVideoPlayer.Loop;
-            set => BaseVideoPlayer.Loop = value;
+            get
+            {
+                if (UseFallbackHandle) return _fallbackHandle.Loop;
+                return BaseVideoPlayer.Loop;
+            }
+            set
+            {
+                if (UseFallbackHandle)
+                {
+                    _fallbackHandle.Loop = value;
+                    return;
+                }
+                BaseVideoPlayer.Loop = value;
+            }
         }
 
         public float VideoTime
         {
-            get => BaseVideoPlayer.GetTime();
-            set => BaseVideoPlayer.SetTime(value);
+            get
+            {
+                if (UseFallbackHandle) return _fallbackHandle.VideoTime;
+                return BaseVideoPlayer.GetTime();
+            }
+            set
+            {
+                if (UseFallbackHandle)
+                {
+                    _fallbackHandle.VideoTime = value;
+                    return;
+                }
+                BaseVideoPlayer.SetTime(value);
+            }
         }
 
         #region ListenerEvents
@@ -124,6 +192,7 @@ namespace Yamadev.YamaStream
         public override void OnVideoError(VideoError videoError)
         {
             _stopped = true;
+            _loading = false;
             if (_listener != null) _listener.OnVideoError(videoError);
         }
 
@@ -135,6 +204,11 @@ namespace Yamadev.YamaStream
 
         public void PlayUrl(VRCUrl url)
         {
+            if (UseFallbackHandle)
+            {
+                _fallbackHandle.PlayUrl(url);
+                return;
+            }
             _url = url;
             _loading = true;
             _lastLoaded = UnityEngine.Time.time;
@@ -143,6 +217,11 @@ namespace Yamadev.YamaStream
 
         public void Play()
         {
+            if (UseFallbackHandle)
+            {
+                _fallbackHandle.Play();
+                return;
+            }
             if (_stopped || BaseVideoPlayer.IsPlaying) return;
             BaseVideoPlayer.Play();
             if (_listener != null) _listener.OnVideoPlay();
@@ -150,6 +229,11 @@ namespace Yamadev.YamaStream
 
         public void Pause()
         {
+            if (UseFallbackHandle)
+            {
+                _fallbackHandle.Pause();
+                return;
+            }
             if (_stopped || !BaseVideoPlayer.IsPlaying) return;
             BaseVideoPlayer.Pause();
             if (_listener != null) _listener.OnVideoPause();
@@ -157,6 +241,11 @@ namespace Yamadev.YamaStream
 
         public void Stop()
         {
+            if (UseFallbackHandle)
+            {
+                _fallbackHandle.Stop();
+                return;
+            }
             if (_stopped && !_loading) return;
             BaseVideoPlayer.Stop();
             _stopped = true;
@@ -173,7 +262,14 @@ namespace Yamadev.YamaStream
             _blitTexture.wrapMode = TextureWrapMode.Clamp;
         }
 
-        public Texture Texture => _texture != null ? _blitTexture != null ? _blitTexture : _texture : null;
+        public Texture Texture
+        {
+            get
+            {
+                if (UseFallbackHandle) return _fallbackHandle.Texture;
+                return _texture != null ? _blitTexture != null ? _blitTexture : _texture : null;
+            }
+        }
 
         void resetTexture()
         {
@@ -187,6 +283,12 @@ namespace Yamadev.YamaStream
 
         public void GetVideoTexture()
         {
+            if (UseFallbackHandle)
+            {
+                _fallbackHandle.GetVideoTexture();
+                return;
+            }
+
             if (_renderer == null || _stopped)
             {
                 resetTexture();
