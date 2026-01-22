@@ -181,7 +181,7 @@ namespace Yamadev.YamaStream
         {
             _videoPlayerAnimator.SetFloat("Speed", _speed);
             _videoPlayerAnimator.Update(0f);
-            if (!_stopped && _videoPlayerType == VideoPlayerType.AVProVideoPlayer)
+            if (!_stopped && _videoPlayerType == VideoPlayerType.AVProVideoPlayer && !VideoPlayerHandle.UseFallbackHandle)
                 SendCustomEventDelayedFrames(nameof(Reload), 1);
             UpdateAudio();
         }
