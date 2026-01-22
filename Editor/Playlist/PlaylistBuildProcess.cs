@@ -41,11 +41,11 @@ namespace Yamadev.YamaStream.Editor
         {
           var udonPlaylist = item.gameObject.AddUdonSharpComponent<Playlist>();
 
-          udonPlaylist.SetProgramVariable("_playlistName", item.playListName);
+          udonPlaylist.SetProgramVariable("_playlistName", item.playlistName);
 
-          var videoPlayerTypes = item.tracks.Select(track => track.Mode).ToArray();
-          var titles = item.tracks.Select(track => track.Title ?? string.Empty).ToArray();
-          var urls = item.tracks.Select(track => new VRCUrl(track.Url ?? string.Empty)).ToArray();
+          var videoPlayerTypes = item.tracks.Select(track => track.playerType).ToArray();
+          var titles = item.tracks.Select(track => track.title ?? string.Empty).ToArray();
+          var urls = item.tracks.Select(track => new VRCUrl(track.url ?? string.Empty)).ToArray();
 
           udonPlaylist.SetProgramVariable("_videoPlayerTypes", videoPlayerTypes);
           udonPlaylist.SetProgramVariable("_titles", titles);
@@ -55,7 +55,7 @@ namespace Yamadev.YamaStream.Editor
         }
         catch (Exception ex)
         {
-          Debug.LogError($"Failed to create playlist component for '{item.playListName}': {ex.Message}");
+          Debug.LogError($"Failed to create playlist component for '{item.playlistName}': {ex.Message}");
         }
       }
 

@@ -23,7 +23,7 @@ namespace Yamadev.YamaStream.Modules.SlideShower
     {
       get
       {
-        if (!_slideMode || _controller.Stopped || _controller.IsLoading) return -1;
+        if (!_slideMode || _controller.Stopped || _controller.IsLoading || _slideSeconds < 1) return -1;
         return Mathf.FloorToInt(_controller.VideoTime) / _slideSeconds + 1;
       }
     }

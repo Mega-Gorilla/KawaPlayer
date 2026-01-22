@@ -15,7 +15,7 @@ namespace Yamadev.YamaStream.Editor
     {
       Title = EditorLocalization.Get("label.playlist");
       _playlistItem = (PlaylistItem)target;
-      _playlistNameProp = serializedObject.FindProperty("playListName");
+      _playlistNameProp = serializedObject.FindProperty("playlistName");
       _tracksProp = serializedObject.FindProperty("tracks");
     }
 
@@ -108,8 +108,8 @@ namespace Yamadev.YamaStream.Editor
     private void DrawTrackRow(int index)
     {
       var trackProp = _tracksProp.GetArrayElementAtIndex(index);
-      var titleProp = trackProp.FindPropertyRelative("Title");
-      var urlProp = trackProp.FindPropertyRelative("Url");
+      var titleProp = trackProp.FindPropertyRelative("title");
+      var urlProp = trackProp.FindPropertyRelative("url");
 
       var rowBgColor = index % 2 == 0
           ? (EditorGUIUtility.isProSkin ? new Color(0.22f, 0.22f, 0.22f) : new Color(0.76f, 0.76f, 0.76f))

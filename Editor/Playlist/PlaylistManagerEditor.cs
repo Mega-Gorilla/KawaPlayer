@@ -19,7 +19,7 @@ namespace Yamadev.YamaStream.Editor
 
     private void RefreshPlaylists()
     {
-      _playlists = _playlistManager.GetPlaylists();
+      _playlists = _playlistManager.GetPlaylists() ?? new List<PlaylistItem>();
     }
 
     public override void OnInspectorGUI()
@@ -74,9 +74,9 @@ namespace Yamadev.YamaStream.Editor
       {
         fontSize = 11
       };
-      var playlistName = string.IsNullOrEmpty(playlist.playListName)
+      var playlistName = string.IsNullOrEmpty(playlist.playlistName)
           ? EditorLocalization.Get("playlist.unnamed")
-          : playlist.playListName;
+          : playlist.playlistName;
       var nameRect = new Rect(rowRect.x + 4, rowRect.y, rowRect.width - 50, rowRect.height);
       EditorGUI.LabelField(nameRect, playlistName, nameStyle);
 

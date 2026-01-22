@@ -18,7 +18,7 @@ namespace Yamadev.YamaStream
   public partial class Controller : YamaPlayerListener
   {
     [SerializeField, HideInInspector] private string _version;
-    [SerializeField] private PlayerHandler[] _videoPlayerHandlers;
+    [SerializeField] private PlayerHandler[] _videoPlayerHandlers = new PlayerHandler[0];
     [SerializeField] private bool _useFallbackHandler;
     [SerializeField] private string _timeFormat = @"hh\:mm\:ss";
     [SerializeField] private bool _isLocal;
@@ -117,6 +117,9 @@ namespace Yamadev.YamaStream
         PrintLog($"Player handler changed to {_handler.Type.GetString()}.");
       }
     }
+
+    [Obsolete("Use Handler instead")]
+    public PlayerHandler VideoPlayerHandle => Handler;
 
     private void RegisterHandlerListeners()
     {
@@ -234,7 +237,7 @@ namespace Yamadev.YamaStream
     {
       int len = _videoPlayerHandlers.Length;
       for (int i = 0; i < len; i++) _videoPlayerHandlers[i].Speed = _speed;
-      if (!Stopped && Handler.Type == VideoPlayerType.AVProVideoPlayer)
+      if (!Stopped && Handler.Type == VideoPlayerType.AVProVideoPlayer && !Handler.UseFallbackHandler)
         SendCustomEventDelayedFrames(nameof(Reload), 0);
       UpdateAudioPitch();
     }

@@ -162,7 +162,6 @@ namespace Yamadev.YamaStream
           videoError = VideoError.Unknown;
           break;
       }
-      ;
       if (Utilities.IsValid(_listener)) _listener.AfterVideoErrorOccurred(videoError);
     }
   }

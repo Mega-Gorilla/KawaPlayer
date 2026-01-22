@@ -252,7 +252,8 @@ namespace Yamadev.YamaStream.UI
 
     private void PlayUrlField(VRCUrlInputField urlInputField)
     {
-      if (!Utilities.IsValid(urlInputField) || !urlInputField.GetUrl().IsValidUrl())
+      if (!Utilities.IsValid(urlInputField)) return;
+      if (!urlInputField.GetUrl().IsValidUrl())
       {
         urlInputField.SetUrl(VRCUrl.Empty);
         return;
@@ -408,7 +409,7 @@ namespace Yamadev.YamaStream.UI
     public void SetTime()
     {
       _progressDrag = false;
-      if (!_progressSlider || _controller.Stopped || _progressDrag) return;
+      if (!_progressSlider || _controller.Stopped) return;
       if (!InvokeBeforeEvent(nameof(BeforeUserSetTime)))
       {
         UpdateUI();

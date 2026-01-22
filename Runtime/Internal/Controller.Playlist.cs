@@ -95,11 +95,7 @@ namespace Yamadev.YamaStream
 
     public void PlayTrack(Playlist playlist, int index)
     {
-      if (!Utilities.IsValid(playlist) || index < 0 || index >= playlist.TrackCount)
-      {
-        PrintError($"Cannot play track: invalid index {index} for playlist {playlist.name} with {playlist.TrackCount} tracks");
-        return;
-      }
+      if (!Utilities.IsValid(playlist) || index < 0 || index >= playlist.TrackCount) return;
 
       _activePlaylistIndex = Array.IndexOf(_playlists, playlist);
       _playingTrackIndex = index;

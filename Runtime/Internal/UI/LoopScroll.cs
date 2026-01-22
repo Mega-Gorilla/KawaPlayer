@@ -134,7 +134,10 @@ namespace Yamadev.YamaStream.UI
       _position = _scrollRect.content.anchoredPosition;
       UpdateIndexes();
       UpdatePosition();
-      _callbackUdon.SendCustomEvent(_callbackEventName);
+      if (Utilities.IsValid(_callbackUdon) && !string.IsNullOrEmpty(_callbackEventName))
+      {
+        _callbackUdon.SendCustomEvent(_callbackEventName);
+      }
     }
   }
 }

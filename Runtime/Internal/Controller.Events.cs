@@ -49,7 +49,10 @@ namespace Yamadev.YamaStream
 
       if (Networking.IsOwner(gameObject) && !_isLocal)
       {
-        if (!string.IsNullOrEmpty(TrackUtils.GetUrl(Track).Get())) _history.AddTrack(Track);
+        if (!string.IsNullOrEmpty(TrackUtils.GetUrl(Track).Get()) && Utilities.IsValid(_history))
+        {
+          _history.AddTrack(Track);
+        }
         Track = TrackUtils.CreateEmptyTrack();
         _syncedVideoTime = 0f;
         _networkDataTimeTicks = 0;

@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 using VRC.SDKBase;
 using Object = UnityEngine.Object;
@@ -17,8 +18,8 @@ namespace Yamadev.YamaStream
   public partial class Controller
   {
     [SerializeField] private int _maxResolution;
-    [SerializeField] private bool _mirrorFlip = true;
-    [SerializeField, Range(0f, 1f)] private float _brightness = 1f;
+    [SerializeField, FormerlySerializedAs("_mirrorInverse")] private bool _mirrorFlip = true;
+    [SerializeField, FormerlySerializedAs("_emission"), Range(0f, 1f)] private float _brightness = 1f;
     [SerializeField, HideInInspector] private ScreenType[] _screenTypes;
     [SerializeField, HideInInspector] private Object[] _screens;
     [SerializeField, HideInInspector] private string[] _textureProperties;
@@ -92,6 +93,13 @@ namespace Yamadev.YamaStream
       }
     }
 
+    [Obsolete("Use MirrorFlip instead")]
+    public bool MirrorInverse
+    {
+      get => MirrorFlip;
+      set => MirrorFlip = value;
+    }
+
     public float Brightness
     {
       get => _brightness;
@@ -106,6 +114,13 @@ namespace Yamadev.YamaStream
           if (Utilities.IsValid(listener)) listener.AfterBrightnessChanged(value);
         }
       }
+    }
+
+    [Obsolete("Use Brightness instead")]
+    public float Emission
+    {
+      get => Brightness;
+      set => Brightness = value;
     }
 
     public override void AfterTextureUpdated(Texture texture)

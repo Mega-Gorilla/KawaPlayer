@@ -27,9 +27,9 @@ namespace Yamadev.YamaStream.Editor
     {
       originalItem = item;
       active = item.gameObject.activeSelf;
-      name = item.playListName;
+      name = item.playlistName;
       tracks = item.tracks?.ToList() ?? new List<PlaylistTrack>();
-      youtubeListId = item.YouTubePlayListID ?? "";
+      youtubeListId = item.youtubePlaylistId ?? "";
       isNameEditing = false;
     }
   }

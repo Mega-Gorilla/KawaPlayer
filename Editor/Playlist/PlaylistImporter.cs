@@ -110,9 +110,9 @@ namespace Yamadev.YamaStream.Editor
           name = "IwaSync3 Playlist",
           tracks = tracks.Select((track) => new PlaylistTrack()
           {
-            Mode = (VideoPlayerType)track.mode,
-            Title = track.title,
-            Url = track.url,
+            playerType = (VideoPlayerType)track.mode,
+            title = track.title,
+            url = track.url,
           }).ToList(),
           youtubeListId = YtdlpResolver.GetYoutubePlaylistIdFromUrl(playlistUrl)
         };
@@ -167,9 +167,9 @@ namespace Yamadev.YamaStream.Editor
           name = "Kinel Playlist",
           tracks = ((dynamic[])li.videoDatas).Select((data) => new PlaylistTrack()
           {
-            Title = data.title,
-            Url = data.url,
-            Mode = (VideoPlayerType)data.mode,
+            title = data.title,
+            url = data.url,
+            playerType = (VideoPlayerType)data.mode,
           }).ToList(),
           youtubeListId = YtdlpResolver.GetYoutubePlaylistIdFromUrl(li.playlistUrl)
         };
@@ -233,17 +233,17 @@ namespace Yamadev.YamaStream.Editor
             {
               tracks.Add(new PlaylistTrack
               {
-                Title = playListEntryTitles[urlOffset + j],
-                Url = playListUrls[urlOffset + j].Get(),
-                Mode = VideoPlayerType.ImageViewer,
+                playerType = VideoPlayerType.ImageViewer,
+                title = playListEntryTitles[urlOffset + j],
+                url = playListUrls[urlOffset + j].Get(),
               });
               continue;
             }
             tracks.Add(new PlaylistTrack
             {
-              Title = playListEntryTitles[urlOffset + j],
-              Url = playListUrls[urlOffset + j].Get(),
-              Mode = playerHandlers[playListPlayerIndex[urlOffset + j] - 1] == "BuiltInPlayer" ? VideoPlayerType.UnityVideoPlayer : VideoPlayerType.AVProVideoPlayer,
+              playerType = playerHandlers[playListPlayerIndex[urlOffset + j] - 1] == "BuiltInPlayer" ? VideoPlayerType.UnityVideoPlayer : VideoPlayerType.AVProVideoPlayer,
+              title = playListEntryTitles[urlOffset + j],
+              url = playListUrls[urlOffset + j].Get(),
             });
           }
 
@@ -270,9 +270,9 @@ namespace Yamadev.YamaStream.Editor
         bool defaultStreamMode = (bool)((UdonSharpBehaviour)usharpVideo).GetProgramVariable("defaultStreamMode");
         return ((VRCUrl[])usharpVideo.playlist).Select((url) => new PlaylistTrack()
         {
-          Mode = defaultStreamMode ? VideoPlayerType.AVProVideoPlayer : VideoPlayerType.UnityVideoPlayer,
-          Title = string.Empty,
-          Url = url.Get(),
+          playerType = defaultStreamMode ? VideoPlayerType.AVProVideoPlayer : VideoPlayerType.UnityVideoPlayer,
+          title = string.Empty,
+          url = url.Get(),
         }).ToList();
       }
       catch (Exception ex)
@@ -288,9 +288,9 @@ namespace Yamadev.YamaStream.Editor
       {
         return ((VRCUrl[])proTvPlaylist.mainUrls).Select((url, index) => new PlaylistTrack()
         {
-          Mode = VideoPlayerType.AVProVideoPlayer,
-          Title = proTvPlaylist.titles[index],
-          Url = url.Get(),
+          playerType = VideoPlayerType.AVProVideoPlayer,
+          title = proTvPlaylist.titles[index],
+          url = url.Get(),
         }).ToList();
       }
       catch (Exception ex)
@@ -318,9 +318,9 @@ namespace Yamadev.YamaStream.Editor
         string name = tracks.Count > 0 ? tracks[0].playlist : "";
         var playlistTracks = tracks.Select(track => new PlaylistTrack
         {
-          Mode = VideoPlayerType.AVProVideoPlayer,
-          Title = track.title,
-          Url = track.url,
+          playerType = VideoPlayerType.AVProVideoPlayer,
+          title = track.title,
+          url = track.url,
         }).ToList();
 
         return new PlaylistData

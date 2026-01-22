@@ -322,6 +322,7 @@ namespace Yamadev.YamaStream
       var height = _videoTexture.height;
       if (!Utilities.IsValid(_blitTexture) || _blitTexture.width != width || _blitTexture.height != height)
       {
+        if (Utilities.IsValid(_blitTexture)) _blitTexture.Release();
         _blitTexture = VRCRenderTexture.GetTemporary(width, height, 0, RenderTextureFormat.ARGB64, RenderTextureReadWrite.sRGB, 1);
         _blitTexture.filterMode = FilterMode.Bilinear;
         _blitTexture.wrapMode = TextureWrapMode.Clamp;

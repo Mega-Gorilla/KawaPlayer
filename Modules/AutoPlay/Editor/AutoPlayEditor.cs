@@ -180,7 +180,7 @@ namespace Yamadev.YamaStream.Modules.AutoPlay.Editor
       for (int i = 0; i < _playlists.Count; i++)
       {
         var playlist = _playlists[i];
-        var name = string.IsNullOrEmpty(playlist.playListName) ? $"Playlist {i + 1}" : playlist.playListName;
+        var name = string.IsNullOrEmpty(playlist.playlistName) ? $"Playlist {i + 1}" : playlist.playlistName;
         names.Add(EscapePopupName(name));
       }
       _playlistNames = names.ToArray();
@@ -210,7 +210,7 @@ namespace Yamadev.YamaStream.Modules.AutoPlay.Editor
       for (int i = 0; i < playlist.tracks.Length; i++)
       {
         var track = playlist.tracks[i];
-        var title = string.IsNullOrEmpty(track.Title) ? $"Track {i + 1}" : track.Title;
+        var title = string.IsNullOrEmpty(track.title) ? $"Track {i + 1}" : track.title;
         names.Add(EscapePopupName($"{i + 1}. {title}"));
       }
       _trackNames = names.ToArray();

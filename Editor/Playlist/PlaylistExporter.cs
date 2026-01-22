@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -22,9 +23,9 @@ namespace Yamadev.YamaStream.Editor
         playlists = playlists.Where(p => p != null).Select(p => new PlaylistData
         {
           active = p.gameObject.activeSelf,
-          name = p.playListName,
+          name = p.playlistName,
           tracks = p.tracks?.ToList() ?? new List<PlaylistTrack>(),
-          youtubeListId = p.YouTubePlayListID
+          youtubeListId = p.youtubePlaylistId
         }).ToList()
       };
 
@@ -45,17 +46,23 @@ namespace Yamadev.YamaStream.Editor
       string filePath = EditorUtility.OpenFilePanel("Import playlists", Application.dataPath, "json");
       if (string.IsNullOrEmpty(filePath) || !File.Exists(filePath)) return results;
 
-      string jsonStr = File.ReadAllText(filePath);
-      JObject root = JObject.Parse(jsonStr);
-      JArray playlistsArray = root["playlists"] as JArray;
-      if (playlistsArray == null) return results;
-
-      foreach (JObject item in playlistsArray)
+      try
       {
-        var data = ParsePlaylistData(item);
-        if (data != null) results.Add(data);
-      }
+        string jsonStr = File.ReadAllText(filePath);
+        JObject root = JObject.Parse(jsonStr);
+        JArray playlistsArray = root["playlists"] as JArray;
+        if (playlistsArray == null) return results;
 
+        foreach (JObject item in playlistsArray)
+        {
+          var data = ParsePlaylistData(item);
+          if (data != null) results.Add(data);
+        }
+      }
+      catch (Exception ex)
+      {
+        Debug.LogError($"Failed to import playlists: {ex.Message}");
+      }
       return results;
     }
 
@@ -94,9 +101,9 @@ namespace Yamadev.YamaStream.Editor
 
       return new PlaylistTrack
       {
-        Mode = (VideoPlayerType)mode,
-        Title = title,
-        Url = url
+        playerType = (VideoPlayerType)mode,
+        title = title,
+        url = url
       };
     }
   }

@@ -1,22 +1,23 @@
 ﻿
 using System;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace Yamadev.YamaStream
 {
   [Serializable]
   public class PlaylistTrack
   {
-    public VideoPlayerType Mode;
-    public string Title;
-    public string Url;
+    [FormerlySerializedAs("Mode")] public VideoPlayerType playerType;
+    [FormerlySerializedAs("Title")] public string title;
+    [FormerlySerializedAs("Url")] public string url;
   }
 
   public class PlaylistItem : MonoBehaviour
   {
-    public string playListName;
+    [FormerlySerializedAs("playListName")] public string playlistName;
     public PlaylistTrack[] tracks;
 
-    public string YouTubePlayListID;
+    [FormerlySerializedAs("YouTubePlayListID")] public string youtubePlaylistId;
   }
 }

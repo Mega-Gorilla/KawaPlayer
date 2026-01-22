@@ -59,15 +59,15 @@ namespace Yamadev.YamaStream.UI
 
     public void Show(string title, string message, string closeText, string executeText, string execute2Text, UdonSharpBehaviour targetUdon, string closeEventName, string executeEventName, string execute2EventName)
     {
-      _titleText.text = title;
-      _messageText.text = message;
-      _closeText.text = closeText;
-      _executeText.text = executeText;
-      _execute2Text.text = execute2Text;
-      _targetUdon = targetUdon;
-      _closeEventName = closeEventName;
-      _executeEventName = executeEventName;
-      _execute2EventName = execute2EventName;
+      if (Utilities.IsValid(_titleText)) _titleText.text = title;
+      if (Utilities.IsValid(_messageText)) _messageText.text = message;
+      if (Utilities.IsValid(_closeText)) _closeText.text = closeText;
+      if (Utilities.IsValid(_executeText)) _executeText.text = executeText;
+      if (Utilities.IsValid(_execute2Text)) _execute2Text.text = execute2Text;
+      if (Utilities.IsValid(_targetUdon)) _targetUdon = targetUdon;
+      if (Utilities.IsValid(_closeEventName)) _closeEventName = closeEventName;
+      if (Utilities.IsValid(_executeEventName)) _executeEventName = executeEventName;
+      if (Utilities.IsValid(_execute2EventName)) _execute2EventName = execute2EventName;
       gameObject.SetActive(true);
     }
 

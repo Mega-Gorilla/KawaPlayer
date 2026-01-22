@@ -23,8 +23,8 @@ namespace Yamadev.YamaStream
 
     public static bool IsValidUrl(this VRCUrl url)
     {
-      var urlString = url.Get();
-      return IsValidUrl(urlString);
+      if (!Utilities.IsValid(url)) return false;
+      return IsValidUrl(url.Get());
     }
   }
 }

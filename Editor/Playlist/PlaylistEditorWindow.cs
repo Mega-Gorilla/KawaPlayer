@@ -220,9 +220,9 @@ namespace Yamadev.YamaStream.Editor
         {
           _selectedPlaylist.tracks.Add(new PlaylistTrack
           {
-            Mode = _defaultTrackMode,
-            Title = "",
-            Url = ""
+            playerType = _defaultTrackMode,
+            title = "",
+            url = ""
           });
           IsDirty = true;
         },
@@ -252,13 +252,13 @@ namespace Yamadev.YamaStream.Editor
 
             Rect playerRect = rect;
             playerRect.xMax = 240;
-            track.Mode = (VideoPlayerType)EditorGUI.EnumPopup(playerRect, new GUIContent(EditorLocalization.Get("settings.videoPlayerType.label")), track.Mode);
+            track.playerType = (VideoPlayerType)EditorGUI.EnumPopup(playerRect, new GUIContent(EditorLocalization.Get("settings.videoPlayerType.label")), track.playerType);
 
             rect.y += EditorGUIUtility.standardVerticalSpacing + EditorGUIUtility.singleLineHeight;
-            track.Title = EditorGUI.TextField(rect, new GUIContent(EditorLocalization.Get("label.title")), track.Title);
+            track.title = EditorGUI.TextField(rect, new GUIContent(EditorLocalization.Get("label.title")), track.title);
 
             rect.y += EditorGUIUtility.standardVerticalSpacing + EditorGUIUtility.singleLineHeight;
-            track.Url = EditorGUI.TextField(rect, new GUIContent("Url"), track.Url);
+            track.url = EditorGUI.TextField(rect, new GUIContent("Url"), track.url);
 
             if (check.changed)
             {
@@ -409,7 +409,7 @@ namespace Yamadev.YamaStream.Editor
 
       foreach (var track in _selectedPlaylist.tracks)
       {
-        track.Mode = _defaultTrackMode;
+        track.playerType = _defaultTrackMode;
       }
       IsDirty = true;
     }
@@ -488,8 +488,8 @@ namespace Yamadev.YamaStream.Editor
         }
 
         var so = new SerializedObject(item);
-        so.FindProperty("playListName").stringValue = playlist.name;
-        so.FindProperty("YouTubePlayListID").stringValue = playlist.youtubeListId;
+        so.FindProperty("playlistName").stringValue = playlist.name;
+        so.FindProperty("youtubePlaylistId").stringValue = playlist.youtubeListId;
 
         var tracksProp = so.FindProperty("tracks");
         tracksProp.arraySize = playlist.tracks?.Count ?? 0;
@@ -499,9 +499,9 @@ namespace Yamadev.YamaStream.Editor
           {
             var track = playlist.tracks[j];
             var trackProp = tracksProp.GetArrayElementAtIndex(j);
-            trackProp.FindPropertyRelative("Mode").intValue = (int)track.Mode;
-            trackProp.FindPropertyRelative("Title").stringValue = track.Title;
-            trackProp.FindPropertyRelative("Url").stringValue = track.Url;
+            trackProp.FindPropertyRelative("playerType").intValue = (int)track.playerType;
+            trackProp.FindPropertyRelative("title").stringValue = track.title;
+            trackProp.FindPropertyRelative("url").stringValue = track.url;
           }
         }
         so.ApplyModifiedProperties();
