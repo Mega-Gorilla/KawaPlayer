@@ -65,6 +65,8 @@
   "settings.playback.lowLatency.tooltip": "启用后，最大限度减少直播延迟。",
   "settings.playback.retryInterval.tooltip": "视频加载失败时重试前的等待时间（秒）。",
   "settings.playback.maxRetry.tooltip": "视频加载失败时的最大重试次数。",
+  "settings.playback.fallbackAfterErrors": "备用播放器切换错误数",
+  "settings.playback.fallbackAfterErrors.tooltip": "发生指定次数错误后切换到备用播放器。设为0则禁用。",
   "settings.screen.label": "屏幕",
   "settings.screen.targets": "屏幕目标",
   "settings.screen.mainTextureProperty": "主纹理属性名",

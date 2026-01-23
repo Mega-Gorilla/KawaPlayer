@@ -65,6 +65,8 @@
   "settings.playback.lowLatency.tooltip": "활성화하면 라이브 스트리밍 등에서 지연을 최소화합니다.",
   "settings.playback.retryInterval.tooltip": "영상 로드 실패 시 재시도까지 대기 시간(초).",
   "settings.playback.maxRetry.tooltip": "영상 로드 실패 시 최대 재시도 횟수.",
+  "settings.playback.fallbackAfterErrors": "폴백 플레이어 전환 오류 수",
+  "settings.playback.fallbackAfterErrors.tooltip": "지정된 횟수의 오류가 발생하면 폴백 플레이어로 전환합니다. 0으로 설정하면 비활성화됩니다.",
   "settings.screen.label": "화면",
   "settings.screen.targets": "화면 대상",
   "settings.screen.mainTextureProperty": "메인 텍스처 속성 이름",

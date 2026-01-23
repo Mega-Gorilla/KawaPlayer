@@ -19,10 +19,9 @@ namespace Yamadev.YamaStream
   {
     [SerializeField, HideInInspector] private string _version;
     [SerializeField] private PlayerHandler[] _videoPlayerHandlers = new PlayerHandler[0];
-    [SerializeField] private bool _useFallbackHandler;
+    [SerializeField, Range(0, 10)] private int _useFallbackAfterErrors = 1;
     [SerializeField] private string _timeFormat = @"hh\:mm\:ss";
     [SerializeField] private bool _isLocal;
-    [SerializeField, Range(5f, 10f)] private float _retryAfterSeconds = 5.1f;
     [SerializeField, Range(0, 10)] private int _maxErrorRetry = 5;
     [SerializeField, UdonSynced, FieldChangeCallback(nameof(Loop))] private bool _loop;
     [UdonSynced, FieldChangeCallback(nameof(Speed))] private float _speed = 1f;
@@ -38,6 +37,9 @@ namespace Yamadev.YamaStream
     private VRCUrl _retryTargetUrl = VRCUrl.Empty;
     private bool _reloading;
     private int _lastSetTimeFrame = 0;
+    private float _lastLoadTime = 0f;
+
+    private const float SAFETY_RETRY_INTERVAL = 5.1f;
 
     private void Start()
     {
@@ -351,8 +353,10 @@ namespace Yamadev.YamaStream
 
       var trackPlayerType = TrackUtils.GetPlayerType(track);
       SetPlayerType(trackPlayerType);
+
       if (!_reloading) Track = track;
       Handler.LoadUrl(TrackUtils.GetUrl(track));
+      _lastLoadTime = Time.time;
 
       if (Networking.IsOwner(gameObject) && !_isLocal && !isReload)
       {

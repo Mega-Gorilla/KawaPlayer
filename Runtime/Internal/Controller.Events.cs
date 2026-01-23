@@ -1,5 +1,6 @@
 using VRC.SDKBase;
 using VRC.SDK3.Components.Video;
+using UnityEngine;
 
 namespace Yamadev.YamaStream
 {
@@ -177,9 +178,9 @@ namespace Yamadev.YamaStream
           _retryTargetUrl = VRCUrl.Empty;
           return;
         case VideoError.PlayerError:
-          if (_errorRetryCount == 0)
+          if (_useFallbackAfterErrors > 0 && _errorRetryCount == _useFallbackAfterErrors - 1)
           {
-            if (_useFallbackHandler && Utilities.IsValid(Handler.FallbackHandler))
+            if (Utilities.IsValid(Handler.FallbackHandler))
             {
               Handler.UseFallbackHandler = true;
               PrintLog($"Switching to fallback handler: {Handler.FallbackHandler.Type.GetString()}");
@@ -196,8 +197,11 @@ namespace Yamadev.YamaStream
       {
         _errorRetryCount++;
         _retryTargetUrl = TrackUtils.GetUrl(Track);
-        PrintLog($"Scheduling retry {_errorRetryCount}/{_maxErrorRetry} in {_retryAfterSeconds} seconds");
-        SendCustomEventDelayedSeconds(nameof(ErrorRetry), _retryAfterSeconds);
+
+        var nextSafeRetryTime = _lastLoadTime + SAFETY_RETRY_INTERVAL;
+        var delay = Time.time >= nextSafeRetryTime ? 0 : nextSafeRetryTime - Time.time;
+        SendCustomEventDelayedSeconds(nameof(ErrorRetry), delay);
+        PrintLog($"Scheduling retry {_errorRetryCount}/{_maxErrorRetry} in {delay} seconds");
       }
       else
       {
@@ -226,6 +230,8 @@ namespace Yamadev.YamaStream
       }
 
       Handler.LoadUrl(currentUrl);
+      _lastLoadTime = Time.time;
+
       int len = _listeners.Length;
       for (int i = 0; i < len; i++)
       {

@@ -65,6 +65,8 @@
   "settings.playback.lowLatency.tooltip": "啟用後，最大限度減少直播延遲。",
   "settings.playback.retryInterval.tooltip": "影片載入失敗時重試前的等待時間（秒）。",
   "settings.playback.maxRetry.tooltip": "影片載入失敗時的最大重試次數。",
+  "settings.playback.fallbackAfterErrors": "備用播放器切換錯誤數",
+  "settings.playback.fallbackAfterErrors.tooltip": "發生指定次數錯誤後切換到備用播放器。設為0則停用。",
   "settings.screen.label": "螢幕",
   "settings.screen.targets": "螢幕目標",
   "settings.screen.mainTextureProperty": "主紋理屬性名",

@@ -68,6 +68,8 @@
   "settings.playback.retryInterval.tooltip": "動画の読み込みに失敗した場合、再試行するまでの待機時間（秒）。",
   "settings.playback.maxRetry": "最大リトライ回数",
   "settings.playback.maxRetry.tooltip": "動画の読み込みに失敗した場合の最大再試行回数。",
+  "settings.playback.fallbackAfterErrors": "フォールバック開始エラー数",
+  "settings.playback.fallbackAfterErrors.tooltip": "指定した回数エラーが発生した後、フォールバックプレイヤーに切り替えます。0で無効。",
   "settings.screen.label": "スクリーン",
   "settings.screen.targets": "スクリーン",
   "settings.screen.mainTextureProperty": "メインテクスチャプロパティ名",

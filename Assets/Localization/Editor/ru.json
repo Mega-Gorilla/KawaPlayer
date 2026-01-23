@@ -65,6 +65,8 @@
   "settings.playback.lowLatency.tooltip": "При включении минимизирует задержку для прямых трансляций.",
   "settings.playback.retryInterval.tooltip": "Время ожидания в секундах перед повторной попыткой при ошибке загрузки видео.",
   "settings.playback.maxRetry.tooltip": "Максимальное количество повторных попыток при ошибке загрузки видео.",
+  "settings.playback.fallbackAfterErrors": "Переключение на резерв после ошибок",
+  "settings.playback.fallbackAfterErrors.tooltip": "Переключиться на резервный плеер после указанного количества ошибок. 0 — отключено.",
   "settings.screen.label": "Экран",
   "settings.screen.targets": "Целевые экраны",
   "settings.screen.mainTextureProperty": "Имя свойства основной текстуры",

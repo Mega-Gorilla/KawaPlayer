@@ -254,10 +254,9 @@ MonoBehaviour:
   - {fileID: 7411987779523232629}
   - {fileID: 7626724300130756598}
   - {fileID: 4001353197897885127}
-  _useFallbackHandler: 1
+  _useFallbackAfterErrors: 1
   _timeFormat: hh\:mm\:ss
   _isLocal: 0
-  _retryAfterSeconds: 5.1
   _maxErrorRetry: 5
   _loop: 0
   _queue: {fileID: 9060510277436997253}

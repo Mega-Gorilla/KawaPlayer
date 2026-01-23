@@ -28,8 +28,9 @@ namespace Yamadev.YamaStream.Editor
     private SerializedProperty _loop;
     private SerializedProperty _shuffle;
     private SerializedProperty _videoPlayerHandlers;
-    private SerializedProperty _retryAfterSeconds;
+    // private SerializedProperty _retryAfterSeconds;
     private SerializedProperty _maxErrorRetry;
+    private SerializedProperty _useFallbackAfterErrors;
     private SerializedProperty _forwardInterval;
     private SerializedProperty _screenTypes;
     private SerializedProperty _screens;
@@ -82,8 +83,9 @@ namespace Yamadev.YamaStream.Editor
         _loop = _controllerSerializedObject.FindProperty("_loop");
         _shuffle = _controllerSerializedObject.FindProperty("_shuffle");
         _videoPlayerHandlers = _controllerSerializedObject.FindProperty("_videoPlayerHandlers");
-        _retryAfterSeconds = _controllerSerializedObject.FindProperty("_retryAfterSeconds");
+        // _retryAfterSeconds = _controllerSerializedObject.FindProperty("_retryAfterSeconds");
         _maxErrorRetry = _controllerSerializedObject.FindProperty("_maxErrorRetry");
+        _useFallbackAfterErrors = _controllerSerializedObject.FindProperty("_useFallbackAfterErrors");
         _forwardInterval = _controllerSerializedObject.FindProperty("_forwardInterval");
         _screenTypes = _controllerSerializedObject.FindProperty("_screenTypes");
         _screens = _controllerSerializedObject.FindProperty("_screens");
@@ -343,8 +345,9 @@ namespace Yamadev.YamaStream.Editor
       EditorGUILayout.PropertyField(_brightness, EditorLocalization.GetLayout("settings.video.brightness", "settings.video.brightness.tooltip"));
       EditorGUILayout.PropertyField(_mute, EditorLocalization.GetLayout("settings.audio.mute", "settings.audio.mute.tooltip"));
       EditorGUILayout.PropertyField(_volume, EditorLocalization.GetLayout("settings.audio.volume", "settings.audio.volume.tooltip"));
-      EditorGUILayout.PropertyField(_retryAfterSeconds, EditorLocalization.GetLayout("settings.playback.retryInterval", "settings.playback.retryInterval.tooltip"));
+      // EditorGUILayout.PropertyField(_retryAfterSeconds, EditorLocalization.GetLayout("settings.playback.retryInterval", "settings.playback.retryInterval.tooltip"));
       EditorGUILayout.PropertyField(_maxErrorRetry, EditorLocalization.GetLayout("settings.playback.maxRetry", "settings.playback.maxRetry.tooltip"));
+      EditorGUILayout.PropertyField(_useFallbackAfterErrors, EditorLocalization.GetLayout("settings.playback.fallbackAfterErrors", "settings.playback.fallbackAfterErrors.tooltip"));
       EditorGUILayout.PropertyField(_useLowLatency, EditorLocalization.GetLayout("settings.playback.lowLatency", "settings.playback.lowLatency.tooltip"));
       DrawScreenSettings();
       DrawSpeakerSettings();

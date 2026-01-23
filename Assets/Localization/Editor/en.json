@@ -68,6 +68,8 @@
   "settings.playback.retryInterval.tooltip": "Wait time in seconds before retrying when video loading fails.",
   "settings.playback.maxRetry": "Max retry count",
   "settings.playback.maxRetry.tooltip": "Maximum number of retry attempts when video loading fails.",
+  "settings.playback.fallbackAfterErrors": "Fallback after errors",
+  "settings.playback.fallbackAfterErrors.tooltip": "Switch to fallback player after this many errors. Set to 0 to disable.",
   "settings.screen.label": "Screen",
   "settings.screen.targets": "Screen targets",
   "settings.screen.mainTextureProperty": "Main texture property name",
