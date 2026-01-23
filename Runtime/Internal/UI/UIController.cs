@@ -725,7 +725,10 @@ namespace Yamadev.YamaStream.UI
       UpdateTrackView();
       UpdateLoadingView();
       UpdateAudioView();
-      if (Utilities.IsValid(_idleScreenImage) && Utilities.IsValid(_idleScreenSprite)) _idleScreenImage.gameObject.SetActive(_controller.Stopped);
+      if (Utilities.IsValid(_idleScreenImage) && Utilities.IsValid(_idleScreenSprite))
+      {
+        _idleScreenImage.gameObject.SetActive(_controller.Stopped || _controller.IsLoading);
+      }
     }
 
     private void UpdateProgressView()
