@@ -22,7 +22,7 @@ namespace Yamadev.YamaStream.Editor
     private void OnEnable()
     {
       _moduleManager = (ModuleManager)target;
-      Title = "Module Manager";
+      Title = EditorLocalization.Get("module.manager.title");
       FindYamaPlayerModules();
     }
 

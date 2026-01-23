@@ -1251,19 +1251,7 @@ MonoBehaviour:
   m_Value: 1
   m_OnValueChanged:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 8543043602505162336}
-        m_TargetAssemblyTypeName: VRC.Udon.UdonBehaviour, VRC.Udon
-        m_MethodName: SendCustomEvent
-        m_Mode: 5
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: OnSliderValueChanged
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
 --- !u!1 &2830344445276167017
 GameObject:
   m_ObjectHideFlags: 0
@@ -2139,9 +2127,10 @@ MonoBehaviour:
     PrefabModifications: []
     SerializationNodes: []
   _udonSharpBackingUdonBehaviour: {fileID: 8543043602505162336}
-  SliderLeft: {fileID: 5290108938312500321}
-  SliderRight: {fileID: 6460318889032383390}
-  Fill: {fileID: 72083885680741157}
+  _sliderLeft: {fileID: 5290108938312500321}
+  _sliderRight: {fileID: 6460318889032383390}
+  _fill: {fileID: 72083885680741157}
+  _fillPaddingY: -7
 --- !u!114 &8543043602505162336
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2663,19 +2652,7 @@ MonoBehaviour:
   m_Value: 0
   m_OnValueChanged:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 8543043602505162336}
-        m_TargetAssemblyTypeName: VRC.Udon.UdonBehaviour, VRC.Udon
-        m_MethodName: SendCustomEvent
-        m_Mode: 5
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: OnSliderValueChanged
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
 --- !u!1 &6666560119041713372
 GameObject:
   m_ObjectHideFlags: 0

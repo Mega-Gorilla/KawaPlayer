@@ -248,13 +248,7 @@ namespace Yamadev.YamaStream
       UpdateAudioPitch();
     }
 
-    public RepeatStatus RepeatStatus
-    {
-      get => RepeatStatus.New(_repeat);
-      set => Repeat = value.GetPackedData();
-    }
-
-    private ulong Repeat
+    public ulong Repeat
     {
       get => _repeat;
       set
@@ -268,16 +262,19 @@ namespace Yamadev.YamaStream
           var listener = _listeners[i];
           if (Utilities.IsValid(listener)) listener.AfterRepeatChanged(value);
         }
-        RepeatStatus status = RepeatStatus.New(_repeat);
-        if (status.IsOn()) PrintLog($"Repeat on, start: {status.GetStartTime()}, end: {status.GetEndTime()}.");
+
+        if (RepeatUtils.IsOn(_repeat)) PrintLog($"Repeat on, start: {RepeatUtils.GetStartTime(_repeat)}, end: {RepeatUtils.GetEndTime(_repeat)}.");
       }
     }
 
     public void CheckRepeat()
     {
-      RepeatStatus status = RepeatStatus.New(_repeat);
-      if (!IsPlaying || !status.IsOn()) return;
-      if (Handler.Time > status.GetEndTime() || Handler.Time < status.GetStartTime()) SetTime(status.GetStartTime());
+      if (!IsPlaying || IsLive || !RepeatUtils.IsOn(_repeat)) return;
+
+      var start = RepeatUtils.GetStartTime(_repeat);
+      var end = RepeatUtils.GetEndTime(_repeat);
+      if (Handler.Time > end || Handler.Time < start) SetTime(start);
+
       SendCustomEventDelayedSeconds(nameof(CheckRepeat), 0.5f);
     }
 

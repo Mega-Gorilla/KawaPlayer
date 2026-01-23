@@ -1,5 +1,4 @@
 using UdonSharp;
-using UnityEngine;
 using VRC.SDK3.Data;
 using VRC.SDK3.StringLoading;
 using VRC.SDKBase;
@@ -11,8 +10,9 @@ namespace Yamadev.YamaStream.Modules.VideoInfoDownloader
   [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
   public class VideoInfoDownloader : YamaPlayerModule
   {
-    private DataDictionary _info = new DataDictionary();
+    private DataDictionary _videoInfo = new DataDictionary();
     private DataDictionary _pending = new DataDictionary();
+    private DataDictionary _error = new DataDictionary();
 
     private DataDictionary[] _providers = new DataDictionary[]
     {
@@ -26,32 +26,30 @@ namespace Yamadev.YamaStream.Modules.VideoInfoDownloader
       }
     };
 
-    public string GetVideoInfo(VRCUrl url)
+    public string GetVideoInfo(string urlStr)
     {
-      if (!Utilities.IsValid(url) || string.IsNullOrEmpty(url.Get()))
+      if (string.IsNullOrEmpty(urlStr) || string.IsNullOrEmpty(GetProviderFromUrl(urlStr)))
       {
         return string.Empty;
       }
 
-      if (_info.TryGetValue(url.Get(), TokenType.String, out var info))
+      if (_videoInfo.TryGetValue(urlStr, TokenType.String, out var info))
       {
         return info.String;
       }
 
-      DownloadVideoInfo(url);
-
       return string.Empty;
     }
 
-    private string GetProviderFromUrl(string url)
+    private string GetProviderFromUrl(string urlStr)
     {
-      if (string.IsNullOrEmpty(url)) return string.Empty;
+      if (string.IsNullOrEmpty(urlStr)) return string.Empty;
 
       int len = _providers.Length;
       for (int i = 0; i < len; i++)
       {
         var provider = _providers[i];
-        if (Regex.IsMatch(url, provider["pattern"].String, RegexOptions.IgnoreCase))
+        if (Regex.IsMatch(urlStr, provider["pattern"].String, RegexOptions.IgnoreCase))
         {
           return provider["provider"].String;
         }
@@ -64,11 +62,9 @@ namespace Yamadev.YamaStream.Modules.VideoInfoDownloader
       if (!Utilities.IsValid(url)) return;
 
       string urlStr = url.Get();
-      if (string.IsNullOrEmpty(urlStr)) return;
-      if (string.IsNullOrEmpty(GetProviderFromUrl(urlStr))) return;
+      if (string.IsNullOrEmpty(urlStr) || string.IsNullOrEmpty(GetProviderFromUrl(urlStr)) || _error.ContainsKey(urlStr)) return;
 
       if (_pending.ContainsKey(urlStr)) return;
-
       _pending.SetValue(urlStr, true);
       VRCStringDownloader.LoadUrl(url, (IUdonEventReceiver)this);
     }
@@ -81,7 +77,7 @@ namespace Yamadev.YamaStream.Modules.VideoInfoDownloader
       _pending.Remove(urlStr);
 
       string provider = GetProviderFromUrl(urlStr);
-      string title = string.Empty;
+      string title;
 
       switch (provider)
       {
@@ -97,19 +93,53 @@ namespace Yamadev.YamaStream.Modules.VideoInfoDownloader
 
       if (string.IsNullOrEmpty(title)) return;
 
-      _info.SetValue(urlStr, title);
+      _videoInfo.SetValue(urlStr, title);
       PrintLog($"Loaded video info from {provider}: {title} ({urlStr})");
+
+      UpdateVideoInfoToTrack(urlStr, title);
+      UpdateVideoInfoToQueue(urlStr, title);
+    }
+
+    private void UpdateVideoInfoToTrack(string urlStr, string title)
+    {
+      if (string.IsNullOrEmpty(urlStr) || string.IsNullOrEmpty(title)) return;
 
       if (!Utilities.IsValid(_controller)) return;
 
       var track = _controller.Track;
-      if (track == null || track.Length == 0) return;
+      if (!Utilities.IsValid(track) || TrackUtils.GetUrl(track).Get() != urlStr) return;
 
       var currentTitle = TrackUtils.GetTitle(track);
-      if (string.IsNullOrEmpty(currentTitle))
+      if (!string.IsNullOrEmpty(currentTitle)) return;
+
+      TrackUtils.SetTitle(track, title);
+      _controller.SendCustomVideoEvent(nameof(AfterTrackUpdated));
+    }
+
+    private void UpdateVideoInfoToQueue(string urlStr, string title)
+    {
+      if (string.IsNullOrEmpty(urlStr) || string.IsNullOrEmpty(title)) return;
+
+      if (!Utilities.IsValid(_controller)) return;
+
+      var queue = _controller.Queue;
+      if (!Utilities.IsValid(queue) || queue.TrackCount == 0) return;
+
+      var trackCount = queue.TrackCount;
+      int changedCount = 0;
+      for (int i = 0; i < trackCount; i++)
       {
+        var track = queue.GetTrack(i);
+        if (!Utilities.IsValid(track)) continue;
+        if (TrackUtils.GetUrl(track).Get() != urlStr || !string.IsNullOrEmpty(TrackUtils.GetTitle(track))) continue;
+
         TrackUtils.SetTitle(track, title);
-        _controller.SendCustomVideoEvent(nameof(AfterTrackUpdated));
+        changedCount++;
+      }
+
+      if (changedCount > 0)
+      {
+        _controller.SendCustomVideoEvent(nameof(AfterQueueUpdated));
       }
     }
 
@@ -117,6 +147,7 @@ namespace Yamadev.YamaStream.Modules.VideoInfoDownloader
     {
       string urlStr = result.Url.Get();
       _pending.Remove(urlStr);
+      _error.SetValue(urlStr, true);
       PrintLog($"Failed to load video info: {urlStr}");
     }
 
@@ -125,12 +156,51 @@ namespace Yamadev.YamaStream.Modules.VideoInfoDownloader
       if (!Utilities.IsValid(_controller)) return;
 
       var track = _controller.Track;
-      if (track == null || track.Length == 0) return;
+      if (!Utilities.IsValid(track) || track.Length == 0) return;
 
       var title = TrackUtils.GetTitle(track);
       if (string.IsNullOrEmpty(title))
       {
         DownloadVideoInfo(TrackUtils.GetUrl(track));
+      }
+    }
+
+    public override void AfterQueueUpdated()
+    {
+      if (!Utilities.IsValid(_controller)) return;
+
+      var queue = _controller.Queue;
+      if (!Utilities.IsValid(queue)) return;
+
+      int foundCount = 0;
+      int trackCount = queue.TrackCount;
+      for (int i = 0; i < trackCount; i++)
+      {
+        var track = queue.GetTrack(i);
+        if (!Utilities.IsValid(track)) continue;
+
+        if (!string.IsNullOrEmpty(TrackUtils.GetTitle(track))) continue;
+
+        var url = TrackUtils.GetUrl(track);
+        if (!Utilities.IsValid(url)) continue;
+
+        var urlStr = url.Get();
+        if (string.IsNullOrEmpty(urlStr) || _error.ContainsKey(urlStr)) continue;
+
+        var videoInfo = GetVideoInfo(urlStr);
+        if (!string.IsNullOrEmpty(videoInfo))
+        {
+          TrackUtils.SetTitle(track, videoInfo);
+          foundCount++;
+          continue;
+        }
+
+        DownloadVideoInfo(url);
+      }
+
+      if (foundCount > 0)
+      {
+        _controller.SendCustomVideoEvent(nameof(AfterQueueUpdated));
       }
     }
   }

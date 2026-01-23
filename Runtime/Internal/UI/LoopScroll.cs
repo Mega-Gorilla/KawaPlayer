@@ -21,6 +21,8 @@ namespace Yamadev.YamaStream.UI
     private UdonSharpBehaviour _callbackUdon;
     private string _callbackEventName;
 
+    private const float SCROLL_THRESHOLD_SQR = 0.003f;
+
     void Start() => Initialize();
 
     public int LineCount => _lineCount;
@@ -39,9 +41,13 @@ namespace Yamadev.YamaStream.UI
 
     private void ResetValues()
     {
+      if (!_initialized) return;
+
       _indexes = new int[_lineCount].Populate(-1);
       for (int i = 0; i < _lineCount; i++)
+      {
         _scrollRect.content.GetChild(i).gameObject.SetActive(false);
+      }
     }
 
     private void Render()
@@ -49,10 +55,7 @@ namespace Yamadev.YamaStream.UI
       AdjustHeight();
       UpdateIndexes();
       UpdatePosition();
-      if (Utilities.IsValid(_callbackUdon) && !string.IsNullOrEmpty(_callbackEventName))
-      {
-        _callbackUdon.SendCustomEvent(_callbackEventName);
-      }
+      InvokeCallback();
     }
 
     public void ScrollToTop()
@@ -69,10 +72,20 @@ namespace Yamadev.YamaStream.UI
     {
       if (_initialized) return;
       _scrollRect = GetComponent<ScrollRect>();
-      if (!Utilities.IsValid(_template)) _template = _scrollRect.content.GetChild(0).gameObject;
-      _template.SetActive(false);
 
+      if (!Utilities.IsValid(_template) && Utilities.IsValid(_scrollRect) && Utilities.IsValid(_scrollRect.content))
+      {
+        if (_scrollRect.content.childCount <= 0) return;
+        _template = _scrollRect.content.GetChild(0).gameObject;
+      }
+
+      if (!Utilities.IsValid(_template)) return;
+
+      _template.SetActive(false);
       _lineHeight = _template.GetComponent<RectTransform>().rect.height;
+
+      if (_lineHeight <= 0) return;
+
       int count = Mathf.CeilToInt(_scrollRect.GetComponent<RectTransform>().rect.height / _lineHeight);
       for (int i = 0; i < count; i++)
       {
@@ -81,6 +94,7 @@ namespace Yamadev.YamaStream.UI
         obj.transform.SetSiblingIndex(_template.transform.GetSiblingIndex() + i + 1);
         obj.SetActive(false);
       }
+
       _lineCount = count + 1;
       _lastIndexes = new int[_lineCount].Populate(-1);
       _indexes = new int[_lineCount].Populate(-1);
@@ -108,7 +122,7 @@ namespace Yamadev.YamaStream.UI
       int[] indexes = new int[_lineCount];
       for (int i = 0; i < _lineCount; i++)
       {
-        int target = (offset / _lineCount) * _lineCount + i;
+        int target = offset / _lineCount * _lineCount + i;
         indexes[i] = target < offset ? target + _lineCount : target;
         if (indexes[i] < 0 || indexes[i] > _length - 1) indexes[i] = -1;
       }
@@ -130,10 +144,15 @@ namespace Yamadev.YamaStream.UI
     public void OnScroll()
     {
       if (!_initialized) Initialize();
-      if ((_position - _scrollRect.content.anchoredPosition).sqrMagnitude <= 0.003f) return;
+      if ((_position - _scrollRect.content.anchoredPosition).sqrMagnitude <= SCROLL_THRESHOLD_SQR) return;
       _position = _scrollRect.content.anchoredPosition;
       UpdateIndexes();
       UpdatePosition();
+      InvokeCallback();
+    }
+
+    private void InvokeCallback()
+    {
       if (Utilities.IsValid(_callbackUdon) && !string.IsNullOrEmpty(_callbackEventName))
       {
         _callbackUdon.SendCustomEvent(_callbackEventName);

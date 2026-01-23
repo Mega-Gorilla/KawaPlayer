@@ -8,12 +8,13 @@ namespace Yamadev.YamaStream.UI
   [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
   public class Modal : UdonSharpBehaviour
   {
-    [SerializeField] private Text _titleText, _messageText;
+    [SerializeField] private Text _titleText;
+    [SerializeField] private Text _messageText;
     [SerializeField, RegisterEvent(nameof(Button.onClick), nameof(Close))] private Button _closeButton;
     [SerializeField, RegisterEvent(nameof(Button.onClick), nameof(Execute))] private Button _executeButton;
     [SerializeField, RegisterEvent(nameof(Button.onClick), nameof(Execute2))] private Button _execute2Button;
     [SerializeField] private Text _closeText, _executeText, _execute2Text;
-    [SerializeField] private float _maxHeight;
+    [SerializeField] private float _maxHeight = 400f;
     [SerializeField] private ScrollRect _scrollRect;
     private UdonSharpBehaviour _targetUdon;
     private string _closeEventName, _executeEventName, _execute2EventName;
@@ -21,36 +22,24 @@ namespace Yamadev.YamaStream.UI
 
     private void Start()
     {
-      _scrollRectTransform = _scrollRect.GetComponent<RectTransform>();
+      if (Utilities.IsValid(_scrollRect))
+      {
+        _scrollRectTransform = _scrollRect.GetComponent<RectTransform>();
+      }
     }
 
-    private void Update() => AdaptMaxHeight();
-
-    public void Close()
+    private void ExecuteAndClose(string eventName)
     {
-      if (Utilities.IsValid(_targetUdon) && !string.IsNullOrEmpty(_closeEventName))
+      if (Utilities.IsValid(_targetUdon) && !string.IsNullOrEmpty(eventName))
       {
-        _targetUdon.SendCustomEvent(_closeEventName);
+        _targetUdon.SendCustomEvent(eventName);
       }
       gameObject.SetActive(false);
     }
 
-    public void Execute()
-    {
-      if (Utilities.IsValid(_targetUdon) && !string.IsNullOrEmpty(_executeEventName))
-      {
-        _targetUdon.SendCustomEvent(_executeEventName);
-      }
-      gameObject.SetActive(false);
-    }
-    public void Execute2()
-    {
-      if (Utilities.IsValid(_targetUdon) && !string.IsNullOrEmpty(_execute2EventName))
-      {
-        _targetUdon.SendCustomEvent(_execute2EventName);
-      }
-      gameObject.SetActive(false);
-    }
+    public void Close() => ExecuteAndClose(_closeEventName);
+    public void Execute() => ExecuteAndClose(_executeEventName);
+    public void Execute2() => ExecuteAndClose(_execute2EventName);
 
     public void Show(string title, string message, string closeText, string executeText, UdonSharpBehaviour targetUdon, string closeEventName, string executeEventName)
     {
@@ -64,19 +53,28 @@ namespace Yamadev.YamaStream.UI
       if (Utilities.IsValid(_closeText)) _closeText.text = closeText;
       if (Utilities.IsValid(_executeText)) _executeText.text = executeText;
       if (Utilities.IsValid(_execute2Text)) _execute2Text.text = execute2Text;
-      if (Utilities.IsValid(_targetUdon)) _targetUdon = targetUdon;
-      if (Utilities.IsValid(_closeEventName)) _closeEventName = closeEventName;
-      if (Utilities.IsValid(_executeEventName)) _executeEventName = executeEventName;
-      if (Utilities.IsValid(_execute2EventName)) _execute2EventName = execute2EventName;
+      _targetUdon = targetUdon;
+      _closeEventName = closeEventName;
+      _executeEventName = executeEventName;
+      _execute2EventName = execute2EventName;
+
+      if (Utilities.IsValid(_executeButton)) _executeButton.gameObject.SetActive(Utilities.IsValid(targetUdon) && !string.IsNullOrEmpty(executeEventName));
+      if (Utilities.IsValid(_execute2Button)) _execute2Button.gameObject.SetActive(Utilities.IsValid(targetUdon) && !string.IsNullOrEmpty(execute2EventName));
+
       gameObject.SetActive(true);
+      SendCustomEventDelayedFrames(nameof(AdaptMaxHeight), 3);
     }
 
     public void AdaptMaxHeight()
     {
+      if (!Utilities.IsValid(_scrollRect) || !Utilities.IsValid(_scrollRect.content) || !Utilities.IsValid(_scrollRectTransform)) return;
+      if (_maxHeight <= 0) return;
+
       float contentHeight = _scrollRect.content.sizeDelta.y;
       bool over = contentHeight > _maxHeight;
       _scrollRect.vertical = over;
       _scrollRectTransform.sizeDelta = new Vector2(_scrollRectTransform.sizeDelta.x, over ? _maxHeight : contentHeight);
+      _scrollRect.verticalNormalizedPosition = 1f;
     }
   }
 }
