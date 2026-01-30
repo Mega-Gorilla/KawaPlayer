@@ -51,6 +51,8 @@ namespace Yamadev.YamaStream
 
     public virtual bool IsStopped { get; }
 
+    public virtual bool IsError { get; }
+
     public virtual bool Loop { get; set; }
 
     public virtual float Speed { get; set; }

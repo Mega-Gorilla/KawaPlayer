@@ -42,26 +42,28 @@ namespace Yamadev.YamaStream
 
     public override void AfterVideoStopped()
     {
-      _reloading = false;
       _errorRetryCount = 0;
       _retryTargetUrl = VRCUrl.Empty;
-      _repeat = 0;
-      Handler.UseFallbackHandler = false;
 
-      if (Networking.IsOwner(gameObject) && !_isLocal)
+      if (!_reloading)
       {
-        if (!string.IsNullOrEmpty(TrackUtils.GetUrl(Track).Get()) && Utilities.IsValid(_history))
+        _repeat = 0;
+        Handler.UseFallbackHandler = false;
+
+        if (Networking.IsOwner(gameObject) && !_isLocal)
         {
-          _history.AddTrack(Track);
+          if (!string.IsNullOrEmpty(TrackUtils.GetUrl(Track).Get()) && Utilities.IsValid(_history))
+          {
+            _history.AddTrack(Track);
+          }
+          Track = TrackUtils.CreateEmptyTrack();
+          ResetSyncedVideoTime();
+          RequestSerialization();
         }
-        Track = TrackUtils.CreateEmptyTrack();
-        _syncedVideoTime = 0f;
-        _networkDataTimeTicks = 0;
-        RequestSerialization();
-      }
-      else
-      {
-        Track = TrackUtils.CreateEmptyTrack();
+        else
+        {
+          Track = TrackUtils.CreateEmptyTrack();
+        }
       }
 
       int len = _listeners.Length;
@@ -82,7 +84,7 @@ namespace Yamadev.YamaStream
 
       if (Networking.IsOwner(gameObject) && !_isLocal && !_reloading)
       {
-        ResetSyncedVideoTime();
+        UpdateSyncedVideoTime(0f);
         RequestSerialization();
       }
       else EnsureVideoTime();
@@ -112,7 +114,7 @@ namespace Yamadev.YamaStream
     {
       if (Networking.IsOwner(gameObject) && !_isLocal)
       {
-        ResetSyncedVideoTime();
+        UpdateSyncedVideoTime(0f);
         RequestSerialization();
       }
 

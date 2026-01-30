@@ -21,6 +21,7 @@ namespace Yamadev.YamaStream
     private Texture _videoTexture;
     private RenderTexture _blitTexture;
     private bool _stopped = true;
+    private bool _isError;
 
     private void Start()
     {
@@ -95,6 +96,15 @@ namespace Yamadev.YamaStream
       {
         if (UseFallbackHandler) return _fallbackHandler.IsStopped;
         return _stopped;
+      }
+    }
+
+    public override bool IsError
+    {
+      get
+      {
+        if (UseFallbackHandler) return _fallbackHandler.IsError;
+        return _isError;
       }
     }
 
@@ -236,6 +246,7 @@ namespace Yamadev.YamaStream
       _loadedUrl = url;
       _stopped = false;
       _loading = true;
+      _isError = false;
     }
 
     public override void LoadUrl(VRCUrl url)
@@ -251,6 +262,7 @@ namespace Yamadev.YamaStream
       _loadedUrl = url;
       _stopped = false;
       _loading = true;
+      _isError = false;
     }
 
     public override void Play()
@@ -290,6 +302,7 @@ namespace Yamadev.YamaStream
       _loadedUrl = VRCUrl.Empty;
       _loading = false;
       _stopped = true;
+      _isError = false;
 
       if (!Utilities.IsValid(_videoTexture) && Utilities.IsValid(_blitTexture))
       {
@@ -360,6 +373,7 @@ namespace Yamadev.YamaStream
     {
       _loading = false;
       _stopped = true;
+      _isError = true;
       if (Utilities.IsValid(_listener)) _listener.AfterVideoErrorOccurred(videoError);
     }
 

@@ -141,7 +141,7 @@ namespace Yamadev.YamaStream.UI
       {
         _volumeTooltipText.text = $"{Mathf.Ceil(_volumeSliderHelper.Percent * 100)}%";
       }
-      if (_controller.IsPlaying) UpdateProgressView();
+      if (!_controller.Stopped && !_controller.IsLoading) UpdateProgressView();
     }
 
     public bool InvokeBeforeEvent(string eventName)
@@ -404,7 +404,6 @@ namespace Yamadev.YamaStream.UI
       }
 
       _controller.TakeOwnership();
-      _controller.ClearPlaylistIndexes();
       _controller.Stop();
     }
 
@@ -596,6 +595,11 @@ namespace Yamadev.YamaStream.UI
     public void SetSpeed()
     {
       if (!Utilities.IsValid(_speedSlider)) return;
+      if (_controller.SyncedState != (byte)PlayerState.Idle && (_controller.Stopped || _controller.IsLoading))
+      {
+        UpdateUI();
+        return;
+      }
       if (!InvokeBeforeEvent(nameof(BeforeUserChangeSpeed)))
       {
         UpdateUI();

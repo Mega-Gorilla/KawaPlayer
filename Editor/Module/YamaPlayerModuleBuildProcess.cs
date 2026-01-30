@@ -76,7 +76,13 @@ namespace Yamadev.YamaStream.Editor
             var calculatedIndex = childCount + siblingIndex;
             copy.transform.SetSiblingIndex(calculatedIndex < 0 ? 0 : calculatedIndex);
           }
+        }
+      }
 
+      foreach (var uiSlot in uiSlots)
+      {
+        if (uiSlot?.content != null)
+        {
           Object.DestroyImmediate(uiSlot.content);
         }
       }

@@ -13,6 +13,7 @@ namespace Yamadev.YamaStream
     private bool _isPlaying;
     private bool _loop;
     private bool _playImmediately;
+    private bool _isError;
     private VRCImageDownloader _imageDownloader;
 
     private void Start()
@@ -34,6 +35,8 @@ namespace Yamadev.YamaStream
     }
 
     public override bool IsStopped => !_isReady && !_loading;
+
+    public override bool IsError => _isError;
 
     public VRCImageDownloader ImageDownloader
     {
@@ -81,6 +84,7 @@ namespace Yamadev.YamaStream
       _loadedUrl = url;
       _playImmediately = true;
       _loading = true;
+      _isError = false;
     }
 
     public override void LoadUrl(VRCUrl url)
@@ -89,6 +93,7 @@ namespace Yamadev.YamaStream
       _loadedUrl = url;
       _playImmediately = false;
       _loading = true;
+      _isError = false;
     }
 
     public override void Play()
@@ -111,6 +116,7 @@ namespace Yamadev.YamaStream
       _loadedUrl = VRCUrl.Empty;
       _loading = false;
       _isPlaying = false;
+      _isError = false;
       _texture = null;
       if (Utilities.IsValid(_imageDownloader))
       {
@@ -143,6 +149,7 @@ namespace Yamadev.YamaStream
       if (!result.Url.Equals(_loadedUrl)) return;
 
       _loading = false;
+      _isError = true;
       VideoError videoError;
       switch (result.Error)
       {

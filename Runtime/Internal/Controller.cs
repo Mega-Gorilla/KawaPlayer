@@ -74,6 +74,7 @@ namespace Yamadev.YamaStream
     public bool Paused => Handler.IsPaused;
     public bool Stopped => Handler.IsStopped;
     public bool IsPlaying => Handler.IsPlaying;
+    public bool IsError => Handler.IsError;
     public float Duration => Handler.Duration;
     public string FormatedDuration => TimeSpan.FromSeconds(Duration).ToString(_timeFormat);
     public float VideoTime => Handler.Time;
@@ -189,8 +190,9 @@ namespace Yamadev.YamaStream
 
     public void Stop(bool force = false)
     {
-      if (Stopped && !force) return;
+      if (Stopped && !IsError && !force) return;
       _syncedState = (byte)PlayerState.Idle;
+      ClearPlaylistIndexes();
       Handler.Stop();
     }
 
@@ -349,7 +351,7 @@ namespace Yamadev.YamaStream
     {
       _autoForward = false;
       _reloading = isReload;
-      if (!_reloading) Handler.Stop();
+      Handler.Stop();
 
       var trackPlayerType = TrackUtils.GetPlayerType(track);
       SetPlayerType(trackPlayerType);

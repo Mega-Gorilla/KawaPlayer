@@ -64,7 +64,11 @@ namespace Yamadev.YamaStream
 
     private void EnsureVideoTime(bool force = false)
     {
-      if (IsLive || Stopped || _networkDataTimeTicks == 0) return;
+      if (IsLive || Stopped || _networkDataTimeTicks == 0)
+      {
+        _lastSync = Time.time;
+        return;
+      }
 
       float offset = Paused ? 0 : (float)(Networking.GetNetworkDateTime().Ticks - _networkDataTimeTicks) / TimeSpan.TicksPerSecond * Speed;
       float targetTime = Mathf.Clamp(_syncedVideoTime + offset + _localDelay, 0, Duration);
