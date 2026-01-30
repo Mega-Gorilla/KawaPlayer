@@ -6,7 +6,7 @@ namespace Yamadev.YamaStream
 {
     public abstract class YamaPlayerBehaviour : UdonSharpBehaviour
     {
-        const string DebugPrefix = "[<color=#EF6291>YamaStream</color>]";
+        protected const string DebugPrefix = "[<color=#EF6291>YamaStream</color>]";
 
         protected bool IsLocalPlayerValid => Utilities.IsValid(Networking.LocalPlayer);
         protected VRCPlayerApi LocalPlayer => IsLocalPlayerValid ? Networking.LocalPlayer : null;
@@ -28,10 +28,10 @@ namespace Yamadev.YamaStream
             RequestSerialization();
         }
 
-        protected void PrintLog(object message) => Debug.Log($"{DebugPrefix} {message}");
+        protected virtual void PrintLog(object message) => Debug.Log($"{DebugPrefix} {message}");
 
-        protected void PrintWarning(object message) => Debug.LogWarning($"{DebugPrefix} {message}");
+        protected virtual void PrintWarning(object message) => Debug.LogWarning($"{DebugPrefix} {message}");
 
-        protected void PrintError(object message) => Debug.LogError($"{DebugPrefix} {message}");
+        protected virtual void PrintError(object message) => Debug.LogError($"{DebugPrefix} {message}");
     }
 }

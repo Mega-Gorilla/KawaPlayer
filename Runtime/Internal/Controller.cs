@@ -90,8 +90,8 @@ namespace Yamadev.YamaStream
 
     public void AddListener(YamaPlayerListener listener)
     {
-      if (!Utilities.IsValid(listener) || Array.IndexOf(EventListeners, listener) >= 0) return;
-      EventListeners = EventListeners.Add(listener);
+      if (!Utilities.IsValid(listener) || Array.IndexOf(_listeners, listener) >= 0) return;
+      _listeners = _listeners.Add(listener);
     }
 
     public void SendCustomVideoEvent(string eventName)

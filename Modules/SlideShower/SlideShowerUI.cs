@@ -36,6 +36,7 @@ namespace Yamadev.YamaStream.Modules.SlideShower
       _uiController = GetComponentInParent<UIController>();
       if (!Utilities.IsValid(_uiController) || !Utilities.IsValid(_slideShower)) return;
       _slideShower.AddListener(this);
+      _uiController.AddListener(this);
 
       _currentTimeText = (Text)_uiController.GetProgramVariable("_currentTimeText");
       _totalDurationText = (Text)_uiController.GetProgramVariable("_totalDurationText");
@@ -156,7 +157,7 @@ namespace Yamadev.YamaStream.Modules.SlideShower
       SetSlideSeconds(3);
     }
 
-    public override void BeforeUserSetTime()
+    public void BeforeUserSetTime()
     {
       if (!Utilities.IsValid(_slideShower) || !_slideShower.SlideMode || !Utilities.IsValid(_uiController)) return;
       _uiController.CancelCurrentAction();
@@ -165,7 +166,7 @@ namespace Yamadev.YamaStream.Modules.SlideShower
       _slideShower.SetSlidePage((int)_progressSlider.value);
     }
 
-    public override void BeforeUserBackward()
+    public void BeforeUserBackward()
     {
       if (!Utilities.IsValid(_slideShower) || !_slideShower.SlideMode || !Utilities.IsValid(_uiController)) return;
       _uiController.CancelCurrentAction();
@@ -174,7 +175,7 @@ namespace Yamadev.YamaStream.Modules.SlideShower
       _slideShower.PreviousSlide();
     }
 
-    public override void BeforeUserForward()
+    public void BeforeUserForward()
     {
       if (!Utilities.IsValid(_slideShower) || !_slideShower.SlideMode || !Utilities.IsValid(_uiController)) return;
       _uiController.CancelCurrentAction();

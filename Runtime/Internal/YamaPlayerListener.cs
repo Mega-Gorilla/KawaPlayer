@@ -59,34 +59,5 @@ namespace Yamadev.YamaStream
     public virtual void AfterVideoRetry() { }
 
     #endregion
-
-    #region User Events
-
-    public virtual void BeforeUserChangePlayerHandler() { }
-    public virtual void BeforeUserPlayTrack() { }
-    public virtual void BeforeUserPlayVideo() { }
-    public virtual void BeforeUserPauseVideo() { }
-    public virtual void BeforeUserStopVideo() { }
-    public virtual void BeforeUserSetTime() { }
-    public virtual void BeforeUserBackward() { }
-    public virtual void BeforeUserForward() { }
-    public virtual void BeforeUserReloadVideo() { }
-    public virtual void BeforeUserChangeLoop() { }
-    public virtual void BeforeUserChangeShufflePlay() { }
-    public virtual void BeforeUserChangeSpeed() { }
-    public virtual void BeforeUserChangeRepeat() { }
-    public virtual void BeforeUserChangeLocalDelay() { }
-    public virtual void BeforeUserChangeMirrorFlip() { }
-    public virtual void BeforeUserChangeBrightness() { }
-    public virtual void BeforeUserChangeMaxResolution() { }
-    public virtual void BeforeUserChangeVolume() { }
-    public virtual void BeforeUserChangeMute() { }
-    public virtual void BeforeUserChangeLanguage() { }
-    public virtual void BeforeUserAddTrackToQueue() { }
-    public virtual void BeforeUserRemoveTrackFromQueue() { }
-    public virtual void BeforeUserMoveTrackUp() { }
-    public virtual void BeforeUserMoveTrackDown() { }
-
-    #endregion
   }
 }

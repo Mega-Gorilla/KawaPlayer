@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.CompilerServices;
 using UdonSharp;
 using UnityEngine;
 using VRC.SDK3.Data;
@@ -34,22 +35,7 @@ namespace Yamadev.YamaStream.Modules.PermissionManagement
     public override void Start()
     {
       base.Start();
-      if (!Networking.IsMaster) return;
-      Initialize();
-    }
-
-    public void AddListener(YamaPlayerListener listener)
-    {
-      if (!Utilities.IsValid(listener) || Array.IndexOf(_listeners, listener) >= 0) return;
-      _listeners = _listeners.Add(listener);
-    }
-
-    public bool IsPlayerOwner(VRCPlayerApi player)
-    {
-      if (!Utilities.IsValid(player)) return false;
-      if (_grantPermissionToInstanceOwner && player.isInstanceOwner) return true;
-      if (_grantPermissionToInstanceMaster && player.isMaster) return true;
-      return Array.IndexOf(_ownerList, player.displayName) >= 0;
+      if (Networking.IsMaster) Initialize();
     }
 
     public DataDictionary PermissionData
@@ -58,51 +44,79 @@ namespace Yamadev.YamaStream.Modules.PermissionManagement
       set
       {
         _permission = value;
+
+        if (Networking.IsOwner(_controller.gameObject) && !_controller.IsLocal) RequestSerialization();
         int len = _listeners.Length;
         for (int i = 0; i < len; i++) _listeners[i].SendCustomEvent("AfterPermissionChanged");
+        PrintLog("Permission updated.");
       }
     }
 
-    public PlayerPermission PlayerPermission =>
-      IsLocalPlayerValid ? GetPermissionByPlayerId(LocalPlayer.playerId) : PlayerPermission.Viewer;
-
-    private DataDictionary InitializePlayerPermission(VRCPlayerApi player)
+    public PlayerPermission PlayerPermission
     {
-      DataDictionary result = new DataDictionary();
-      result.Add("displayName", player.displayName);
-      result.Add("permission", IsPlayerOwner(player) ? (int)PlayerPermission.Owner : (int)_defaultPermission);
-      return result;
+      get
+      {
+        if (!IsLocalPlayerValid) return PlayerPermission.Viewer;
+        return GetPermissionByPlayerId(LocalPlayer.playerId);
+      }
     }
 
     private void Initialize()
     {
-      if (LocalPlayer == null) return;
-      _permission.Add(LocalPlayer.playerId.ToString(), InitializePlayerPermission(LocalPlayer));
-      PermissionData = _permission;
-      SyncVariables();
+      if (!IsLocalPlayerValid) return;
+
+      var dict = new DataDictionary();
+      dict.Add(LocalPlayer.playerId.ToString(), InitializePlayerPermission(LocalPlayer));
+      TakeOwnership();
+      PermissionData = dict;
+    }
+
+    private DataDictionary InitializePlayerPermission(VRCPlayerApi player)
+    {
+      int permission = (int)_defaultPermission;
+      if (GrantPermissionToInstanceOwner && player.isInstanceOwner) permission = (int)PlayerPermission.Owner;
+      if (GrantPermissionToInstanceMaster && player.isMaster) permission = (int)PlayerPermission.Owner;
+      if (Array.IndexOf(_ownerList, player.displayName) >= 0) permission = (int)PlayerPermission.Owner;
+
+      DataDictionary result = new DataDictionary();
+      result.Add("displayName", player.displayName);
+      result.Add("permission", permission);
+
+      return result;
+    }
+
+    public void AddListener(YamaPlayerListener listener)
+    {
+      if (!Utilities.IsValid(listener) || Array.IndexOf(_listeners, listener) >= 0) return;
+      _listeners = _listeners.Add(listener);
     }
 
     public override void OnPlayerJoined(VRCPlayerApi player)
     {
       if (!IsObjectOwner) return;
-      if (_permission.ContainsKey(player.playerId.ToString())) return;
-      _permission.Add(player.playerId.ToString(), InitializePlayerPermission(player));
-      PermissionData = _permission;
-      SyncVariables();
+
+      var dict = PermissionData;
+      if (dict.ContainsKey(player.playerId.ToString())) return;
+      dict.Add(player.playerId.ToString(), InitializePlayerPermission(player));
+      PermissionData = dict;
     }
 
     public override void OnPlayerLeft(VRCPlayerApi player)
     {
       if (!IsObjectOwner) return;
-      if (!_permission.ContainsKey(player.playerId.ToString())) return;
-      _permission.Remove(player.playerId.ToString());
-      PermissionData = _permission;
-      SyncVariables();
+      var dict = PermissionData;
+      if (!dict.ContainsKey(player.playerId.ToString())) return;
+      dict.Remove(player.playerId.ToString());
+      PermissionData = dict;
     }
 
     public override void OnPreSerialization()
     {
-      VRCJson.TrySerializeToJson(_permission, JsonExportType.Minify, out var json);
+      if (!VRCJson.TrySerializeToJson(_permission, JsonExportType.Minify, out var json))
+      {
+        PrintWarning("Failed to serialize permission data.");
+        return;
+      }
       _permissionString = json.String;
     }
 
@@ -112,37 +126,38 @@ namespace Yamadev.YamaStream.Modules.PermissionManagement
       if (!VRCJson.TryDeserializeFromJson(_permissionString, out DataToken result)) return;
       if (result.TokenType != TokenType.DataDictionary) return;
 
-      _permission = result.DataDictionary;
-      for (int i = 0; i < _permission.Count; i++)
+      var dict = result.DataDictionary;
+      var count = dict.Count;
+      for (int i = 0; i < count; i++)
       {
-        double value = _permission.GetValues()[i].DataDictionary["permission"].Double;
-        _permission.GetValues()[i].DataDictionary.SetValue("permission", (int)value);
+        var entry = dict.GetValues()[i];
+        if (entry.TokenType != TokenType.DataDictionary) continue;
+        var innerDict = entry.DataDictionary;
+        if (!innerDict.TryGetValue("permission", out DataToken permToken)) continue;
+        innerDict.SetValue("permission", (int)permToken.Double);
       }
 
-      PermissionData = _permission;
+      PermissionData = dict;
     }
 
     public void SetPermission(int index, PlayerPermission permission)
     {
-      if (index < 0 || index >= _permission.Count) return;
-      DataToken key = _permission.GetKeys()[index];
+      if ((int)PlayerPermission < (int)PlayerPermission.Admin) return;
+      if (index < 0 || index >= PermissionData.Count) return;
+
+      var dict = PermissionData;
+      DataToken key = dict.GetKeys()[index];
       int value = (int)permission;
-      _permission[key].DataDictionary["permission"] = value;
-      PermissionData = _permission;
-      SyncVariables();
+      dict[key].DataDictionary["permission"] = value;
+      PermissionData = dict;
     }
 
     public PlayerPermission GetPermissionByPlayerId(int playerId)
     {
-      if (!_permission.ContainsKey(playerId.ToString())) return _defaultPermission;
-      _permission.TryGetValue(playerId.ToString(), out var result);
-      return (PlayerPermission)result.DataDictionary["permission"].Int;
-    }
+      if (!PermissionData.ContainsKey(playerId.ToString())) return _defaultPermission;
 
-    public void AfterLanguageChanged()
-    {
-      int len = _listeners.Length;
-      for (int i = 0; i < len; i++) _listeners[i].SendCustomEvent("AfterLanguageChanged");
+      PermissionData.TryGetValue(playerId.ToString(), out var result);
+      return (PlayerPermission)result.DataDictionary["permission"].Int;
     }
   }
 }

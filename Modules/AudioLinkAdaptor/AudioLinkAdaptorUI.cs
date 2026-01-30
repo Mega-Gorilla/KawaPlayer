@@ -28,6 +28,7 @@ namespace Yamadev.YamaStream.Modules.AudioLinkAdaptor
       _uiController = GetComponentInParent<UIController>();
       if (!Utilities.IsValid(_uiController) || !Utilities.IsValid(_audioLinkAdaptor)) return;
       _audioLinkAdaptor.AddListener(this);
+      _uiController.AddListener(this);
       UpdateTranslation();
       UpdateAudioLinkState();
     }

@@ -200,46 +200,6 @@ namespace Yamadev.YamaStream.Modules.SlideShower
         if (Utilities.IsValid(listener)) listener.AfterTimeChanged(time);
       }
     }
-
-    public override void BeforeUserSetTime()
-    {
-      int len = _listeners.Length;
-      for (int i = 0; i < len; i++)
-      {
-        var listener = _listeners[i];
-        if (Utilities.IsValid(listener)) listener.BeforeUserSetTime();
-      }
-    }
-
-    public override void BeforeUserBackward()
-    {
-      int len = _listeners.Length;
-      for (int i = 0; i < len; i++)
-      {
-        var listener = _listeners[i];
-        if (Utilities.IsValid(listener)) listener.BeforeUserBackward();
-      }
-    }
-
-    public override void BeforeUserForward()
-    {
-      int len = _listeners.Length;
-      for (int i = 0; i < len; i++)
-      {
-        var listener = _listeners[i];
-        if (Utilities.IsValid(listener)) listener.BeforeUserForward();
-      }
-    }
-
-    public void AfterLanguageChanged()
-    {
-      int len = _listeners.Length;
-      for (int i = 0; i < len; i++)
-      {
-        var listener = _listeners[i];
-        if (Utilities.IsValid(listener)) listener.SendCustomEvent("AfterLanguageChanged");
-      }
-    }
     #endregion
   }
 }

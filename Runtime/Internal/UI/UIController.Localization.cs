@@ -194,7 +194,7 @@ namespace Yamadev.YamaStream.UI
 
     private void SetLanguage(string language)
     {
-      if (!InvokeBeforeEvent(nameof(BeforeUserChangeLanguage))) return;
+      if (!InvokeBeforeEvent("BeforeUserChangeLanguage")) return;
 
       InitializeTranslation();
       _currentLanguage = string.IsNullOrEmpty(language) ? DetectUserLanguage() : language;
@@ -210,7 +210,8 @@ namespace Yamadev.YamaStream.UI
       GeneratePlaylistView();
       UpdateTranslationToggles();
 
-      _controller.SendCustomVideoEvent("AfterLanguageChanged");
+      int len = _listeners.Length;
+      for (int i = 0; i < len; i++) _listeners[i].SendCustomEvent("AfterLanguageChanged");
     }
 
     private void UpdateFont(string languageCode)

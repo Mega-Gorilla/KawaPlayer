@@ -57,8 +57,8 @@ MonoBehaviour:
   _udonSharpBackingUdonBehaviour: {fileID: 8925292300691005182}
   _permissionManagement: {fileID: 7998798272856929684}
   _permissionScroll: {fileID: 5471566091424963570}
-  _permissionEntry: {fileID: 9021702848726846491}
-  _permissionPage: {fileID: 7367292316937190951}
+  _permissionToggle: {fileID: 7108854601613709793}
+  _permissionPage: {fileID: 7104998376335983347}
   _ownerColor: {r: 0.39, g: 0.71, b: 0.96, a: 1}
   _adminColor: {r: 0.73, g: 0.41, b: 0.78, a: 1}
   _editorColor: {r: 0.51, g: 0.78, b: 0.52, a: 1}
@@ -2519,6 +2519,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: PermissionPageToggle
       objectReference: {fileID: 0}
+    - target: {fileID: 914924982577283796, guid: f1e4e53248e1da748ad675bffcbdf10c, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 3851885439562308559, guid: f1e4e53248e1da748ad675bffcbdf10c, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0
@@ -2636,6 +2640,17 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 552733972563373674, guid: f1e4e53248e1da748ad675bffcbdf10c, type: 3}
   m_PrefabInstance: {fileID: 7408466159477637967}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &7108854601613709793 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 321885469019001518, guid: f1e4e53248e1da748ad675bffcbdf10c, type: 3}
+  m_PrefabInstance: {fileID: 7408466159477637967}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7665794883911451035}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9085046f02f69544eb97fd06b6048fe2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &7665794883911451035 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 914924982577283796, guid: f1e4e53248e1da748ad675bffcbdf10c, type: 3}

@@ -13,7 +13,7 @@ namespace Yamadev.YamaStream.Modules.PermissionManagement
   {
     [SerializeField] private PermissionManagement _permissionManagement;
     [SerializeField] private LoopScroll _permissionScroll;
-    [SerializeField] private GameObject _permissionEntry;
+    [SerializeField] private Toggle _permissionToggle;
     [SerializeField] private GameObject _permissionPage;
     [SerializeField] private Color _ownerColor = new Color(0.39f, 0.71f, 0.96f, 1f);
     [SerializeField] private Color _adminColor = new Color(0.73f, 0.41f, 0.78f, 1f);
@@ -32,27 +32,28 @@ namespace Yamadev.YamaStream.Modules.PermissionManagement
       _uiController = GetComponentInParent<UIController>();
       if (!Utilities.IsValid(_uiController) || !Utilities.IsValid(_permissionManagement)) return;
       _permissionManagement.AddListener(this);
+      _uiController.AddListener(this);
       UpdateTranslation();
       GeneratePermissionView();
     }
 
-    public override void BeforeUserChangePlayerHandler() => CheckPermission();
-    public override void BeforeUserPlayTrack() => CheckPermission();
-    public override void BeforeUserPlayVideo() => CheckPermission();
-    public override void BeforeUserPauseVideo() => CheckPermission();
-    public override void BeforeUserStopVideo() => CheckPermission();
-    public override void BeforeUserSetTime() => CheckPermission();
-    public override void BeforeUserBackward() => CheckPermission();
-    public override void BeforeUserForward() => CheckPermission();
-    public override void BeforeUserReloadVideo() => CheckPermission();
-    public override void BeforeUserChangeLoop() => CheckPermission();
-    public override void BeforeUserChangeShufflePlay() => CheckPermission();
-    public override void BeforeUserChangeSpeed() => CheckPermission();
-    public override void BeforeUserChangeRepeat() => CheckPermission();
-    public override void BeforeUserAddTrackToQueue() => CheckPermission();
-    public override void BeforeUserRemoveTrackFromQueue() => CheckPermission();
-    public override void BeforeUserMoveTrackUp() => CheckPermission();
-    public override void BeforeUserMoveTrackDown() => CheckPermission();
+    public void BeforeUserChangePlayerHandler() => CheckPermission();
+    public void BeforeUserPlayTrack() => CheckPermission();
+    public void BeforeUserPlayVideo() => CheckPermission();
+    public void BeforeUserPauseVideo() => CheckPermission();
+    public void BeforeUserStopVideo() => CheckPermission();
+    public void BeforeUserSetTime() => CheckPermission();
+    public void BeforeUserBackward() => CheckPermission();
+    public void BeforeUserForward() => CheckPermission();
+    public void BeforeUserReloadVideo() => CheckPermission();
+    public void BeforeUserChangeLoop() => CheckPermission();
+    public void BeforeUserChangeShufflePlay() => CheckPermission();
+    public void BeforeUserChangeSpeed() => CheckPermission();
+    public void BeforeUserChangeRepeat() => CheckPermission();
+    public void BeforeUserAddTrackToQueue() => CheckPermission();
+    public void BeforeUserRemoveTrackFromQueue() => CheckPermission();
+    public void BeforeUserMoveTrackUp() => CheckPermission();
+    public void BeforeUserMoveTrackDown() => CheckPermission();
 
     private void CheckPermission()
     {
@@ -72,14 +73,10 @@ namespace Yamadev.YamaStream.Modules.PermissionManagement
 
       _permissionScroll.SetUp(_permissionManagement.PermissionData.Count, this, nameof(UpdatePermissionView));
 
-      bool showPage = _permissionManagement.PlayerPermission == PlayerPermission.Owner ||
-        _permissionManagement.PlayerPermission == PlayerPermission.Admin;
+      bool showPage = (int)_permissionManagement.PlayerPermission >= (int)PlayerPermission.Admin;
 
-      if (Utilities.IsValid(_permissionEntry)) _permissionEntry.SetActive(showPage);
-      if (Utilities.IsValid(_permissionPage) && !showPage && _permissionPage.activeSelf)
-      {
-        _permissionPage.SetActive(false);
-      }
+      if (Utilities.IsValid(_permissionToggle)) _permissionToggle.gameObject.SetActive(showPage);
+      if (Utilities.IsValid(_permissionPage)) _permissionPage.SetActive(showPage && _permissionToggle.isOn);
     }
 
     public void UpdatePermissionView()

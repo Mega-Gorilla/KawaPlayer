@@ -106,6 +106,7 @@ namespace Yamadev.YamaStream.UI
 
     #endregion
 
+    private UdonSharpBehaviour[] _listeners = new UdonSharpBehaviour[0];
     private bool _progressDrag;
     private bool _actionCancelled;
 
@@ -144,14 +145,19 @@ namespace Yamadev.YamaStream.UI
       if (!_controller.Stopped && !_controller.IsLoading) UpdateProgressView();
     }
 
+    public void AddListener(UdonSharpBehaviour listener)
+    {
+      if (!Utilities.IsValid(listener) || Array.IndexOf(_listeners, listener) >= 0) return;
+      _listeners = _listeners.Add(listener);
+    }
+
     public bool InvokeBeforeEvent(string eventName)
     {
       _actionCancelled = false;
-      var listeners = _controller.EventListeners;
-      int len = listeners.Length;
+      int len = _listeners.Length;
       for (int i = 0; i < len; i++)
       {
-        var listener = listeners[i];
+        var listener = _listeners[i];
         if (Utilities.IsValid(listener)) listener.SendCustomEvent(eventName);
         if (_actionCancelled) break;
       }
@@ -186,7 +192,7 @@ namespace Yamadev.YamaStream.UI
 
     public void SetUnityPlayerInternal()
     {
-      if (!InvokeBeforeEvent(nameof(BeforeUserChangePlayerHandler)))
+      if (!InvokeBeforeEvent("BeforeUserChangePlayerHandler"))
       {
         UpdateUI();
         return;
@@ -214,7 +220,7 @@ namespace Yamadev.YamaStream.UI
 
     public void SetAVProPlayerInternal()
     {
-      if (!InvokeBeforeEvent(nameof(BeforeUserChangePlayerHandler)))
+      if (!InvokeBeforeEvent("BeforeUserChangePlayerHandler"))
       {
         UpdateUI();
         return;
@@ -242,7 +248,7 @@ namespace Yamadev.YamaStream.UI
 
     public void SetImageViewerInternal()
     {
-      if (!InvokeBeforeEvent(nameof(BeforeUserChangePlayerHandler)))
+      if (!InvokeBeforeEvent("BeforeUserChangePlayerHandler"))
       {
         UpdateUI();
         return;
@@ -335,7 +341,7 @@ namespace Yamadev.YamaStream.UI
 
     public void AddUrlToQueueEventInternal(VideoPlayerType playerType, VRCUrl url)
     {
-      if (!InvokeBeforeEvent(nameof(BeforeUserAddTrackToQueue)))
+      if (!InvokeBeforeEvent("BeforeUserAddTrackToQueue"))
       {
         UpdateUI();
         return;
@@ -361,7 +367,7 @@ namespace Yamadev.YamaStream.UI
 
     private void PlayUrlInternal(VideoPlayerType playerType, VRCUrl url)
     {
-      if (!InvokeBeforeEvent(nameof(BeforeUserPlayTrack)))
+      if (!InvokeBeforeEvent("BeforeUserPlayTrack"))
       {
         UpdateUI();
         return;
@@ -373,7 +379,7 @@ namespace Yamadev.YamaStream.UI
 
     public void Play()
     {
-      if (!InvokeBeforeEvent(nameof(BeforeUserPlayTrack)))
+      if (!InvokeBeforeEvent("BeforeUserPlayTrack"))
       {
         UpdateUI();
         return;
@@ -385,7 +391,7 @@ namespace Yamadev.YamaStream.UI
 
     public void Pause()
     {
-      if (!InvokeBeforeEvent(nameof(BeforeUserPauseVideo)))
+      if (!InvokeBeforeEvent("BeforeUserPauseVideo"))
       {
         UpdateUI();
         return;
@@ -397,7 +403,7 @@ namespace Yamadev.YamaStream.UI
 
     public void Stop()
     {
-      if (!InvokeBeforeEvent(nameof(BeforeUserStopVideo)))
+      if (!InvokeBeforeEvent("BeforeUserStopVideo"))
       {
         UpdateUI();
         return;
@@ -413,7 +419,7 @@ namespace Yamadev.YamaStream.UI
     {
       _progressDrag = false;
       if (!_progressSlider || _controller.Stopped) return;
-      if (!InvokeBeforeEvent(nameof(BeforeUserSetTime)))
+      if (!InvokeBeforeEvent("BeforeUserSetTime"))
       {
         UpdateUI();
         return;
@@ -426,7 +432,7 @@ namespace Yamadev.YamaStream.UI
     public void SetTimeByHelper()
     {
       if (!_progressSliderHelper) return;
-      if (!InvokeBeforeEvent(nameof(BeforeUserSetTime)))
+      if (!InvokeBeforeEvent("BeforeUserSetTime"))
       {
         UpdateUI();
         return;
@@ -438,7 +444,7 @@ namespace Yamadev.YamaStream.UI
 
     public void Loop()
     {
-      if (!InvokeBeforeEvent(nameof(BeforeUserChangeLoop)))
+      if (!InvokeBeforeEvent("BeforeUserChangeLoop"))
       {
         UpdateUI();
         return;
@@ -450,7 +456,7 @@ namespace Yamadev.YamaStream.UI
 
     public void LoopOff()
     {
-      if (!InvokeBeforeEvent(nameof(BeforeUserChangeLoop)))
+      if (!InvokeBeforeEvent("BeforeUserChangeLoop"))
       {
         UpdateUI();
         return;
@@ -462,7 +468,7 @@ namespace Yamadev.YamaStream.UI
 
     public void Reload()
     {
-      if (!InvokeBeforeEvent(nameof(BeforeUserReloadVideo)))
+      if (!InvokeBeforeEvent("BeforeUserReloadVideo"))
       {
         UpdateUI();
         return;
@@ -485,7 +491,7 @@ namespace Yamadev.YamaStream.UI
 
     public void SetRepeat(bool on)
     {
-      if (!InvokeBeforeEvent(nameof(BeforeUserChangeRepeat)))
+      if (!InvokeBeforeEvent("BeforeUserChangeRepeat"))
       {
         UpdateUI();
         return;
@@ -546,7 +552,7 @@ namespace Yamadev.YamaStream.UI
 
     public void SetShuffle()
     {
-      if (!InvokeBeforeEvent(nameof(BeforeUserChangeShufflePlay)))
+      if (!InvokeBeforeEvent("BeforeUserChangeShufflePlay"))
       {
         UpdateUI();
         return;
@@ -558,7 +564,7 @@ namespace Yamadev.YamaStream.UI
 
     public void SetShuffleOff()
     {
-      if (!InvokeBeforeEvent(nameof(BeforeUserChangeShufflePlay)))
+      if (!InvokeBeforeEvent("BeforeUserChangeShufflePlay"))
       {
         UpdateUI();
         return;
@@ -570,7 +576,7 @@ namespace Yamadev.YamaStream.UI
 
     public void Backward()
     {
-      if (!InvokeBeforeEvent(nameof(BeforeUserBackward)))
+      if (!InvokeBeforeEvent("BeforeUserBackward"))
       {
         UpdateUI();
         return;
@@ -582,7 +588,7 @@ namespace Yamadev.YamaStream.UI
 
     public void Forward()
     {
-      if (!InvokeBeforeEvent(nameof(BeforeUserForward)))
+      if (!InvokeBeforeEvent("BeforeUserForward"))
       {
         UpdateUI();
         return;
@@ -600,7 +606,7 @@ namespace Yamadev.YamaStream.UI
         UpdateUI();
         return;
       }
-      if (!InvokeBeforeEvent(nameof(BeforeUserChangeSpeed)))
+      if (!InvokeBeforeEvent("BeforeUserChangeSpeed"))
       {
         UpdateUI();
         return;
@@ -612,7 +618,7 @@ namespace Yamadev.YamaStream.UI
 
     public void Mute()
     {
-      if (!InvokeBeforeEvent(nameof(BeforeUserChangeMute)))
+      if (!InvokeBeforeEvent("BeforeUserChangeMute"))
       {
         UpdateUI();
         return;
@@ -622,7 +628,7 @@ namespace Yamadev.YamaStream.UI
 
     public void Unmute()
     {
-      if (!InvokeBeforeEvent(nameof(BeforeUserChangeMute)))
+      if (!InvokeBeforeEvent("BeforeUserChangeMute"))
       {
         UpdateUI();
         return;
@@ -633,7 +639,7 @@ namespace Yamadev.YamaStream.UI
     public void SetVolume()
     {
       if (!Utilities.IsValid(_volumeSlider)) return;
-      if (!InvokeBeforeEvent(nameof(BeforeUserChangeVolume)))
+      if (!InvokeBeforeEvent("BeforeUserChangeVolume"))
       {
         UpdateUI();
         return;
@@ -645,7 +651,7 @@ namespace Yamadev.YamaStream.UI
     public void SetVolumeByHelper()
     {
       if (!Utilities.IsValid(_volumeSliderHelper)) return;
-      if (!InvokeBeforeEvent(nameof(BeforeUserChangeVolume)))
+      if (!InvokeBeforeEvent("BeforeUserChangeVolume"))
       {
         UpdateUI();
         return;
@@ -661,7 +667,7 @@ namespace Yamadev.YamaStream.UI
 
     private void SetLocalDelay(float value)
     {
-      if (!InvokeBeforeEvent(nameof(BeforeUserChangeLocalDelay)))
+      if (!InvokeBeforeEvent("BeforeUserChangeLocalDelay"))
       {
         UpdateUI();
         return;
@@ -672,7 +678,7 @@ namespace Yamadev.YamaStream.UI
     public void SetBrightness()
     {
       if (!Utilities.IsValid(_brightnessSlider)) return;
-      if (!InvokeBeforeEvent(nameof(BeforeUserChangeBrightness)))
+      if (!InvokeBeforeEvent("BeforeUserChangeBrightness"))
       {
         UpdateUI();
         return;
@@ -684,7 +690,7 @@ namespace Yamadev.YamaStream.UI
     public void SetMirrorFlipOn()
     {
       if (!Utilities.IsValid(_mirrorFlipOnToggle) || !_mirrorFlipOnToggle.isOn) return;
-      if (!InvokeBeforeEvent(nameof(BeforeUserChangeMirrorFlip)))
+      if (!InvokeBeforeEvent("BeforeUserChangeMirrorFlip"))
       {
         UpdateUI();
         return;
@@ -695,7 +701,7 @@ namespace Yamadev.YamaStream.UI
     public void SetMirrorFlipOff()
     {
       if (!Utilities.IsValid(_mirrorFlipOffToggle) || !_mirrorFlipOffToggle.isOn) return;
-      if (!InvokeBeforeEvent(nameof(BeforeUserChangeMirrorFlip)))
+      if (!InvokeBeforeEvent("BeforeUserChangeMirrorFlip"))
       {
         UpdateUI();
         return;
@@ -712,7 +718,7 @@ namespace Yamadev.YamaStream.UI
     public void SetMaxResolution4320() => SetMaxResolution(4320);
     private void SetMaxResolution(int value)
     {
-      if (!InvokeBeforeEvent(nameof(BeforeUserChangeMaxResolution)))
+      if (!InvokeBeforeEvent("BeforeUserChangeMaxResolution"))
       {
         UpdateUI();
         return;

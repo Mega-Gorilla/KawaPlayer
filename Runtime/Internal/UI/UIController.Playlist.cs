@@ -151,7 +151,7 @@ namespace Yamadev.YamaStream.UI
 
     public void RemoveFromQueue()
     {
-      if (!InvokeBeforeEvent(nameof(BeforeUserRemoveTrackFromQueue))) return;
+      if (!InvokeBeforeEvent("BeforeUserRemoveTrackFromQueue")) return;
       if (!_playlistTracksScroll || _playlistTrackIndex < 0) return;
 
       _controller.Queue.TakeOwnership();
@@ -160,7 +160,7 @@ namespace Yamadev.YamaStream.UI
 
     public void AddPlaylistTrackToQueue()
     {
-      if (!InvokeBeforeEvent(nameof(BeforeUserAddTrackToQueue))) return;
+      if (!InvokeBeforeEvent("BeforeUserAddTrackToQueue")) return;
       if (!_playlistTracksScroll || _playlistTrackIndex < 0) return;
 
       object[] track;
@@ -180,21 +180,21 @@ namespace Yamadev.YamaStream.UI
 
     public void MoveUp()
     {
-      if (!InvokeBeforeEvent(nameof(BeforeUserMoveTrackUp))) return;
+      if (!InvokeBeforeEvent("BeforeUserMoveTrackUp")) return;
       _controller.TakeOwnership();
       _controller.Queue.MoveUp(_playlistTrackIndex);
     }
 
     public void MoveDown()
     {
-      if (!InvokeBeforeEvent(nameof(BeforeUserMoveTrackDown))) return;
+      if (!InvokeBeforeEvent("BeforeUserMoveTrackDown")) return;
       _controller.TakeOwnership();
       _controller.Queue.MoveDown(_playlistTrackIndex);
     }
 
     public void PlayPlaylistTrack()
     {
-      if (!InvokeBeforeEvent(nameof(BeforeUserPlayTrack))) return;
+      if (!InvokeBeforeEvent("BeforeUserPlayTrack")) return;
       if (!_playlistTracksScroll || _playlistTrackIndex < 0) return;
 
       if (_historyTabToggle.isOn)

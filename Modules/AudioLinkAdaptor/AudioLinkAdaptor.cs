@@ -166,12 +166,6 @@ namespace Yamadev.YamaStream.Modules.AudioLinkAdaptor
       UpdateMediaLoop();
     }
 
-    public void AfterLanguageChanged()
-    {
-      int len = _listeners.Length;
-      for (int i = 0; i < len; i++) _listeners[i].SendCustomEvent("AfterLanguageChanged");
-    }
-
 #endif
   }
 }
