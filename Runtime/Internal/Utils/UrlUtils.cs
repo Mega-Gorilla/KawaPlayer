@@ -12,7 +12,7 @@ namespace Yamadev.YamaStream
       return url.Substring(0, index).ToLower();
     }
 
-    public static string Protocol(this VRCUrl url) => GetProtocolFromUrl(url.Get());
+    public static string GetProtocol(this VRCUrl url) => GetProtocolFromUrl(url.Get());
 
     public static bool IsValidUrl(string url)
     {

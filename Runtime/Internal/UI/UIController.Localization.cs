@@ -308,15 +308,51 @@ namespace Yamadev.YamaStream.UI
         for (int i = 0; i < scrollRectTransform.childCount; i++)
         {
           Transform cell = scrollRectTransform.GetChild(i);
-          if (cell.transform.TryFind("Actions", out var actions))
+          var actions = cell.transform.Find("Actions");
+          if (Utilities.IsValid(actions))
           {
-            if (actions.TryFind("Return/Text", out var back) && back.TryGetComponentLocal<Text>(out var backText)) backText.text = GetTranslation("button.back");
-            if (actions.TryFind("Up/Text", out var up) && up.TryGetComponentLocal<Text>(out var upText)) upText.text = GetTranslation("button.moveUp");
-            if (actions.TryFind("Down/Text", out var down) && down.TryGetComponentLocal<Text>(out var downText)) downText.text = GetTranslation("button.moveDown");
-            if (actions.TryFind("Remove/Text", out var remove) && remove.TryGetComponentLocal<Text>(out var removeText)) removeText.text = GetTranslation("button.remove");
-            if (actions.TryFind("Copy/Text", out var copyUrl) && copyUrl.TryGetComponentLocal<Text>(out var copyUrlText)) copyUrlText.text = GetTranslation("button.copyUrl");
-            if (actions.TryFind("Add/Text", out var addQueue) && addQueue.TryGetComponentLocal<Text>(out var addQueueText)) addQueueText.text = GetTranslation("button.addQueue");
-            if (actions.TryFind("Play/Text", out var play) && play.TryGetComponentLocal<Text>(out var playText)) playText.text = GetTranslation("button.playVideo");
+            var back = actions.Find("Return/Text");
+            if (Utilities.IsValid(back))
+            {
+              var backText = back.GetComponent<Text>();
+              if (Utilities.IsValid(backText)) backText.text = GetTranslation("button.back");
+            }
+            var up = actions.Find("Up/Text");
+            if (Utilities.IsValid(up))
+            {
+              var upText = up.GetComponent<Text>();
+              if (Utilities.IsValid(upText)) upText.text = GetTranslation("button.moveUp");
+            }
+            var down = actions.Find("Down/Text");
+            if (Utilities.IsValid(down))
+            {
+              var downText = down.GetComponent<Text>();
+              if (Utilities.IsValid(downText)) downText.text = GetTranslation("button.moveDown");
+            }
+            var remove = actions.Find("Remove/Text");
+            if (Utilities.IsValid(remove))
+            {
+              var removeText = remove.GetComponent<Text>();
+              if (Utilities.IsValid(removeText)) removeText.text = GetTranslation("button.remove");
+            }
+            var copyUrl = actions.Find("Copy/Text");
+            if (Utilities.IsValid(copyUrl))
+            {
+              var copyUrlText = copyUrl.GetComponent<Text>();
+              if (Utilities.IsValid(copyUrlText)) copyUrlText.text = GetTranslation("button.copyUrl");
+            }
+            var addQueue = actions.Find("Add/Text");
+            if (Utilities.IsValid(addQueue))
+            {
+              var addQueueText = addQueue.GetComponent<Text>();
+              if (Utilities.IsValid(addQueueText)) addQueueText.text = GetTranslation("button.addQueue");
+            }
+            var play = actions.Find("Play/Text");
+            if (Utilities.IsValid(play))
+            {
+              var playText = play.GetComponent<Text>();
+              if (Utilities.IsValid(playText)) playText.text = GetTranslation("button.playVideo");
+            }
           }
         }
       }

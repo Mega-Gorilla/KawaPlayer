@@ -33,11 +33,25 @@ namespace Yamadev.YamaStream.UI
         if (_playlistsListScroll.Indexes[i] == _playlistsListScroll.LastIndexes[i] || _playlistsListScroll.Indexes[i] == -1) continue;
         var cell = _playlistsListScroll.GetComponent<ScrollRect>().content.GetChild(i);
         var playlist = _controller.Playlists[_playlistsListScroll.Indexes[i]];
-        if (cell.TryFind("Text", out var n) && n.TryGetComponentLocal(out Text name))
-          name.text = _controller.Playlists[_playlistsListScroll.Indexes[i]].PlaylistName;
-        if (cell.TryFind("TrackCount", out var tr) && tr.TryGetComponentLocal(out Text trackCount))
-          trackCount.text = playlist.TrackCount > 0 ? $"{GetTranslation("label.total")} {playlist.TrackCount} {GetTranslation("label.tracks")}" : string.Empty;
-        if (cell.TryGetComponentLocal<IndexTrigger>(out var trigger)) trigger.SetProgramVariable("_variableObject", _playlistsListScroll.Indexes[i]);
+
+        var n = cell.Find("Text");
+        if (Utilities.IsValid(n))
+        {
+          var name = n.GetComponent<Text>();
+          if (Utilities.IsValid(name))
+            name.text = _controller.Playlists[_playlistsListScroll.Indexes[i]].PlaylistName;
+        }
+
+        var tr = cell.Find("TrackCount");
+        if (Utilities.IsValid(tr))
+        {
+          var trackCount = tr.GetComponent<Text>();
+          if (Utilities.IsValid(trackCount))
+            trackCount.text = playlist.TrackCount > 0 ? $"{GetTranslation("label.total")} {playlist.TrackCount} {GetTranslation("label.tracks")}" : string.Empty;
+        }
+
+        var trigger = cell.GetComponent<IndexTrigger>();
+        if (Utilities.IsValid(trigger)) trigger.SetProgramVariable("_variableObject", _playlistsListScroll.Indexes[i]);
       }
     }
 
@@ -115,37 +129,71 @@ namespace Yamadev.YamaStream.UI
         bool isPlaying = _playlistIndex == _controller.ActivePlaylistIndex && _playlistTracksScroll.Indexes[i] == _controller.PlayingTrackIndex;
 
         var cell = _playlistTracksScroll.GetComponent<ScrollRect>().content.GetChild(i);
-        if (cell.TryFind("Info", out var info))
+        var info = cell.Find("Info");
+        if (Utilities.IsValid(info))
         {
-          if (info.TryFind("Title", out var ti) && ti.TryGetComponentLocal(out Text title))
+          var ti = info.Find("Title");
+          if (Utilities.IsValid(ti))
           {
-            title.text = string.IsNullOrEmpty(trackTitle) ? trackUrl.Get() : trackTitle;
-            title.color = isPlaying ? _primaryColor : Color.white;
+            var title = ti.GetComponent<Text>();
+            if (Utilities.IsValid(title))
+            {
+              title.text = string.IsNullOrEmpty(trackTitle) ? trackUrl.Get() : trackTitle;
+              title.color = isPlaying ? _primaryColor : Color.white;
+            }
           }
-          if (info.TryFind("Url", out var u) && u.TryGetComponentLocal(out Text url))
-            url.text = string.IsNullOrEmpty(trackTitle) ? string.Empty : trackUrl.Get();
-          if (info.TryFind("No", out var no) && no.TryGetComponentLocal(out Text numberText))
+          var u = info.Find("Url");
+          if (Utilities.IsValid(u))
           {
-            numberText.text = $"{_playlistTracksScroll.Indexes[i] + 1}";
-            numberText.gameObject.SetActive(!isPlaying);
+            var urlText = u.GetComponent<Text>();
+            if (Utilities.IsValid(urlText))
+              urlText.text = string.IsNullOrEmpty(trackTitle) ? string.Empty : trackUrl.Get();
           }
-          if (info.TryFind("PlayingMark", out var playingMark)) playingMark.gameObject.SetActive(isPlaying);
+          var no = info.Find("No");
+          if (Utilities.IsValid(no))
+          {
+            var numberText = no.GetComponent<Text>();
+            if (Utilities.IsValid(numberText))
+            {
+              numberText.text = $"{_playlistTracksScroll.Indexes[i] + 1}";
+              numberText.gameObject.SetActive(!isPlaying);
+            }
+          }
+          var playingMark = info.Find("PlayingMark");
+          if (Utilities.IsValid(playingMark)) playingMark.gameObject.SetActive(isPlaying);
         }
-        if (cell.TryFind("Actions", out var actions))
+        var actions = cell.Find("Actions");
+        if (Utilities.IsValid(actions))
         {
-          if (actions.TryFind("Up", out var upMark)) upMark.gameObject.SetActive(_queueTabToggle.isOn);
-          if (actions.TryFind("Down", out var downMark)) downMark.gameObject.SetActive(_queueTabToggle.isOn);
-          if (actions.TryFind("Remove", out var removeMark)) removeMark.gameObject.SetActive(_queueTabToggle.isOn);
-          if (actions.TryFind("Copy", out var copyUrl) && copyUrl.TryFind("URL", out var url) && url.TryGetComponentLocal<InputField>(out var trackUrlText))
+          var upMark = actions.Find("Up");
+          if (Utilities.IsValid(upMark)) upMark.gameObject.SetActive(_queueTabToggle.isOn);
+          var downMark = actions.Find("Down");
+          if (Utilities.IsValid(downMark)) downMark.gameObject.SetActive(_queueTabToggle.isOn);
+          var removeMark = actions.Find("Remove");
+          if (Utilities.IsValid(removeMark)) removeMark.gameObject.SetActive(_queueTabToggle.isOn);
+          var copyUrl = actions.Find("Copy");
+          if (Utilities.IsValid(copyUrl))
           {
-            copyUrl.gameObject.SetActive(!_queueTabToggle.isOn);
-            trackUrlText.text = trackUrl.Get();
+            var urlTransform = copyUrl.Find("URL");
+            if (Utilities.IsValid(urlTransform))
+            {
+              var trackUrlText = urlTransform.GetComponent<InputField>();
+              if (Utilities.IsValid(trackUrlText))
+              {
+                copyUrl.gameObject.SetActive(!_queueTabToggle.isOn);
+                trackUrlText.text = trackUrl.Get();
+              }
+            }
           }
-          if (actions.TryFind("Add", out var addMark)) addMark.gameObject.SetActive(!_queueTabToggle.isOn);
-          if (actions.TryFind("Play", out var PlayMark)) PlayMark.gameObject.SetActive(!_queueTabToggle.isOn);
+          var addMark = actions.Find("Add");
+          if (Utilities.IsValid(addMark)) addMark.gameObject.SetActive(!_queueTabToggle.isOn);
+          var PlayMark = actions.Find("Play");
+          if (Utilities.IsValid(PlayMark)) PlayMark.gameObject.SetActive(!_queueTabToggle.isOn);
         }
-        if (cell.TryGetComponentLocal<Animator>(out var ani)) ani.SetTrigger("Reset");
-        if (cell.TryGetComponentLocal<IndexTrigger>(out var trigger)) trigger.SetProgramVariable("_variableObject", _playlistTracksScroll.Indexes[i]);
+        var ani = cell.GetComponent<Animator>();
+        if (Utilities.IsValid(ani)) ani.SetTrigger("Reset");
+        var trigger = cell.GetComponent<IndexTrigger>();
+        if (Utilities.IsValid(trigger)) trigger.SetProgramVariable("_variableObject", _playlistTracksScroll.Indexes[i]);
       }
     }
 

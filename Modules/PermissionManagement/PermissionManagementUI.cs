@@ -94,52 +94,66 @@ namespace Yamadev.YamaStream.Modules.PermissionManagement
         Transform cell = scrollRect.content.GetChild(i);
         DataToken value = _permissionManagement.PermissionData.GetValues()[index];
 
-        if (value.DataDictionary.TryGetValue("displayName", TokenType.String, out DataToken displayName) &&
-          cell.TryFind("Name", out var name) &&
-          name.TryGetComponentLocal(out Text nameText))
+        if (value.DataDictionary.TryGetValue("displayName", TokenType.String, out DataToken displayName))
         {
-          nameText.text = displayName.String;
+          var name = cell.Find("Name");
+          if (Utilities.IsValid(name))
+          {
+            var nameText = name.GetComponent<Text>();
+            if (Utilities.IsValid(nameText))
+              nameText.text = displayName.String;
+          }
         }
 
         PlayerPermission permission = (PlayerPermission)value.DataDictionary["permission"].Int;
         bool couldControl = (int)_permissionManagement.PlayerPermission > (int)permission;
 
-        if (cell.TryFind("Label", out var label) && label.TryGetComponentLocal(out Text labelText))
+        var label = cell.Find("Label");
+        if (Utilities.IsValid(label))
         {
-          labelText.text = permission == PlayerPermission.Owner ? "Owner" : "Admin";
+          var labelText = label.GetComponent<Text>();
+          if (Utilities.IsValid(labelText))
+            labelText.text = permission == PlayerPermission.Owner ? "Owner" : "Admin";
         }
 
-        if (cell.TryFind("Dropdown", out var dropdown))
+        var dropdown = cell.Find("Dropdown");
+        if (Utilities.IsValid(dropdown))
         {
           dropdown.gameObject.SetActive(couldControl);
         }
 
-        if (cell.TryFind("Mark", out var mark) && mark.TryGetComponentLocal(out Image markImage))
+        var mark = cell.Find("Mark");
+        if (Utilities.IsValid(mark))
         {
-          switch (permission)
+          var markImage = mark.GetComponent<Image>();
+          if (Utilities.IsValid(markImage))
           {
-            case PlayerPermission.Owner:
-              markImage.color = _ownerColor;
-              break;
-            case PlayerPermission.Admin:
-              markImage.color = _adminColor;
-              if (Utilities.IsValid(dropdown)) dropdown.GetComponent<Dropdown>().SetValueWithoutNotify(0);
-              break;
-            case PlayerPermission.Editor:
-              markImage.color = _editorColor;
-              if (Utilities.IsValid(dropdown)) dropdown.GetComponent<Dropdown>().SetValueWithoutNotify(1);
-              break;
-            case PlayerPermission.Viewer:
-              markImage.color = _viewerColor;
-              if (Utilities.IsValid(dropdown)) dropdown.GetComponent<Dropdown>().SetValueWithoutNotify(2);
-              break;
-            default:
-              markImage.color = _viewerColor;
-              break;
+            switch (permission)
+            {
+              case PlayerPermission.Owner:
+                markImage.color = _ownerColor;
+                break;
+              case PlayerPermission.Admin:
+                markImage.color = _adminColor;
+                if (Utilities.IsValid(dropdown)) dropdown.GetComponent<Dropdown>().SetValueWithoutNotify(0);
+                break;
+              case PlayerPermission.Editor:
+                markImage.color = _editorColor;
+                if (Utilities.IsValid(dropdown)) dropdown.GetComponent<Dropdown>().SetValueWithoutNotify(1);
+                break;
+              case PlayerPermission.Viewer:
+                markImage.color = _viewerColor;
+                if (Utilities.IsValid(dropdown)) dropdown.GetComponent<Dropdown>().SetValueWithoutNotify(2);
+                break;
+              default:
+                markImage.color = _viewerColor;
+                break;
+            }
           }
         }
 
-        if (cell.TryGetComponentLocal<IndexTrigger>(out var trigger))
+        var trigger = cell.GetComponent<IndexTrigger>();
+        if (Utilities.IsValid(trigger))
         {
           trigger.SetProgramVariable("_variableObject", index);
         }
@@ -159,7 +173,8 @@ namespace Yamadev.YamaStream.Modules.PermissionManagement
       if (!Utilities.IsValid(scrollRect)) return;
 
       Transform cell = scrollRect.content.GetChild(cellIndex);
-      if (!cell.TryFind("Dropdown", out var dropdownTransform)) return;
+      var dropdownTransform = cell.Find("Dropdown");
+      if (!Utilities.IsValid(dropdownTransform)) return;
 
       Dropdown dropdown = dropdownTransform.GetComponent<Dropdown>();
       if (!Utilities.IsValid(dropdown)) return;
