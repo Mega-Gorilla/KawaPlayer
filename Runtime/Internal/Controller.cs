@@ -177,8 +177,6 @@ namespace Yamadev.YamaStream
       if ((Stopped || IsPlaying) && !force) return;
       _syncedState = (byte)PlayerState.Playing;
       Handler.Play();
-
-      SendCustomEventDelayedFrames(nameof(CheckRepeat), 0);
     }
 
     public void Pause(bool force = false)
@@ -326,7 +324,7 @@ namespace Yamadev.YamaStream
       }
     }
 
-    public void PlayTrack(object[] track, bool direct = true)
+    public void PlayTrack(object[] track)
     {
       if (!Utilities.IsValid(track)) return;
 
@@ -342,7 +340,8 @@ namespace Yamadev.YamaStream
         Stop();
       }
 
-      if (direct) ClearPlaylistIndexes();
+      ClearPlaylistIndexes();
+
       _syncedState = (byte)PlayerState.Playing;
       LoadTrack(track);
     }

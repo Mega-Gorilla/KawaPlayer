@@ -79,8 +79,9 @@ namespace Yamadev.YamaStream
     {
       _errorRetryCount = 0;
       _retryTargetUrl = VRCUrl.Empty;
-      if (SyncedState == PlayerState.Playing) Play(true);
-      if (SyncedState == PlayerState.Idle) Stop(true);
+      if (SyncedState == PlayerState.Playing) Handler.Play();
+      if (SyncedState == PlayerState.Idle) Handler.Stop();
+      SendCustomEventDelayedFrames(nameof(CheckRepeat), 0);
 
       if (Networking.IsOwner(gameObject) && !_isLocal && !_reloading)
       {

@@ -918,11 +918,11 @@ namespace Yamadev.YamaStream.UI
     public override void AfterVideoRetry() => UpdateLoadingView();
     public override void AfterQueueUpdated()
     {
-      if (_queueTabToggle.isOn) GeneratePlaylistTracks();
+      if (Utilities.IsValid(_queueTabToggle) && _queueTabToggle.isOn) GeneratePlaylistTracks();
     }
     public override void AfterHistoryUpdated()
     {
-      if (_historyTabToggle.isOn) GeneratePlaylistTracks();
+      if (Utilities.IsValid(_historyTabToggle) && _historyTabToggle.isOn) GeneratePlaylistTracks();
     }
     public override void AfterPlaylistsUpdated() => GeneratePlaylistView();
     public override void AfterVolumeChanged(float volume) => UpdateAudioView();

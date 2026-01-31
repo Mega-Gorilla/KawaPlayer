@@ -97,11 +97,26 @@ namespace Yamadev.YamaStream
     {
       if (!Utilities.IsValid(playlist) || index < 0 || index >= playlist.TrackCount) return;
 
+      var track = playlist.GetTrack(index);
+      if (!Utilities.IsValid(track)) return;
+
+      var url = TrackUtils.GetUrl(track);
+      if (!url.IsValidUrl())
+      {
+        PrintError($"URL {url.Get()} is not valid.");
+        return;
+      }
+
+      if (IsPlaying && (Networking.IsOwner(gameObject) || _isLocal))
+      {
+        Stop();
+      }
+
       _activePlaylistIndex = Array.IndexOf(_playlists, playlist);
       _playingTrackIndex = index;
 
-      var track = playlist.GetTrack(index);
-      PlayTrack(track, false);
+      _syncedState = (byte)PlayerState.Playing;
+      LoadTrack(track);
     }
 
     public void Backward()
