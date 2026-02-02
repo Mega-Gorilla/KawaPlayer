@@ -182,5 +182,28 @@
     "module.persistence.regenerateDialogMessage": "Regenerar el ID hará que la configuración guardada anteriormente sea inaccesible. ¿Está seguro de que desea regenerarlo?",
     "module.persistence.regenerateDialogOk": "Regenerar",
     "module.persistence.regenerateDialogCancel": "Cancelar"
+  },
+  "it": {
+    "module.persistence.name": "Persistenza Impostazioni",
+    "module.persistence.description": "Ripristina le impostazioni al rientro nel mondo",
+    "module.persistence.title": "Persistenza Impostazioni",
+    "module.persistence.keySettings": "Impostazioni Chiave",
+    "module.persistence.uniqueId": "ID Univoco",
+    "module.persistence.volumeKey": "Chiave Volume",
+    "module.persistence.muteKey": "Chiave Muto",
+    "module.persistence.mirrorFlipKey": "Chiave Specchio Invertito",
+    "module.persistence.brightnessKey": "Chiave Luminosità",
+    "module.persistence.generateKeys": "Genera ID",
+    "module.persistence.clearKeys": "Cancella ID",
+    "module.persistence.pathBasedWarning": "ID non impostato. Il percorso gerarchico verrà utilizzato come chiave. Le impostazioni utente andranno perse se modifichi il nome o la posizione del GameObject. Si consiglia di generare un ID.",
+    "module.persistence.apiNotAvailable": "L'API VRC Player Persistence non è disponibile. Richiede VRChat SDK 3.5.0 o successivo.",
+    "module.persistence.clearKeysDialogTitle": "Cancella ID",
+    "module.persistence.clearKeysDialogMessage": "La cancellazione dell'ID renderà inaccessibili le impostazioni utente salvate in precedenza. Sei sicuro di voler cancellare?",
+    "module.persistence.clearKeysDialogOk": "Cancella",
+    "module.persistence.clearKeysDialogCancel": "Annulla",
+    "module.persistence.regenerateDialogTitle": "Rigenera ID",
+    "module.persistence.regenerateDialogMessage": "La rigenerazione dell'ID renderà inaccessibili le impostazioni utente salvate in precedenza. Sei sicuro di voler rigenerare?",
+    "module.persistence.regenerateDialogOk": "Rigenera",
+    "module.persistence.regenerateDialogCancel": "Annulla"
   }
 }

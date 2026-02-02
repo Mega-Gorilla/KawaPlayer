@@ -150,5 +150,24 @@
     "module.autoPlay.noPlaylists": "Плейлисти не знайдено. Перевірте наявність YamaPlayer у батьківських об'єктах.",
     "module.autoPlay.noTracks": "У цьому плейлисті немає треків.",
     "module.autoPlay.refresh": "Оновити"
+  },
+  "it": {
+    "module.autoPlay.name": "Riproduzione Automatica",
+    "module.autoPlay.description": "Riproduce automaticamente il video quando si entra nel mondo",
+    "module.autoPlay.title": "Riproduzione Automatica",
+    "module.autoPlay.settings": "Impostazioni Base",
+    "module.autoPlay.mode": "Modalità Riproduzione Automatica",
+    "module.autoPlay.delay": "Ritardo Avvio (sec)",
+    "module.autoPlay.trackSettings": "Impostazioni Traccia",
+    "module.autoPlay.playerType": "Tipo di Lettore",
+    "module.autoPlay.trackTitle": "Titolo",
+    "module.autoPlay.url": "URL",
+    "module.autoPlay.playlistSettings": "Impostazioni Playlist",
+    "module.autoPlay.playlist": "Playlist",
+    "module.autoPlay.track": "Traccia",
+    "module.autoPlay.random": "Riproduzione Casuale",
+    "module.autoPlay.noPlaylists": "Nessuna playlist trovata. Verifica che YamaPlayer esista negli oggetti genitori.",
+    "module.autoPlay.noTracks": "Nessuna traccia in questa playlist.",
+    "module.autoPlay.refresh": "Aggiorna"
   }
 }

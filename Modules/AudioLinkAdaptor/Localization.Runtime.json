@@ -46,5 +46,11 @@
     "module.audioLinkAdaptor.description": "Enlaza el audio del video a AudioLink",
     "module.audioLinkAdaptor.disabled": "Desactivado",
     "module.audioLinkAdaptor.enabled": "Activado"
+  },
+  "it": {
+    "module.audioLinkAdaptor.title": "Integrazione AudioLink",
+    "module.audioLinkAdaptor.description": "Collega l'audio video ad AudioLink",
+    "module.audioLinkAdaptor.disabled": "Disabilitato",
+    "module.audioLinkAdaptor.enabled": "Abilitato"
   }
 }

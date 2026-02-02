@@ -110,5 +110,19 @@
     "module.permissionManagement.desc.admin": "Puede operar el reproductor de video y editar permisos de usuarios.",
     "module.permissionManagement.desc.editor": "Puede operar el reproductor de video (reproducir, detener, etc.).",
     "module.permissionManagement.desc.viewer": "Solo puede ver videos."
+  },
+  "it": {
+    "module.permissionManagement.name": "Gestione Permessi",
+    "module.permissionManagement.description": "Gestisce i permessi del lettore",
+    "module.permissionManagement.title": "Gestione Permessi",
+    "module.permissionManagement.defaultPermission": "Permesso Predefinito",
+    "module.permissionManagement.ownerList": "Lista Proprietari",
+    "module.permissionManagement.grantToInstanceOwner": "Concedi permesso al proprietario dell'istanza",
+    "module.permissionManagement.grantToInstanceMaster": "Concedi permesso al master dell'istanza",
+    "module.permissionManagement.hint": "Configura i permessi di operazione del lettore. Gli utenti con nomi visualizzati registrati nella lista proprietari riceveranno i permessi di proprietario.",
+    "module.permissionManagement.desc.owner": "Permessi completi. Questo permesso non può essere modificato.",
+    "module.permissionManagement.desc.admin": "Può operare il lettore video e modificare i permessi degli utenti.",
+    "module.permissionManagement.desc.editor": "Può operare il lettore video (riproduzione, stop, ecc.).",
+    "module.permissionManagement.desc.viewer": "Può solo guardare i video."
   }
 }

@@ -46,5 +46,11 @@
     "module.slideshower.description": "Un módulo que muestra el video como diapositivas. Cambia el video por página.",
     "module.slideshower.slideMode": "Modo de diapositivas",
     "module.slideshower.slideSeconds": "Segundos por diapositiva"
+  },
+  "it": {
+    "module.slideshower.name": "Presentazione Diapositive",
+    "module.slideshower.description": "Un modulo che visualizza il video come diapositive. Cambia video per pagina.",
+    "module.slideshower.slideMode": "Modalità Diapositive",
+    "module.slideshower.slideSeconds": "Secondi per Diapositiva"
   }
 }

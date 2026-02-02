@@ -102,5 +102,18 @@
     "module.ltcgiAdaptor.settings": "Налаштування",
     "module.ltcgiAdaptor.hint": "Якщо екрани не відображаються, спочатку налаштуйте YamaPlayer Screen.",
     "module.ltcgiAdaptor.notInstalled": "LTCGI не встановлено. Будь ласка, встановіть LTCGI."
+  },
+  "it": {
+    "module.ltcgiAdaptor.name": "Adattatore LTCGI",
+    "module.ltcgiAdaptor.description": "Configura automaticamente l'integrazione video LTCGI",
+    "module.ltcgiAdaptor.title": "Adattatore LTCGI",
+    "module.ltcgiAdaptor.screenList": "Schermi Target",
+    "module.ltcgiAdaptor.refresh": "Aggiorna",
+    "module.ltcgiAdaptor.noScreens": "Nessuno schermo target trovato",
+    "module.ltcgiAdaptor.enable": "Abilita",
+    "module.ltcgiAdaptor.disable": "Disabilita",
+    "module.ltcgiAdaptor.settings": "Impostazioni",
+    "module.ltcgiAdaptor.hint": "Se gli schermi non vengono visualizzati, configura prima YamaPlayer Screen.",
+    "module.ltcgiAdaptor.notInstalled": "LTCGI non è installato. Si prega di installare LTCGI."
   }
 }

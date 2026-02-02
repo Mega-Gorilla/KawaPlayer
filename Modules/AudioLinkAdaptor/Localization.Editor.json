@@ -62,5 +62,13 @@
     "module.audioLinkAdaptor.hint": "Якщо посилання на AudioLink не встановлено, воно буде автоматично налаштовано під час збірки.",
     "module.audioLinkAdaptor.notInstalled": "AudioLink не встановлено. Будь ласка, встановіть AudioLink.",
     "module.audioLinkAdaptor.addToScene": "Додати AudioLink до сцени"
+  },
+  "it": {
+    "module.audioLinkAdaptor.name": "Adattatore AudioLink",
+    "module.audioLinkAdaptor.description": "Configura automaticamente l'integrazione video di AudioLink",
+    "module.audioLinkAdaptor.defaultAudioLinkEnabled": "Abilita AudioLink per impostazione predefinita",
+    "module.audioLinkAdaptor.hint": "Se il riferimento AudioLink non è impostato, verrà configurato automaticamente al momento della build.",
+    "module.audioLinkAdaptor.notInstalled": "AudioLink non è installato. Si prega di installare AudioLink.",
+    "module.audioLinkAdaptor.addToScene": "Aggiungi AudioLink alla scena"
   }
 }

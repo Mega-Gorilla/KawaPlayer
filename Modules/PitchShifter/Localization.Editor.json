@@ -46,5 +46,11 @@
     "module.pitchshifter.description": "Módulo de cambio de tono para karaoke. Cambia el tono sin cambiar la velocidad de reproducción.",
     "module.pitchshifter.semitones": "Semitonos",
     "module.pitchshifter.bufferLength": "Tamaño del búfer"
+  },
+  "it": {
+    "module.pitchshifter.name": "Cambio Tonalità",
+    "module.pitchshifter.description": "Modulo per cambio tonalità karaoke. Cambia la tonalità senza modificare la velocità di riproduzione.",
+    "module.pitchshifter.semitones": "Semitoni",
+    "module.pitchshifter.bufferLength": "Dimensione Buffer"
   }
 }

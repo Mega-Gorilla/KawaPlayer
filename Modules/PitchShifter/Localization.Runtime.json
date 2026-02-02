@@ -30,5 +30,9 @@
   "es": {
     "module.pitchshifter.title": "Cambiador de tono",
     "module.pitchshifter.description": "Cambia el tono sin cambiar la velocidad de reproducción"
+  },
+  "it": {
+    "module.pitchshifter.title": "Cambio Tonalità",
+    "module.pitchshifter.description": "Cambia la tonalità senza modificare la velocità di riproduzione"
   }
 }

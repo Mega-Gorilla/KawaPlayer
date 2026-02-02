@@ -38,5 +38,10 @@
     "module.lightVolumeAdaptor.name": "Адаптер Light Volume",
     "module.lightVolumeAdaptor.description": "Автоматично налаштовує інтеграцію відео VRC Light Volumes",
     "module.lightVolumeAdaptor.notInstalled": "VRC Light Volumes не встановлено. Будь ласка, встановіть VRC Light Volumes."
+  },
+  "it": {
+    "module.lightVolumeAdaptor.name": "Adattatore Light Volume",
+    "module.lightVolumeAdaptor.description": "Configura automaticamente l'integrazione video VRC Light Volumes",
+    "module.lightVolumeAdaptor.notInstalled": "VRC Light Volumes non è installato. Si prega di installare VRC Light Volumes."
   }
 }

@@ -26,6 +26,7 @@ namespace Yamadev.YamaStream.UI
     [SerializeField, RegisterEvent(nameof(Toggle.onValueChanged), nameof(SetLanguageToSpanish))] private Toggle _languageSpanishToggle;
     [SerializeField, RegisterEvent(nameof(Toggle.onValueChanged), nameof(SetLanguageToUkranian))] private Toggle _languageUkranianToggle;
     [SerializeField, RegisterEvent(nameof(Toggle.onValueChanged), nameof(SetLanguageToRussian))] private Toggle _languageRussianToggle;
+    [SerializeField, RegisterEvent(nameof(Toggle.onValueChanged), nameof(SetLanguageToItalian))] private Toggle _languageItalianToggle;
 
     [Header("Localization - Left Side Labels")]
     [SerializeField] private Text _inputUrlLabel;
@@ -254,6 +255,7 @@ namespace Yamadev.YamaStream.UI
       if (Utilities.IsValid(_languageSpanishToggle)) _languageSpanishToggle.SetIsOnWithoutNotify(_currentLanguage == "es");
       if (Utilities.IsValid(_languageUkranianToggle)) _languageUkranianToggle.SetIsOnWithoutNotify(_currentLanguage == "uk");
       if (Utilities.IsValid(_languageRussianToggle)) _languageRussianToggle.SetIsOnWithoutNotify(_currentLanguage == "ru");
+      if (Utilities.IsValid(_languageItalianToggle)) _languageItalianToggle.SetIsOnWithoutNotify(_currentLanguage == "it");
     }
 
     private void UpdateTranslation()

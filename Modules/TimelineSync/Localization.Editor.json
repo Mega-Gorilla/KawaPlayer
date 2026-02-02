@@ -94,5 +94,17 @@
     "module.timelineSync.remove": "Eliminar",
     "module.timelineSync.noMappings": "No hay mapeos registrados",
     "module.timelineSync.hint": "Registra pares de URL de video y PlayableDirector. Cuando se reproduzca el video, el Timeline se sincronizará automáticamente."
+  },
+  "it": {
+    "module.timelineSync.name": "Sincronizzazione Timeline",
+    "module.timelineSync.description": "Sincronizza la riproduzione della Timeline con gli URL dei video",
+    "module.timelineSync.title": "Sincronizzazione Timeline",
+    "module.timelineSync.mappingList": "Mappature URL / Timeline",
+    "module.timelineSync.url": "URL",
+    "module.timelineSync.timeline": "Timeline",
+    "module.timelineSync.add": "Aggiungi",
+    "module.timelineSync.remove": "Rimuovi",
+    "module.timelineSync.noMappings": "Nessuna mappatura registrata",
+    "module.timelineSync.hint": "Registra coppie di URL video e PlayableDirector. Quando il video viene riprodotto, la Timeline verrà sincronizzata automaticamente."
   }
 }

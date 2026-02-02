@@ -14725,6 +14725,10 @@ MonoBehaviour:
     displayName: "\u0440\u0443\u0441\u0441\u043A\u0438\u0439 \u044F\u0437\u044B\u043A"
     translationFile: {fileID: 4900000, guid: 62de29f8e470c0d45a7fab55c4014ff9, type: 3}
     font: {fileID: 0}
+  - languageCode: it
+    displayName: Italiano
+    translationFile: {fileID: 4900000, guid: 12d3ff7c4be3d58439a97ec45b63cf2f, type: 3}
+    font: {fileID: 12800000, guid: 6488e13b806b0524dbadc43e3a9bd5fb, type: 3}
 --- !u!114 &2700407722501375082
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -14824,6 +14828,7 @@ MonoBehaviour:
   _languageSpanishToggle: {fileID: 1681618239145173556}
   _languageUkranianToggle: {fileID: 4967341862018269258}
   _languageRussianToggle: {fileID: 4083870138326503629}
+  _languageItalianToggle: {fileID: 6392060917325511574}
   _inputUrlLabel: {fileID: 7623365175255795313}
   _loopLabel: {fileID: 3409824905768289711}
   _loopLabel2: {fileID: 793207023218890688}
@@ -17279,6 +17284,17 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5f7201a12d95ffc409449d95f23cf332, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &6392060917325511574 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 4977499141244389329, guid: 9b4eefc0e5913bd48bcd00a520f56300, type: 3}
+  m_PrefabInstance: {fileID: 2136545231472376903}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9085046f02f69544eb97fd06b6048fe2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!114 &6438100503872390146 stripped

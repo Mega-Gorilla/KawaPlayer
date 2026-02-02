@@ -86,5 +86,16 @@
     "module.slideshower.slideSeconds.1s": "1s",
     "module.slideshower.slideSeconds.2s": "2s",
     "module.slideshower.slideSeconds.3s": "3s"
+  },
+  "it": {
+    "module.slideshower.slideMode.title": "Modalità Diapositive",
+    "module.slideshower.slideMode.description": "Visualizza il video come diapositive",
+    "module.slideshower.slideMode.on": "ON",
+    "module.slideshower.slideMode.off": "OFF",
+    "module.slideshower.slideSeconds.title": "Secondi Diapositiva",
+    "module.slideshower.slideSeconds.description": "Imposta i secondi per diapositiva",
+    "module.slideshower.slideSeconds.1s": "1s",
+    "module.slideshower.slideSeconds.2s": "2s",
+    "module.slideshower.slideSeconds.3s": "3s"
   }
 }

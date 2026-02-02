@@ -5541,6 +5541,10 @@ MonoBehaviour:
     displayName: "\u0440\u0443\u0441\u0441\u043A\u0438\u0439 \u044F\u0437\u044B\u043A"
     translationFile: {fileID: 4900000, guid: 62de29f8e470c0d45a7fab55c4014ff9, type: 3}
     font: {fileID: 0}
+  - languageCode: it
+    displayName: Italiano
+    translationFile: {fileID: 4900000, guid: 12d3ff7c4be3d58439a97ec45b63cf2f, type: 3}
+    font: {fileID: 12800000, guid: 6488e13b806b0524dbadc43e3a9bd5fb, type: 3}
 --- !u!114 &5575827741807152191
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5640,6 +5644,7 @@ MonoBehaviour:
   _languageSpanishToggle: {fileID: 0}
   _languageUkranianToggle: {fileID: 0}
   _languageRussianToggle: {fileID: 0}
+  _languageItalianToggle: {fileID: 0}
   _inputUrlLabel: {fileID: 0}
   _loopLabel: {fileID: 0}
   _loopLabel2: {fileID: 0}

@@ -22,6 +22,7 @@ namespace Yamadev.YamaStream.Editor
       ("ko", "한국어"),
       ("ru", "Русский"),
       ("uk", "Українська"),
+      ("it", "Italiano"),
       ("zh-CN", "简体中文"),
       ("zh-TW", "繁體中文")
     };

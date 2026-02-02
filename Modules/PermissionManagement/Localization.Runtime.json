@@ -110,5 +110,19 @@
     "module.permissionManagement.adminDesc": "Puede controlar el reproductor de video y editar permisos de usuarios.",
     "module.permissionManagement.editorDesc": "Puede controlar el reproductor de video: reproducir, detener, etc.",
     "module.permissionManagement.viewerDesc": "Solo puede ver videos."
+  },
+  "it": {
+    "module.permissionManagement.title": "Gestione Permessi",
+    "module.permissionManagement.toggleLabelText": "Permesso",
+    "module.permissionManagement.noPermission": "Nessun Permesso",
+    "module.permissionManagement.noPermissionMessage": "Non hai il permesso per eseguire questa azione. Contatta un amministratore.",
+    "module.permissionManagement.owner": "Owner",
+    "module.permissionManagement.admin": "Admin",
+    "module.permissionManagement.editor": "Editor",
+    "module.permissionManagement.viewer": "Viewer",
+    "module.permissionManagement.ownerDesc": "Ha permessi completi. Questo permesso non può essere modificato.",
+    "module.permissionManagement.adminDesc": "Può controllare il lettore video e modificare i permessi degli utenti.",
+    "module.permissionManagement.editorDesc": "Può controllare il lettore video: riproduzione, stop, ecc.",
+    "module.permissionManagement.viewerDesc": "Può solo guardare i video."
   }
 }
