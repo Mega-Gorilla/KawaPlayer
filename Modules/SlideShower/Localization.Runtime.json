@@ -65,7 +65,7 @@
     "module.slideshower.slideSeconds.2s": "2 сек",
     "module.slideshower.slideSeconds.3s": "3 сек"
   },
-  "uk-UA": {
+  "uk": {
     "module.slideshower.slideMode.title": "Режим слайдів",
     "module.slideshower.slideMode.description": "Відображає відео як слайди",
     "module.slideshower.slideMode.on": "УВІМК",

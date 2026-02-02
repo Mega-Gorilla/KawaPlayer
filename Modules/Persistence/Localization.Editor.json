@@ -137,7 +137,7 @@
     "module.persistence.regenerateDialogOk": "Перегенерировать",
     "module.persistence.regenerateDialogCancel": "Отмена"
   },
-  "uk-UA": {
+  "uk": {
     "module.persistence.name": "Збереження налаштувань",
     "module.persistence.description": "Відновлює налаштування при повторному вході у світ",
     "module.persistence.title": "Збереження налаштувань",

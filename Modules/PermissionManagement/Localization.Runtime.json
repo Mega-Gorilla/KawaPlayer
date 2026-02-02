@@ -83,7 +83,7 @@
     "module.permissionManagement.editorDesc": "Может управлять видеоплеером: воспроизведение, остановка и т.д.",
     "module.permissionManagement.viewerDesc": "Может только смотреть видео."
   },
-  "uk-UA": {
+  "uk": {
     "module.permissionManagement.title": "Управління правами",
     "module.permissionManagement.toggleLabelText": "Права",
     "module.permissionManagement.noPermission": "Немає дозволу",

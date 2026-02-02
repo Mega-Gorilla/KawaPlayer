@@ -35,7 +35,7 @@
     "module.slideshower.slideMode": "Режим слайдов",
     "module.slideshower.slideSeconds": "Секунд на слайд"
   },
-  "uk-UA": {
+  "uk": {
     "module.slideshower.name": "Слайд-шоу",
     "module.slideshower.description": "Модуль для відображення відео у вигляді слайдів. Перемикає відео за сторінками.",
     "module.slideshower.slideMode": "Режим слайдів",

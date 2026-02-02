@@ -1843,7 +1843,7 @@ MonoBehaviour:
     displayName: "Espa\xF1ol"
     translationFile: {fileID: 4900000, guid: c4e9309b428765046891abf6ca8f9a7d, type: 3}
     font: {fileID: 12800000, guid: 6488e13b806b0524dbadc43e3a9bd5fb, type: 3}
-  - languageCode: uk-UA
+  - languageCode: uk
     displayName: "\u0443\u043A\u0440\u0430\u0457\u043D\u0441\u044C\u043A\u0430 \u043C\u043E\u0432\u0430"
     translationFile: {fileID: 4900000, guid: 6bec8f911f42bae48a1927826891c21d, type: 3}
     font: {fileID: 0}

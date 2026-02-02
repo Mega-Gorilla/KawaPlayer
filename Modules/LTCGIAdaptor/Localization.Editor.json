@@ -90,7 +90,7 @@
     "module.ltcgiAdaptor.hint": "Если экраны не отображаются, сначала настройте YamaPlayer Screen.",
     "module.ltcgiAdaptor.notInstalled": "LTCGI не установлен. Пожалуйста, установите LTCGI."
   },
-  "uk-UA": {
+  "uk": {
     "module.ltcgiAdaptor.name": "Адаптер LTCGI",
     "module.ltcgiAdaptor.description": "Автоматично налаштовує інтеграцію відео LTCGI",
     "module.ltcgiAdaptor.title": "Адаптер LTCGI",

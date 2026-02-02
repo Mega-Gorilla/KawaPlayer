@@ -35,7 +35,7 @@
     "module.audioLinkAdaptor.disabled": "Отключено",
     "module.audioLinkAdaptor.enabled": "Включено"
   },
-  "uk-UA": {
+  "uk": {
     "module.audioLinkAdaptor.title": "Інтеграція AudioLink",
     "module.audioLinkAdaptor.description": "Пов'язує аудіо відео з AudioLink",
     "module.audioLinkAdaptor.disabled": "Вимкнено",

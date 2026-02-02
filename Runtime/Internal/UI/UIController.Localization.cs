@@ -184,7 +184,7 @@ namespace Yamadev.YamaStream.UI
     public void SetLanguageToUkranian()
     {
       if (!Utilities.IsValid(_languageUkranianToggle) || !_languageUkranianToggle.isOn) return;
-      SetLanguage("uk-UA");
+      SetLanguage("uk");
     }
     public void SetLanguageToRussian()
     {
@@ -247,7 +247,7 @@ namespace Yamadev.YamaStream.UI
       if (Utilities.IsValid(_languageTraditionalChineseToggle)) _languageTraditionalChineseToggle.SetIsOnWithoutNotify(_currentLanguage == "zh-HK");
       if (Utilities.IsValid(_languageKoreanToggle)) _languageKoreanToggle.SetIsOnWithoutNotify(_currentLanguage == "ko");
       if (Utilities.IsValid(_languageSpanishToggle)) _languageSpanishToggle.SetIsOnWithoutNotify(_currentLanguage == "es");
-      if (Utilities.IsValid(_languageUkranianToggle)) _languageUkranianToggle.SetIsOnWithoutNotify(_currentLanguage == "uk-UA");
+      if (Utilities.IsValid(_languageUkranianToggle)) _languageUkranianToggle.SetIsOnWithoutNotify(_currentLanguage == "uk");
       if (Utilities.IsValid(_languageRussianToggle)) _languageRussianToggle.SetIsOnWithoutNotify(_currentLanguage == "ru");
     }
 

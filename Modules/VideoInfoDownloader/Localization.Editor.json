@@ -27,7 +27,7 @@
     "module.videoInfoDownloader.name": "Загрузчик информации о видео",
     "module.videoInfoDownloader.description": "Автоматически загружает названия видео с YouTube или Twitch"
   },
-  "uk-UA": {
+  "uk": {
     "module.videoInfoDownloader.name": "Завантажувач інформації про відео",
     "module.videoInfoDownloader.description": "Автоматично завантажує назви відео з YouTube або Twitch"
   }

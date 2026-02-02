@@ -55,7 +55,7 @@
     "module.audioLinkAdaptor.notInstalled": "AudioLink не установлен. Пожалуйста, установите AudioLink.",
     "module.audioLinkAdaptor.addToScene": "Добавить AudioLink в сцену"
   },
-  "uk-UA": {
+  "uk": {
     "module.audioLinkAdaptor.name": "Адаптер AudioLink",
     "module.audioLinkAdaptor.description": "Автоматично налаштовує інтеграцію відео AudioLink",
     "module.audioLinkAdaptor.defaultAudioLinkEnabled": "Увімкнути AudioLink за замовчуванням",

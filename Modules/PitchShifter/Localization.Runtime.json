@@ -23,7 +23,7 @@
     "module.pitchshifter.title": "Сдвиг высоты тона",
     "module.pitchshifter.description": "Изменяет высоту тона без изменения скорости воспроизведения"
   },
-  "uk-UA": {
+  "uk": {
     "module.pitchshifter.title": "Зсув висоти тону",
     "module.pitchshifter.description": "Змінює висоту тону без зміни швидкості відтворення"
   },

@@ -71,7 +71,7 @@
     "module.timelineSync.noMappings": "Нет зарегистрированных соответствий",
     "module.timelineSync.hint": "Зарегистрируйте пары URL видео и PlayableDirector. При воспроизведении видео Timeline будет автоматически синхронизирован."
   },
-  "uk-UA": {
+  "uk": {
     "module.timelineSync.name": "Синхронізація Timeline",
     "module.timelineSync.description": "Синхронізує відтворення Timeline з URL відео",
     "module.timelineSync.title": "Синхронізація Timeline",

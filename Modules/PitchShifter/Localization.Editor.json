@@ -35,7 +35,7 @@
     "module.pitchshifter.semitones": "Полутона",
     "module.pitchshifter.bufferLength": "Размер буфера"
   },
-  "uk-UA": {
+  "uk": {
     "module.pitchshifter.name": "Зсув висоти тону",
     "module.pitchshifter.description": "Модуль зміни висоти тону для караоке. Змінює висоту тону без зміни швидкості відтворення.",
     "module.pitchshifter.semitones": "Півтони",

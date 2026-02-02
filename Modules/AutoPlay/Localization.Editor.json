@@ -132,7 +132,7 @@
     "module.autoPlay.noTracks": "В этом плейлисте нет треков.",
     "module.autoPlay.refresh": "Обновить"
   },
-  "uk-UA": {
+  "uk": {
     "module.autoPlay.name": "Автовідтворення",
     "module.autoPlay.description": "Автоматично відтворює відео при вході у світ",
     "module.autoPlay.title": "Автовідтворення",
