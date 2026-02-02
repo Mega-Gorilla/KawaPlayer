@@ -14,8 +14,8 @@ namespace Yamadev.YamaStream
     [SerializeField] private string _textureName = "_MainTex";
     [SerializeField] private bool _useMaterial;
     [SerializeField] private Material _blitMaterial;
-    private BaseVRCVideoPlayer _baseVideoPlayer;
-    private Animator _animator;
+    [SerializeField] private BaseVRCVideoPlayer _baseVideoPlayer;
+    [SerializeField] private Animator _animator;
     private Renderer _renderer;
     private MaterialPropertyBlock _properties;
     private Texture _videoTexture;
@@ -25,10 +25,10 @@ namespace Yamadev.YamaStream
 
     private void Start()
     {
-      _animator = GetComponent<Animator>();
+      if (!Utilities.IsValid(_baseVideoPlayer)) _baseVideoPlayer = GetComponent<BaseVRCVideoPlayer>();
+      if (!Utilities.IsValid(_animator)) _animator = GetComponent<Animator>();
       _animator.Rebind();
-      _baseVideoPlayer = GetComponent<BaseVRCVideoPlayer>();
-      _renderer = GetComponent<Renderer>();
+      if (!Utilities.IsValid(_renderer)) _renderer = GetComponent<Renderer>();
       _properties = new MaterialPropertyBlock();
     }
 
@@ -74,7 +74,7 @@ namespace Yamadev.YamaStream
       {
         if (UseFallbackHandler) return _fallbackHandler.IsPlaying;
 
-        if (!_baseVideoPlayer) return false;
+        if (!Utilities.IsValid(_baseVideoPlayer)) return false;
         return _baseVideoPlayer.IsPlaying;
       }
     }
@@ -113,7 +113,7 @@ namespace Yamadev.YamaStream
       get
       {
         if (UseFallbackHandler) return _fallbackHandler.Loop;
-        if (!_baseVideoPlayer) return false;
+        if (!Utilities.IsValid(_baseVideoPlayer)) return false;
         return _baseVideoPlayer.Loop;
       }
       set
@@ -123,7 +123,7 @@ namespace Yamadev.YamaStream
           _fallbackHandler.Loop = value;
           return;
         }
-        if (!_baseVideoPlayer) return;
+        if (!Utilities.IsValid(_baseVideoPlayer)) return;
         _baseVideoPlayer.Loop = value;
       }
     }

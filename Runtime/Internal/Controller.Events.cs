@@ -132,7 +132,7 @@ namespace Yamadev.YamaStream
     {
       if (Networking.IsOwner(gameObject) || _isLocal)
       {
-        if (Utilities.IsValid(ActivePlaylist) && _forwardInterval >= 0)
+        if (_forwardInterval >= 0)
         {
           _autoForward = true;
           SendCustomEventDelayedSeconds(nameof(AutoForward), _forwardInterval);
@@ -141,7 +141,8 @@ namespace Yamadev.YamaStream
         {
           ClearPlaylistIndexes();
         }
-        Stop();
+        _syncedState = (byte)PlayerState.Idle;
+        Handler.Stop();
       }
 
       int len = _listeners.Length;

@@ -206,7 +206,11 @@ namespace Yamadev.YamaStream
       {
         _loop = value;
         int handlerLen = _videoPlayerHandlers.Length;
-        for (int i = 0; i < handlerLen; i++) _videoPlayerHandlers[i].Loop = _loop;
+        for (int i = 0; i < handlerLen; i++)
+        {
+          var handler = _videoPlayerHandlers[i];
+          if (Utilities.IsValid(handler)) handler.Loop = _loop;
+        }
 
         if (Networking.IsOwner(gameObject) && !_isLocal) RequestSerialization();
         int listenerLen = _listeners.Length;

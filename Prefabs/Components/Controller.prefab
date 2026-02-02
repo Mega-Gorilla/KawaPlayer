@@ -139,6 +139,8 @@ MonoBehaviour:
   _textureName: _MainTex
   _useMaterial: 0
   _blitMaterial: {fileID: 0}
+  _baseVideoPlayer: {fileID: 7156250130313680623}
+  _animator: {fileID: 8355149606679023289}
 --- !u!114 &8881296824453546644
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -572,6 +574,8 @@ MonoBehaviour:
   _textureName: _MainTex
   _useMaterial: 1
   _blitMaterial: {fileID: 2100000, guid: e3f249d178e05cf478f1114d3a4d4c3a, type: 2}
+  _baseVideoPlayer: {fileID: 1426565410921700173}
+  _animator: {fileID: 7966330262816718863}
 --- !u!114 &6438658096325529388
 MonoBehaviour:
   m_ObjectHideFlags: 0
