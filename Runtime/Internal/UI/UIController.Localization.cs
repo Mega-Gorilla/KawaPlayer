@@ -191,6 +191,11 @@ namespace Yamadev.YamaStream.UI
       if (!Utilities.IsValid(_languageRussianToggle) || !_languageRussianToggle.isOn) return;
       SetLanguage("ru");
     }
+    public void SetLanguageToItalian()
+    {
+      if (!Utilities.IsValid(_languageItalianToggle) || !_languageItalianToggle.isOn) return;
+      SetLanguage("it");
+    }
 
     private void SetLanguage(string language)
     {
