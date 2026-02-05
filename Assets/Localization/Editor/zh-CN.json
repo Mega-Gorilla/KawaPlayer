@@ -288,5 +288,12 @@
   "settings.ui.idleScreenSprite.tooltip": "设置视频未播放时显示的图片。",
   "label.yamaPlayer": "YamaPlayer",
   "msg.playModeNotAvailable": "YamaPlayer在播放模式下不可用。",
-  "msg.yamaPlayerRequired": "需要YamaPlayer引用。"
+  "msg.yamaPlayerRequired": "需要YamaPlayer引用。",
+  "button.continue": "继续",
+  "dialog.conflict.title": "冲突",
+  "dialog.conflict.speaker": "此扬声器已被其他视频播放器使用。是否继续？",
+  "dialog.conflict.screen": "此屏幕已被其他视频播放器使用。是否继续？",
+  "button.ok": "确定",
+  "msg.inspectorLocked.title": "检查器已锁定",
+  "msg.inspectorLocked": "检查器已锁定。请先解锁。"
 }

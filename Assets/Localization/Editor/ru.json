@@ -288,5 +288,12 @@
   "settings.ui.idleScreenSprite.tooltip": "Установить изображение, отображаемое когда видео не воспроизводится.",
   "label.yamaPlayer": "YamaPlayer",
   "msg.playModeNotAvailable": "YamaPlayer недоступен в режиме воспроизведения.",
-  "msg.yamaPlayerRequired": "Требуется ссылка на YamaPlayer."
+  "msg.yamaPlayerRequired": "Требуется ссылка на YamaPlayer.",
+  "button.continue": "Продолжить",
+  "dialog.conflict.title": "Конфликт",
+  "dialog.conflict.speaker": "Этот динамик уже используется другим видеоплеером. Продолжить?",
+  "dialog.conflict.screen": "Этот экран уже используется другим видеоплеером. Продолжить?",
+  "button.ok": "ОК",
+  "msg.inspectorLocked.title": "Инспектор заблокирован",
+  "msg.inspectorLocked": "Инспектор заблокирован. Сначала разблокируйте его."
 }

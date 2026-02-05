@@ -120,7 +120,17 @@ namespace Yamadev.YamaStream.Editor
         var settingsRect = new Rect(buttonsStartX, buttonY, buttonWidth, buttonHeight);
         if (GUI.Button(settingsRect, EditorLocalization.Get("module.manager.button.settings")))
         {
-          Selection.activeGameObject = module.gameObject;
+          if (ActiveEditorTracker.sharedTracker.isLocked)
+          {
+            EditorUtility.DisplayDialog(
+              EditorLocalization.Get("msg.inspectorLocked.title"),
+              EditorLocalization.Get("msg.inspectorLocked"),
+              EditorLocalization.Get("button.ok"));
+          }
+          else
+          {
+            Selection.activeGameObject = module.gameObject;
+          }
         }
       }
 

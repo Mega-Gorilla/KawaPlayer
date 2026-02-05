@@ -104,11 +104,19 @@ namespace Yamadev.YamaStream.Editor
         _speakerList = new ReorderableList(_controllerSerializedObject, _audioSources)
         {
           drawHeaderCallback = (rect) => EditorGUI.LabelField(rect, EditorLocalization.GetLayout("settings.audio.speakers"), EditorStyles.boldLabel),
+          onAddCallback = OnAddSpeaker,
           drawElementCallback = (rect, index, isActive, isFocused) =>
           {
             rect.height = EditorGUIUtility.singleLineHeight;
             var element = _audioSources.GetArrayElementAtIndex(index);
-            EditorGUI.PropertyField(rect, element, GUIContent.none);
+            using (var check = new EditorGUI.ChangeCheckScope())
+            {
+              EditorGUI.PropertyField(rect, element, GUIContent.none);
+              if (check.changed)
+              {
+                HandleSpeakerChange(element);
+              }
+            }
           },
           elementHeight = EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing,
         };
@@ -464,7 +472,17 @@ namespace Yamadev.YamaStream.Editor
       {
         if (GUILayout.Button(EditorLocalization.Get("module.manager.button.settings"), GUILayout.Width(50)))
         {
-          Selection.activeGameObject = module.gameObject;
+          if (ActiveEditorTracker.sharedTracker.isLocked)
+          {
+            EditorUtility.DisplayDialog(
+              EditorLocalization.Get("msg.inspectorLocked.title"),
+              EditorLocalization.Get("msg.inspectorLocked"),
+              EditorLocalization.Get("button.ok"));
+          }
+          else
+          {
+            Selection.activeGameObject = module.gameObject;
+          }
         }
       }
 
@@ -549,6 +567,68 @@ namespace Yamadev.YamaStream.Editor
     }
 #endif
 
+    #region Speaker Settings
+    private void OnAddSpeaker(ReorderableList list)
+    {
+      _audioSources.arraySize += 1;
+      _audioSources.GetArrayElementAtIndex(_audioSources.arraySize - 1).objectReferenceValue = null;
+    }
+
+    private void HandleSpeakerChange(SerializedProperty element)
+    {
+      _controllerSerializedObject.ApplyModifiedProperties();
+
+      var audioSource = element.objectReferenceValue as AudioSource;
+      if (audioSource == null) return;
+
+      if (!audioSource.TryGetComponent<YamaPlayerSpeaker>(out var speaker))
+      {
+        speaker = audioSource.gameObject.AddComponent<YamaPlayerSpeaker>();
+      }
+      else if (speaker.controller != null && speaker.controller != _controller)
+      {
+        if (!EditorUtility.DisplayDialog(
+          EditorLocalization.Get("dialog.conflict.title"),
+          EditorLocalization.Get("dialog.conflict.speaker"),
+          EditorLocalization.Get("button.continue"),
+          EditorLocalization.Get("button.cancel")))
+        {
+          element.objectReferenceValue = null;
+          return;
+        }
+        RemoveAudioSourceFromController(speaker.controller, audioSource);
+      }
+      speaker.controller = _controller;
+
+      if (_avPro != null && audioSource.TryGetComponent<VRCAVProVideoSpeaker>(out var avProSpeaker))
+      {
+        var speakerSO = new SerializedObject(avProSpeaker);
+        var videoPlayerProp = speakerSO.FindProperty("videoPlayer");
+        if (videoPlayerProp != null)
+        {
+          videoPlayerProp.objectReferenceValue = _avPro;
+          speakerSO.ApplyModifiedProperties();
+        }
+      }
+
+      EditorUtility.SetDirty(audioSource.gameObject);
+    }
+
+    private void RemoveAudioSourceFromController(Controller controller, AudioSource audioSource)
+    {
+      var so = new SerializedObject(controller);
+      var audioSourcesProp = so.FindProperty("_audioSources");
+      for (int i = audioSourcesProp.arraySize - 1; i >= 0; i--)
+      {
+        if (audioSourcesProp.GetArrayElementAtIndex(i).objectReferenceValue == audioSource)
+        {
+          audioSourcesProp.DeleteArrayElementAtIndex(i);
+        }
+      }
+      so.ApplyModifiedProperties();
+    }
+    #endregion
+
     #region Screen Settings
     private void OnAddScreen(ReorderableList list)
     {
@@ -624,7 +704,49 @@ namespace Yamadev.YamaStream.Editor
       if (screen.objectReferenceValue != null)
       {
         SetDefaultTextureProperty(screen.objectReferenceValue, textureProperty);
+
+        if (screen.objectReferenceValue is Component component)
+        {
+          if (!component.TryGetComponent<YamaPlayerScreen>(out var yamaScreen))
+          {
+            yamaScreen = component.gameObject.AddComponent<YamaPlayerScreen>();
+          }
+          else if (yamaScreen.controller != null && yamaScreen.controller != _controller)
+          {
+            if (!EditorUtility.DisplayDialog(
+              EditorLocalization.Get("dialog.conflict.title"),
+              EditorLocalization.Get("dialog.conflict.screen"),
+              EditorLocalization.Get("button.continue"),
+              EditorLocalization.Get("button.cancel")))
+            {
+              screen.objectReferenceValue = null;
+              return;
+            }
+            RemoveScreenFromController(yamaScreen.controller, component);
+          }
+          yamaScreen.controller = _controller;
+          yamaScreen.property = textureProperty.stringValue;
+          EditorUtility.SetDirty(component.gameObject);
+        }
       }
+    }
+
+    private void RemoveScreenFromController(Controller controller, Component screenComponent)
+    {
+      var so = new SerializedObject(controller);
+      var screensProp = so.FindProperty("_screens");
+      var screenTypesProp = so.FindProperty("_screenTypes");
+      var texturePropertiesProp = so.FindProperty("_textureProperties");
+      for (int i = screensProp.arraySize - 1; i >= 0; i--)
+      {
+        if (screensProp.GetArrayElementAtIndex(i).objectReferenceValue == screenComponent)
+        {
+          screensProp.DeleteArrayElementAtIndex(i);
+          screenTypesProp.DeleteArrayElementAtIndex(i);
+          texturePropertiesProp.DeleteArrayElementAtIndex(i);
+        }
+      }
+      so.ApplyModifiedProperties();
     }
 
     private void SetDefaultTextureProperty(Object target, SerializedProperty textureProperty)

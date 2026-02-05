@@ -276,5 +276,12 @@
   "settings.ui.idleScreenSprite.tooltip": "Set the image displayed when no video is playing.",
   "label.yamaPlayer": "YamaPlayer",
   "msg.playModeNotAvailable": "YamaPlayer is not available in play mode.",
-  "msg.yamaPlayerRequired": "YamaPlayer reference is required."
+  "msg.yamaPlayerRequired": "YamaPlayer reference is required.",
+  "button.continue": "Continue",
+  "dialog.conflict.title": "Conflict",
+  "dialog.conflict.speaker": "This speaker is already used by another video player. Continue?",
+  "dialog.conflict.screen": "This screen is already used by another video player. Continue?",
+  "button.ok": "OK",
+  "msg.inspectorLocked.title": "Inspector Locked",
+  "msg.inspectorLocked": "The inspector is locked. Please unlock it first."
 }

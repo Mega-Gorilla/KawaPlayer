@@ -276,5 +276,12 @@
   "settings.ui.idleScreenSprite.tooltip": "動画が再生されていないときに表示される画像を設定します。",
   "label.yamaPlayer": "YamaPlayer",
   "msg.playModeNotAvailable": "YamaPlayerはプレイモード中に利用できません。",
-  "msg.yamaPlayerRequired": "YamaPlayerの参照が必要です。"
+  "msg.yamaPlayerRequired": "YamaPlayerの参照が必要です。",
+  "button.continue": "続行",
+  "dialog.conflict.title": "コンフリクト",
+  "dialog.conflict.speaker": "このスピーカーは既に他の動画プレイヤーに使用されています。続行しますか？",
+  "dialog.conflict.screen": "このスクリーンは既に他の動画プレイヤーに使用されています。続行しますか？",
+  "button.ok": "OK",
+  "msg.inspectorLocked.title": "インスペクタがロックされています",
+  "msg.inspectorLocked": "インスペクタがロックされています。先にロックを解除してください。"
 }

@@ -276,5 +276,12 @@
   "settings.ui.idleScreenSprite.tooltip": "Imposta l'immagine mostrata quando nessun video è in riproduzione.",
   "label.yamaPlayer": "YamaPlayer",
   "msg.playModeNotAvailable": "YamaPlayer non è disponibile durante la modalità Play.",
-  "msg.yamaPlayerRequired": "È richiesto un riferimento a YamaPlayer."
+  "msg.yamaPlayerRequired": "È richiesto un riferimento a YamaPlayer.",
+  "button.continue": "Continua",
+  "dialog.conflict.title": "Conflitto",
+  "dialog.conflict.speaker": "Questo altoparlante è già utilizzato da un altro video player. Continuare?",
+  "dialog.conflict.screen": "Questo schermo è già utilizzato da un altro video player. Continuare?",
+  "button.ok": "OK",
+  "msg.inspectorLocked.title": "Inspector Bloccato",
+  "msg.inspectorLocked": "L'inspector è bloccato. Sbloccalo prima."
 }
