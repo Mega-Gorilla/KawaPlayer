@@ -17,7 +17,6 @@ namespace Yamadev.YamaStream.Editor
       {
         ProcessYamaPlayerSpeaker();
         ProcessYamaPlayerScreen();
-        ProcessUIController();
       }
       catch (Exception ex)
       {
@@ -42,24 +41,6 @@ namespace Yamadev.YamaStream.Editor
       {
         if (screen == null || screen.controller == null) continue;
         screen.controller.AddScreen(screen.Type, screen.Reference, screen.property);
-      }
-    }
-
-    private static void ProcessUIController()
-    {
-      var uiControllers = Object.FindObjectsByType<UIController>(FindObjectsInactive.Include, FindObjectsSortMode.None);
-      foreach (var uiController in uiControllers)
-      {
-        if (uiController == null) continue;
-        var toggleGroups = uiController.GetComponentsInChildren<ToggleGroup>(true);
-        foreach (var toggleGroup in toggleGroups)
-        {
-          foreach (var toggle in toggleGroup.GetComponentsInChildren<Toggle>(true))
-          {
-            if (toggle == null || toggle.transform.parent != toggleGroup.transform) continue;
-            toggle.group = toggleGroup;
-          }
-        }
       }
     }
   }

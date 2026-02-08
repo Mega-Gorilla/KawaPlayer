@@ -11,6 +11,7 @@ namespace Yamadev.YamaStream.Modules.TimelineSync.Editor
   {
     private SerializedProperty _urlsProperty;
     private SerializedProperty _timelinesProperty;
+    private SerializedProperty _hideOnStopProperty;
     private ReorderableList _mappingList;
 
     private void OnEnable()
@@ -20,45 +21,57 @@ namespace Yamadev.YamaStream.Modules.TimelineSync.Editor
 
       _urlsProperty = serializedObject.FindProperty("_urls");
       _timelinesProperty = serializedObject.FindProperty("_timelines");
+      _hideOnStopProperty = serializedObject.FindProperty("_hideOnStop");
 
       SetupReorderableList();
     }
 
     private void SetupReorderableList()
     {
-      int maxCount = Mathf.Max(_urlsProperty.arraySize, _timelinesProperty.arraySize);
+      int maxCount = Mathf.Max(_urlsProperty.arraySize, Mathf.Max(_timelinesProperty.arraySize, _hideOnStopProperty.arraySize));
       _urlsProperty.arraySize = maxCount;
       _timelinesProperty.arraySize = maxCount;
+      _hideOnStopProperty.arraySize = maxCount;
 
       _mappingList = new ReorderableList(serializedObject, _urlsProperty, true, true, true, true);
 
       _mappingList.drawHeaderCallback = (Rect rect) =>
       {
-        float halfWidth = (rect.width - 20) / 2;
-        EditorGUI.LabelField(new Rect(rect.x, rect.y, halfWidth, rect.height), EditorLocalization.Get("module.timelineSync.url"));
-        EditorGUI.LabelField(new Rect(rect.x + halfWidth + 10, rect.y, halfWidth, rect.height), EditorLocalization.Get("module.timelineSync.timeline"));
+        float checkboxWidth = 60;
+        float fieldWidth = (rect.width - checkboxWidth - 20) / 2;
+        EditorGUI.LabelField(new Rect(rect.x, rect.y, fieldWidth, rect.height), EditorLocalization.Get("module.timelineSync.url"));
+        EditorGUI.LabelField(new Rect(rect.x + fieldWidth + 10, rect.y, fieldWidth, rect.height), EditorLocalization.Get("module.timelineSync.timeline"));
+        EditorGUI.LabelField(new Rect(rect.x + fieldWidth * 2 + 20, rect.y, checkboxWidth, rect.height), EditorLocalization.Get("module.timelineSync.hideOnStop"));
       };
 
       _mappingList.drawElementCallback = (Rect rect, int index, bool isActive, bool isFocused) =>
       {
         EnsureArraySize(index);
 
-        float halfWidth = (rect.width - 10) / 2;
+        float checkboxWidth = 60;
+        float fieldWidth = (rect.width - checkboxWidth - 20) / 2;
         float y = rect.y + 2;
         float height = EditorGUIUtility.singleLineHeight;
 
         SerializedProperty urlElement = _urlsProperty.GetArrayElementAtIndex(index);
         SerializedProperty timelineElement = _timelinesProperty.GetArrayElementAtIndex(index);
+        SerializedProperty hideOnStopElement = _hideOnStopProperty.GetArrayElementAtIndex(index);
 
         EditorGUI.PropertyField(
-          new Rect(rect.x, y, halfWidth, height),
+          new Rect(rect.x, y, fieldWidth, height),
           urlElement,
           GUIContent.none
         );
 
         EditorGUI.PropertyField(
-          new Rect(rect.x + halfWidth + 10, y, halfWidth, height),
+          new Rect(rect.x + fieldWidth + 10, y, fieldWidth, height),
           timelineElement,
+          GUIContent.none
+        );
+
+        EditorGUI.PropertyField(
+          new Rect(rect.x + fieldWidth * 2 + 20, y, checkboxWidth, height),
+          hideOnStopElement,
           GUIContent.none
         );
       };
@@ -68,9 +81,11 @@ namespace Yamadev.YamaStream.Modules.TimelineSync.Editor
         int newIndex = _urlsProperty.arraySize;
         _urlsProperty.arraySize++;
         _timelinesProperty.arraySize++;
+        _hideOnStopProperty.arraySize++;
 
         _urlsProperty.GetArrayElementAtIndex(newIndex).stringValue = "";
         _timelinesProperty.GetArrayElementAtIndex(newIndex).objectReferenceValue = null;
+        _hideOnStopProperty.GetArrayElementAtIndex(newIndex).boolValue = false;
       };
 
       _mappingList.onRemoveCallback = (ReorderableList list) =>
@@ -86,12 +101,17 @@ namespace Yamadev.YamaStream.Modules.TimelineSync.Editor
             }
             _timelinesProperty.DeleteArrayElementAtIndex(list.index);
           }
+          if (list.index < _hideOnStopProperty.arraySize)
+          {
+            _hideOnStopProperty.DeleteArrayElementAtIndex(list.index);
+          }
         }
       };
 
       _mappingList.onReorderCallbackWithDetails = (ReorderableList list, int oldIndex, int newIndex) =>
       {
         _timelinesProperty.MoveArrayElement(oldIndex, newIndex);
+        _hideOnStopProperty.MoveArrayElement(oldIndex, newIndex);
       };
 
       _mappingList.elementHeight = EditorGUIUtility.singleLineHeight + 6;
@@ -106,6 +126,10 @@ namespace Yamadev.YamaStream.Modules.TimelineSync.Editor
       while (_timelinesProperty.arraySize <= index)
       {
         _timelinesProperty.arraySize++;
+      }
+      while (_hideOnStopProperty.arraySize <= index)
+      {
+        _hideOnStopProperty.arraySize++;
       }
     }
 

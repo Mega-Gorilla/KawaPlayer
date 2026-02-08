@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEditor;
 using System.Collections.Generic;
 using Yamadev.YamaStream.UI;
+using UnityEngine.UI;
 
 namespace Yamadev.YamaStream.Editor
 {
@@ -75,6 +76,16 @@ namespace Yamadev.YamaStream.Editor
           {
             var calculatedIndex = childCount + siblingIndex;
             copy.transform.SetSiblingIndex(calculatedIndex < 0 ? 0 : calculatedIndex);
+          }
+        }
+
+        var toggleGroups = uiController.GetComponentsInChildren<ToggleGroup>(true);
+        foreach (var toggleGroup in toggleGroups)
+        {
+          foreach (var toggle in toggleGroup.GetComponentsInChildren<Toggle>(true))
+          {
+            if (toggle == null || toggle.transform.parent != toggleGroup.transform) continue;
+            toggle.group = toggleGroup;
           }
         }
       }

@@ -1,3 +1,4 @@
+using System;
 using UdonSharp;
 using UnityEngine;
 using UnityEngine.Playables;
@@ -10,11 +11,35 @@ namespace Yamadev.YamaStream.Modules.TimelineSync
   {
     [SerializeField] private string[] _urls;
     [SerializeField] private PlayableDirector[] _timelines;
+    [SerializeField] private bool[] _hideOnStop;
+    private int _currentIndex = -1;
 
-    private PlayableDirector _currentTimeline;
+    public override void Start()
+    {
+      base.Start();
+
+      var len = _hideOnStop.Length;
+      for (int i = 0; i < len; i++)
+      {
+        if (i >= _timelines.Length) break;
+        if (_hideOnStop[i])
+        {
+          var timeline = _timelines[i];
+          if (Utilities.IsValid(timeline)) timeline.gameObject.SetActive(false);
+        }
+      }
+    }
 
     public string[] Urls => _urls;
     public PlayableDirector[] Timelines => _timelines;
+    public PlayableDirector CurrentTimeline
+    {
+      get
+      {
+        if (_currentIndex < 0 || _currentIndex >= _timelines.Length) return null;
+        return _timelines[_currentIndex];
+      }
+    }
 
     private PlayableDirector GetTimelineForUrl(string url)
     {
@@ -31,54 +56,57 @@ namespace Yamadev.YamaStream.Modules.TimelineSync
 
     private void PlayTimeline(float time)
     {
-      if (!Utilities.IsValid(_currentTimeline)) return;
+      if (!Utilities.IsValid(CurrentTimeline)) return;
 
-      if (!_currentTimeline.gameObject.activeSelf || !_currentTimeline.enabled)
+      if (!CurrentTimeline.gameObject.activeSelf || !CurrentTimeline.enabled)
       {
-        _currentTimeline.gameObject.SetActive(true);
-        _currentTimeline.enabled = true;
+        CurrentTimeline.gameObject.SetActive(true);
+        CurrentTimeline.enabled = true;
       }
 
-      _currentTimeline.time = time;
-      _currentTimeline.Play();
+      CurrentTimeline.time = time;
+      CurrentTimeline.Play();
     }
 
     private void PauseTimeline(float time)
     {
-      if (!Utilities.IsValid(_currentTimeline)) return;
+      if (!Utilities.IsValid(CurrentTimeline)) return;
 
-      _currentTimeline.time = time;
-      _currentTimeline.Pause();
+      CurrentTimeline.time = time;
+      CurrentTimeline.Pause();
     }
 
     private void SetTimelineTime(float time)
     {
-      if (!Utilities.IsValid(_currentTimeline)) return;
+      if (!Utilities.IsValid(CurrentTimeline)) return;
 
-      _currentTimeline.time = time;
+      CurrentTimeline.time = time;
     }
 
     private void StopTimeline()
     {
-      if (!Utilities.IsValid(_currentTimeline)) return;
+      if (!Utilities.IsValid(CurrentTimeline)) return;
 
-      _currentTimeline.time = 0f;
-      _currentTimeline.Stop();
-      _currentTimeline.gameObject.SetActive(false);
-      _currentTimeline = null;
+      CurrentTimeline.time = 0f;
+      CurrentTimeline.Stop();
+      if (_currentIndex >= 0 && _currentIndex < _hideOnStop.Length && _hideOnStop[_currentIndex])
+        _timelines[_currentIndex].gameObject.SetActive(false);
+      _currentIndex = -1;
     }
 
     private void UpdateCurrentTimeline()
     {
-      if (!Utilities.IsValid(_controller)) return;
+      if (!Utilities.IsValid(_controller) || !Utilities.IsValid(_controller.Track)) return;
 
       string url = TrackUtils.GetUrl(_controller.Track).Get();
       var timeline = GetTimelineForUrl(url);
 
-      if (_currentTimeline != timeline)
+      if (CurrentTimeline != timeline)
       {
         StopTimeline();
-        _currentTimeline = timeline;
+        _currentIndex = Array.IndexOf(_urls, url);
+        if (_currentIndex >= 0 && _currentIndex < _hideOnStop.Length && _hideOnStop[_currentIndex])
+          _timelines[_currentIndex].gameObject.SetActive(true);
       }
     }
 
@@ -118,14 +146,7 @@ namespace Yamadev.YamaStream.Modules.TimelineSync
     public override void AfterTrackLoaded()
     {
       if (!Utilities.IsValid(_controller)) return;
-
-      string url = TrackUtils.GetUrl(_controller.Track).Get();
-      var timeline = GetTimelineForUrl(url);
-
-      if (_currentTimeline != timeline)
-      {
-        StopTimeline();
-      }
+      UpdateCurrentTimeline();
     }
   }
 }
