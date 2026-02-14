@@ -92,6 +92,11 @@ namespace Yamadev.YamaStream.Modules.LightVolumeAdaptor
         }
       }
     }
+
+    public override void AfterVideoStopped()
+    {
+      SetColor(Color.black);
+    }
 #endif
   }
 }
