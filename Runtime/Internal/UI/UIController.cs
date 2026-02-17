@@ -601,7 +601,7 @@ namespace Yamadev.YamaStream.UI
     public void SetSpeed()
     {
       if (!Utilities.IsValid(_speedSlider)) return;
-      if (_controller.SyncedState != (byte)PlayerState.Idle && (_controller.Stopped || _controller.IsLoading))
+      if ((byte)_controller.SyncedState != (byte)PlayerState.Idle && (_controller.Stopped || _controller.IsLoading))
       {
         UpdateUI();
         return;

@@ -188,6 +188,7 @@ namespace Yamadev.YamaStream
 
     public void Stop(bool force = false)
     {
+      _autoForward = false;
       if (Stopped && !IsError && !force) return;
       _syncedState = (byte)PlayerState.Idle;
       ClearPlaylistIndexes();

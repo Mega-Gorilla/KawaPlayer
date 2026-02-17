@@ -296,7 +296,7 @@ namespace Yamadev.YamaStream
         _fallbackHandler.Stop();
         return;
       }
-      if (!Utilities.IsValid(_baseVideoPlayer)) return;
+      if (!Utilities.IsValid(_baseVideoPlayer) || _stopped) return;
 
       _baseVideoPlayer.Stop();
       _loadedUrl = VRCUrl.Empty;
