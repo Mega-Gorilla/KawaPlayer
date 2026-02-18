@@ -16,9 +16,11 @@ namespace Yamadev.YamaStream.UI
     [SerializeField, RegisterEvent(nameof(Toggle.onValueChanged), nameof(GenerateQueueView))] private Toggle _queueTabToggle;
     [SerializeField, RegisterEvent(nameof(Toggle.onValueChanged), nameof(GenerateHistoryView))] private Toggle _historyTabToggle;
     [SerializeField] private Toggle _playlistsTabToggle;
-
     private int _playlistIndex = -1;
     private int _playlistTrackIndex = -1;
+
+    private bool IsQueuePage => Utilities.IsValid(_queueTabToggle) && _queueTabToggle.isOn;
+    private bool IsHistoryPage => Utilities.IsValid(_historyTabToggle) && _historyTabToggle.isOn;
 
     public void GeneratePlaylistView()
     {
@@ -57,13 +59,13 @@ namespace Yamadev.YamaStream.UI
 
     public void GenerateQueueView()
     {
-      if (!Utilities.IsValid(_queueTabToggle) || !_queueTabToggle.isOn || !Utilities.IsValid(_playlistTracksScroll)) return;
+      if (!IsQueuePage || !Utilities.IsValid(_playlistTracksScroll)) return;
       _playlistTracksScroll.SetUp(_controller.Queue.TrackCount, this, nameof(UpdatePlaylistTracksContent));
     }
 
     public void GenerateHistoryView()
     {
-      if (!Utilities.IsValid(_historyTabToggle) || !_historyTabToggle.isOn || !Utilities.IsValid(_playlistTracksScroll)) return;
+      if (!IsHistoryPage || !Utilities.IsValid(_playlistTracksScroll)) return;
       _playlistTracksScroll.SetUp(_controller.History.TrackCount, this, nameof(UpdatePlaylistTracksContent));
     }
 
@@ -76,14 +78,14 @@ namespace Yamadev.YamaStream.UI
     public void GeneratePlaylistTracks()
     {
       if (!Utilities.IsValid(_playlistsListScroll) || !Utilities.IsValid(_playlistTracksScroll)) return;
-      if (!_queueTabToggle.isOn && !_historyTabToggle.isOn && _playlistIndex < 0) return;
+      if (!IsQueuePage && !IsHistoryPage && _playlistIndex < 0) return;
 
       int trackCount;
-      if (_queueTabToggle.isOn)
+      if (IsQueuePage)
       {
         trackCount = _controller.Queue.TrackCount;
       }
-      else if (_historyTabToggle.isOn)
+      else if (IsHistoryPage)
       {
         trackCount = _controller.History.TrackCount;
       }
@@ -104,11 +106,11 @@ namespace Yamadev.YamaStream.UI
     public void UpdatePlaylistTracksContent()
     {
       object[][] tracks;
-      if (_queueTabToggle.isOn)
+      if (IsQueuePage)
       {
         tracks = _controller.Queue.Tracks;
       }
-      else if (_historyTabToggle.isOn)
+      else if (IsHistoryPage)
       {
         tracks = _controller.History.Tracks;
       }
@@ -166,11 +168,11 @@ namespace Yamadev.YamaStream.UI
         if (Utilities.IsValid(actions))
         {
           var upMark = actions.Find("Up");
-          if (Utilities.IsValid(upMark)) upMark.gameObject.SetActive(_queueTabToggle.isOn);
+          if (Utilities.IsValid(upMark)) upMark.gameObject.SetActive(IsQueuePage);
           var downMark = actions.Find("Down");
-          if (Utilities.IsValid(downMark)) downMark.gameObject.SetActive(_queueTabToggle.isOn);
+          if (Utilities.IsValid(downMark)) downMark.gameObject.SetActive(IsQueuePage);
           var removeMark = actions.Find("Remove");
-          if (Utilities.IsValid(removeMark)) removeMark.gameObject.SetActive(_queueTabToggle.isOn);
+          if (Utilities.IsValid(removeMark)) removeMark.gameObject.SetActive(IsQueuePage);
           var copyUrl = actions.Find("Copy");
           if (Utilities.IsValid(copyUrl))
           {
@@ -180,15 +182,15 @@ namespace Yamadev.YamaStream.UI
               var trackUrlText = urlTransform.GetComponent<InputField>();
               if (Utilities.IsValid(trackUrlText))
               {
-                copyUrl.gameObject.SetActive(!_queueTabToggle.isOn);
+                copyUrl.gameObject.SetActive(!IsQueuePage);
                 trackUrlText.text = trackUrl.Get();
               }
             }
           }
           var addMark = actions.Find("Add");
-          if (Utilities.IsValid(addMark)) addMark.gameObject.SetActive(!_queueTabToggle.isOn);
+          if (Utilities.IsValid(addMark)) addMark.gameObject.SetActive(!IsQueuePage);
           var PlayMark = actions.Find("Play");
-          if (Utilities.IsValid(PlayMark)) PlayMark.gameObject.SetActive(!_queueTabToggle.isOn);
+          if (Utilities.IsValid(PlayMark)) PlayMark.gameObject.SetActive(!IsQueuePage);
         }
         var ani = cell.GetComponent<Animator>();
         if (Utilities.IsValid(ani)) ani.SetTrigger("Reset");
@@ -212,7 +214,7 @@ namespace Yamadev.YamaStream.UI
       if (!_playlistTracksScroll || _playlistTrackIndex < 0) return;
 
       object[] track;
-      if (_historyTabToggle.isOn)
+      if (IsHistoryPage)
       {
         track = _controller.History.GetTrack(_playlistTrackIndex);
       }
@@ -245,7 +247,7 @@ namespace Yamadev.YamaStream.UI
       if (!InvokeBeforeEvent("BeforeUserPlayTrack")) return;
       if (!_playlistTracksScroll || _playlistTrackIndex < 0) return;
 
-      if (_historyTabToggle.isOn)
+      if (IsHistoryPage)
       {
         _controller.TakeOwnership();
         _controller.PlayTrackFromHistory(_playlistTrackIndex);
