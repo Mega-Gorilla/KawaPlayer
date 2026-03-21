@@ -13,6 +13,7 @@ namespace Yamadev.YamaStream.Modules.TimelineSync
     [SerializeField] private PlayableDirector[] _timelines;
     [SerializeField] private bool[] _hideOnStop;
     private int _currentIndex = -1;
+    private float _pendingTime = 0f;
 
     public override void Start()
     {
@@ -113,7 +114,7 @@ namespace Yamadev.YamaStream.Modules.TimelineSync
     public override void AfterVideoReady()
     {
       UpdateCurrentTimeline();
-      PlayTimeline(0f);
+      PlayTimeline(_pendingTime);
     }
 
     public override void AfterVideoLooped()
@@ -140,12 +141,14 @@ namespace Yamadev.YamaStream.Modules.TimelineSync
 
     public override void AfterTimeChanged(float time)
     {
+      _pendingTime = time;
       SetTimelineTime(time);
     }
 
     public override void AfterTrackLoaded()
     {
       if (!Utilities.IsValid(_controller)) return;
+      _pendingTime = 0f;
       UpdateCurrentTimeline();
     }
   }

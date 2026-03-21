@@ -83,6 +83,11 @@ namespace Yamadev.YamaStream.UI
     [Header("Localization - Messages")]
     [SerializeField] private Text _unlockUiMessageLabel;
 
+    [Header("Localization - Modal Dialog")]
+    [SerializeField] private Text _modalUnityVideoPlayerLabel; // 現在使用してない
+    [SerializeField] private Text _modalAVProVideoPlayerLabel; // 現在使用してない
+    [SerializeField] private Text _modalImageViewerLabel;
+
     #endregion
 
     private DataDictionary _translationData;
@@ -302,6 +307,7 @@ namespace Yamadev.YamaStream.UI
       if (Utilities.IsValid(_maxResolutionDescLabel)) _maxResolutionDescLabel.text = GetTranslation("desc.maxResolution");
 
       if (Utilities.IsValid(_languageSelectTitleLabel)) _languageSelectTitleLabel.text = GetTranslation("label.languageSelect");
+      if (Utilities.IsValid(_modalImageViewerLabel)) _modalImageViewerLabel.text = GetTranslation("label.imageViewer");
 
       if (Utilities.IsValid(_unlockUiMessageLabel))
       {

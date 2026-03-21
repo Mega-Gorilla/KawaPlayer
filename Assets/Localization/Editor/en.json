@@ -283,5 +283,7 @@
   "dialog.conflict.screen": "This screen is already used by another video player. Continue?",
   "button.ok": "OK",
   "msg.inspectorLocked.title": "Inspector Locked",
-  "msg.inspectorLocked": "The inspector is locked. Please unlock it first."
+  "msg.inspectorLocked": "The inspector is locked. Please unlock it first.",
+  "sceneOverlay.front": "Front",
+  "sceneOverlay.back": "Back"
 }

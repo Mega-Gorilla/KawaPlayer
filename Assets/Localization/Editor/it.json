@@ -283,5 +283,7 @@
   "dialog.conflict.screen": "Questo schermo è già utilizzato da un altro video player. Continuare?",
   "button.ok": "OK",
   "msg.inspectorLocked.title": "Inspector Bloccato",
-  "msg.inspectorLocked": "L'inspector è bloccato. Sbloccalo prima."
+  "msg.inspectorLocked": "L'inspector è bloccato. Sbloccalo prima.",
+  "sceneOverlay.front": "Fronte",
+  "sceneOverlay.back": "Retro"
 }

@@ -295,5 +295,7 @@
   "dialog.conflict.screen": "此屏幕已被其他视频播放器使用。是否继续？",
   "button.ok": "确定",
   "msg.inspectorLocked.title": "检查器已锁定",
-  "msg.inspectorLocked": "检查器已锁定。请先解锁。"
+  "msg.inspectorLocked": "检查器已锁定。请先解锁。",
+  "sceneOverlay.front": "正面",
+  "sceneOverlay.back": "背面"
 }

@@ -295,5 +295,7 @@
   "dialog.conflict.screen": "Цей екран вже використовується іншим відеоплеєром. Продовжити?",
   "button.ok": "ОК",
   "msg.inspectorLocked.title": "Інспектор заблоковано",
-  "msg.inspectorLocked": "Інспектор заблоковано. Спочатку розблокуйте його."
+  "msg.inspectorLocked": "Інспектор заблоковано. Спочатку розблокуйте його.",
+  "sceneOverlay.front": "Лицьова",
+  "sceneOverlay.back": "Зворотня"
 }

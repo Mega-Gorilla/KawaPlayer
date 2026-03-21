@@ -283,5 +283,7 @@
   "dialog.conflict.screen": "このスクリーンは既に他の動画プレイヤーに使用されています。続行しますか？",
   "button.ok": "OK",
   "msg.inspectorLocked.title": "インスペクタがロックされています",
-  "msg.inspectorLocked": "インスペクタがロックされています。先にロックを解除してください。"
+  "msg.inspectorLocked": "インスペクタがロックされています。先にロックを解除してください。",
+  "sceneOverlay.front": "表",
+  "sceneOverlay.back": "裏"
 }

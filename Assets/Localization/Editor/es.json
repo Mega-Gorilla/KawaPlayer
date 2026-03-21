@@ -295,5 +295,7 @@
   "dialog.conflict.screen": "Esta pantalla ya está en uso por otro reproductor de video. ¿Continuar?",
   "button.ok": "OK",
   "msg.inspectorLocked.title": "Inspector Bloqueado",
-  "msg.inspectorLocked": "El inspector está bloqueado. Por favor, desbloquéelo primero."
+  "msg.inspectorLocked": "El inspector está bloqueado. Por favor, desbloquéelo primero.",
+  "sceneOverlay.front": "Frente",
+  "sceneOverlay.back": "Reverso"
 }
