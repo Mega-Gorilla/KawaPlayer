@@ -1,61 +1,72 @@
-[![GitHub release (latest by date)](https://img.shields.io/github/v/release/koorimizuw/YamaPlayer?label=release)](https://github.com/koorimizuw/YamaPlayer/releases)
-![GitHub release (by tag)](https://img.shields.io/github/downloads/koorimizuw/YamaPlayer/latest/total)
-![GitHub all releases](https://img.shields.io/github/downloads/koorimizuw/YamaPlayer/total?label=total%20downloads)
+# KawaPlayer
 
-# YamaPlayer
+[YamaPlayer](https://github.com/koorimizuw/YamaPlayer) のフォークリポジトリです。
 
-![image](https://github.com/user-attachments/assets/fc345e20-8c4d-4218-b7f5-f5efe5d055a0)
+## 目的
 
-YamaPlayerはVRChatで使うことを想定して作られた動画プレイヤーです。
+YamaPlayer のプレイリスト機能を拡張し、**外部プレイリストをランタイムで読み込んで Queue に自動追加する機能**を実装することを目指しています。
 
-## 特徴
+VRChat/Udon の制約（ランタイムで `string → VRCUrl` 変換が不可能）を回避するため、**Pre-baked URL Pool + リダイレクトサーバー方式**を採用する設計です。
 
-🌟YouTube、Twitterなど動画の再生  
-🌟YouTube Live、Twitchなどストリーミング配信の再生  
-🌟YouTube、Twitchの動画のタイトルの自動ロード  
-🌟再生速度変更  
-🌟区間リピート再生  
-🌟最大解像度変更  
-🌟ミラー反転  
-🌟カラオケモード(ベータ)  
-🌟画面の明るさの調整  
-🌟画面内操作可能のモダンなUI  
-🌟再生キュー  
-🌟再生履歴  
-🌟再生プレイリスト  
-🌟シークバーヘルパー  
-🌟ダイナミックプレイリスト  
-🌟トランジションアニメーション  
-🌟LTCGIサポート  
-🌟英語・中国語・韓国語対応  
-🌟信用できる再生同期(ユーザ間の遅延を内部で計算する)  
-🌟軽量・低負荷  
-🌟VRCHandMenu対応([booth](https://yamadev.booth.pm/items/4201369))([GitHub](https://github.com/koorimizuw/VRCHandMenu))
+## 現在の状態
 
-ワールド製作者にもやさしい機能がいっぱいあります。  
-🌟設置簡単(シーンに置くだけ)  
-🌟持てるサブスクリーン  
-🌟他動画プレイヤーのプレイリストからインポート  
-🌟YouTubeのプレイリストをワンクリックでインポート
+設計段階です。実装はまだ開始していません。
+
+## YamaPlayer について
+
+YamaPlayer は VRChat で使うことを想定して作られた動画プレイヤーです。以下の機能を備えています。
+
+- YouTube、Twitch 等の動画・ストリーミング再生
+- 動画タイトルの自動ロード
+- 再生速度変更、区間リピート、最大解像度変更
+- カラオケモード
+- 再生キュー、再生履歴、プレイリスト
+- ネットワーク同期（ユーザ間の遅延を内部で計算）
+- AudioLink / LTCGI サポート
+- 多言語対応
+
+詳細は [本家 YamaPlayer](https://github.com/koorimizuw/YamaPlayer) を参照してください。
 
 ## 導入手順
-- Yamadev vpms packagesサイトからVCCに追加
 
-  https://vpm.kwxxw.net/  
-  こちらのサイトから、「ADD TO VCC」ボタンをクリックすると、Yamadev vpm reposが自動的にVCCに追加されます。  
-  VCCのプロジェクトから「Manage Project」を開き、YamaPlayerの行の一番右の「+」ボタンをクリックします。  
-  「ADD TO VCC」が反応しない場合は、VCCから「Setting - Packages - Add Repository」を開き、```https://vpm.kwxxw.net/index.json```を追加してください。
-- 手動でYamadev vpm reposを追加
-  
-  ```
-  vpm add repo https://vpm.kwxxw.net/index.json
-  ```
-  [VPM CLI](https://vcc.docs.vrchat.com/vpm/cli/)の説明はこちらです。
+このフォークは VPM 配布していません。Unity プロジェクトの `Packages/manifest.json` にローカルパッケージ参照を追加してください。
+
+```json
+{
+  "dependencies": {
+    "net.kwxxw.yama-stream": "file:<KawaPlayerリポジトリのパス>",
+    ...
+  }
+}
+```
+
+VRChat Worlds SDK (>=3.8.1) が導入済みのプロジェクトが必要です。
+
+## ドキュメント
+
+### 調査・分析
+
+- [プレイリストパイプライン解析](docs/analysis/playlist-pipeline.md)
+- [URL→再生パイプライン解析](docs/analysis/url-to-playback-pipeline.md)
+- [ランタイムJSONプレイリストの制約](docs/analysis/why-no-runtime-json-playlist.md)
+
+### 設計
+
+- [URL Pool 方式プレイリストローダー — 全体設計](docs/design/url-pool-playlist-loader.md)
+- [URL Pool 方式 — Unity 側設計](docs/design/url-pool-unity.md)
+- [URL Pool 方式 — サーバー側設計](docs/design/url-pool-server.md)
 
 ## 利用規約
-許可：  
-改変  
-ワールドの一部としてVRChatでの公開  
-有償・無償問わず販売ワールドアセットへの取り組み  
 
-クレジット記載は任意です、ただし販売ワールドアセットへ取り組む場合クレジット記載は必須です。  
+本家 YamaPlayer の利用規約に準じます。
+
+許可：
+改変
+ワールドの一部としてVRChatでの公開
+有償・無償問わず販売ワールドアセットへの取り組み
+
+クレジット記載は任意です、ただし販売ワールドアセットへ取り組む場合クレジット記載は必須です。
+
+## クレジット
+
+- [YamaPlayer](https://github.com/koorimizuw/YamaPlayer) by [kwxxw](https://yamadev.booth.pm)
