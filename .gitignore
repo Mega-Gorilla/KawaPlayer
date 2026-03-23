@@ -1,1 +1,5 @@
 .DS_Store
+CLAUDE.md.meta
+AGENTS.md.meta
+docs.meta
+docs/**/*.meta
