@@ -42,20 +42,6 @@ YamaPlayer は VRChat で使うことを想定して作られた動画プレイ�
 
 VRChat Worlds SDK (>=3.8.1) が導入済みのプロジェクトが必要です。
 
-## ドキュメント
-
-### 調査・分析
-
-- [プレイリストパイプライン解析](docs/analysis/playlist-pipeline.md)
-- [URL→再生パイプライン解析](docs/analysis/url-to-playback-pipeline.md)
-- [ランタイムJSONプレイリストの制約](docs/analysis/why-no-runtime-json-playlist.md)
-
-### 設計
-
-- [URL Pool 方式プレイリストローダー — 全体設計](docs/design/url-pool-playlist-loader.md)
-- [URL Pool 方式 — Unity 側設計](docs/design/url-pool-unity.md)
-- [URL Pool 方式 — サーバー側設計](docs/design/url-pool-server.md)
-
 ## 利用規約
 
 本家 YamaPlayer の利用規約に準じます。
