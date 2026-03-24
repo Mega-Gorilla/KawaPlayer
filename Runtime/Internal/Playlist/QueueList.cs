@@ -61,6 +61,30 @@ namespace Yamadev.YamaStream
       _controller.SendCustomVideoEvent(nameof(AfterQueueUpdated));
     }
 
+    public void AddTracks(object[][] tracks)
+    {
+      if (!Utilities.IsValid(tracks) || tracks.Length == 0) return;
+
+      int currentLength = _tracks.Length;
+      int addLength = tracks.Length;
+      object[][] newTracks = new object[currentLength + addLength][];
+      for (int i = 0; i < currentLength; i++)
+      {
+        newTracks[i] = _tracks[i];
+      }
+      for (int i = 0; i < addLength; i++)
+      {
+        newTracks[currentLength + i] = tracks[i];
+      }
+      _tracks = newTracks;
+
+      if (Networking.IsOwner(_controller.gameObject) && !_controller.IsLocal)
+      {
+        RequestSerialization();
+      }
+      _controller.SendCustomVideoEvent(nameof(AfterQueueUpdated));
+    }
+
     public void RemoveTrack(int index)
     {
       if (index < 0 || index >= _tracks.Length) return;
