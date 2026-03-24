@@ -48,14 +48,14 @@ VRChat のカラオケワールド等で実績のある **Pre-baked URL Pool** �
 │                     ランタイム                                     │
 │                                                                   │
 │  [ユーザー]                                                       │
-│    │  resolver URL を VRCUrlInputField に入力                     │
-│    │  例: https://api.example.com/playlists/abc123                │
+│    │  resolve URL を VRCUrlInputField に入力                      │
+│    │  例: https://api.example.com/r/kawaplayer-main/V1StGXR8      │
 │    ▼                                                              │
 │  [PlaylistLoader (Unity)]                                         │
-│    │  VRCStringDownloader.LoadUrl(resolverUrl)                    │
+│    │  VRCStringDownloader.LoadUrl(resolveUrl)                     │
 │    ▼                                                              │
-│  [Resolver API (サーバー)]                                        │
-│    │  1. 外部プレイリスト JSON を取得                               │
+│  [Resolve API (サーバー)]                                         │
+│    │  1. DB からプレイリストのトラック一覧を取得                      │
 │    │  2. 各トラック URL に pool index を割り当て                    │
 │    │  3. index 付き JSON をレスポンス                               │
 │    ▼                                                              │
@@ -82,8 +82,9 @@ VRChat のカラオケワールド等で実績のある **Pre-baked URL Pool** �
 | 担当 | 責務 | やらないこと |
 |------|------|------------|
 | **Unity Editor** | VRCUrl Pool のビルド時生成 | サーバーとの通信 |
-| **Unity Runtime** | resolver URL の受け取り、index 付き JSON のパース、Queue 追加 | 実 URL の解決、VRCUrl の動的生成 |
-| **サーバー** | プレイリスト取得、index 割り当て、HTTP 302 リダイレクト | Unity の状態管理、Queue 操作 |
+| **Unity Runtime** | resolve URL の受け取り、index 付き JSON のパース、Queue 追加 | 実 URL の解決、VRCUrl の動的生成 |
+| **サーバー (Hasura)** | ユーザー管理、動画カタログ、プレイリスト CRUD | Unity の状態管理 |
+| **サーバー (API Routes)** | Resolve API (index 割り当て)、Redirect API (HTTP 302) | Queue 操作 |
 
 **設計の核心**: Unity 側は実際の動画 URL を一切知らなくても動作する。動的な要素はすべてサーバー側に集約される。
 

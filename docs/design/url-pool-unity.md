@@ -9,7 +9,7 @@
 Unity 側の責務は以下の4つに限定する。
 
 1. **ビルド時**: Pool 用 `VRCUrl[]` の生成
-2. **ランタイム**: resolver URL の受け取り
+2. **ランタイム**: resolve URL の受け取り
 3. **ランタイム**: index 付きレスポンス JSON のパース
 4. **ランタイム**: index を使った Queue 追加
 
@@ -49,7 +49,7 @@ public class PlaylistLoader : YamaPlayerModule
     [SerializeField] private string _poolId;
 
     private bool _isLoading;
-    private VRCUrl _pendingResolverUrl;
+    private VRCUrl _pendingResolveUrl;
 }
 ```
 
@@ -117,10 +117,10 @@ for (int i = 0; i < poolSize; i++)
 ```text
 ユーザー入力                VRCStringDownloader         VRCJson              Queue
     │                            │                       │                   │
-    │  resolver URL 入力         │                       │                   │
+    │  resolve URL 入力          │                       │                   │
     │  (VRCUrlInputField)        │                       │                   │
     ├──────────────────────────>│                       │                   │
-    │                            │  LoadUrl(resolverUrl)  │                   │
+    │                            │  LoadUrl(resolveUrl)   │                   │
     │                            ├─── HTTP GET ─────────>│ (サーバー)         │
     │                            │                       │                   │
     │                            │<── index 付き JSON ───│                   │
@@ -141,10 +141,9 @@ for (int i = 0; i < poolSize; i++)
 
 | パターン | URL 例 | 用途 |
 |---------|--------|------|
-| resolver 直指定 | `https://api.example.com/playlist?src=https://example.com/list.json` | 開発・検証 |
-| 事前登録プレイリスト | `https://api.example.com/playlists/abc123` | **実運用 (推奨)** |
+| resolve URL | `https://api.example.com/r/{poolId}/{playlistId}` | VRChat から入力 |
 
-実運用では事前登録方式を推奨。URL が短く、VRChat 内でのテキスト入力が容易。
+プレイリストはサーバーの Web UI で作成・管理し、resolve URL を VRChat に入力する。Web ページ (`/playlists/{id}`) にコピー用の VRChat URL が表示される。
 
 ### JSON パース
 
@@ -176,7 +175,7 @@ var track = TrackUtils.NewTrack((VideoPlayerType)mode, title, redirectUrl);
 
 | 失敗ケース | UI メッセージ例 |
 |-----------|----------------|
-| resolver URL ダウンロード失敗 | `Playlist server is unavailable` |
+| resolve URL ダウンロード失敗 | `Playlist server is unavailable` |
 | JSON パース失敗 | `Failed to parse playlist response` |
 | `index` フィールド欠落 | `Invalid track data (missing index)` |
 | index が pool 範囲外 | `Pool index out of range` |
@@ -189,18 +188,18 @@ var track = TrackUtils.NewTrack((VideoPlayerType)mode, title, redirectUrl);
 ## 擬似コード
 
 ```csharp
-public void LoadPlaylistFromUrl(VRCUrl resolverUrl)
+public void LoadPlaylistFromUrl(VRCUrl resolveUrl)
 {
     if (_isLoading) return;
     _isLoading = true;
-    _pendingResolverUrl = resolverUrl;
+    _pendingResolveUrl = resolveUrl;
     if (Utilities.IsValid(_ui)) _ui.ShowLoading("Loading playlist...");
-    VRCStringDownloader.LoadUrl(resolverUrl, (IUdonEventReceiver)this);
+    VRCStringDownloader.LoadUrl(resolveUrl, (IUdonEventReceiver)this);
 }
 
 public override void OnStringLoadSuccess(IVRCStringDownload result)
 {
-    if (result.Url.Get() != _pendingResolverUrl.Get()) return;
+    if (result.Url.Get() != _pendingResolveUrl.Get()) return;
     _isLoading = false;
 
     // JSON パース

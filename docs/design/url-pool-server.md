@@ -4,33 +4,154 @@
 
 ---
 
-## 責務
+## 概要
 
-サーバーの責務は以下の3つに集約される。
+サーバーは以下の機能を提供する。
 
-1. **Resolver**: 外部プレイリスト JSON を取得し、各トラックに pool index を割り当てて返す
-2. **Redirect**: `pool + index` に対して実際の動画 URL へ HTTP 302 リダイレクトする
-3. **Pool 管理**: slot の割り当て、重複再利用、TTL 管理を行う
+1. **ユーザー管理**: ユーザー登録・認証
+2. **動画カタログ**: 動画 URL の登録・メタデータ管理
+3. **プレイリスト管理**: ユーザーがカタログから自由にプレイリストを作成・編集
+4. **VRChat Resolve API**: プレイリストのトラックに pool index を割り当て、index 付き JSON を返す
+5. **VRChat Redirect API**: `pool + index` から実際の動画 URL へ HTTP 302 リダイレクト
+6. **Pool 管理**: slot の割り当て、重複再利用、TTL 管理（PostgreSQL に永続化）
 
 サーバーは Unity の状態管理や Queue 操作には関与しない。
 
 ---
 
+## 技術スタック
+
+| レイヤー | 技術 | 備考 |
+|---------|------|------|
+| フロントエンド | Next.js | プレイリスト管理 UI、ユーザー登録画面 |
+| GraphQL API | Hasura | PostgreSQL 上の CRUD を自動公開 |
+| カスタム API | Next.js API Routes | VRChat 向け resolve / redirect エンドポイント |
+| DB | PostgreSQL | ユーザー、動画カタログ、プレイリスト、pool state |
+
+参考構成: [vhub-world-search](https://github.com/kisaragi-official/vhub-world-search)
+
+### Hasura で扱うもの
+
+- ユーザー登録・認証
+- 動画カタログの CRUD
+- プレイリストの作成・編集・削除
+- プレイリスト一覧の取得 (GraphQL)
+
+### Next.js API Routes で扱うもの
+
+- `GET /r/{poolId}/{playlistId}` → VRChat 向け resolve（低レイテンシが必要）
+- `GET /vrcurl/{poolId}/{index}` → HTTP 302 リダイレクト（動画プレイヤーが毎回アクセス）
+- Pool state の管理
+
+---
+
+## データモデル
+
+### users
+
+| カラム | 型 | 説明 |
+|--------|-----|------|
+| id | uuid | PK |
+| name | text | 表示名 |
+| created_at | timestamptz | |
+
+### videos (動画カタログ)
+
+| カラム | 型 | 説明 |
+|--------|-----|------|
+| id | uuid | PK |
+| url | text | 動画 URL (unique) |
+| title | text | タイトル |
+| mode | int | VideoPlayerType (0=Unity, 1=AVPro, 2=ImageViewer) |
+| thumbnail_url | text | サムネイル URL (nullable) |
+| registered_by | uuid | FK → users |
+| created_at | timestamptz | |
+
+### playlists
+
+| カラム | 型 | 説明 |
+|--------|-----|------|
+| id | text | PK。nanoid (21文字, URL-safe) |
+| name | text | プレイリスト名 |
+| owner_id | uuid | FK → users |
+| is_public | boolean | 公開フラグ |
+| created_at | timestamptz | |
+| updated_at | timestamptz | |
+
+### playlist_tracks
+
+| カラム | 型 | 説明 |
+|--------|-----|------|
+| id | uuid | PK |
+| playlist_id | text | FK → playlists |
+| video_id | uuid | FK → videos |
+| position | int | プレイリスト内の順番 |
+
+### pool_slots (Pool 状態の永続化)
+
+| カラム | 型 | 説明 |
+|--------|-----|------|
+| pool_id | text | Pool 識別子 |
+| index | int | スロット番号 (0 〜 poolSize-1) |
+| dest_url | text | リダイレクト先 URL |
+| expires_at | timestamptz | TTL 期限 |
+| (PK) | | (pool_id, index) |
+
+### pool_url_index (逆引き)
+
+| カラム | 型 | 説明 |
+|--------|-----|------|
+| pool_id | text | Pool 識別子 |
+| url | text | 動画 URL |
+| index | int | 割り当て済みスロット番号 |
+| (PK) | | (pool_id, url) |
+
+---
+
 ## API 仕様
 
-### 1. Playlist Resolver API
-
-外部プレイリスト JSON を取得し、index 割り当て済みのレスポンスを返す。
+### 1. Web ページ — プレイリスト閲覧・編集
 
 ```text
-GET /playlist?src={encodedPlaylistJsonUrl}&pool={poolId}
+GET /playlists/{id}
+```
+
+Next.js のページとして提供。ブラウザ向け HTML を返す。
+
+**機能**:
+- プレイリスト名、トラック一覧（タイトル、URL、サムネイル）を表示
+- オーナーは編集・削除が可能（認証必要）
+- **VRChat URL の表示**: ユーザーがコピーして VRChat に入力するための resolve URL を表示
+
+```text
+┌─────────────────────────────────────────────┐
+│  My Playlist (12 tracks)                     │
+│  ──────────────────────────────              │
+│  1. Song A - youtube.com/...                 │
+│  2. Song B - youtube.com/...                 │
+│  ...                                         │
+│                                              │
+│  VRChat URL:                                 │
+│  ┌─────────────────────────────────────────┐ │
+│  │ https://api.example.com/r/kawa/V1StGXR8 │ │
+│  └─────────────────────────────────────────┘ │
+│  [Copy]                                      │
+└─────────────────────────────────────────────┘
+```
+
+### 2. VRChat Resolve API
+
+プレイリストのトラックに pool index を割り当て、index 付き JSON を返す。VRChat の `VRCStringDownloader` がアクセスする。
+
+```text
+GET /r/{poolId}/{playlistId}
 ```
 
 **処理フロー**:
 ```text
-1. src の URL からプレイリスト JSON を取得
-2. JSON をパースし、tracks を抽出
-3. 各 track.url に対して register(pool, url) で index を割り当て
+1. playlistId で DB からプレイリストを取得
+2. playlist_tracks → videos を JOIN してトラック一覧を取得
+3. 各 video.url に対して register(poolId, url) で index を割り当て
 4. url を除外した index 付き JSON をレスポンス
 ```
 
@@ -39,6 +160,7 @@ GET /playlist?src={encodedPlaylistJsonUrl}&pool={poolId}
 {
   "ok": true,
   "pool": "kawaplayer-main",
+  "name": "My Playlist",
   "tracks": [
     { "index": 42, "title": "Song A", "mode": 0 },
     { "index": 43, "title": "Song B", "mode": 0 }
@@ -50,112 +172,54 @@ GET /playlist?src={encodedPlaylistJsonUrl}&pool={poolId}
 ```json
 {
   "ok": false,
-  "error": "Failed to fetch playlist from src URL"
+  "error": "Playlist not found"
 }
 ```
 
-### 2. 登録済みプレイリスト API
-
-サーバーに事前登録されたプレイリストを返す。内部処理は Resolver API と同じ。
-
-```text
-GET /playlists/{id}
-```
-
-**用途**: 実運用で推奨。URL が短く、VRChat 内での入力が容易。ワールド制作者がサーバーの管理画面からプレイリストを登録する運用を想定。
-
-### 3. リダイレクト API
+### 3. VRChat Redirect API
 
 VRChat の動画プレイヤーがアクセスする。pool + index に紐付けられた動画 URL へリダイレクトする。
 
 ```text
-GET /vrcurl/{pool}/{index}
+GET /vrcurl/{poolId}/{index}
 ```
 
 **レスポンス**:
 - 成功: `302 Location: https://www.youtube.com/watch?v=...`
 - 未登録/失効: `404 Not Found`
 
----
-
-## 入力プレイリスト JSON フォーマット
-
-Resolver API が `src` から取得する外部 JSON のフォーマット。KawaPlayer のエディタ時フォーマット (`PlaylistExporter.cs`) と互換。
-
-### 単一プレイリスト形式
-
-```json
-{
-  "tracks": [
-    { "mode": 0, "title": "Song A", "url": "https://www.youtube.com/watch?v=AAA" },
-    { "mode": 1, "title": "Live Stream", "url": "https://www.youtube.com/watch?v=BBB" }
-  ]
-}
-```
-
-### 複数プレイリスト形式
-
-```json
-{
-  "playlists": [
-    {
-      "name": "Playlist A",
-      "tracks": [
-        { "mode": 0, "title": "Song A", "url": "https://youtu.be/AAA" }
-      ]
-    }
-  ]
-}
-```
-
-| フィールド | 必須 | デフォルト | 説明 |
-|-----------|------|-----------|------|
-| `url` | **必須** | — | 動画 URL |
-| `mode` | 任意 | `0` | VideoPlayerType (0=Unity, 1=AVPro, 2=ImageViewer) |
-| `title` | 任意 | `""` | トラックタイトル |
-
-サーバーは `mode` と `title` を解釈せず、そのままレスポンスに含める。`url` はサーバー内部で index に変換し、レスポンスには含めない。
+**パフォーマンス要件**: 動画プレイヤーが再生のたびにアクセスするため、低レイテンシが必要。DB クエリは `pool_slots` テーブルへの PK 検索のみ。必要に応じてインメモリキャッシュを追加。
 
 ---
 
 ## Pool 管理
 
-### 内部モデル
-
-```text
-PoolState {
-    poolId:    string
-    size:      int
-    nextIndex: int          // 次に割り当てる index (循環)
-    slots: [
-        {
-            index:     int
-            destUrl:   string
-            expiresAt: timestamp
-        }
-    ]
-    urlToIndex: map[string → int]   // URL → index の逆引き (重複再利用用)
-}
-```
-
 ### index 割り当てルール
 
 ```text
-register(pool, url):
-    // 1. 重複チェック: 同一 URL が登録済みかつ未失効なら再利用
-    if urlToIndex[url] exists and not expired:
-        touch(expiresAt)    // TTL 更新
-        return existing index
+register(poolId, url):
+    // 1. 重複チェック: pool_url_index から検索
+    existing = SELECT index FROM pool_url_index
+               WHERE pool_id = poolId AND url = url
+    if existing and not expired:
+        UPDATE pool_slots SET expires_at = now + TTL
+            WHERE pool_id = poolId AND index = existing.index
+        return existing.index
 
     // 2. 空きスロット探索: 失効済み slot を優先
-    index = findExpiredSlot()
-    if not found:
-        index = nextIndex   // 循環
-        nextIndex = (nextIndex + 1) % size
+    expired_slot = SELECT index FROM pool_slots
+                   WHERE pool_id = poolId AND expires_at < now
+                   ORDER BY index LIMIT 1
+    if expired_slot:
+        index = expired_slot.index
+    else:
+        index = next_index(poolId)  // 循環カウンタ
 
-    // 3. 登録
-    slots[index] = { destUrl: url, expiresAt: now + TTL }
-    urlToIndex[url] = index
+    // 3. 登録 (UPSERT)
+    UPSERT pool_slots (pool_id, index, dest_url, expires_at)
+        VALUES (poolId, index, url, now + TTL)
+    UPSERT pool_url_index (pool_id, url, index)
+        VALUES (poolId, url, index)
     return index
 ```
 
@@ -164,24 +228,20 @@ register(pool, url):
 | 設定 | 推奨値 | 説明 |
 |------|--------|------|
 | 初期 TTL | 30分 | slot 割り当て時に設定 |
-| アクセス時更新 | あり | リダイレクト API アクセス時に TTL を延長 |
+| アクセス時更新 | あり | Redirect API アクセス時に TTL を延長 |
 | 失効 slot | 再利用対象 | 新規割り当て時に優先使用 |
 
 TTL により、pool サイズが固定でも長時間運用が可能。使われなくなった slot は自動的に解放される。
+
+Pool state は PostgreSQL に永続化するため、サーバー再起動時も slot mapping が保持される。
 
 ---
 
 ## セキュリティ
 
-### src URL の検証
+### 動画 URL の検証
 
-- `src` のスキームが `http` / `https` であること
-- 内部 IP (127.0.0.1, 10.x.x.x, 192.168.x.x 等) へのリクエスト禁止 (SSRF 対策)
-- レスポンスサイズ上限 (例: 1MB)
-
-### track URL の検証
-
-- 動画 URL のドメインが許可リスト内であること
+動画カタログに登録可能な URL のドメインを制限する。
 
 | サービス | 許可ドメイン |
 |---------|------------|
@@ -192,85 +252,89 @@ TTL により、pool サイズが固定でも長時間運用が可能。使わ�
 | Soundcloud | `soundcloud.com`, `*.sndcdn.com` |
 | VRCDN | `*.vrcdn.live`, `*.vrcdn.video`, `*.vrcdn.cloud` |
 
-許可リスト外の URL はスキップし、レスポンスに含めない。
+許可リスト外の URL はカタログ登録時に拒否する。
 
 ### レート制限
 
-- `/playlist`: 10 req/min per IP
-- `/playlists/{id}`: 30 req/min per IP
-- `/vrcurl/{pool}/{index}`: 制限なし (動画プレイヤーが直接アクセス)
+| エンドポイント | 制限 | 理由 |
+|--------------|------|------|
+| `/r/{poolId}/{playlistId}` | 30 req/min per IP | VRChat からのアクセス |
+| `/vrcurl/{poolId}/{index}` | 制限緩め or なし | 動画プレイヤーが直接アクセス |
+| Hasura GraphQL | Hasura の設定に準じる | Web UI からのアクセス |
 
-### pool アクセス制御
+### 認証
 
-- pool ごとにオプションで API キーを設定可能
-- 管理画面でのプレイリスト登録にはサーバー認証が必要
+| 操作 | 認証 |
+|------|------|
+| 動画カタログ登録・編集 | 要認証 (登録ユーザー) |
+| プレイリスト作成・編集・削除 | 要認証 (オーナー) |
+| プレイリスト閲覧 (Web) | 公開プレイリストは不要、非公開は要認証 |
+| Resolve API (`/r/...`) | 不要 (共有 URL で公開アクセス) |
+| Redirect API (`/vrcurl/...`) | 不要 |
 
 ---
 
 ## 擬似コード
 
-### Resolver 処理
+### Resolve 処理 (Next.js API Route)
 
 ```text
-handlePlaylistRequest(src, pool):
-    // 1. 外部 JSON 取得
-    response = httpGet(src)
-    if response.error:
-        return { ok: false, error: "Failed to fetch playlist" }
+handleResolve(poolId, playlistId):
+    // 1. DB からプレイリスト取得
+    playlist = SELECT * FROM playlists WHERE id = playlistId
+    if not playlist or (not playlist.is_public):
+        return { ok: false, error: "Playlist not found" }
 
-    // 2. JSON パース
-    playlist = parseJson(response.body)
-    rawTracks = extractTracks(playlist)  // "tracks" or "playlists"→"tracks"
+    // 2. トラック一覧を取得
+    tracks = SELECT v.url, v.title, v.mode, pt.position
+             FROM playlist_tracks pt
+             JOIN videos v ON pt.video_id = v.id
+             WHERE pt.playlist_id = playlistId
+             ORDER BY pt.position
 
     // 3. 各トラックに index 割り当て
     resolvedTracks = []
-    for track in rawTracks:
-        if not isAllowedDomain(track.url):
-            continue
-        index = register(pool, track.url)
+    for track in tracks:
+        index = register(poolId, track.url)
         resolvedTracks.append({
             index: index,
-            title: track.title or "",
-            mode:  track.mode or 0
+            title: track.title,
+            mode:  track.mode
         })
 
-    // 4. レスポンス (url はレスポンスに含めない)
-    return { ok: true, pool: pool, tracks: resolvedTracks }
+    // 4. レスポンス (url は含めない)
+    return {
+        ok: true,
+        pool: poolId,
+        name: playlist.name,
+        tracks: resolvedTracks
+    }
 ```
 
-### リダイレクト処理
+### Redirect 処理 (Next.js API Route)
 
 ```text
-handleRedirect(pool, index):
-    slot = getSlot(pool, index)
-    if slot is null or slot.expired:
+handleRedirect(poolId, index):
+    slot = SELECT dest_url, expires_at FROM pool_slots
+           WHERE pool_id = poolId AND index = index
+
+    if slot is null or slot.expires_at < now:
         return 404
 
-    slot.expiresAt = now + TTL   // アクセス時 TTL 更新
-    return 302 Location: slot.destUrl
+    // アクセス時 TTL 更新
+    UPDATE pool_slots SET expires_at = now + TTL
+        WHERE pool_id = poolId AND index = index
+
+    return 302 Location: slot.dest_url
 ```
-
----
-
-## 技術選定 (参考)
-
-サーバーの実装技術は自由だが、参考として:
-
-| 選択肢 | 利点 |
-|--------|------|
-| Node.js + Express | 軽量、VRChat コミュニティで実績あり (u2b.cx) |
-| Python + FastAPI | 型安全、自動ドキュメント生成 |
-| Go + net/http | 高パフォーマンス、デプロイが容易 |
-
-ストレージ: pool 状態はインメモリで十分（再起動時に消えても問題ない。TTL が短いため）。永続化が必要な場合は Redis を追加。
 
 ---
 
 ## VRChat 側の注意事項
 
-リダイレクトサーバーのドメインは VRChat の video player allowlist 外であるため:
+サーバーのドメインは VRChat の video player allowlist 外であるため:
 
-- **VRCStringDownloader** (Resolver API へのアクセス): untrusted URL 扱い
-- **動画プレイヤー** (リダイレクト API へのアクセス): untrusted URL 扱い
+- **VRCStringDownloader** (Resolve API へのアクセス): untrusted URL 扱い
+- **動画プレイヤー** (Redirect API へのアクセス): untrusted URL 扱い
 
 2024年12月以降、パブリックインスタンスでは untrusted URL がデフォルトでブロックされるため、ワールド制作者は VRChat ウェブサイトでドメインを allowlist に追加する必要がある。
