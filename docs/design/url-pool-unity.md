@@ -74,7 +74,7 @@ public class PlaylistLoaderPoolSettings
 {
     public string poolBaseUrl;   // 例: https://api.example.com
     public string poolId;        // 例: kawaplayer-main
-    public int poolSize;         // 例: 10000 / 100000 (デフォルト: 100000)
+    public int poolSize;         // 候補値: 10000 / 50000 / 100000 (実測で決定)
 }
 ```
 
@@ -99,7 +99,7 @@ for (int i = 0; i < poolSize; i++)
 |------|------|
 | Pool Base URL | リダイレクトサーバーの URL (例: `https://api.example.com`) |
 | Pool ID | このワールド固有の識別子 (例: `kawaplayer-main`) |
-| Pool Size | スロット数 (デフォルト: 100,000。推定サイズ ~11-16MB) |
+| Pool Size | スロット数 (候補値: 10,000 / 50,000 / 100,000。prefab サイズ・Inspector 操作性・ビルド時間の実測後に決定) |
 | **Generate Pool** ボタン | 上記設定から `VRCUrl[]` を生成し `_redirectPool` に保存 |
 | **Validate Pool** ボタン | 生成済み Pool の整合性を検証 |
 
@@ -259,7 +259,7 @@ private void EnqueueFromIndexes(DataList trackDicts)
 {
     int totalCount = trackDicts.Count;
 
-    // UdonSharp では並列配列で管理
+    // UdonSharp ではカスタム DTO 配列を使わず DataDictionary を直接処理
     object[][] tempTracks = new object[totalCount][];
     int addedCount = 0;
     int failedCount = 0;

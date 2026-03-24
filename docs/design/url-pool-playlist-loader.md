@@ -136,9 +136,9 @@ Resolve API (`/r/{poolId}/{playlistId}`) が返す JSON は index 化済み。Un
 | **B3: Unity Runtime** | PlaylistLoader モジュール, UI, Queue 追加 | [Unity 側設計](url-pool-unity.md) |
 | **B4: 品質** | テスト (pool 上限, サーバーダウン, untrusted URL 等) | 両方 |
 
-### 既存コードへの変更
+### 既存コードへの変更 (実装順の最初に行う)
 
-本設計の実装にあたり、既存コードへの変更が1件必要:
+本設計の実装にあたり、既存コードへの変更が1件必要。**Phase B2・B3 より先に実装すること**（PlaylistLoader モジュールがこのメソッドに依存するため）:
 
 - `QueueList.AddTracks(object[][] tracks)` メソッドの新規追加 (`Runtime/Internal/Playlist/QueueList.cs`)。既存の `AddTrack()` は1件ずつ同期・イベント発火するため、一括追加時の効率が悪い。詳細は [Unity 側設計](url-pool-unity.md) を参照。
 
@@ -155,7 +155,7 @@ Resolve API (`/r/{poolId}/{playlistId}`) が返す JSON は index 化済み。Un
 
 ### Pool サイズの上限
 
-デフォルト Pool サイズは 100,000 件（シーン/プレハブ上で推定 ~11-16MB）。同時に参照可能なトラック数は Pool サイズが上限だが、TTL による slot の循環再利用で実用上は緩和される。Pool サイズはカタログ総数ではなくピーク時の同時参照数で決める。
+Pool サイズの候補は 10,000 / 50,000 / 100,000 件（推定 ~0.5-16MB）。prefab サイズ・Inspector 操作性・ビルド時間の実測後に決定する。同時に参照可能なトラック数は Pool サイズが上限だが、TTL による slot の循環再利用で実用上は緩和される。Pool サイズはカタログ総数ではなくピーク時の同時参照数で決める。
 
 ### サーバー依存
 
