@@ -32,16 +32,39 @@
 
 ### Hasura で扱うもの
 
-- ユーザー登録・認証
 - 動画カタログの CRUD
 - プレイリストの作成・編集・削除
 - プレイリスト一覧の取得 (GraphQL)
+- ユーザーごとのデータアクセス制御 (Hasura permissions)
 
 ### Next.js API Routes で扱うもの
 
+- `GET /api/auth/login` → MiAuth (Misskey 認証) リダイレクト
+- `GET /api/auth/callback` → MiAuth コールバック → ユーザー upsert → セッション設定
+- `GET /api/auth/logout` → セッション破棄
+- `GET /api/auth/me` → 現在のセッション情報
 - `GET /r/{poolId}/{playlistId}` → VRChat 向け resolve（低レイテンシが必要）
 - `GET /vrcurl/{poolId}/{index}` → HTTP 302 リダイレクト（動画プレイヤーが毎回アクセス）
 - Pool state の管理
+
+### 認証方式
+
+[vhub-world-search](https://github.com/kisaragi-official/vhub-world-search) と同じ **MiAuth** (Misskey 認証) を採用する。
+
+```text
+[ログインフロー]
+1. ユーザーが /api/auth/login にアクセス
+2. サーバーが MiAuth session ID を生成し Cookie に保存
+3. Misskey の MiAuth 画面にリダイレクト
+   → https://sns.vrc-hub.com/miauth/{session}?name=KawaPlayer&callback=...
+4. ユーザーが Misskey 上で認証を許可
+5. Misskey が /api/auth/callback にリダイレクト
+6. サーバーが MiAuth check API で認証を検証
+7. users テーブルに upsert (misskey_id をキーにユーザー作成 or 更新)
+8. iron-session でセッション Cookie を設定
+```
+
+セッション管理: [iron-session](https://github.com/vvo/iron-session)（暗号化 Cookie ベース）
 
 ---
 
@@ -51,9 +74,13 @@
 
 | カラム | 型 | 説明 |
 |--------|-----|------|
-| id | uuid | PK |
-| name | text | 表示名 |
+| id | uuid | PK (自動生成) |
+| misskey_id | text | Misskey ユーザー ID (unique) |
+| misskey_username | text | Misskey ユーザー名 |
+| display_name | text | 表示名 (nullable, Misskey の name) |
+| avatar_url | text | アバター画像 URL (nullable) |
 | created_at | timestamptz | |
+| updated_at | timestamptz | |
 
 ### videos (動画カタログ)
 
