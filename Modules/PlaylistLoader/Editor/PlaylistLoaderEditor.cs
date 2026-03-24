@@ -12,9 +12,8 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader.Editor
   {
     private SerializedProperty _redirectPool;
     private SerializedProperty _poolId;
-
-    private string _poolBaseUrl = "https://api.example.com";
-    private int _poolSize = 100000;
+    private SerializedProperty _poolBaseUrl;
+    private SerializedProperty _poolSize;
 
     private void OnEnable()
     {
@@ -23,6 +22,8 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader.Editor
 
       _redirectPool = serializedObject.FindProperty("_redirectPool");
       _poolId = serializedObject.FindProperty("_poolId");
+      _poolBaseUrl = serializedObject.FindProperty("_poolBaseUrl");
+      _poolSize = serializedObject.FindProperty("_poolSize");
     }
 
     public override void OnInspectorGUI()
@@ -44,12 +45,12 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader.Editor
       EditorGUILayout.LabelField("Pool Settings", EditorStyles.boldLabel);
       EditorGUILayout.Space(SpaceSmall);
 
-      _poolBaseUrl = EditorGUILayout.TextField("Pool Base URL", _poolBaseUrl);
+      EditorGUILayout.PropertyField(_poolBaseUrl, new GUIContent("Pool Base URL"));
       EditorGUILayout.PropertyField(_poolId, new GUIContent("Pool ID"));
-      _poolSize = EditorGUILayout.IntField("Pool Size", _poolSize);
+      EditorGUILayout.PropertyField(_poolSize, new GUIContent("Pool Size"));
 
-      if (_poolSize < 1) _poolSize = 1;
-      if (_poolSize > 200000) _poolSize = 200000;
+      if (_poolSize.intValue < 1) _poolSize.intValue = 1;
+      if (_poolSize.intValue > 200000) _poolSize.intValue = 200000;
     }
 
     private void DrawPoolStatus()
@@ -87,9 +88,11 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader.Editor
 
     private void GeneratePool()
     {
+      string baseUrl = _poolBaseUrl.stringValue;
       string poolId = _poolId.stringValue;
+      int poolSize = _poolSize.intValue;
 
-      if (string.IsNullOrEmpty(_poolBaseUrl) || !(_poolBaseUrl.StartsWith("http://") || _poolBaseUrl.StartsWith("https://")))
+      if (string.IsNullOrEmpty(baseUrl) || !(baseUrl.StartsWith("http://") || baseUrl.StartsWith("https://")))
       {
         EditorUtility.DisplayDialog("Error", "Pool Base URL must start with http:// or https://", "OK");
         return;
@@ -102,14 +105,14 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader.Editor
 
       var sw = Stopwatch.StartNew();
 
-      _redirectPool.arraySize = _poolSize;
-      for (int i = 0; i < _poolSize; i++)
+      _redirectPool.arraySize = poolSize;
+      for (int i = 0; i < poolSize; i++)
       {
         var element = _redirectPool.GetArrayElementAtIndex(i);
         var urlProp = element.FindPropertyRelative("url");
         if (urlProp != null)
         {
-          urlProp.stringValue = $"{_poolBaseUrl}/vrcurl/{poolId}/{i}";
+          urlProp.stringValue = $"{baseUrl}/vrcurl/{poolId}/{i}";
         }
       }
 
@@ -117,25 +120,67 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader.Editor
       EditorUtility.SetDirty(target);
 
       sw.Stop();
-      Debug.Log($"[PlaylistLoader] Generated {_poolSize} VRCUrl entries in {sw.ElapsedMilliseconds}ms");
-      EditorUtility.DisplayDialog("Success", $"Generated {_poolSize} VRCUrl entries.\nTime: {sw.ElapsedMilliseconds}ms", "OK");
+      Debug.Log($"[PlaylistLoader] Generated {poolSize} VRCUrl entries in {sw.ElapsedMilliseconds}ms");
+      EditorUtility.DisplayDialog("Success", $"Generated {poolSize} VRCUrl entries.\nTime: {sw.ElapsedMilliseconds}ms", "OK");
     }
 
     private void ValidatePool()
     {
       string poolId = _poolId.stringValue;
-      int poolSize = _redirectPool.arraySize;
+      int expectedSize = _poolSize.intValue;
+      int actualSize = _redirectPool.arraySize;
 
-      if (poolSize == 0)
+      if (actualSize == 0)
       {
         EditorUtility.DisplayDialog("Validation", "Pool is empty. Generate a pool first.", "OK");
         return;
       }
 
       int errors = 0;
-      string expectedPrefix = null;
 
-      for (int i = 0; i < poolSize; i++)
+      // Check: _redirectPool.Length == poolSize
+      if (actualSize != expectedSize)
+      {
+        Debug.LogWarning($"[PlaylistLoader] Validation: pool size mismatch. Expected {expectedSize}, actual {actualSize}");
+        errors++;
+      }
+
+      // Extract base URL from first entry
+      string firstUrl = null;
+      string detectedBaseUrl = null;
+      {
+        var element = _redirectPool.GetArrayElementAtIndex(0);
+        var urlProp = element.FindPropertyRelative("url");
+        if (urlProp != null)
+          firstUrl = urlProp.stringValue;
+      }
+
+      if (string.IsNullOrEmpty(firstUrl))
+      {
+        Debug.LogError("[PlaylistLoader] Validation: first entry has empty URL");
+        EditorUtility.DisplayDialog("Validation", "Validation failed: first entry has empty URL.", "OK");
+        return;
+      }
+
+      int vrcurlPos = firstUrl.IndexOf("/vrcurl/");
+      if (vrcurlPos < 0)
+      {
+        Debug.LogError($"[PlaylistLoader] Validation: first entry does not contain /vrcurl/ pattern: {firstUrl}");
+        EditorUtility.DisplayDialog("Validation", "Validation failed: URL pattern not recognized.", "OK");
+        return;
+      }
+
+      detectedBaseUrl = firstUrl.Substring(0, vrcurlPos);
+
+      // Check: base URL starts with http/https
+      if (!(detectedBaseUrl.StartsWith("http://") || detectedBaseUrl.StartsWith("https://")))
+      {
+        Debug.LogWarning($"[PlaylistLoader] Validation: base URL does not start with http(s): {detectedBaseUrl}");
+        errors++;
+      }
+
+      // Check each entry
+      for (int i = 0; i < actualSize; i++)
       {
         var element = _redirectPool.GetArrayElementAtIndex(i);
         var urlProp = element.FindPropertyRelative("url");
@@ -146,31 +191,27 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader.Editor
         }
 
         string url = urlProp.stringValue;
-        string expectedSuffix = $"/vrcurl/{poolId}/{i}";
-
-        if (i == 0)
-        {
-          int suffixStart = url.IndexOf("/vrcurl/");
-          expectedPrefix = suffixStart >= 0 ? url.Substring(0, suffixStart) : null;
-        }
+        string expectedUrl = $"{detectedBaseUrl}/vrcurl/{poolId}/{i}";
 
         if (string.IsNullOrEmpty(url))
         {
           Debug.LogWarning($"[PlaylistLoader] Validation: index {i} has empty URL");
           errors++;
         }
-        else if (!url.EndsWith(expectedSuffix))
+        else if (url != expectedUrl)
         {
-          Debug.LogWarning($"[PlaylistLoader] Validation: index {i} URL mismatch. Expected suffix: {expectedSuffix}");
+          Debug.LogWarning($"[PlaylistLoader] Validation: index {i} URL mismatch.\n  Expected: {expectedUrl}\n  Actual:   {url}");
           errors++;
+          if (errors <= 5) continue; // Log first 5 mismatches in detail
+          break; // Stop after too many errors
         }
       }
 
       if (errors == 0)
       {
-        string msg = $"Validation passed.\n\nPool Size: {poolSize}\nPool ID: {poolId}\nBase URL: {expectedPrefix}";
+        string msg = $"Validation passed.\n\nPool Size: {actualSize}\nPool ID: {poolId}\nBase URL: {detectedBaseUrl}";
         EditorUtility.DisplayDialog("Validation", msg, "OK");
-        Debug.Log($"[PlaylistLoader] Validation passed: {poolSize} entries, pool={poolId}");
+        Debug.Log($"[PlaylistLoader] Validation passed: {actualSize} entries, pool={poolId}, base={detectedBaseUrl}");
       }
       else
       {
