@@ -147,16 +147,26 @@ for (int i = 0; i < poolSize; i++)
 
 ### JSON パース
 
-サーバーが返す index 付きレスポンスをパースする。`url` フィールドは含まれない（Unity 側は実 URL を知る必要がない）。
+Resolve API が返す index 付きレスポンスをパースする。1回のリクエストで1プレイリストが返される。`url` フィールドは含まれない（Unity 側は実 URL を知る必要がない）。
+
+```json
+{
+  "ok": true,
+  "pool": "kawaplayer-main",
+  "name": "お気に入りカラオケ",
+  "tracks": [
+    { "index": 42, "title": "Song A", "mode": 0 },
+    { "index": 43, "title": "Song B", "mode": 0 }
+  ]
+}
+```
 
 ```text
-レスポンス JSON
-    │
-    ├── "tracks" キーあり → 単一プレイリスト
-    │     └── 各要素から index, title, mode を取得
-    │
-    └── "playlists" キーあり → 複数プレイリスト
-          └── 各プレイリストの "tracks" を走査
+パース手順:
+  1. "ok" が true であることを確認
+  2. "tracks" 配列を取得
+  3. 各要素から index, title, mode を取得
+  4. _redirectPool[index] で VRCUrl に変換
 ```
 
 ### Queue 追加
@@ -210,16 +220,39 @@ public override void OnStringLoadSuccess(IVRCStringDownload result)
         return;
     }
 
-    // tracks 抽出 (単一/複数プレイリスト対応)
-    DataList allTracks = ExtractAllTracks(root.DataDictionary);
-    if (allTracks.Count == 0)
+    var rootDict = root.DataDictionary;
+
+    // "ok" チェック
+    if (rootDict.TryGetValue("ok", out DataToken okToken)
+        && okToken.TokenType == TokenType.Boolean
+        && !okToken.Boolean)
     {
-        if (Utilities.IsValid(_ui)) _ui.ShowError("No tracks found.");
+        string error = "Playlist server returned an error.";
+        if (rootDict.TryGetValue("error", out DataToken errToken)
+            && errToken.TokenType == TokenType.String)
+            error = errToken.String;
+        if (Utilities.IsValid(_ui)) _ui.ShowError(error);
+        return;
+    }
+
+    // "tracks" 配列を取得
+    if (!rootDict.TryGetValue("tracks", out DataToken tracksToken)
+        || tracksToken.TokenType != TokenType.DataList
+        || tracksToken.DataList.Count == 0)
+    {
+        if (Utilities.IsValid(_ui)) _ui.ShowError("No tracks found in playlist.");
         return;
     }
 
     // index → VRCUrl → Track → Queue
-    EnqueueFromIndexes(allTracks);
+    EnqueueFromIndexes(tracksToken.DataList);
+}
+
+public override void OnStringLoadError(IVRCStringDownload result)
+{
+    if (result.Url.Get() != _pendingResolveUrl.Get()) return;
+    _isLoading = false;
+    if (Utilities.IsValid(_ui)) _ui.ShowError("Playlist server is unavailable.");
 }
 
 private void EnqueueFromIndexes(DataList trackDicts)

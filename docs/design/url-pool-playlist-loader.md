@@ -2,7 +2,7 @@
 
 ## 目的
 
-外部プレイリストから KawaPlayer の Queue をランタイムで自動構築する。
+サーバー上で管理されたプレイリストから KawaPlayer の Queue をランタイムで自動構築する。
 
 VRChat/Udon はランタイムで `string → VRCUrl` 変換を行えないため（[調査結果](../analysis/why-no-runtime-json-playlist.md)）、**Pre-baked URL Pool + リダイレクトサーバー方式**を採用する。
 
@@ -83,8 +83,8 @@ VRChat のカラオケワールド等で実績のある **Pre-baked URL Pool** �
 |------|------|------------|
 | **Unity Editor** | VRCUrl Pool のビルド時生成 | サーバーとの通信 |
 | **Unity Runtime** | resolve URL の受け取り、index 付き JSON のパース、Queue 追加 | 実 URL の解決、VRCUrl の動的生成 |
-| **サーバー (Hasura)** | ユーザー管理、動画カタログ、プレイリスト CRUD | Unity の状態管理 |
-| **サーバー (API Routes)** | Resolve API (index 割り当て)、Redirect API (HTTP 302) | Queue 操作 |
+| **サーバー (Hasura)** | 動画カタログ CRUD、プレイリスト CRUD、データアクセス制御 | Unity の状態管理 |
+| **サーバー (API Routes)** | MiAuth 認証、Resolve API (index 割り当て)、Redirect API (HTTP 302)、Pool 管理 | Queue 操作 |
 
 **設計の核心**: Unity 側は実際の動画 URL を一切知らなくても動作する。動的な要素はすべてサーバー側に集約される。
 
@@ -102,35 +102,28 @@ VRChat のカラオケワールド等で実績のある **Pre-baked URL Pool** �
 
 ### レスポンス JSON 仕様
 
-サーバーが返す JSON は index 化済み。Unity 側は生の動画 URL を扱わない。
+Resolve API (`/r/{poolId}/{playlistId}`) が返す JSON は index 化済み。Unity 側は生の動画 URL を扱わない。1回のリクエストで1プレイリストを解決する。
 
 ```json
 {
+  "ok": true,
+  "pool": "kawaplayer-main",
+  "name": "お気に入りカラオケ",
   "tracks": [
-    { "mode": 0, "title": "Song A", "index": 42 },
-    { "mode": 0, "title": "Song B", "index": 43 }
+    { "index": 42, "title": "Song A", "mode": 0 },
+    { "index": 43, "title": "Song B", "mode": 0 }
   ]
 }
 ```
 
-複数プレイリスト形式:
-
-```json
-{
-  "playlists": [
-    {
-      "name": "Playlist A",
-      "tracks": [
-        { "mode": 0, "title": "Song A", "index": 42 }
-      ]
-    }
-  ]
-}
-```
-
-- `mode`: VideoPlayerType (0=Unity, 1=AVPro, 2=ImageViewer)。サーバーは解釈せずパススルー
-- `title`: 空の場合、Unity 側の VideoInfoDownloader が補完可能
-- `index`: サーバーが割り当てた pool スロット番号
+| フィールド | 説明 |
+|-----------|------|
+| `ok` | 成功なら `true`、エラーなら `false` |
+| `pool` | pool ID (確認用) |
+| `name` | プレイリスト名 |
+| `tracks[].index` | サーバーが割り当てた pool スロット番号 |
+| `tracks[].title` | トラックタイトル。空の場合 Unity 側の VideoInfoDownloader が補完可能 |
+| `tracks[].mode` | VideoPlayerType (0=Unity, 1=AVPro, 2=ImageViewer)。サーバーは解釈せずパススルー |
 
 ---
 
@@ -138,7 +131,7 @@ VRChat のカラオケワールド等で実績のある **Pre-baked URL Pool** �
 
 | Phase | 内容 | 詳細 |
 |-------|------|------|
-| **B1: サーバー** | Resolver API, リダイレクト API, pool 管理 | [サーバー側設計](url-pool-server.md) |
+| **B1: サーバー** | MiAuth 認証, Resolve API, Redirect API, Pool 管理, 動画カタログ, プレイリスト管理 | [サーバー側設計](url-pool-server.md) |
 | **B2: Unity Editor** | Pool 生成 Inspector, バリデーション | [Unity 側設計](url-pool-unity.md) |
 | **B3: Unity Runtime** | PlaylistLoader モジュール, UI, Queue 追加 | [Unity 側設計](url-pool-unity.md) |
 | **B4: 品質** | テスト (pool 上限, サーバーダウン, untrusted URL 等) | 両方 |
