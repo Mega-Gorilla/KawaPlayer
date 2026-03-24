@@ -70,6 +70,42 @@
 
 ## データモデル
 
+### リレーション図
+
+```text
+users
+  │
+  ├── (owner_id) ──────→ playlists
+  │                          │
+  │                          ├── (playlist_id) ──→ playlist_tracks ←── (video_id) ──→ videos
+  │                                                                                     │
+  └── (registered_by) ──────────────────────────────────────────────────────────────────┘
+
+pool_slots        ← pool_id + index で動画 URL へのリダイレクトを管理
+pool_url_index    ← pool_id + url で重複チェック (pool_slots の逆引き)
+```
+
+- `users` → `playlists`: 1対多。ユーザーは複数のプレイリストを作成できる
+- `playlists` → `playlist_tracks` → `videos`: 多対多。`playlist_tracks` が中間テーブル。1つのプレイリストに複数の動画、1つの動画が複数のプレイリストに属せる
+- `users` → `videos`: 1対多。動画カタログへの登録者を記録
+- `pool_slots` / `pool_url_index`: プレイリストや動画テーブルとは FK で結ばない。Resolve API 実行時に動的に割り当てられる一時的なマッピング
+
+### Resolve API でのクエリ
+
+VRChat から `/r/{poolId}/{playlistId}` にアクセスされると、`playlist_tracks` と `videos` を JOIN してトラック一覧を取得する:
+
+```sql
+SELECT v.url, v.title, v.mode
+FROM playlist_tracks pt
+JOIN videos v ON pt.video_id = v.id
+WHERE pt.playlist_id = '{playlistId}'
+ORDER BY pt.position
+```
+
+各トラックの `v.url` に pool index が割り当てられ、`url` を除外した index 付き JSON がレスポンスとなる。
+
+---
+
 ### users
 
 | カラム | 型 | 説明 |
@@ -127,12 +163,14 @@
 
 ### playlist_tracks
 
+playlists と videos の多対多リレーションを解決する中間テーブル。`position` でプレイリスト内の並び順を管理する。
+
 | カラム | 型 | 説明 |
 |--------|-----|------|
 | id | uuid | PK |
 | playlist_id | text | FK → playlists |
 | video_id | uuid | FK → videos |
-| position | int | プレイリスト内の順番 |
+| position | int | プレイリスト内の順番 (0始まり) |
 
 例:
 
