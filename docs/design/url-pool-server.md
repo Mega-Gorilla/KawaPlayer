@@ -298,6 +298,8 @@ GET /vrcurl/{poolId}/{index}
 
 **TTL 切れ時の UX**: slot が失効した場合、Redirect API は `404` を返し、VRChat 側では動画の読み込みエラーとして表示される。自動再 resolve は VRCUrl 制約により困難（新しい resolve URL を動的に構築できない）。ユーザーが手動でプレイリストを再読み込みする運用とする。Redirect API でのアクセス時 TTL 延長により、再生中のトラックが突然切れることは通常発生しない。長時間放置されたキュー内トラックが失効するケースが主な該当シナリオ。
 
+**監視**: Redirect API の `404` 発生率は運用監視の対象とする。`404` が頻発する場合、pool サイズ不足または slot TTL が短すぎるシグナルである。メトリクスとして `redirect_404_count` (pool 別) を記録し、アラート閾値を設定することを推奨する。
+
 ---
 
 ## Pool 管理
@@ -322,8 +324,10 @@ register(poolId, url):
                 WHERE pool_id = poolId AND index = existing.index
             COMMIT
             return existing.index
-        // 失効済み → 逆引きは残っているが slot は期限切れ
-        // 下の登録処理で上書きされるのでそのまま進む
+        // 失効済み → 逆引きが古い状態で残っている
+        // ★ 先に古い逆引きを削除してからスロット探索に進む
+        DELETE FROM pool_url_index
+            WHERE pool_id = poolId AND url = url
 
     // 2. 空きスロット探索: 失効済み slot を優先
     expired_slot = SELECT index, dest_url FROM pool_slots
@@ -405,6 +409,8 @@ Pool state は PostgreSQL に永続化するため、サーバー再起動時も
 | 保存先 | インメモリ (Next.js プロセス内) | Redis は不要。プロセス再起動でクリアされても問題ない |
 
 キャッシュヒット時は register() を実行せず、キャッシュ済みの index 付き JSON をそのまま返す。pool_slots の TTL はキャッシュ元の resolve 時に設定済みなので、キャッシュヒット時の TTL 延長は不要。
+
+**前提条件**: Resolve キャッシュ TTL は slot TTL より十分短いこと。キャッシュ TTL が slot TTL に近いと、キャッシュヒットで返した index の slot が既に失効している可能性がある。現在の設定（キャッシュ 60秒、slot 30分）では問題にならない。
 
 ### レート制限
 
