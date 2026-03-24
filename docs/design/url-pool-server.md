@@ -82,6 +82,12 @@
 | created_at | timestamptz | |
 | updated_at | timestamptz | |
 
+例:
+
+| id | misskey_id | misskey_username | display_name | avatar_url |
+|----|-----------|-----------------|-------------|-----------|
+| `a1b2c3d4-...` | `9x8y7z6w` | `mega_gorilla` | `Mega Gorilla` | `https://sns.vrc-hub.com/files/...` |
+
 ### videos (動画カタログ)
 
 | カラム | 型 | 説明 |
@@ -94,6 +100,13 @@
 | registered_by | uuid | FK → users |
 | created_at | timestamptz | |
 
+例:
+
+| id | url | title | mode | thumbnail_url | registered_by |
+|----|-----|-------|------|--------------|--------------|
+| `f1e2d3c4-...` | `https://www.youtube.com/watch?v=dQw4w9WgXcQ` | `Rick Astley - Never Gonna Give You Up` | 0 | `https://i.ytimg.com/vi/dQw4w9WgXcQ/default.jpg` | `a1b2c3d4-...` |
+| `b5a6c7d8-...` | `https://www.twitch.tv/example` | `Example Live` | 1 | `null` | `a1b2c3d4-...` |
+
 ### playlists
 
 | カラム | 型 | 説明 |
@@ -105,6 +118,13 @@
 | created_at | timestamptz | |
 | updated_at | timestamptz | |
 
+例:
+
+| id | name | owner_id | is_public |
+|----|------|---------|----------|
+| `V1StGXR8_Z5jdHi6B-myT` | `お気に入りカラオケ` | `a1b2c3d4-...` | `true` |
+| `xYz9Abc3Def7Ghi1Jkl5m` | `作業用BGM` | `a1b2c3d4-...` | `false` |
+
 ### playlist_tracks
 
 | カラム | 型 | 説明 |
@@ -113,6 +133,13 @@
 | playlist_id | text | FK → playlists |
 | video_id | uuid | FK → videos |
 | position | int | プレイリスト内の順番 |
+
+例:
+
+| id | playlist_id | video_id | position |
+|----|------------|---------|---------|
+| `11111111-...` | `V1StGXR8_Z5jdHi6B-myT` | `f1e2d3c4-...` | 0 |
+| `22222222-...` | `V1StGXR8_Z5jdHi6B-myT` | `b5a6c7d8-...` | 1 |
 
 ### pool_slots (Pool 状態の永続化)
 
@@ -124,6 +151,13 @@
 | expires_at | timestamptz | TTL 期限 |
 | (PK) | | (pool_id, index) |
 
+例:
+
+| pool_id | index | dest_url | expires_at |
+|---------|-------|---------|-----------|
+| `kawaplayer-main` | 42 | `https://www.youtube.com/watch?v=dQw4w9WgXcQ` | `2026-03-24T15:30:00Z` |
+| `kawaplayer-main` | 43 | `https://www.twitch.tv/example` | `2026-03-24T15:30:00Z` |
+
 ### pool_url_index (逆引き)
 
 | カラム | 型 | 説明 |
@@ -132,6 +166,13 @@
 | url | text | 動画 URL |
 | index | int | 割り当て済みスロット番号 |
 | (PK) | | (pool_id, url) |
+
+例:
+
+| pool_id | url | index |
+|---------|-----|-------|
+| `kawaplayer-main` | `https://www.youtube.com/watch?v=dQw4w9WgXcQ` | 42 |
+| `kawaplayer-main` | `https://www.twitch.tv/example` | 43 |
 
 ---
 
