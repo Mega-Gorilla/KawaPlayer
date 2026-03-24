@@ -47,10 +47,12 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader.Editor
 
       EditorGUILayout.PropertyField(_poolBaseUrl, new GUIContent("Pool Base URL"));
       EditorGUILayout.PropertyField(_poolId, new GUIContent("Pool ID"));
-      EditorGUILayout.PropertyField(_poolSize, new GUIContent("Pool Size"));
 
-      if (_poolSize.intValue < 1) _poolSize.intValue = 1;
-      if (_poolSize.intValue > 200000) _poolSize.intValue = 200000;
+      using (new EditorGUI.DisabledGroupScope(true))
+      {
+        EditorGUILayout.IntField("Pool Size", _poolSize.intValue);
+      }
+      EditorGUILayout.HelpBox("Pool Size はサーバーと一致する必要があるため変更できません。", MessageType.Info);
     }
 
     private void DrawPoolStatus()
