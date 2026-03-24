@@ -105,19 +105,20 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader.Editor
 
       var sw = Stopwatch.StartNew();
 
-      _redirectPool.arraySize = poolSize;
+      // VRCUrl[] を直接構築 (SerializedProperty 経由は大量配列で極端に遅いため)
+      var urls = new VRCUrl[poolSize];
       for (int i = 0; i < poolSize; i++)
       {
-        var element = _redirectPool.GetArrayElementAtIndex(i);
-        var urlProp = element.FindPropertyRelative("url");
-        if (urlProp != null)
-        {
-          urlProp.stringValue = $"{baseUrl}/vrcurl/{poolId}/{i}";
-        }
+        urls[i] = new VRCUrl($"{baseUrl}/vrcurl/{poolId}/{i}");
       }
 
-      serializedObject.ApplyModifiedProperties();
+      Undo.RecordObject(target, "Generate PlaylistLoader Pool");
+      var loader = (PlaylistLoader)target;
+      var field = typeof(PlaylistLoader).GetField("_redirectPool",
+        System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+      field.SetValue(loader, urls);
       EditorUtility.SetDirty(target);
+      serializedObject.Update();
 
       sw.Stop();
       Debug.Log($"[PlaylistLoader] Generated {poolSize} VRCUrl entries in {sw.ElapsedMilliseconds}ms");
@@ -128,7 +129,11 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader.Editor
     {
       string poolId = _poolId.stringValue;
       int expectedSize = _poolSize.intValue;
-      int actualSize = _redirectPool.arraySize;
+
+      // VRCUrl[] を直接取得 (SerializedProperty 経由は大量配列で遅いため)
+      var loader = (PlaylistLoader)target;
+      VRCUrl[] pool = loader.RedirectPool;
+      int actualSize = pool != null ? pool.Length : 0;
 
       if (actualSize == 0)
       {
@@ -138,7 +143,7 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader.Editor
 
       int errors = 0;
 
-      // Check: _redirectPool.Length == poolSize
+      // Check: pool.Length == poolSize
       if (actualSize != expectedSize)
       {
         Debug.LogWarning($"[PlaylistLoader] Validation: pool size mismatch. Expected {expectedSize}, actual {actualSize}");
@@ -146,14 +151,7 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader.Editor
       }
 
       // Extract base URL from first entry
-      string firstUrl = null;
-      string detectedBaseUrl = null;
-      {
-        var element = _redirectPool.GetArrayElementAtIndex(0);
-        var urlProp = element.FindPropertyRelative("url");
-        if (urlProp != null)
-          firstUrl = urlProp.stringValue;
-      }
+      string firstUrl = pool[0] != null ? pool[0].Get() : null;
 
       if (string.IsNullOrEmpty(firstUrl))
       {
@@ -170,7 +168,7 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader.Editor
         return;
       }
 
-      detectedBaseUrl = firstUrl.Substring(0, vrcurlPos);
+      string detectedBaseUrl = firstUrl.Substring(0, vrcurlPos);
 
       // Check: base URL starts with http/https
       if (!(detectedBaseUrl.StartsWith("http://") || detectedBaseUrl.StartsWith("https://")))
@@ -182,15 +180,7 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader.Editor
       // Check each entry
       for (int i = 0; i < actualSize; i++)
       {
-        var element = _redirectPool.GetArrayElementAtIndex(i);
-        var urlProp = element.FindPropertyRelative("url");
-        if (urlProp == null)
-        {
-          errors++;
-          continue;
-        }
-
-        string url = urlProp.stringValue;
+        string url = pool[i] != null ? pool[i].Get() : null;
         string expectedUrl = $"{detectedBaseUrl}/vrcurl/{poolId}/{i}";
 
         if (string.IsNullOrEmpty(url))
@@ -202,8 +192,7 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader.Editor
         {
           Debug.LogWarning($"[PlaylistLoader] Validation: index {i} URL mismatch.\n  Expected: {expectedUrl}\n  Actual:   {url}");
           errors++;
-          if (errors <= 5) continue; // Log first 5 mismatches in detail
-          break; // Stop after too many errors
+          if (errors > 5) break; // Stop after too many errors
         }
       }
 
