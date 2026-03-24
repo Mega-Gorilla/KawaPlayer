@@ -74,7 +74,7 @@ public class PlaylistLoaderPoolSettings
 {
     public string poolBaseUrl;   // 例: https://api.example.com
     public string poolId;        // 例: kawaplayer-main
-    public int poolSize;         // 候補値: 10000 / 50000 / 100000 (実測で決定)
+    public int poolSize;         // デフォルト: 100000 (実測: 5.33MB)
 }
 ```
 
@@ -99,7 +99,7 @@ for (int i = 0; i < poolSize; i++)
 |------|------|
 | Pool Base URL | リダイレクトサーバーの URL (例: `https://api.example.com`) |
 | Pool ID | このワールド固有の識別子 (例: `kawaplayer-main`) |
-| Pool Size | スロット数 (候補値: 10,000 / 50,000 / 100,000。prefab サイズ・Inspector 操作性・ビルド時間の実測後に決定) |
+| Pool Size | スロット数 (デフォルト: 100,000。実測 5.33MB) |
 | **Generate Pool** ボタン | 上記設定から `VRCUrl[]` を生成し `_redirectPool` に保存 |
 | **Validate Pool** ボタン | 生成済み Pool の整合性を検証 |
 
