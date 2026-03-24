@@ -296,6 +296,8 @@ GET /vrcurl/{poolId}/{index}
 
 **パフォーマンス要件**: 動画プレイヤーが再生のたびにアクセスするため、低レイテンシが必要。DB クエリは `pool_slots` テーブルへの PK 検索のみ。必要に応じてインメモリキャッシュを追加。
 
+**TTL 切れ時の UX**: slot が失効した場合、Redirect API は `404` を返し、VRChat 側では動画の読み込みエラーとして表示される。自動再 resolve は VRCUrl 制約により困難（新しい resolve URL を動的に構築できない）。ユーザーが手動でプレイリストを再読み込みする運用とする。Redirect API でのアクセス時 TTL 延長により、再生中のトラックが突然切れることは通常発生しない。長時間放置されたキュー内トラックが失効するケースが主な該当シナリオ。
+
 ---
 
 ## Pool 管理
@@ -304,30 +306,62 @@ GET /vrcurl/{poolId}/{index}
 
 ```text
 register(poolId, url):
+    // ★ 全操作を単一トランザクション + pool 単位の排他ロックで実行
+    BEGIN TRANSACTION
+    SELECT pg_advisory_xact_lock(hashtext(poolId))
+
     // 1. 重複チェック: pool_url_index から検索
     existing = SELECT index FROM pool_url_index
                WHERE pool_id = poolId AND url = url
-    if existing and not expired:
-        UPDATE pool_slots SET expires_at = now + TTL
-            WHERE pool_id = poolId AND index = existing.index
-        return existing.index
+    if existing:
+        slot = SELECT expires_at FROM pool_slots
+               WHERE pool_id = poolId AND index = existing.index
+        if slot and slot.expires_at >= now:
+            // 未失効 → TTL 延長して再利用
+            UPDATE pool_slots SET expires_at = now + TTL
+                WHERE pool_id = poolId AND index = existing.index
+            COMMIT
+            return existing.index
+        // 失効済み → 逆引きは残っているが slot は期限切れ
+        // 下の登録処理で上書きされるのでそのまま進む
 
     // 2. 空きスロット探索: 失効済み slot を優先
-    expired_slot = SELECT index FROM pool_slots
+    expired_slot = SELECT index, dest_url FROM pool_slots
                    WHERE pool_id = poolId AND expires_at < now
                    ORDER BY index LIMIT 1
+                   FOR UPDATE  // 行ロック (他トランザクションとの競合防止)
     if expired_slot:
         index = expired_slot.index
+        // ★ 旧 URL の逆引きエントリを削除 (不整合防止)
+        DELETE FROM pool_url_index
+            WHERE pool_id = poolId AND url = expired_slot.dest_url
     else:
         index = next_index(poolId)  // 循環カウンタ
+        // 循環で未失効 slot を上書きする場合も旧逆引きを削除
+        old_slot = SELECT dest_url FROM pool_slots
+                   WHERE pool_id = poolId AND index = index
+        if old_slot:
+            DELETE FROM pool_url_index
+                WHERE pool_id = poolId AND url = old_slot.dest_url
 
     // 3. 登録 (UPSERT)
     UPSERT pool_slots (pool_id, index, dest_url, expires_at)
         VALUES (poolId, index, url, now + TTL)
     UPSERT pool_url_index (pool_id, url, index)
         VALUES (poolId, url, index)
+
+    COMMIT
     return index
 ```
+
+### 排他制御
+
+`register()` は以下の2層で並行アクセスを制御する:
+
+1. **`pg_advisory_xact_lock(hashtext(poolId))`**: pool 単位のアドバイザリロック。同一 pool への同時 register を直列化する。トランザクション終了時に自動解放
+2. **`SELECT ... FOR UPDATE`**: 失効 slot の行ロック。他トランザクションが同じ slot を取得するのを防止
+
+これにより、同時に複数の Resolve API が走っても、同じ slot の二重割当てや同じ URL への重複 index 割り当てを防止する。
 
 ### TTL (Time-To-Live)
 
@@ -360,11 +394,23 @@ Pool state は PostgreSQL に永続化するため、サーバー再起動時も
 
 許可リスト外の URL はカタログ登録時に拒否する。
 
+### Resolve キャッシュ
+
+同じプレイリストの Resolve 結果を短期キャッシュする。同一 NAT 配下の複数ユーザーが同じ resolve URL を入力しても、DB 負荷を抑えつつ高速にレスポンスできる。
+
+| 設定 | 推奨値 | 説明 |
+|------|--------|------|
+| キャッシュキー | `poolId + playlistId` | |
+| TTL | 60秒 | プレイリスト編集後の反映遅延は最大60秒 |
+| 保存先 | インメモリ (Next.js プロセス内) | Redis は不要。プロセス再起動でクリアされても問題ない |
+
+キャッシュヒット時は register() を実行せず、キャッシュ済みの index 付き JSON をそのまま返す。pool_slots の TTL はキャッシュ元の resolve 時に設定済みなので、キャッシュヒット時の TTL 延長は不要。
+
 ### レート制限
 
 | エンドポイント | 制限 | 理由 |
 |--------------|------|------|
-| `/r/{poolId}/{playlistId}` | 30 req/min per IP | VRChat からのアクセス |
+| `/r/{poolId}/{playlistId}` | 60 req/min per IP | VRChat からのアクセス。Resolve キャッシュにより実際の DB 負荷は低い |
 | `/vrcurl/{poolId}/{index}` | 制限緩め or なし | 動画プレイヤーが直接アクセス |
 | Hasura GraphQL | Hasura の設定に準じる | Web UI からのアクセス |
 
