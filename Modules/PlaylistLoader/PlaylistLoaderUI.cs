@@ -10,9 +10,12 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
   public class PlaylistLoaderUI : YamaPlayerListener
   {
     [SerializeField] private PlaylistLoader _loader;
-    [SerializeField] private VRCUrlInputField _playlistUrlInput;
+    [SerializeField, RegisterEvent(nameof(VRCUrlInputField.onEndEdit), nameof(OnPlaylistUrlSubmit))]
+    private VRCUrlInputField _playlistUrlInput;
     [SerializeField] private Text _statusText;
     [SerializeField] private GameObject _loadingIndicator;
+
+    private bool _clearPending;
 
     public void OnPlaylistUrlSubmit()
     {
@@ -24,25 +27,31 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
 
     public void ShowLoading(string message)
     {
+      _clearPending = false;
       if (Utilities.IsValid(_loadingIndicator)) _loadingIndicator.SetActive(true);
       if (Utilities.IsValid(_statusText)) _statusText.text = message;
     }
 
     public void ShowSuccess(string message)
     {
+      _clearPending = false;
       if (Utilities.IsValid(_loadingIndicator)) _loadingIndicator.SetActive(false);
       if (Utilities.IsValid(_statusText)) _statusText.text = message;
+      _clearPending = true;
       SendCustomEventDelayedSeconds(nameof(ClearStatus), 5f);
     }
 
     public void ShowError(string message)
     {
+      _clearPending = false;
       if (Utilities.IsValid(_loadingIndicator)) _loadingIndicator.SetActive(false);
       if (Utilities.IsValid(_statusText)) _statusText.text = message;
     }
 
     public void ClearStatus()
     {
+      if (!_clearPending) return;
+      _clearPending = false;
       if (Utilities.IsValid(_statusText)) _statusText.text = "";
     }
   }
