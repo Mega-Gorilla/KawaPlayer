@@ -162,7 +162,7 @@ namespace Yamadev.YamaStream.Editor
 
       if (Application.isPlaying)
       {
-        EditorGUILayout.HelpBox("YamaPlayer is not available in the play mode.", MessageType.Info);
+        EditorGUILayout.HelpBox("KawaPlayer is not available in the play mode.", MessageType.Info);
         return;
       }
 

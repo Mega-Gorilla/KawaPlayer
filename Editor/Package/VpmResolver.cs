@@ -69,7 +69,7 @@ namespace Yamadev.YamaStream.Editor
         {
           dialogMsg.Insert(0, "This will update multiple packages:\n\n");
           dialogMsg.AppendLine("\nAre you sure?");
-          if (!EditorUtility.DisplayDialog("Update YamaPlayer", dialogMsg.ToString(), "OK", "Cancel"))
+          if (!EditorUtility.DisplayDialog("Update KawaPlayer", dialogMsg.ToString(), "OK", "Cancel"))
             return false;
         }
 
