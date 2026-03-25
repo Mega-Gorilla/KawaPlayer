@@ -877,7 +877,7 @@ namespace Yamadev.YamaStream.UI
 
     private void GenerateVersionView()
     {
-      if (Utilities.IsValid(_versionDisplayText)) _versionDisplayText.text = $"YamaPlayer v{_controller.Version}";
+      if (Utilities.IsValid(_versionDisplayText)) _versionDisplayText.text = $"KawaPlayer v{_controller.Version}";
       if (Utilities.IsValid(_updateLogText) && Utilities.IsValid(_updateLogTextAsset)) _updateLogText.text = _updateLogTextAsset.text;
     }
 

@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace Yamadev.YamaStream
 {
-  [AddComponentMenu("YamaPlayer/Localization Settings")]
+  [AddComponentMenu("KawaPlayer/Localization Settings")]
   public class LocalizationSettings : MonoBehaviour
   {
     public string defaultLanguage = "";

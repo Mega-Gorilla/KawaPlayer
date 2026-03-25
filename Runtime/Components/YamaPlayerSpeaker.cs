@@ -8,7 +8,7 @@ namespace Yamadev.YamaStream
   [RequireComponent(typeof(VRCAVProVideoSpeaker))]
   [RequireComponent(typeof(VRCSpatialAudioSource))]
   [DisallowMultipleComponent]
-  [AddComponentMenu("YamaStream/YamaPlayer Speaker")]
+  [AddComponentMenu("KawaPlayer/Speaker")]
   public class YamaPlayerSpeaker : MonoBehaviour
   {
     public Controller controller;

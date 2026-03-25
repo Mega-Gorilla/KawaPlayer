@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Yamadev.YamaStream
 {
-  [AddComponentMenu("YamaPlayer/Appearance Settings")]
+  [AddComponentMenu("KawaPlayer/Appearance Settings")]
   public class AppearanceSettings : MonoBehaviour
   {
     public string defaultColorSet = "";
