@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using VRC.SDK3.Components;
 using VRC.SDKBase;
+using Yamadev.YamaStream.UI;
 
 namespace Yamadev.YamaStream.Modules.PlaylistLoader
 {
