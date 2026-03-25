@@ -16,10 +16,6 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
 
     private UIController _uiController;
     private VRCUrlInputField _mainUrlInput;
-    private Text _statusMessageText;
-    private GameObject _loadingIndicator;
-
-    private bool _clearPending;
 
     private void Start()
     {
@@ -27,46 +23,45 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
       if (!Utilities.IsValid(_uiController) || !Utilities.IsValid(_loader)) return;
 
       _mainUrlInput = (VRCUrlInputField)_uiController.GetProgramVariable("_urlInputField");
-      _statusMessageText = (Text)_uiController.GetProgramVariable("_statusMessageText");
-      _loadingIndicator = (GameObject)_uiController.GetProgramVariable("_loadingIndicator");
     }
 
     public void OnLoadPlaylistClick()
     {
       if (!Utilities.IsValid(_mainUrlInput) || !Utilities.IsValid(_loader)) return;
+      if (_loader.IsLoading) return;
+
       var url = _mainUrlInput.GetUrl();
+      if (!Utilities.IsValid(url) || string.IsNullOrEmpty(url.Get()))
+      {
+        ShowError("URL is empty.");
+        return;
+      }
+
       _mainUrlInput.SetUrl(VRCUrl.Empty);
       _loader.LoadPlaylistFromUrl(url);
     }
 
     public void ShowLoading(string message)
     {
-      _clearPending = false;
-      if (Utilities.IsValid(_loadingIndicator)) _loadingIndicator.SetActive(true);
-      if (Utilities.IsValid(_statusMessageText)) _statusMessageText.text = message;
+      // Playlist 読み込みは短時間 (~1秒) のため、共有 loading indicator は操作しない
+      // 競合回避: UIController の _loadingIndicator / _statusMessageText に触れない
     }
 
     public void ShowSuccess(string message)
     {
-      _clearPending = false;
-      if (Utilities.IsValid(_loadingIndicator)) _loadingIndicator.SetActive(false);
-      if (Utilities.IsValid(_statusMessageText)) _statusMessageText.text = message;
-      _clearPending = true;
-      SendCustomEventDelayedSeconds(nameof(ClearStatus), 5f);
+      if (!Utilities.IsValid(_uiController)) return;
+      _uiController.ShowMessage("Playlist Loader", message);
     }
 
     public void ShowError(string message)
     {
-      _clearPending = false;
-      if (Utilities.IsValid(_loadingIndicator)) _loadingIndicator.SetActive(false);
-      if (Utilities.IsValid(_statusMessageText)) _statusMessageText.text = message;
+      if (!Utilities.IsValid(_uiController)) return;
+      _uiController.ShowMessage("Playlist Loader", message);
     }
 
     public void ClearStatus()
     {
-      if (!_clearPending) return;
-      _clearPending = false;
-      if (Utilities.IsValid(_statusMessageText)) _statusMessageText.text = "";
+      // ShowMessage はモーダルなのでユーザーが閉じる。自動クリア不要
     }
   }
 }
