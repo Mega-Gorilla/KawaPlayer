@@ -11,40 +11,35 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
   public class PlaylistLoaderUI : YamaPlayerListener
   {
     [SerializeField] private PlaylistLoader _loader;
+    [SerializeField] private VRCUrlInputField _playlistUrlInput;
     [SerializeField, RegisterEvent(nameof(Button.onClick), nameof(OnLoadPlaylistClick))]
     private Button _loadPlaylistButton;
 
     private UIController _uiController;
-    private VRCUrlInputField _mainUrlInput;
 
     private void Start()
     {
       _uiController = GetComponentInParent<UIController>();
-      if (!Utilities.IsValid(_uiController) || !Utilities.IsValid(_loader)) return;
-
-      _mainUrlInput = (VRCUrlInputField)_uiController.GetProgramVariable("_urlInputField");
     }
 
     public void OnLoadPlaylistClick()
     {
-      if (!Utilities.IsValid(_mainUrlInput) || !Utilities.IsValid(_loader)) return;
+      if (!Utilities.IsValid(_playlistUrlInput) || !Utilities.IsValid(_loader)) return;
       if (_loader.IsLoading) return;
 
-      var url = _mainUrlInput.GetUrl();
+      var url = _playlistUrlInput.GetUrl();
       if (!Utilities.IsValid(url) || string.IsNullOrEmpty(url.Get()))
       {
         ShowError("URL is empty.");
         return;
       }
 
-      _mainUrlInput.SetUrl(VRCUrl.Empty);
+      _playlistUrlInput.SetUrl(VRCUrl.Empty);
       _loader.LoadPlaylistFromUrl(url);
     }
 
     public void ShowLoading(string message)
     {
-      // Playlist 読み込みは短時間 (~1秒) のため、共有 loading indicator は操作しない
-      // 競合回避: UIController の _loadingIndicator / _statusMessageText に触れない
     }
 
     public void ShowSuccess(string message)
@@ -61,7 +56,6 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
 
     public void ClearStatus()
     {
-      // ShowMessage はモーダルなのでユーザーが閉じる。自動クリア不要
     }
   }
 }
