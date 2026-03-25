@@ -46,7 +46,7 @@ namespace Yamadev.YamaStream.Editor
       }
     }
 
-    [MenuItem("YamaPlayer/Enable AVPro Debug")]
+    [MenuItem("KawaPlayer/Enable AVPro Debug")]
     public static async UniTask AVProDebug()
     {
       PlayerSettings.GetScriptingDefineSymbols(NamedBuildTarget.Standalone, out string[] symbols);

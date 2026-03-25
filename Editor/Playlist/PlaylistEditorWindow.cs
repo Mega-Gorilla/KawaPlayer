@@ -45,23 +45,23 @@ namespace Yamadev.YamaStream.Editor
       }
     }
 
-    [MenuItem("YamaPlayer/Edit Playlist")]
+    [MenuItem("KawaPlayer/Edit Playlist")]
     public static void ShowPlaylistEditorWindow()
     {
-      var window = GetWindow<PlaylistEditorWindow>(title: "YamaPlayer Playlist Editor");
+      var window = GetWindow<PlaylistEditorWindow>(title: "KawaPlayer Playlist Editor");
       window.Show();
     }
 
     public static void ShowPlaylistEditorWindow(YamaPlayer player)
     {
-      var window = GetWindow<PlaylistEditorWindow>(title: "YamaPlayer Playlist Editor");
+      var window = GetWindow<PlaylistEditorWindow>(title: "KawaPlayer Playlist Editor");
       window.YamaPlayer = player;
       window.Show();
     }
 
     public static void ShowPlaylistEditorWindow(YamaPlayer player, PlaylistItem targetPlaylist)
     {
-      var window = GetWindow<PlaylistEditorWindow>(title: "YamaPlayer Playlist Editor");
+      var window = GetWindow<PlaylistEditorWindow>(title: "KawaPlayer Playlist Editor");
       window.YamaPlayer = player;
       window.SelectPlaylist(targetPlaylist);
       window.Show();

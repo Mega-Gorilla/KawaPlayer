@@ -5,7 +5,7 @@ namespace Yamadev.YamaStream.Editor
 {
   public static class YamaPlayerMenu
   {
-    const string menuPrefix = "GameObject/YamaPlayer/";
+    const string menuPrefix = "GameObject/KawaPlayer/";
     static string _yamaplayerPrefabGuid = "0ca92d0fbf2bf3944bfeef01f4977da5";
     static string _yamaplayerNoScreenPrefabGuid = "84f33e64f5807174288ea98464197fd1";
     static string _subScreenPrefabGuid = "1d1c026d8b023d04ea81f85594f05aec";

@@ -4,7 +4,7 @@ using UnityEngine.UI;
 namespace Yamadev.YamaStream
 {
   [DisallowMultipleComponent]
-  [AddComponentMenu("YamaStream/YamaPlayer Screen")]
+  [AddComponentMenu("KawaPlayer/Screen")]
   public class YamaPlayerScreen : MonoBehaviour
   {
     public Controller controller;
