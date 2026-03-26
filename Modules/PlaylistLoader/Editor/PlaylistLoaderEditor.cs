@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using UnityEditor;
 using UnityEngine;
 using VRC.SDKBase;
@@ -125,8 +124,6 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader.Editor
         return;
       }
 
-      var sw = Stopwatch.StartNew();
-
       var urls = new VRCUrl[poolSize];
       for (int i = 0; i < poolSize; i++)
       {
@@ -139,9 +136,8 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader.Editor
       field.SetValue(loader, urls);
       EditorUtility.SetDirty(target);
 
-      sw.Stop();
-      Debug.Log($"[PlaylistLoader] Generated {poolSize} VRCUrl entries in {sw.ElapsedMilliseconds}ms");
-      EditorUtility.DisplayDialog("Success", $"Generated {poolSize} VRCUrl entries.\nTime: {sw.ElapsedMilliseconds}ms", "OK");
+      Debug.Log($"[PlaylistLoader] Generated {poolSize} VRCUrl entries");
+      EditorUtility.DisplayDialog("Success", $"Generated {poolSize} VRCUrl entries.", "OK");
     }
 
     private void ValidatePool()
