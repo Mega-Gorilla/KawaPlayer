@@ -13,7 +13,7 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
     [SerializeField] private PlaylistLoaderUI _ui;
     [SerializeField] private VRCUrl[] _redirectPool = new VRCUrl[0];
     [SerializeField] private string _poolId;
-    [SerializeField] private string _poolBaseUrl = "https://api.example.com";
+    [SerializeField] private string _poolBaseUrl = "https://playlist.vrc-hub.com";
     [SerializeField] private int _poolSize = 100000;
 
     private bool _isLoading;

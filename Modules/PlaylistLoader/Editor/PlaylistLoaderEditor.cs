@@ -65,13 +65,14 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader.Editor
       EditorGUILayout.LabelField("Pool Settings", EditorStyles.boldLabel);
       EditorGUILayout.Space(SpaceSmall);
 
-      EditorGUILayout.PropertyField(_poolBaseUrl, new GUIContent("Pool Base URL"));
-      EditorGUILayout.PropertyField(_poolId, new GUIContent("Pool ID"));
-      EditorGUILayout.PropertyField(_poolSize, new GUIContent("Pool Size"));
-      EditorGUILayout.HelpBox("Pool Size はサーバーの設定と一致させてください。不一致の場合、リダイレクト失敗の原因になります。", MessageType.Warning);
+      using (new EditorGUI.DisabledGroupScope(true))
+      {
+        EditorGUILayout.PropertyField(_poolBaseUrl, new GUIContent("Pool Base URL"));
+        EditorGUILayout.PropertyField(_poolSize, new GUIContent("Pool Size"));
+      }
+      EditorGUILayout.HelpBox("Pool Base URL と Pool Size はサーバー (playlist.vrc-hub.com) の設定に固定されています。", MessageType.Info);
 
-      if (_poolSize.intValue < 1) _poolSize.intValue = 1;
-      if (_poolSize.intValue > 200000) _poolSize.intValue = 200000;
+      EditorGUILayout.PropertyField(_poolId, new GUIContent("Pool ID"));
     }
 
     private void DrawPoolStatus()
