@@ -124,6 +124,11 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader.Editor
         return;
       }
 
+      if (!ValidatePoolIdWithServer(baseUrl, poolId))
+      {
+        return;
+      }
+
       var urls = new VRCUrl[poolSize];
       for (int i = 0; i < poolSize; i++)
       {
@@ -138,6 +143,33 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader.Editor
 
       Debug.Log($"[PlaylistLoader] Generated {poolSize} VRCUrl entries");
       EditorUtility.DisplayDialog("Success", $"Generated {poolSize} VRCUrl entries.", "OK");
+    }
+
+    private bool ValidatePoolIdWithServer(string baseUrl, string poolId)
+    {
+      try
+      {
+        using (var client = new System.Net.WebClient())
+        {
+          string url = $"{baseUrl}/r/{poolId}/_validate";
+          string response = client.DownloadString(url);
+
+          if (response.Contains("Unknown pool"))
+          {
+            EditorUtility.DisplayDialog("Error",
+              $"Pool ID \"{poolId}\" はサーバーに存在しません。\n\nPool ID を確認してください。", "OK");
+            return false;
+          }
+        }
+        return true;
+      }
+      catch (System.Net.WebException)
+      {
+        // ネットワークエラー: オフライン開発を許可するため警告のみ
+        return EditorUtility.DisplayDialog("Warning",
+          "サーバーに接続できませんでした。\nPool ID の有効性を確認できません。\n\nそのまま生成しますか？",
+          "生成する", "キャンセル");
+      }
     }
 
     private void ValidatePool()
