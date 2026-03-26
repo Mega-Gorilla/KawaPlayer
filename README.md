@@ -1,6 +1,6 @@
 # KawaPlayer
 
-[YamaPlayer](https://github.com/koorimizuw/YamaPlayer) のフォークリポジトリです。YamaPlayer の全機能に加え、外部プレイリストのランタイム読み込み機能 (PlaylistLoader) を搭載しています。
+[YamaPlayer](https://github.com/koorimizuw/YamaPlayer) のフォークリポジトリです。YamaPlayer の全機能に加え、外部プレイリストのランタイム読み込み機能 (PlaylistLoader) を搭載しています（基本機能実装済み・VRChat 実機検証継続中）。
 
 ## PlaylistLoader
 
@@ -50,9 +50,10 @@ VRChat Worlds SDK (>=3.8.1) が導入済みのプロジェクトが必要です�
 1. シーンに YamaPlayer を配置
 2. YamaPlayer の子に空の GameObject を作成し、`PlaylistLoader` と `PlaylistLoaderUI` コンポーネントを追加
 3. PlaylistLoader の Inspector で Controller を割り当て
-4. Pool ID を設定（デフォルト: `default`）し、Generate Pool を実行
-5. YamaPlayer の UI 階層 (`LeftSide/Container`) に、UrlInput を複製した PlaylistLoaderInput を配置（EventTrigger / Animator を削除）
-6. PlaylistLoaderUI の `Playlist Url Input` に PlaylistLoaderInput を割り当て
+4. PlaylistLoaderUI の `Loader` に同じ GameObject 上の PlaylistLoader を割り当て
+5. Pool ID を設定（デフォルト: `default`）し、Generate Pool を実行
+6. YamaPlayer の UI 階層 (`LeftSide/Container`) に、UrlInput を複製した PlaylistLoaderInput を配置（EventTrigger / Animator を削除）
+7. PlaylistLoaderUI の `Playlist Url Input` に PlaylistLoaderInput を割り当て
 
 ## 利用規約
 
