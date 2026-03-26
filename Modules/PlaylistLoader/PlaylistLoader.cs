@@ -10,7 +10,6 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
   [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
   public class PlaylistLoader : YamaPlayerModule
   {
-    [SerializeField] private PlaylistLoaderUI _ui;
     [SerializeField] private VRCUrl[] _redirectPool = new VRCUrl[0];
     [SerializeField] private string _poolId = "default";
     [SerializeField] private string _poolBaseUrl = "https://playlist.vrc-hub.com";
@@ -61,7 +60,6 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
 
       _isLoading = false;
       PrintError($"Failed to download playlist: {result.Error}");
-      NotifyUI("Playlist server is unavailable.");
     }
 
     private bool TryParseResponse(string json, out DataList tracks)
@@ -72,7 +70,6 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
           || root.TokenType != TokenType.DataDictionary)
       {
         PrintError("Failed to parse playlist response.");
-        NotifyUI("Failed to parse playlist response.");
         return false;
       }
 
@@ -87,7 +84,6 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
             && errToken.TokenType == TokenType.String)
           error = errToken.String;
         PrintError(error);
-        NotifyUI(error);
         return false;
       }
 
@@ -96,7 +92,6 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
           || tracksToken.DataList.Count == 0)
       {
         PrintWarning("No tracks found in playlist.");
-        NotifyUI("No tracks found in playlist.");
         return false;
       }
 
@@ -144,7 +139,6 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
             ? $"No tracks could be added ({failedCount} skipped)"
             : "No valid tracks to add.";
         PrintWarning(msg);
-        NotifyUI(msg);
         return null;
       }
 
@@ -159,7 +153,6 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
       if (!Utilities.IsValid(queue))
       {
         PrintError("Queue is not available.");
-        NotifyUI("Queue is not available.");
         return;
       }
 
@@ -179,12 +172,6 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
           ? $"Added {tracks.Length}/{totalCount} tracks ({failedCount} failed)"
           : $"Added {tracks.Length} tracks to queue";
       PrintLog(message);
-      NotifyUI(message);
-    }
-
-    private void NotifyUI(string message)
-    {
-      if (Utilities.IsValid(_ui)) _ui.ShowNotification(message);
     }
 
     private int TryGetInt(DataDictionary dict, string key, int defaultValue)
