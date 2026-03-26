@@ -86,6 +86,19 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader.Editor
       {
         float estimatedMB = currentSize * 54f / (1024f * 1024f);
         EditorGUILayout.LabelField("Estimated File Size", $"~{estimatedMB:F2} MB");
+
+        // Pool ID 不一致検出: 生成済み Pool の Pool ID と現在の設定値を比較
+        var loader = (PlaylistLoader)target;
+        VRCUrl[] pool = loader.RedirectPool;
+        if (pool != null && pool.Length > 0 && pool[0] != null)
+        {
+          string firstUrl = pool[0].Get();
+          string expectedPrefix = $"/vrcurl/{_poolId.stringValue}/";
+          if (!string.IsNullOrEmpty(firstUrl) && !firstUrl.Contains(expectedPrefix))
+          {
+            EditorGUILayout.HelpBox("Pool ID が生成済み Pool と一致しません。[Generate Pool] を再実行してください。", MessageType.Warning);
+          }
+        }
       }
     }
 
