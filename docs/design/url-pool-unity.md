@@ -68,15 +68,13 @@ public class PlaylistLoaderUI : YamaPlayerListener
 
 ### Editor 用設定
 
-```csharp
-[Serializable]
-public class PlaylistLoaderPoolSettings
-{
-    public string poolBaseUrl;   // 例: https://api.example.com
-    public string poolId;        // 例: kawaplayer-main
-    public int poolSize;         // 暫定既定値: 100000 (ファイルサイズ実測: 5.33MB。Inspector/ビルド面は #4 で最終確認)
-}
-```
+| 項目 | 値 | 編集 |
+|------|-----|------|
+| Pool Base URL | `https://playlist.vrc-hub.com` | 固定（読み取り専用） |
+| Pool ID | `default` | 編集可能 |
+| Pool Size | `100000` | 固定（読み取り専用） |
+
+Pool Base URL と Pool Size はサーバー側で固定されているため、Inspector で編集不可。Pool ID はワールド固有の識別子として編集可能。
 
 ---
 
@@ -97,18 +95,20 @@ for (int i = 0; i < poolSize; i++)
 
 | 項目 | 説明 |
 |------|------|
-| Pool Base URL | リダイレクトサーバーの URL (例: `https://api.example.com`) |
-| Pool ID | このワールド固有の識別子 (例: `kawaplayer-main`) |
-| Pool Size | スロット数 (暫定既定値: 100,000。ファイルサイズ実測 5.33MB。Inspector/ビルド面は実装時に最終確認) |
-| **Generate Pool** ボタン | 上記設定から `VRCUrl[]` を生成し `_redirectPool` に保存 |
-| **Validate Pool** ボタン | 生成済み Pool の整合性を検証 |
+| Pool Base URL | `https://playlist.vrc-hub.com` (読み取り専用) |
+| Pool ID | サーバーの Pool ID (デフォルト: `default`) |
+| Pool Size | `100,000` (読み取り専用。実測 5.33MB) |
+| **Generate Pool** ボタン | Pool ID をサーバーで検証後、`VRCUrl[]` を生成して `_redirectPool` に保存 |
 
-### Validate で確認する項目
+### Generate Pool 時のサーバー検証
 
-- `poolBaseUrl` が `http://` or `https://` で始まる
-- `poolId` が空でない
-- `_redirectPool.Length == poolSize`
-- 各 `VRCUrl.Get()` が `/vrcurl/{poolId}/{index}` のパターンに一致
+Generate Pool 実行前にサーバーに `/r/{poolId}/_validate` をリクエストし、Pool ID の有効性を確認する。
+
+| サーバー応答 | 動作 |
+|------------|------|
+| Pool ID 有効 | Pool 生成を続行 |
+| `Unknown pool` | エラーダイアログを表示し、生成を中止 |
+| 接続失敗 | 警告ダイアログ（生成続行 or キャンセルを選択可能） |
 
 ---
 
