@@ -10,7 +10,6 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader.Editor
   public class PlaylistLoaderEditor : EditorBase
   {
     private SerializedProperty _controller;
-    private SerializedProperty _ui;
     private SerializedProperty _redirectPool;
     private SerializedProperty _poolId;
     private SerializedProperty _poolBaseUrl;
@@ -22,7 +21,6 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader.Editor
       Title = "Playlist Loader";
 
       _controller = serializedObject.FindProperty("_controller");
-      _ui = serializedObject.FindProperty("_ui");
       _redirectPool = serializedObject.FindProperty("_redirectPool");
       _poolId = serializedObject.FindProperty("_poolId");
       _poolBaseUrl = serializedObject.FindProperty("_poolBaseUrl");
@@ -53,10 +51,6 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader.Editor
       EditorGUILayout.PropertyField(_controller, new GUIContent("Controller"));
       if (_controller.objectReferenceValue == null)
         EditorGUILayout.HelpBox("Controller が未設定です。YamaPlayer の Controller を割り当ててください。", MessageType.Error);
-
-      EditorGUILayout.PropertyField(_ui, new GUIContent("UI (PlaylistLoaderUI)"));
-      if (_ui.objectReferenceValue == null)
-        EditorGUILayout.HelpBox("UI が未設定です。PlaylistLoaderUI を割り当ててください。", MessageType.Error);
     }
 
     private void DrawPoolSettings()
