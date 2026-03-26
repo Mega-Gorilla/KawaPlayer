@@ -306,7 +306,6 @@ namespace Yamadev.YamaStream
       PrintLog($"{Handler.Type.GetString()}: Set video time: {time}.");
     }
 
-
     public object[] Track
     {
       get
