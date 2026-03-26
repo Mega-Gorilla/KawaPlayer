@@ -149,25 +149,53 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader.Editor
     {
       try
       {
-        using (var client = new System.Net.WebClient())
-        {
-          string url = $"{baseUrl}/r/{poolId}/_validate";
-          string response = client.DownloadString(url);
+        var request = System.Net.HttpWebRequest.Create($"{baseUrl}/r/{poolId}/_validate") as System.Net.HttpWebRequest;
+        request.Timeout = 5000;
 
-          if (response.Contains("Unknown pool"))
+        try
+        {
+          using (var response = request.GetResponse() as System.Net.HttpWebResponse)
+          using (var reader = new System.IO.StreamReader(response.GetResponseStream()))
           {
-            EditorUtility.DisplayDialog("Error",
-              $"Pool ID \"{poolId}\" はサーバーに存在しません。\n\nPool ID を確認してください。", "OK");
-            return false;
+            string body = reader.ReadToEnd();
+            if (body.Contains("Unknown pool"))
+            {
+              EditorUtility.DisplayDialog("Error",
+                $"Pool ID \"{poolId}\" はサーバーに存在しません。\n\nサーバー: {baseUrl}\nPool ID を確認してください。", "OK");
+              return false;
+            }
+            return true;
           }
         }
-        return true;
+        catch (System.Net.WebException ex) when (ex.Response is System.Net.HttpWebResponse httpRes)
+        {
+          // HTTP エラーレスポンス (404 等) — サーバーには接続できている
+          using (var reader = new System.IO.StreamReader(httpRes.GetResponseStream()))
+          {
+            string body = reader.ReadToEnd();
+            if (body.Contains("Unknown pool"))
+            {
+              EditorUtility.DisplayDialog("Error",
+                $"Pool ID \"{poolId}\" はサーバーに存在しません。\n\nサーバー: {baseUrl}\nPool ID を確認してください。", "OK");
+              return false;
+            }
+          }
+          // Playlist not found 等 → Pool ID は有効
+          return true;
+        }
       }
       catch (System.Net.WebException)
       {
-        // ネットワークエラー: オフライン開発を許可するため警告のみ
+        // 接続自体ができない (DNS 解決失敗、タイムアウト等)
         return EditorUtility.DisplayDialog("Warning",
-          "サーバーに接続できませんでした。\nPool ID の有効性を確認できません。\n\nそのまま生成しますか？",
+          $"サーバーに接続できませんでした。\n\nサーバー: {baseUrl}\nPool ID の有効性を確認できません。\n\nそのまま生成しますか？",
+          "生成する", "キャンセル");
+      }
+      catch (System.Exception ex)
+      {
+        Debug.LogWarning($"[PlaylistLoader] Pool ID validation error: {ex.Message}");
+        return EditorUtility.DisplayDialog("Warning",
+          $"Pool ID の検証中にエラーが発生しました。\n\n{ex.Message}\n\nそのまま生成しますか？",
           "生成する", "キャンセル");
       }
     }
