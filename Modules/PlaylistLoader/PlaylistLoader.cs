@@ -153,6 +153,12 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
       _controller.TakeOwnership();
       queue.AddTracks(finalTracks);
 
+      // 停止中なら自動再生
+      if (_controller.Stopped)
+      {
+        _controller.Forward();
+      }
+
       var message = failedCount > 0
           ? $"Added {addedCount}/{totalCount} tracks ({failedCount} failed)"
           : $"Added {addedCount} tracks to queue";

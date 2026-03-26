@@ -11,9 +11,8 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
   public class PlaylistLoaderUI : YamaPlayerListener
   {
     [SerializeField] private PlaylistLoader _loader;
-    [SerializeField] private VRCUrlInputField _playlistUrlInput;
-    [SerializeField, RegisterEvent(nameof(Button.onClick), nameof(OnLoadPlaylistClick))]
-    private Button _loadPlaylistButton;
+    [SerializeField, RegisterEvent(nameof(VRCUrlInputField.onEndEdit), nameof(OnPlaylistUrlSubmit))]
+    private VRCUrlInputField _playlistUrlInput;
 
     private UIController _uiController;
 
@@ -22,7 +21,7 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
       _uiController = GetComponentInParent<UIController>();
     }
 
-    public void OnLoadPlaylistClick()
+    public void OnPlaylistUrlSubmit()
     {
       if (!Utilities.IsValid(_playlistUrlInput) || !Utilities.IsValid(_loader)) return;
       if (_loader.IsLoading) return;
@@ -30,7 +29,6 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
       var url = _playlistUrlInput.GetUrl();
       if (!Utilities.IsValid(url) || string.IsNullOrEmpty(url.Get()))
       {
-        ShowError("URL is empty.");
         return;
       }
 
