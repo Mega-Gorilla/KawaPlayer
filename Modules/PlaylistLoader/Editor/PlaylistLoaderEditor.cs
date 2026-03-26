@@ -11,6 +11,7 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader.Editor
   public class PlaylistLoaderEditor : EditorBase
   {
     private SerializedProperty _controller;
+    private SerializedProperty _ui;
     private SerializedProperty _redirectPool;
     private SerializedProperty _poolId;
     private SerializedProperty _poolBaseUrl;
@@ -22,6 +23,7 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader.Editor
       Title = "Playlist Loader";
 
       _controller = serializedObject.FindProperty("_controller");
+      _ui = serializedObject.FindProperty("_ui");
       _redirectPool = serializedObject.FindProperty("_redirectPool");
       _poolId = serializedObject.FindProperty("_poolId");
       _poolBaseUrl = serializedObject.FindProperty("_poolBaseUrl");
@@ -34,6 +36,7 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader.Editor
       serializedObject.Update();
 
       EditorGUILayout.PropertyField(_controller, new GUIContent("Controller"));
+      EditorGUILayout.PropertyField(_ui, new GUIContent("UI (PlaylistLoaderUI)"));
       EditorGUILayout.Space(SpaceMedium);
       DrawPoolSettings();
       EditorGUILayout.Space(SpaceMedium);
