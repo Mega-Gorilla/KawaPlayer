@@ -192,7 +192,5 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader.Editor
           "生成する", "キャンセル");
       }
     }
-
-  }
   }
 }
