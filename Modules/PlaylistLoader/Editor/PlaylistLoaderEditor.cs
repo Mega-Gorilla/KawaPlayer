@@ -35,14 +35,7 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader.Editor
       base.OnInspectorGUI();
       serializedObject.Update();
 
-      EditorGUILayout.PropertyField(_controller, new GUIContent("Controller"));
-      EditorGUILayout.PropertyField(_ui, new GUIContent("UI (PlaylistLoaderUI)"));
-
-      if (_controller.objectReferenceValue == null)
-        EditorGUILayout.HelpBox("Controller が未設定です。YamaPlayer の Controller を割り当ててください。", MessageType.Error);
-      if (_ui.objectReferenceValue == null)
-        EditorGUILayout.HelpBox("UI が未設定です。PlaylistLoaderUI を割り当ててください。", MessageType.Error);
-
+      DrawReferences();
       EditorGUILayout.Space(SpaceMedium);
       DrawPoolSettings();
       EditorGUILayout.Space(SpaceMedium);
@@ -51,6 +44,20 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader.Editor
       DrawPoolActions();
 
       serializedObject.ApplyModifiedProperties();
+    }
+
+    private void DrawReferences()
+    {
+      EditorGUILayout.LabelField("References", EditorStyles.boldLabel);
+      EditorGUILayout.Space(SpaceSmall);
+
+      EditorGUILayout.PropertyField(_controller, new GUIContent("Controller"));
+      if (_controller.objectReferenceValue == null)
+        EditorGUILayout.HelpBox("Controller が未設定です。YamaPlayer の Controller を割り当ててください。", MessageType.Error);
+
+      EditorGUILayout.PropertyField(_ui, new GUIContent("UI (PlaylistLoaderUI)"));
+      if (_ui.objectReferenceValue == null)
+        EditorGUILayout.HelpBox("UI が未設定です。PlaylistLoaderUI を割り当ててください。", MessageType.Error);
     }
 
     private void DrawPoolSettings()
@@ -119,7 +126,6 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader.Editor
 
       var sw = Stopwatch.StartNew();
 
-      // VRCUrl[] を直接構築 (SerializedProperty 経由は大量配列で極端に遅いため)
       var urls = new VRCUrl[poolSize];
       for (int i = 0; i < poolSize; i++)
       {
@@ -144,7 +150,6 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader.Editor
       string poolId = _poolId.stringValue;
       int expectedSize = _poolSize.intValue;
 
-      // VRCUrl[] を直接取得 (SerializedProperty 経由は大量配列で遅いため)
       var loader = (PlaylistLoader)target;
       VRCUrl[] pool = loader.RedirectPool;
       int actualSize = pool != null ? pool.Length : 0;
@@ -157,16 +162,13 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader.Editor
 
       int errors = 0;
 
-      // Check: pool.Length == poolSize
       if (actualSize != expectedSize)
       {
         Debug.LogWarning($"[PlaylistLoader] Validation: pool size mismatch. Expected {expectedSize}, actual {actualSize}");
         errors++;
       }
 
-      // Extract base URL from first entry
       string firstUrl = pool[0] != null ? pool[0].Get() : null;
-
       if (string.IsNullOrEmpty(firstUrl))
       {
         Debug.LogError("[PlaylistLoader] Validation: first entry has empty URL");
@@ -184,14 +186,12 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader.Editor
 
       string detectedBaseUrl = firstUrl.Substring(0, vrcurlPos);
 
-      // Check: base URL starts with http/https
       if (!(detectedBaseUrl.StartsWith("http://") || detectedBaseUrl.StartsWith("https://")))
       {
         Debug.LogWarning($"[PlaylistLoader] Validation: base URL does not start with http(s): {detectedBaseUrl}");
         errors++;
       }
 
-      // Check each entry
       for (int i = 0; i < actualSize; i++)
       {
         string url = pool[i] != null ? pool[i].Get() : null;
@@ -206,7 +206,7 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader.Editor
         {
           Debug.LogWarning($"[PlaylistLoader] Validation: index {i} URL mismatch.\n  Expected: {expectedUrl}\n  Actual:   {url}");
           errors++;
-          if (errors > 5) break; // Stop after too many errors
+          if (errors > 5) break;
         }
       }
 
