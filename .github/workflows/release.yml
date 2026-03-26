@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
 
 env:
-  packageName: "net.kwxxw.yama-stream"
+  packageName: "com.vhub.kawaplayer"
 
 permissions:
   contents: write
