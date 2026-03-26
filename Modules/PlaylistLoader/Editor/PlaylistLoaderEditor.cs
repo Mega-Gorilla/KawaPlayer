@@ -133,13 +133,11 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader.Editor
         urls[i] = new VRCUrl($"{baseUrl}/vrcurl/{poolId}/{i}");
       }
 
-      Undo.RecordObject(target, "Generate PlaylistLoader Pool");
       var loader = (PlaylistLoader)target;
       var field = typeof(PlaylistLoader).GetField("_redirectPool",
         System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
       field.SetValue(loader, urls);
       EditorUtility.SetDirty(target);
-      serializedObject.Update();
 
       sw.Stop();
       Debug.Log($"[PlaylistLoader] Generated {poolSize} VRCUrl entries in {sw.ElapsedMilliseconds}ms");
