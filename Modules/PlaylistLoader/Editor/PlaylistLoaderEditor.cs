@@ -94,16 +94,9 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader.Editor
       EditorGUILayout.LabelField("Actions", EditorStyles.boldLabel);
       EditorGUILayout.Space(SpaceSmall);
 
-      using (new EditorGUILayout.HorizontalScope())
+      if (GUILayout.Button("Generate Pool"))
       {
-        if (GUILayout.Button("Generate Pool"))
-        {
-          GeneratePool();
-        }
-        if (GUILayout.Button("Validate Pool"))
-        {
-          ValidatePool();
-        }
+        GeneratePool();
       }
     }
 
@@ -200,81 +193,6 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader.Editor
       }
     }
 
-    private void ValidatePool()
-    {
-      string poolId = _poolId.stringValue;
-      int expectedSize = _poolSize.intValue;
-
-      var loader = (PlaylistLoader)target;
-      VRCUrl[] pool = loader.RedirectPool;
-      int actualSize = pool != null ? pool.Length : 0;
-
-      if (actualSize == 0)
-      {
-        EditorUtility.DisplayDialog("Validate Pool",
-          "Pool が空です。\n\n[Generate Pool] を先に実行してください。", "OK");
-        return;
-      }
-
-      var issues = new System.Collections.Generic.List<string>();
-
-      // サイズチェック
-      if (actualSize != expectedSize)
-      {
-        issues.Add($"Pool サイズが不一致です。\n  設定値: {expectedSize}\n  実際: {actualSize}\n  → [Generate Pool] を再実行してください。");
-      }
-
-      // 先頭 URL チェック
-      string firstUrl = pool[0] != null ? pool[0].Get() : null;
-      if (string.IsNullOrEmpty(firstUrl))
-      {
-        issues.Add("先頭エントリの URL が空です。\n  → [Generate Pool] を再実行してください。");
-        ShowValidationResult(issues);
-        return;
-      }
-
-      int vrcurlPos = firstUrl.IndexOf("/vrcurl/");
-      if (vrcurlPos < 0)
-      {
-        issues.Add($"URL パターンが不正です。\n  先頭URL: {firstUrl}\n  → /vrcurl/ を含む URL が必要です。");
-        ShowValidationResult(issues);
-        return;
-      }
-
-      string detectedBaseUrl = firstUrl.Substring(0, vrcurlPos);
-
-      // Pool ID 一致チェック (先頭のみ)
-      string expectedFirst = $"{detectedBaseUrl}/vrcurl/{poolId}/0";
-      if (firstUrl != expectedFirst)
-      {
-        // Pool ID 不一致の可能性を検出
-        string actualPoolId = firstUrl.Substring(vrcurlPos + "/vrcurl/".Length);
-        int slashPos = actualPoolId.IndexOf('/');
-        if (slashPos >= 0) actualPoolId = actualPoolId.Substring(0, slashPos);
-
-        issues.Add($"Pool ID が一致しません。\n  設定値: {poolId}\n  Pool 内の値: {actualPoolId}\n  → Pool ID を変更した場合は [Generate Pool] を再実行してください。");
-      }
-
-      if (issues.Count == 0)
-      {
-        EditorUtility.DisplayDialog("Validate Pool",
-          $"Validation passed.\n\nPool Size: {actualSize}\nPool ID: {poolId}\nBase URL: {detectedBaseUrl}", "OK");
-      }
-      else
-      {
-        ShowValidationResult(issues);
-      }
-    }
-
-    private void ShowValidationResult(System.Collections.Generic.List<string> issues)
-    {
-      var sb = new System.Text.StringBuilder();
-      sb.AppendLine($"Validation failed: {issues.Count} 件の問題が見つかりました。\n");
-      for (int i = 0; i < issues.Count; i++)
-      {
-        sb.AppendLine($"[{i + 1}] {issues[i]}");
-      }
-      EditorUtility.DisplayDialog("Validate Pool", sb.ToString(), "OK");
-    }
+  }
   }
 }
