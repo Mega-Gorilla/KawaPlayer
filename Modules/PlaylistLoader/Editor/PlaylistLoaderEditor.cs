@@ -70,8 +70,6 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader.Editor
         EditorGUILayout.PropertyField(_poolBaseUrl, new GUIContent("Pool Base URL"));
         EditorGUILayout.PropertyField(_poolSize, new GUIContent("Pool Size"));
       }
-      EditorGUILayout.HelpBox("Pool Base URL と Pool Size はサーバー (playlist.vrc-hub.com) の設定に固定されています。", MessageType.Info);
-
       EditorGUILayout.PropertyField(_poolId, new GUIContent("Pool ID"));
     }
 
