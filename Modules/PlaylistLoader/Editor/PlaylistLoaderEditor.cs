@@ -151,72 +151,70 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader.Editor
 
       if (actualSize == 0)
       {
-        EditorUtility.DisplayDialog("Validation", "Pool is empty. Generate a pool first.", "OK");
+        EditorUtility.DisplayDialog("Validate Pool",
+          "Pool が空です。\n\n[Generate Pool] を先に実行してください。", "OK");
         return;
       }
 
-      int errors = 0;
+      var issues = new System.Collections.Generic.List<string>();
 
+      // サイズチェック
       if (actualSize != expectedSize)
       {
-        Debug.LogWarning($"[PlaylistLoader] Validation: pool size mismatch. Expected {expectedSize}, actual {actualSize}");
-        errors++;
+        issues.Add($"Pool サイズが不一致です。\n  設定値: {expectedSize}\n  実際: {actualSize}\n  → [Generate Pool] を再実行してください。");
       }
 
+      // 先頭 URL チェック
       string firstUrl = pool[0] != null ? pool[0].Get() : null;
       if (string.IsNullOrEmpty(firstUrl))
       {
-        Debug.LogError("[PlaylistLoader] Validation: first entry has empty URL");
-        EditorUtility.DisplayDialog("Validation", "Validation failed: first entry has empty URL.", "OK");
+        issues.Add("先頭エントリの URL が空です。\n  → [Generate Pool] を再実行してください。");
+        ShowValidationResult(issues);
         return;
       }
 
       int vrcurlPos = firstUrl.IndexOf("/vrcurl/");
       if (vrcurlPos < 0)
       {
-        Debug.LogError($"[PlaylistLoader] Validation: first entry does not contain /vrcurl/ pattern: {firstUrl}");
-        EditorUtility.DisplayDialog("Validation", "Validation failed: URL pattern not recognized.", "OK");
+        issues.Add($"URL パターンが不正です。\n  先頭URL: {firstUrl}\n  → /vrcurl/ を含む URL が必要です。");
+        ShowValidationResult(issues);
         return;
       }
 
       string detectedBaseUrl = firstUrl.Substring(0, vrcurlPos);
 
-      if (!(detectedBaseUrl.StartsWith("http://") || detectedBaseUrl.StartsWith("https://")))
+      // Pool ID 一致チェック (先頭のみ)
+      string expectedFirst = $"{detectedBaseUrl}/vrcurl/{poolId}/0";
+      if (firstUrl != expectedFirst)
       {
-        Debug.LogWarning($"[PlaylistLoader] Validation: base URL does not start with http(s): {detectedBaseUrl}");
-        errors++;
+        // Pool ID 不一致の可能性を検出
+        string actualPoolId = firstUrl.Substring(vrcurlPos + "/vrcurl/".Length);
+        int slashPos = actualPoolId.IndexOf('/');
+        if (slashPos >= 0) actualPoolId = actualPoolId.Substring(0, slashPos);
+
+        issues.Add($"Pool ID が一致しません。\n  設定値: {poolId}\n  Pool 内の値: {actualPoolId}\n  → Pool ID を変更した場合は [Generate Pool] を再実行してください。");
       }
 
-      for (int i = 0; i < actualSize; i++)
+      if (issues.Count == 0)
       {
-        string url = pool[i] != null ? pool[i].Get() : null;
-        string expectedUrl = $"{detectedBaseUrl}/vrcurl/{poolId}/{i}";
-
-        if (string.IsNullOrEmpty(url))
-        {
-          Debug.LogWarning($"[PlaylistLoader] Validation: index {i} has empty URL");
-          errors++;
-        }
-        else if (url != expectedUrl)
-        {
-          Debug.LogWarning($"[PlaylistLoader] Validation: index {i} URL mismatch.\n  Expected: {expectedUrl}\n  Actual:   {url}");
-          errors++;
-          if (errors > 5) break;
-        }
-      }
-
-      if (errors == 0)
-      {
-        string msg = $"Validation passed.\n\nPool Size: {actualSize}\nPool ID: {poolId}\nBase URL: {detectedBaseUrl}";
-        EditorUtility.DisplayDialog("Validation", msg, "OK");
-        Debug.Log($"[PlaylistLoader] Validation passed: {actualSize} entries, pool={poolId}, base={detectedBaseUrl}");
+        EditorUtility.DisplayDialog("Validate Pool",
+          $"Validation passed.\n\nPool Size: {actualSize}\nPool ID: {poolId}\nBase URL: {detectedBaseUrl}", "OK");
       }
       else
       {
-        string msg = $"Validation failed: {errors} error(s) found.\nCheck console for details.";
-        EditorUtility.DisplayDialog("Validation", msg, "OK");
-        Debug.LogError($"[PlaylistLoader] Validation failed: {errors} error(s)");
+        ShowValidationResult(issues);
       }
+    }
+
+    private void ShowValidationResult(System.Collections.Generic.List<string> issues)
+    {
+      var sb = new System.Text.StringBuilder();
+      sb.AppendLine($"Validation failed: {issues.Count} 件の問題が見つかりました。\n");
+      for (int i = 0; i < issues.Count; i++)
+      {
+        sb.AppendLine($"[{i + 1}] {issues[i]}");
+      }
+      EditorUtility.DisplayDialog("Validate Pool", sb.ToString(), "OK");
     }
   }
 }
