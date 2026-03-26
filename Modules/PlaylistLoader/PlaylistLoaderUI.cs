@@ -2,7 +2,6 @@ using UdonSharp;
 using UnityEngine;
 using VRC.SDK3.Components;
 using VRC.SDKBase;
-using Yamadev.YamaStream.UI;
 
 namespace Yamadev.YamaStream.Modules.PlaylistLoader
 {
@@ -13,13 +12,6 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
     [SerializeField, RegisterEvent(nameof(VRCUrlInputField.onEndEdit), nameof(OnPlaylistUrlSubmit))]
     private VRCUrlInputField _playlistUrlInput;
 
-    private UIController _uiController;
-
-    private void Start()
-    {
-      _uiController = GetComponentInParent<UIController>();
-    }
-
     public void OnPlaylistUrlSubmit()
     {
       if (!Utilities.IsValid(_playlistUrlInput) || !Utilities.IsValid(_loader)) return;
@@ -28,12 +20,6 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
       if (!Utilities.IsValid(url) || string.IsNullOrEmpty(url.Get())) return;
       _playlistUrlInput.SetUrl(VRCUrl.Empty);
       _loader.LoadPlaylistFromUrl(url);
-    }
-
-    public void ShowNotification(string message)
-    {
-      if (!Utilities.IsValid(_uiController)) return;
-      _uiController.ShowMessage("Playlist Loader", message);
     }
   }
 }

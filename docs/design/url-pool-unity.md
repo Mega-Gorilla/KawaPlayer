@@ -44,9 +44,10 @@ Modules/
 [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
 public class PlaylistLoader : YamaPlayerModule
 {
-    [SerializeField] private PlaylistLoaderUI _ui;
     [SerializeField] private VRCUrl[] _redirectPool = new VRCUrl[0];
-    [SerializeField] private string _poolId;
+    [SerializeField] private string _poolId = "default";
+    [SerializeField] private string _poolBaseUrl = "https://playlist.vrc-hub.com";
+    [SerializeField] private int _poolSize = 100000;
 
     private bool _isLoading;
     private VRCUrl _pendingResolveUrl;
@@ -61,10 +62,10 @@ public class PlaylistLoaderUI : YamaPlayerListener
 {
     [SerializeField] private PlaylistLoader _loader;
     [SerializeField] private VRCUrlInputField _playlistUrlInput;
-    [SerializeField] private Text _statusText;
-    [SerializeField] private GameObject _loadingIndicator;
 }
 ```
+
+PlaylistLoaderUI は URL 入力の受け渡しのみに特化。成功/エラー通知はログ出力 (`PrintLog` / `PrintError`) のみ。
 
 ### Editor 用設定
 
@@ -183,28 +184,31 @@ var track = TrackUtils.NewTrack((VideoPlayerType)mode, title, redirectUrl);
 
 ## エラー処理
 
-| 失敗ケース | UI メッセージ例 |
-|-----------|----------------|
-| resolve URL ダウンロード失敗 | `Playlist server is unavailable` |
-| JSON パース失敗 | `Failed to parse playlist response` |
-| `index` フィールド欠落 | `Invalid track data (missing index)` |
-| index が pool 範囲外 | `Pool index out of range` |
-| オーナーシップ不足 | (TakeOwnership で自動取得) |
-| 0 件追加 | `No tracks found in playlist` |
-| 一部失敗 | `Added 8/12 tracks (4 failed)` |
+エラーはログ出力 (`PrintError` / `PrintWarning`) のみ。UI ダイアログは表示しない。
+
+| 失敗ケース | ログ出力 | ユーザーの見え方 |
+|-----------|---------|----------------|
+| resolve URL ダウンロード失敗 | `PrintError("Failed to download playlist: ...")` | 何も起きない |
+| JSON パース失敗 | `PrintError("Failed to parse playlist response.")` | 何も起きない |
+| サーバーエラー (ok: false) | `PrintError(error)` | 何も起きない |
+| トラック 0 件 | `PrintWarning("No tracks found in playlist.")` | 何も起きない |
+| 一部失敗 | `PrintLog("Added 3/5 tracks (2 failed)")` | Queue に部分追加 |
+| 成功 | `PrintLog("Added 5 tracks to queue")` | Queue に追加 + 自動再生 |
 
 ---
 
 ## 擬似コード
 
 ```csharp
+// --- PlaylistLoader.cs ---
+
 public void LoadPlaylistFromUrl(VRCUrl resolveUrl)
 {
     if (_isLoading) return;
     _isLoading = true;
     _pendingResolveUrl = resolveUrl;
-    if (Utilities.IsValid(_ui)) _ui.ShowLoading("Loading playlist...");
     VRCStringDownloader.LoadUrl(resolveUrl, (IUdonEventReceiver)this);
+    PrintLog($"Downloading playlist from {resolveUrl.Get()}...");
 }
 
 public override void OnStringLoadSuccess(IVRCStringDownload result)
@@ -212,114 +216,49 @@ public override void OnStringLoadSuccess(IVRCStringDownload result)
     if (result.Url.Get() != _pendingResolveUrl.Get()) return;
     _isLoading = false;
 
-    // JSON パース
-    if (!VRCJson.TryDeserializeFromJson(result.Result, out DataToken root)
-        || root.TokenType != TokenType.DataDictionary)
-    {
-        if (Utilities.IsValid(_ui)) _ui.ShowError("Failed to parse playlist response.");
-        return;
-    }
-
-    var rootDict = root.DataDictionary;
-
-    // "ok" チェック
-    if (rootDict.TryGetValue("ok", out DataToken okToken)
-        && okToken.TokenType == TokenType.Boolean
-        && !okToken.Boolean)
-    {
-        string error = "Playlist server returned an error.";
-        if (rootDict.TryGetValue("error", out DataToken errToken)
-            && errToken.TokenType == TokenType.String)
-            error = errToken.String;
-        if (Utilities.IsValid(_ui)) _ui.ShowError(error);
-        return;
-    }
-
-    // "tracks" 配列を取得
-    if (!rootDict.TryGetValue("tracks", out DataToken tracksToken)
-        || tracksToken.TokenType != TokenType.DataList
-        || tracksToken.DataList.Count == 0)
-    {
-        if (Utilities.IsValid(_ui)) _ui.ShowError("No tracks found in playlist.");
-        return;
-    }
-
-    // index → VRCUrl → Track → Queue
-    EnqueueFromIndexes(tracksToken.DataList);
+    if (!TryParseResponse(result.Result, out DataList tracks)) return;
+    var builtTracks = BuildTracks(tracks, out int failedCount);
+    if (builtTracks == null) return;
+    EnqueueAndPlay(builtTracks, tracks.Count, failedCount);
 }
 
 public override void OnStringLoadError(IVRCStringDownload result)
 {
     if (result.Url.Get() != _pendingResolveUrl.Get()) return;
     _isLoading = false;
-    if (Utilities.IsValid(_ui)) _ui.ShowError("Playlist server is unavailable.");
+    PrintError($"Failed to download playlist: {result.Error}");
 }
 
-private void EnqueueFromIndexes(DataList trackDicts)
+// TryParseResponse: JSON パース + ok チェック + tracks 抽出
+// BuildTracks: DataList → object[][] 変換 (pool 範囲外はスキップ)
+// EnqueueAndPlay: Queue 追加 + 停止中なら自動再生
+
+private void EnqueueAndPlay(object[][] tracks, int totalCount, int failedCount)
 {
-    int totalCount = trackDicts.Count;
-
-    // UdonSharp ではカスタム DTO 配列を使わず DataDictionary を直接処理
-    object[][] tempTracks = new object[totalCount][];
-    int addedCount = 0;
-    int failedCount = 0;
-
-    for (int i = 0; i < totalCount; i++)
-    {
-        if (trackDicts[i].TokenType != TokenType.DataDictionary)
-        {
-            failedCount++;
-            continue;
-        }
-        var dict = trackDicts[i].DataDictionary;
-
-        // index (必須)
-        int index = TryGetInt(dict, "index", -1);
-        if (index < 0 || index >= _redirectPool.Length)
-        {
-            failedCount++;
-            continue;
-        }
-
-        int mode = TryGetInt(dict, "mode", 0);
-        string title = "";
-        if (dict.TryGetValue("title", out DataToken t)
-            && t.TokenType == TokenType.String)
-            title = t.String;
-
-        VRCUrl redirectUrl = _redirectPool[index];
-        tempTracks[addedCount] = TrackUtils.NewTrack(
-            (VideoPlayerType)mode, title, redirectUrl);
-        addedCount++;
-    }
-
-    if (addedCount == 0)
-    {
-        if (Utilities.IsValid(_ui)) _ui.ShowError("No valid tracks to add.");
-        return;
-    }
-
-    // 実際のサイズに切り詰め
-    object[][] finalTracks = new object[addedCount][];
-    for (int i = 0; i < addedCount; i++) finalTracks[i] = tempTracks[i];
-
     _controller.TakeOwnership();
-    _controller.Queue.AddTracks(finalTracks);
+    _controller.Queue.AddTracks(tracks);
 
-    var message = failedCount > 0
-        ? $"Added {addedCount}/{totalCount} tracks ({failedCount} failed)"
-        : $"Added {addedCount} tracks to queue";
-    if (Utilities.IsValid(_ui)) _ui.ShowSuccess(message);
+    // 自動再生: 停止中のみ。再生中・一時停止中はキュー追加のみ
+    if (_controller.Stopped)
+    {
+        _controller.Forward();
+    }
+
+    PrintLog(failedCount > 0
+        ? $"Added {tracks.Length}/{totalCount} tracks ({failedCount} failed)"
+        : $"Added {tracks.Length} tracks to queue");
 }
 
-private int TryGetInt(DataDictionary dict, string key, int defaultValue)
+// --- PlaylistLoaderUI.cs ---
+
+public void OnPlaylistUrlSubmit()
 {
-    if (!dict.TryGetValue(key, out DataToken token)) return defaultValue;
-    if (token.TokenType == TokenType.Double) return (int)token.Double;
-    if (token.TokenType == TokenType.Float) return (int)token.Float;
-    if (token.TokenType == TokenType.Int) return token.Int;
-    if (token.TokenType == TokenType.Long) return (int)token.Long;
-    return defaultValue;
+    if (!Utilities.IsValid(_playlistUrlInput) || !Utilities.IsValid(_loader)) return;
+    if (_loader.IsLoading) return;
+    var url = _playlistUrlInput.GetUrl();
+    if (!Utilities.IsValid(url) || string.IsNullOrEmpty(url.Get())) return;
+    _playlistUrlInput.SetUrl(VRCUrl.Empty);
+    _loader.LoadPlaylistFromUrl(url);
 }
 ```
 
