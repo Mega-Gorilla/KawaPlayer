@@ -10,7 +10,7 @@ namespace Yamadev.YamaStream.Editor
 {
   public static class EditorLocalization
   {
-    private const string TranslationFolder = "Packages/net.kwxxw.yama-stream/Assets/Localization/Editor";
+    private const string TranslationFolder = "Packages/com.vhub.kawaplayer/Assets/Localization/Editor";
     private const string LanguageKey = "YamaPlayer_EditorLanguage";
     private const string DefaultLanguage = "en";
 

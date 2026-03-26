@@ -37,7 +37,7 @@ YamaPlayer は VRChat で使うことを想定して作られた動画プレイ�
 ```json
 {
   "dependencies": {
-    "net.kwxxw.yama-stream": "file:<KawaPlayerリポジトリのパス>",
+    "com.vhub.kawaplayer": "file:<KawaPlayerリポジトリのパス>",
     ...
   }
 }
