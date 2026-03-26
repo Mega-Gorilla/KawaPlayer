@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using UnityEditor;
 using UnityEngine;
 using VRC.SDKBase;
@@ -11,6 +10,7 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader.Editor
   public class PlaylistLoaderEditor : EditorBase
   {
     private SerializedProperty _controller;
+    private SerializedProperty _ui;
     private SerializedProperty _redirectPool;
     private SerializedProperty _poolId;
     private SerializedProperty _poolBaseUrl;
@@ -22,6 +22,7 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader.Editor
       Title = "Playlist Loader";
 
       _controller = serializedObject.FindProperty("_controller");
+      _ui = serializedObject.FindProperty("_ui");
       _redirectPool = serializedObject.FindProperty("_redirectPool");
       _poolId = serializedObject.FindProperty("_poolId");
       _poolBaseUrl = serializedObject.FindProperty("_poolBaseUrl");
@@ -33,7 +34,7 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader.Editor
       base.OnInspectorGUI();
       serializedObject.Update();
 
-      EditorGUILayout.PropertyField(_controller, new GUIContent("Controller"));
+      DrawReferences();
       EditorGUILayout.Space(SpaceMedium);
       DrawPoolSettings();
       EditorGUILayout.Space(SpaceMedium);
@@ -44,18 +45,33 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader.Editor
       serializedObject.ApplyModifiedProperties();
     }
 
+    private void DrawReferences()
+    {
+      EditorGUILayout.LabelField("References", EditorStyles.boldLabel);
+      EditorGUILayout.Space(SpaceSmall);
+
+      EditorGUILayout.PropertyField(_controller, new GUIContent("Controller"));
+      if (_controller.objectReferenceValue == null)
+        EditorGUILayout.HelpBox("Controller が未設定です。YamaPlayer の Controller を割り当ててください。", MessageType.Error);
+
+      EditorGUILayout.PropertyField(_ui, new GUIContent("UI (PlaylistLoaderUI)"));
+      if (_ui.objectReferenceValue == null)
+        EditorGUILayout.HelpBox("UI が未設定です。PlaylistLoaderUI を割り当ててください。", MessageType.Error);
+    }
+
     private void DrawPoolSettings()
     {
       EditorGUILayout.LabelField("Pool Settings", EditorStyles.boldLabel);
       EditorGUILayout.Space(SpaceSmall);
 
-      EditorGUILayout.PropertyField(_poolBaseUrl, new GUIContent("Pool Base URL"));
+      using (new EditorGUI.DisabledGroupScope(true))
+      {
+        EditorGUILayout.PropertyField(_poolBaseUrl, new GUIContent("Pool Base URL"));
+        EditorGUILayout.PropertyField(_poolSize, new GUIContent("Pool Size"));
+      }
       EditorGUILayout.PropertyField(_poolId, new GUIContent("Pool ID"));
-      EditorGUILayout.PropertyField(_poolSize, new GUIContent("Pool Size"));
-      EditorGUILayout.HelpBox("Pool Size はサーバーの設定と一致させてください。不一致の場合、リダイレクト失敗の原因になります。", MessageType.Warning);
-
-      if (_poolSize.intValue < 1) _poolSize.intValue = 1;
-      if (_poolSize.intValue > 200000) _poolSize.intValue = 200000;
+      if (string.IsNullOrEmpty(_poolId.stringValue))
+        EditorGUILayout.HelpBox("Pool ID が未設定です。サーバーの Pool ID を入力してください。", MessageType.Error);
     }
 
     private void DrawPoolStatus()
@@ -70,6 +86,19 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader.Editor
       {
         float estimatedMB = currentSize * 54f / (1024f * 1024f);
         EditorGUILayout.LabelField("Estimated File Size", $"~{estimatedMB:F2} MB");
+
+        // Pool ID 不一致検出: 生成済み Pool の Pool ID と現在の設定値を比較
+        var loader = (PlaylistLoader)target;
+        VRCUrl[] pool = loader.RedirectPool;
+        if (pool != null && pool.Length > 0 && pool[0] != null)
+        {
+          string firstUrl = pool[0].Get();
+          string expectedPrefix = $"/vrcurl/{_poolId.stringValue}/";
+          if (!string.IsNullOrEmpty(firstUrl) && !firstUrl.Contains(expectedPrefix))
+          {
+            EditorGUILayout.HelpBox("Pool ID が生成済み Pool と一致しません。[Generate Pool] を再実行してください。", MessageType.Warning);
+          }
+        }
       }
     }
 
@@ -78,16 +107,9 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader.Editor
       EditorGUILayout.LabelField("Actions", EditorStyles.boldLabel);
       EditorGUILayout.Space(SpaceSmall);
 
-      using (new EditorGUILayout.HorizontalScope())
+      if (GUILayout.Button("Generate Pool"))
       {
-        if (GUILayout.Button("Generate Pool"))
-        {
-          GeneratePool();
-        }
-        if (GUILayout.Button("Validate Pool"))
-        {
-          ValidatePool();
-        }
+        GeneratePool();
       }
     }
 
@@ -108,110 +130,79 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader.Editor
         return;
       }
 
-      var sw = Stopwatch.StartNew();
+      if (!ValidatePoolIdWithServer(baseUrl, poolId))
+      {
+        return;
+      }
 
-      // VRCUrl[] を直接構築 (SerializedProperty 経由は大量配列で極端に遅いため)
       var urls = new VRCUrl[poolSize];
       for (int i = 0; i < poolSize; i++)
       {
         urls[i] = new VRCUrl($"{baseUrl}/vrcurl/{poolId}/{i}");
       }
 
-      Undo.RecordObject(target, "Generate PlaylistLoader Pool");
       var loader = (PlaylistLoader)target;
       var field = typeof(PlaylistLoader).GetField("_redirectPool",
         System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
       field.SetValue(loader, urls);
       EditorUtility.SetDirty(target);
-      serializedObject.Update();
 
-      sw.Stop();
-      Debug.Log($"[PlaylistLoader] Generated {poolSize} VRCUrl entries in {sw.ElapsedMilliseconds}ms");
-      EditorUtility.DisplayDialog("Success", $"Generated {poolSize} VRCUrl entries.\nTime: {sw.ElapsedMilliseconds}ms", "OK");
+      Debug.Log($"[PlaylistLoader] Generated {poolSize} VRCUrl entries");
+      EditorUtility.DisplayDialog("Success", $"Generated {poolSize} VRCUrl entries.", "OK");
     }
 
-    private void ValidatePool()
+    private bool ValidatePoolIdWithServer(string baseUrl, string poolId)
     {
-      string poolId = _poolId.stringValue;
-      int expectedSize = _poolSize.intValue;
-
-      // VRCUrl[] を直接取得 (SerializedProperty 経由は大量配列で遅いため)
-      var loader = (PlaylistLoader)target;
-      VRCUrl[] pool = loader.RedirectPool;
-      int actualSize = pool != null ? pool.Length : 0;
-
-      if (actualSize == 0)
+      try
       {
-        EditorUtility.DisplayDialog("Validation", "Pool is empty. Generate a pool first.", "OK");
-        return;
-      }
+        var request = System.Net.HttpWebRequest.Create($"{baseUrl}/r/{poolId}/_validate") as System.Net.HttpWebRequest;
+        request.Timeout = 5000;
 
-      int errors = 0;
-
-      // Check: pool.Length == poolSize
-      if (actualSize != expectedSize)
-      {
-        Debug.LogWarning($"[PlaylistLoader] Validation: pool size mismatch. Expected {expectedSize}, actual {actualSize}");
-        errors++;
-      }
-
-      // Extract base URL from first entry
-      string firstUrl = pool[0] != null ? pool[0].Get() : null;
-
-      if (string.IsNullOrEmpty(firstUrl))
-      {
-        Debug.LogError("[PlaylistLoader] Validation: first entry has empty URL");
-        EditorUtility.DisplayDialog("Validation", "Validation failed: first entry has empty URL.", "OK");
-        return;
-      }
-
-      int vrcurlPos = firstUrl.IndexOf("/vrcurl/");
-      if (vrcurlPos < 0)
-      {
-        Debug.LogError($"[PlaylistLoader] Validation: first entry does not contain /vrcurl/ pattern: {firstUrl}");
-        EditorUtility.DisplayDialog("Validation", "Validation failed: URL pattern not recognized.", "OK");
-        return;
-      }
-
-      string detectedBaseUrl = firstUrl.Substring(0, vrcurlPos);
-
-      // Check: base URL starts with http/https
-      if (!(detectedBaseUrl.StartsWith("http://") || detectedBaseUrl.StartsWith("https://")))
-      {
-        Debug.LogWarning($"[PlaylistLoader] Validation: base URL does not start with http(s): {detectedBaseUrl}");
-        errors++;
-      }
-
-      // Check each entry
-      for (int i = 0; i < actualSize; i++)
-      {
-        string url = pool[i] != null ? pool[i].Get() : null;
-        string expectedUrl = $"{detectedBaseUrl}/vrcurl/{poolId}/{i}";
-
-        if (string.IsNullOrEmpty(url))
+        try
         {
-          Debug.LogWarning($"[PlaylistLoader] Validation: index {i} has empty URL");
-          errors++;
+          using (var response = request.GetResponse() as System.Net.HttpWebResponse)
+          using (var reader = new System.IO.StreamReader(response.GetResponseStream()))
+          {
+            string body = reader.ReadToEnd();
+            if (body.Contains("Unknown pool"))
+            {
+              EditorUtility.DisplayDialog("Error",
+                $"Pool ID \"{poolId}\" はサーバーに存在しません。\n\nサーバー: {baseUrl}\nPool ID を確認してください。", "OK");
+              return false;
+            }
+            return true;
+          }
         }
-        else if (url != expectedUrl)
+        catch (System.Net.WebException ex) when (ex.Response is System.Net.HttpWebResponse httpRes)
         {
-          Debug.LogWarning($"[PlaylistLoader] Validation: index {i} URL mismatch.\n  Expected: {expectedUrl}\n  Actual:   {url}");
-          errors++;
-          if (errors > 5) break; // Stop after too many errors
+          // HTTP エラーレスポンス (404 等) — サーバーには接続できている
+          using (var reader = new System.IO.StreamReader(httpRes.GetResponseStream()))
+          {
+            string body = reader.ReadToEnd();
+            if (body.Contains("Unknown pool"))
+            {
+              EditorUtility.DisplayDialog("Error",
+                $"Pool ID \"{poolId}\" はサーバーに存在しません。\n\nサーバー: {baseUrl}\nPool ID を確認してください。", "OK");
+              return false;
+            }
+          }
+          // Playlist not found 等 → Pool ID は有効
+          return true;
         }
       }
-
-      if (errors == 0)
+      catch (System.Net.WebException)
       {
-        string msg = $"Validation passed.\n\nPool Size: {actualSize}\nPool ID: {poolId}\nBase URL: {detectedBaseUrl}";
-        EditorUtility.DisplayDialog("Validation", msg, "OK");
-        Debug.Log($"[PlaylistLoader] Validation passed: {actualSize} entries, pool={poolId}, base={detectedBaseUrl}");
+        // 接続自体ができない (DNS 解決失敗、タイムアウト等)
+        return EditorUtility.DisplayDialog("Warning",
+          $"サーバーに接続できませんでした。\n\nサーバー: {baseUrl}\nPool ID の有効性を確認できません。\n\nそのまま生成しますか？",
+          "生成する", "キャンセル");
       }
-      else
+      catch (System.Exception ex)
       {
-        string msg = $"Validation failed: {errors} error(s) found.\nCheck console for details.";
-        EditorUtility.DisplayDialog("Validation", msg, "OK");
-        Debug.LogError($"[PlaylistLoader] Validation failed: {errors} error(s)");
+        Debug.LogWarning($"[PlaylistLoader] Pool ID validation error: {ex.Message}");
+        return EditorUtility.DisplayDialog("Warning",
+          $"Pool ID の検証中にエラーが発生しました。\n\n{ex.Message}\n\nそのまま生成しますか？",
+          "生成する", "キャンセル");
       }
     }
   }

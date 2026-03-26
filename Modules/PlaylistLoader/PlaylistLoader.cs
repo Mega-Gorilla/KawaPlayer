@@ -12,8 +12,8 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
   {
     [SerializeField] private PlaylistLoaderUI _ui;
     [SerializeField] private VRCUrl[] _redirectPool = new VRCUrl[0];
-    [SerializeField] private string _poolId;
-    [SerializeField] private string _poolBaseUrl = "https://api.example.com";
+    [SerializeField] private string _poolId = "default";
+    [SerializeField] private string _poolBaseUrl = "https://playlist.vrc-hub.com";
     [SerializeField] private int _poolSize = 100000;
 
     private bool _isLoading;
@@ -33,7 +33,6 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
 
       _isLoading = true;
       _pendingResolveUrl = resolveUrl;
-      if (Utilities.IsValid(_ui)) _ui.ShowLoading("Loading playlist...");
       VRCStringDownloader.LoadUrl(resolveUrl, (IUdonEventReceiver)this);
       PrintLog($"Downloading playlist from {resolveUrl.Get()}...");
     }
@@ -46,41 +45,12 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
 
       _isLoading = false;
 
-      if (!VRCJson.TryDeserializeFromJson(result.Result, out DataToken root)
-          || root.TokenType != TokenType.DataDictionary)
-      {
-        PrintError("Failed to parse playlist response.");
-        if (Utilities.IsValid(_ui)) _ui.ShowError("Failed to parse playlist response.");
-        return;
-      }
+      if (!TryParseResponse(result.Result, out DataList tracks)) return;
 
-      var rootDict = root.DataDictionary;
+      var builtTracks = BuildTracks(tracks, out int failedCount);
+      if (builtTracks == null) return;
 
-      // "ok" チェック
-      if (rootDict.TryGetValue("ok", out DataToken okToken)
-          && okToken.TokenType == TokenType.Boolean
-          && !okToken.Boolean)
-      {
-        string error = "Playlist server returned an error.";
-        if (rootDict.TryGetValue("error", out DataToken errToken)
-            && errToken.TokenType == TokenType.String)
-          error = errToken.String;
-        PrintError(error);
-        if (Utilities.IsValid(_ui)) _ui.ShowError(error);
-        return;
-      }
-
-      // "tracks" 配列を取得
-      if (!rootDict.TryGetValue("tracks", out DataToken tracksToken)
-          || tracksToken.TokenType != TokenType.DataList
-          || tracksToken.DataList.Count == 0)
-      {
-        PrintWarning("No tracks found in playlist.");
-        if (Utilities.IsValid(_ui)) _ui.ShowError("No tracks found in playlist.");
-        return;
-      }
-
-      EnqueueFromIndexes(tracksToken.DataList);
+      EnqueueAndPlay(builtTracks, tracks.Count, failedCount);
     }
 
     public override void OnStringLoadError(IVRCStringDownload result)
@@ -91,23 +61,55 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
 
       _isLoading = false;
       PrintError($"Failed to download playlist: {result.Error}");
-      if (Utilities.IsValid(_ui)) _ui.ShowError("Playlist server is unavailable.");
+      NotifyUI("Playlist server is unavailable.");
     }
 
-    private void EnqueueFromIndexes(DataList trackDicts)
+    private bool TryParseResponse(string json, out DataList tracks)
     {
-      var queue = _controller.Queue;
-      if (!Utilities.IsValid(queue))
+      tracks = null;
+
+      if (!VRCJson.TryDeserializeFromJson(json, out DataToken root)
+          || root.TokenType != TokenType.DataDictionary)
       {
-        PrintError("Queue is not available.");
-        if (Utilities.IsValid(_ui)) _ui.ShowError("Queue is not available.");
-        return;
+        PrintError("Failed to parse playlist response.");
+        NotifyUI("Failed to parse playlist response.");
+        return false;
       }
 
+      var rootDict = root.DataDictionary;
+
+      if (rootDict.TryGetValue("ok", out DataToken okToken)
+          && okToken.TokenType == TokenType.Boolean
+          && !okToken.Boolean)
+      {
+        string error = "Playlist server returned an error.";
+        if (rootDict.TryGetValue("error", out DataToken errToken)
+            && errToken.TokenType == TokenType.String)
+          error = errToken.String;
+        PrintError(error);
+        NotifyUI(error);
+        return false;
+      }
+
+      if (!rootDict.TryGetValue("tracks", out DataToken tracksToken)
+          || tracksToken.TokenType != TokenType.DataList
+          || tracksToken.DataList.Count == 0)
+      {
+        PrintWarning("No tracks found in playlist.");
+        NotifyUI("No tracks found in playlist.");
+        return false;
+      }
+
+      tracks = tracksToken.DataList;
+      return true;
+    }
+
+    private object[][] BuildTracks(DataList trackDicts, out int failedCount)
+    {
+      failedCount = 0;
       int totalCount = trackDicts.Count;
-      object[][] tempTracks = new object[totalCount][];
+      var tempTracks = new object[totalCount][];
       int addedCount = 0;
-      int failedCount = 0;
 
       for (int i = 0; i < totalCount; i++)
       {
@@ -131,9 +133,8 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
             && t.TokenType == TokenType.String)
           title = t.String;
 
-        VRCUrl redirectUrl = _redirectPool[index];
         tempTracks[addedCount] = TrackUtils.NewTrack(
-            (VideoPlayerType)mode, title, redirectUrl);
+            (VideoPlayerType)mode, title, _redirectPool[index]);
         addedCount++;
       }
 
@@ -143,21 +144,47 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
             ? $"No tracks could be added ({failedCount} skipped)"
             : "No valid tracks to add.";
         PrintWarning(msg);
-        if (Utilities.IsValid(_ui)) _ui.ShowError(msg);
+        NotifyUI(msg);
+        return null;
+      }
+
+      var result = new object[addedCount][];
+      for (int i = 0; i < addedCount; i++) result[i] = tempTracks[i];
+      return result;
+    }
+
+    private void EnqueueAndPlay(object[][] tracks, int totalCount, int failedCount)
+    {
+      var queue = _controller.Queue;
+      if (!Utilities.IsValid(queue))
+      {
+        PrintError("Queue is not available.");
+        NotifyUI("Queue is not available.");
         return;
       }
 
-      object[][] finalTracks = new object[addedCount][];
-      for (int i = 0; i < addedCount; i++) finalTracks[i] = tempTracks[i];
-
       _controller.TakeOwnership();
-      queue.AddTracks(finalTracks);
+      queue.AddTracks(tracks);
+
+      // 自動再生仕様:
+      // - プレイヤーが停止中 (Stopped) の場合のみ自動再生する
+      // - Forward() は Queue 先頭を取り出して再生する
+      // - 既に再生中・一時停止中の場合はキューに追加するのみ
+      if (_controller.Stopped)
+      {
+        _controller.Forward();
+      }
 
       var message = failedCount > 0
-          ? $"Added {addedCount}/{totalCount} tracks ({failedCount} failed)"
-          : $"Added {addedCount} tracks to queue";
+          ? $"Added {tracks.Length}/{totalCount} tracks ({failedCount} failed)"
+          : $"Added {tracks.Length} tracks to queue";
       PrintLog(message);
-      if (Utilities.IsValid(_ui)) _ui.ShowSuccess(message);
+      NotifyUI(message);
+    }
+
+    private void NotifyUI(string message)
+    {
+      if (Utilities.IsValid(_ui)) _ui.ShowNotification(message);
     }
 
     private int TryGetInt(DataDictionary dict, string key, int defaultValue)
