@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-YamaPlayer is a VRChat video player built with UdonSharp. It runs inside VRChat worlds as a networked, synced video player supporting YouTube, Twitch, and other sources. Package name: `net.kwxxw.yama-stream`, distributed via VPM (VRChat Package Manager).
+KawaPlayer is a VRChat video player (YamaPlayer fork) with PlaylistLoader for loading playlists from playlist.vrc-hub.com. Package name: `com.vhub.kawaplayer`.
 
 - **Unity version**: 2022.3
 - **Language**: C# / UdonSharp (VRChat's Udon scripting layer)

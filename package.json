@@ -1,12 +1,12 @@
 {
-  "name": "net.kwxxw.yama-stream",
+  "name": "com.vhub.kawaplayer",
   "displayName": "KawaPlayer",
   "version": "2.0.0-beta.4",
   "unity": "2022.3",
-  "description": "Video player for VRChat.",
+  "description": "VRChat video player with playlist loading via playlist.vrc-hub.com. Fork of YamaPlayer.",
   "author": {
-    "name": "kwxxw",
-    "url": "https://yamadev.booth.pm"
+    "name": "vhub",
+    "url": "https://playlist.vrc-hub.com"
   },
   "legacyFolders": {
     "Assets\\Yamadev\\YamaStream": "af99c59180c62fb41ab655b73f426e61"
