@@ -71,6 +71,8 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader.Editor
         EditorGUILayout.PropertyField(_poolSize, new GUIContent("Pool Size"));
       }
       EditorGUILayout.PropertyField(_poolId, new GUIContent("Pool ID"));
+      if (string.IsNullOrEmpty(_poolId.stringValue))
+        EditorGUILayout.HelpBox("Pool ID が未設定です。サーバーの Pool ID を入力してください。", MessageType.Error);
     }
 
     private void DrawPoolStatus()
