@@ -37,6 +37,12 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader.Editor
 
       EditorGUILayout.PropertyField(_controller, new GUIContent("Controller"));
       EditorGUILayout.PropertyField(_ui, new GUIContent("UI (PlaylistLoaderUI)"));
+
+      if (_controller.objectReferenceValue == null)
+        EditorGUILayout.HelpBox("Controller が未設定です。YamaPlayer の Controller を割り当ててください。", MessageType.Error);
+      if (_ui.objectReferenceValue == null)
+        EditorGUILayout.HelpBox("UI が未設定です。PlaylistLoaderUI を割り当ててください。", MessageType.Error);
+
       EditorGUILayout.Space(SpaceMedium);
       DrawPoolSettings();
       EditorGUILayout.Space(SpaceMedium);
