@@ -79,10 +79,12 @@ namespace Yamadev.YamaStream
     {
       if (!Utilities.IsValid(_queue) || _queue.TrackCount == 0) return;
 
-      var track = _queue.GetTrack(0);
+      int index = _shuffle ? GetRandomIndex(_queue.TrackCount) : 0;
+
+      var track = _queue.GetTrack(index);
       PlayTrack(track);
 
-      _queue.RemoveTrack(0);
+      _queue.RemoveTrack(index);
     }
 
     public void PlayTrackFromHistory(int index)
