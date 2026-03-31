@@ -21,7 +21,7 @@ namespace Yamadev.YamaStream.Editor
 
     private static void ProcessModule(YamaPlayerModule module)
     {
-      if (module == null) return;
+      if (module == null || !module.gameObject.activeSelf) return;
       var definition = module.GetComponent<YamaPlayerModuleDefinition>();
       var controller = module.GetComponentInParent<Controller>(true);
       if (controller != null)

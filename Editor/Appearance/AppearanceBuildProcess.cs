@@ -7,7 +7,7 @@ namespace Yamadev.YamaStream.Editor
 {
   public class AppearanceBuildProcess : IYamaPlayerBuildProcess
   {
-    public int callbackOrder => -11000;
+    public int callbackOrder => -2000;
 
     public void Process()
     {
