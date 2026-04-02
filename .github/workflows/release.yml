@@ -62,9 +62,10 @@ jobs:
             ${{ env.unityPackage }}
             Packages/${{ env.packageName }}/package.json
 
-      - name: Build Listing
-        uses: peter-evans/repository-dispatch@v3
-        with:
-          token: ${{ secrets.PAT }}
-          repository: koorimizuw/vpm-repos
-          event-type: build-listing
+      # TODO: KawaPlayer 用 VPM リポジトリ作成後に有効化する
+      # - name: Build Listing
+      #   uses: peter-evans/repository-dispatch@v3
+      #   with:
+      #     token: ${{ secrets.PAT }}
+      #     repository: Mega-Gorilla/vpm-repos
+      #     event-type: build-listing
