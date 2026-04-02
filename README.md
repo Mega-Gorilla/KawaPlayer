@@ -32,21 +32,12 @@ YamaPlayer は VRChat で使うことを想定して作られた動画プレイ�
 
 ## 導入手順
 
-[GitHub Releases](https://github.com/Mega-Gorilla/KawaPlayer/releases) から最新の `.unitypackage` をダウンロードし、Unity プロジェクトにインポートしてください。
-
 1. VRChat Worlds SDK (>=3.8.1) が導入済みの Unity プロジェクトを用意
 2. [Releases ページ](https://github.com/Mega-Gorilla/KawaPlayer/releases) から `com.vhub.kawaplayer-x.x.x.unitypackage` をダウンロード
 3. Unity メニュー: **Assets > Import Package > Custom Package** で `.unitypackage` をインポート
+4. **GameObject > KawaPlayer > Main** メニュー、または `KawaPlayer.prefab` をシーンにドラッグして配置
 
-## PlaylistLoader のセットアップ
-
-1. シーンに YamaPlayer を配置
-2. YamaPlayer の子に空の GameObject を作成し、`PlaylistLoader` と `PlaylistLoaderUI` コンポーネントを追加
-3. PlaylistLoader の Inspector で Controller を割り当て
-4. PlaylistLoaderUI の `Loader` に同じ GameObject 上の PlaylistLoader を割り当て
-5. Pool ID を設定（デフォルト: `default`）し、Generate Pool を実行
-6. YamaPlayer の UI 階層 (`LeftSide/Container`) に、UrlInput を複製した PlaylistLoaderInput を配置（EventTrigger / Animator を削除）
-7. PlaylistLoaderUI の `Playlist Url Input` に PlaylistLoaderInput を割り当て
+PlaylistLoader は KawaPlayer.prefab に組み込み済みです。デフォルトの Pool ID (`default`) がそのまま利用可能です。Pool ID を変更する場合のみ、PlaylistLoader の Inspector で Pool ID を設定し Generate Pool を実行してください。
 
 ## 利用規約
 
