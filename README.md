@@ -32,18 +32,11 @@ YamaPlayer は VRChat で使うことを想定して作られた動画プレイ�
 
 ## 導入手順
 
-このフォークは VPM 配布していません。Unity プロジェクトの `Packages/manifest.json` にローカルパッケージ参照を追加してください。
+[GitHub Releases](https://github.com/Mega-Gorilla/KawaPlayer/releases) から最新の `.unitypackage` をダウンロードし、Unity プロジェクトにインポートしてください。
 
-```json
-{
-  "dependencies": {
-    "com.vhub.kawaplayer": "file:<KawaPlayerリポジトリのパス>",
-    ...
-  }
-}
-```
-
-VRChat Worlds SDK (>=3.8.1) が導入済みのプロジェクトが必要です。
+1. VRChat Worlds SDK (>=3.8.1) が導入済みの Unity プロジェクトを用意
+2. [Releases ページ](https://github.com/Mega-Gorilla/KawaPlayer/releases) から `com.vhub.kawaplayer-x.x.x.unitypackage` をダウンロード
+3. Unity メニュー: **Assets > Import Package > Custom Package** で `.unitypackage` をインポート
 
 ## PlaylistLoader のセットアップ
 
