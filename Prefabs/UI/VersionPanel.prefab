@@ -78,7 +78,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: yamadev
+  m_Text: "YamaPlayer: kwxxw"
 --- !u!1 &84817492114388173
 GameObject:
   m_ObjectHideFlags: 0
@@ -264,7 +264,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: "\u3084\u307E@kwxxw"
+  m_Text: "YamaPlayer Fork"
 --- !u!1 &966094477961822828
 GameObject:
   m_ObjectHideFlags: 0
@@ -383,7 +383,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: koorimizuw
+  m_Text: "playlist.vrc-hub.com"
 --- !u!1 &1476864292460265578
 GameObject:
   m_ObjectHideFlags: 0
@@ -528,7 +528,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 4596b013515ae9044b42f7b335e36265, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 75fb6a844ee2fc346a1ad9aaa419017d, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -761,7 +761,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 595bd27b3c054c548b8d28e6609da9bb, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 75fb6a844ee2fc346a1ad9aaa419017d, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -836,7 +836,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 09e88118264954144b57d8e325ada724, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 8ef31c129a792f642980c32774eedb67, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -961,7 +961,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: kw_vrc
+  m_Text: "KawaPlayer: Mega-Gorilla"
 --- !u!1 &7010282274613747485
 GameObject:
   m_ObjectHideFlags: 0
@@ -1383,7 +1383,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &8369954163215183805
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1496,8 +1496,8 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
+  m_Name:
+  m_EditorClassIdentifier:
   m_Material: {fileID: 2100000, guid: 35630e38b4e5ffb40b44ec5348b4333f, type: 2}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
@@ -1506,7 +1506,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 75fb6a844ee2fc346a1ad9aaa419017d, type: 3}
+  m_Sprite: {fileID: 21300000, guid: ab97ea5771096a348a20dec1cac271dd, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
