@@ -9,8 +9,9 @@ namespace Yamadev.YamaStream.Editor
   [InitializeOnLoad]
   public static class PackageManager
   {
-    public const string VpmId = "com.vhub.kawaplayer";
-    public const string VpmUrl = "https://vpm.vrc-hub.com/index.json";
+    // TODO: KawaPlayer 用の VPM リポジトリを構築したら repo ID と URL を更新する
+    public const string VpmId = "net.kwxxw.vpm";
+    public const string VpmUrl = "https://vpm.kwxxw.net/index.json";
     private const string CheckBetaKey = "YamaPlayer_CheckBetaUpdate";
 
     public static bool HasNewVersion { get; private set; } = false;
