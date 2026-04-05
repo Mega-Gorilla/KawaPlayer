@@ -22,6 +22,11 @@ namespace Yamadev.YamaStream.Editor
     private static void ProcessModule(YamaPlayerModule module)
     {
       if (module == null) return;
+      if (!module.gameObject.activeSelf)
+      {
+        module.gameObject.tag = "EditorOnly";
+        return;
+      }
       var definition = module.GetComponent<YamaPlayerModuleDefinition>();
       var controller = module.GetComponentInParent<Controller>(true);
       if (controller != null)
