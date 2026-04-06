@@ -61,6 +61,10 @@ Custom inspectors, build processors, menu items, and the module/localization edi
 - `Yamadev.YamaStream.Editor` — editor tooling
 - Each module has its own runtime and editor asmdef
 
+## GitHub Operations
+
+This repository is a fork of `koorimizuw/YamaPlayer` (upstream). When using `gh` CLI commands (issue, PR, etc.), **always** specify `--repo Mega-Gorilla/KawaPlayer` explicitly. Never create issues, PRs, or comments on the upstream repository (`koorimizuw/YamaPlayer`).
+
 ## Key Constraints
 
 - All runtime scripts must be valid UdonSharp (subset of C#). Many standard C# features are unavailable (no generics on UdonSharpBehaviour, limited reflection, no async/await, etc.).
