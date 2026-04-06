@@ -1,7 +1,7 @@
 {
   "name": "com.vhub.kawaplayer",
   "displayName": "KawaPlayer",
-  "version": "2.0.0-beta.4-kawa.2",
+  "version": "2.0.0-beta.4-kawa.3",
   "unity": "2022.3",
   "description": "VRChat video player with playlist loading via playlist.vrc-hub.com. Fork of YamaPlayer.",
   "author": {

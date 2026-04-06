@@ -1,5 +1,8 @@
 更新履歴:
 
+v2.0.0-beta.4-kawa.3
+PlaylistLoaderにAuto Load On Start機能を追加
+
 v2.0.0-beta.4-kawa.2
 Info画面をKawaPlayer向けに更新
 非アクティブモジュールのビルド処理を修正(upstream取り込み)
