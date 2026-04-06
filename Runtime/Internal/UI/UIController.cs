@@ -766,7 +766,8 @@ namespace Yamadev.YamaStream.UI
 
         if (showTooltip)
         {
-          var tooltipText = _controller.IsLive ? "Live" : TimeSpan.FromSeconds(_controller.Duration * _progressSliderHelper.Percent).ToString(_controller.TimeFormat);
+          var seekSeconds = _controller.Duration * _progressSliderHelper.Percent;
+          var tooltipText = _controller.IsLive || float.IsInfinity(seekSeconds) || float.IsNaN(seekSeconds) ? "Live" : TimeSpan.FromSeconds(seekSeconds).ToString(_controller.TimeFormat);
           _progressTooltipText.text = tooltipText;
         }
       }

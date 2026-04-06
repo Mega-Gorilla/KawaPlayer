@@ -76,11 +76,11 @@ namespace Yamadev.YamaStream
     public bool IsPlaying => Handler.IsPlaying;
     public bool IsError => Handler.IsError;
     public float Duration => Handler.Duration;
-    public string FormatedDuration => TimeSpan.FromSeconds(Duration).ToString(_timeFormat);
+    public string FormatedDuration => float.IsInfinity(Duration) || float.IsNaN(Duration) ? "" : TimeSpan.FromSeconds(Duration).ToString(_timeFormat);
     public float VideoTime => Handler.Time;
-    public string FormatedVideoTime => TimeSpan.FromSeconds(VideoTime).ToString(_timeFormat);
+    public string FormatedVideoTime => float.IsInfinity(VideoTime) || float.IsNaN(VideoTime) ? "" : TimeSpan.FromSeconds(VideoTime).ToString(_timeFormat);
     public bool IsLoading => Handler.IsLoading;
-    public bool IsLive => float.IsInfinity(Duration);
+    public bool IsLive => float.IsInfinity(Duration) || float.IsNaN(Duration);
 
     public YamaPlayerListener[] EventListeners
     {
