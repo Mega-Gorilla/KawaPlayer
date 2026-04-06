@@ -14,6 +14,9 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
     [SerializeField] private string _poolId = "default";
     [SerializeField] private string _poolBaseUrl = "https://playlist.vrc-hub.com";
     [SerializeField] private int _poolSize = 100000;
+    [SerializeField] private bool _autoLoadOnStart;
+    [SerializeField] private VRCUrl _autoLoadUrl;
+    [SerializeField, Range(0, 60)] private float _autoLoadDelay;
 
     private bool _isLoading;
     private VRCUrl _pendingResolveUrl;
@@ -21,6 +24,23 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
     public VRCUrl[] RedirectPool => _redirectPool;
     public string PoolId => _poolId;
     public bool IsLoading => _isLoading;
+
+    public override void Start()
+    {
+      base.Start();
+      if (!Utilities.IsValid(_controller)) return;
+      if (!Networking.IsMaster && !_controller.IsLocal) return;
+      if (!_autoLoadOnStart) return;
+      if (string.IsNullOrEmpty(_autoLoadUrl.Get())) return;
+      if (_redirectPool.Length == 0) return;
+      SendCustomEventDelayedSeconds(nameof(LoadDefaultPlaylist), _autoLoadDelay);
+    }
+
+    public void LoadDefaultPlaylist()
+    {
+      if (_isLoading || _controller.IsLoading) return;
+      LoadPlaylistFromUrl(_autoLoadUrl);
+    }
 
     public void LoadPlaylistFromUrl(VRCUrl resolveUrl)
     {

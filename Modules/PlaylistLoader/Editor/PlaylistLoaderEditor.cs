@@ -14,6 +14,9 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader.Editor
     private SerializedProperty _poolId;
     private SerializedProperty _poolBaseUrl;
     private SerializedProperty _poolSize;
+    private SerializedProperty _autoLoadOnStart;
+    private SerializedProperty _autoLoadUrl;
+    private SerializedProperty _autoLoadDelay;
 
     private void OnEnable()
     {
@@ -25,6 +28,9 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader.Editor
       _poolId = serializedObject.FindProperty("_poolId");
       _poolBaseUrl = serializedObject.FindProperty("_poolBaseUrl");
       _poolSize = serializedObject.FindProperty("_poolSize");
+      _autoLoadOnStart = serializedObject.FindProperty("_autoLoadOnStart");
+      _autoLoadUrl = serializedObject.FindProperty("_autoLoadUrl");
+      _autoLoadDelay = serializedObject.FindProperty("_autoLoadDelay");
     }
 
     public override void OnInspectorGUI()
@@ -39,6 +45,8 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader.Editor
       DrawPoolStatus();
       EditorGUILayout.Space(SpaceMedium);
       DrawPoolActions();
+      EditorGUILayout.Space(SpaceMedium);
+      DrawAutoLoadSection();
 
       serializedObject.ApplyModifiedProperties();
     }
@@ -104,6 +112,27 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader.Editor
       if (GUILayout.Button("Generate Pool"))
       {
         GeneratePool();
+      }
+    }
+
+    private void DrawAutoLoadSection()
+    {
+      EditorGUILayout.LabelField("Auto Load", EditorStyles.boldLabel);
+      EditorGUILayout.Space(SpaceSmall);
+
+      EditorGUILayout.PropertyField(_autoLoadOnStart, new GUIContent("Auto Load On Start"));
+
+      if (!_autoLoadOnStart.boolValue) return;
+
+      EditorGUILayout.PropertyField(_autoLoadUrl, new GUIContent("Resolve URL"));
+      EditorGUILayout.PropertyField(_autoLoadDelay, new GUIContent("Delay (sec)"));
+
+      var urlProp = _autoLoadUrl.FindPropertyRelative("url");
+      if (urlProp != null && string.IsNullOrEmpty(urlProp.stringValue))
+      {
+        EditorGUILayout.HelpBox(
+          "Resolve URL が未設定です。playlist.vrc-hub.com の Resolve URL を入力してください。",
+          MessageType.Warning);
       }
     }
 
