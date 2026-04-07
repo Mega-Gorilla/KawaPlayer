@@ -759,18 +759,22 @@ namespace Yamadev.YamaStream.UI
         _progressSlider.SetValueWithoutNotify(progressValue);
       }
 
-      if (Utilities.IsValid(_progressSliderHelper) && Utilities.IsValid(_progressTooltipText))
-      {
-        var showTooltip = !_controller.Stopped && !_controller.IsLive && _controller.Handler.Type != VideoPlayerType.ImageViewer;
-        _progressSliderHelper.gameObject.SetActive(showTooltip);
+      UpdateTooltip();
+    }
 
-        if (showTooltip)
-        {
-          var seekSeconds = _controller.Duration * _progressSliderHelper.Percent;
-          var tooltipText = _controller.IsLive || float.IsInfinity(seekSeconds) || float.IsNaN(seekSeconds) ? "Live" : TimeSpan.FromSeconds(seekSeconds).ToString(_controller.TimeFormat);
-          _progressTooltipText.text = tooltipText;
-        }
-      }
+    private void UpdateTooltip()
+    {
+      if (!Utilities.IsValid(_progressSliderHelper) || !Utilities.IsValid(_progressTooltipText)) return;
+
+      var showTooltip = !_controller.Stopped && !_controller.IsLive && _controller.Handler.Type != VideoPlayerType.ImageViewer;
+      _progressSliderHelper.gameObject.SetActive(showTooltip);
+
+      if (!showTooltip) return;
+
+      var seekSeconds = _controller.Duration * _progressSliderHelper.Percent;
+      var tooltipText = float.IsInfinity(seekSeconds) || float.IsNaN(seekSeconds) ? "Live" : TimeSpan.FromSeconds(seekSeconds).ToString(_controller.TimeFormat);
+
+      _progressTooltipText.text = tooltipText;
     }
 
     private void UpdatePlaybackView()
