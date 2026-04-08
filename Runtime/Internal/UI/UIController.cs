@@ -81,6 +81,10 @@ namespace Yamadev.YamaStream.UI
     [SerializeField, RegisterEvent(nameof(Toggle.onValueChanged), nameof(Repeat))] private Toggle _repeatOnToggle;
     [SerializeField] private Text _repeatStartTimeText;
     [SerializeField] private Text _repeatEndTimeText;
+    [SerializeField, RegisterEvent(nameof(Button.onClick), nameof(Subtract100ms))] private Button _localDelaySubtract100msButton;
+    [SerializeField, RegisterEvent(nameof(Button.onClick), nameof(Subtract50ms))] private Button _localDelaySubtract50msButton;
+    [SerializeField, RegisterEvent(nameof(Button.onClick), nameof(Add50ms))] private Button _localDelayAdd50msButton;
+    [SerializeField, RegisterEvent(nameof(Button.onClick), nameof(Add100ms))] private Button _localDelayAdd100msButton;
     [SerializeField] private Text _localDelayValueText;
 
     [Header("Settings - Audio/Video")]
