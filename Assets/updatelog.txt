@@ -1,5 +1,11 @@
 更新履歴:
 
+v2.0.0-beta.4-kawa.3.1
+VCC/VPM対応(VPMリポジトリ経由のインストール・更新が可能に)
+upstream取り込み: ライブ配信TimeSpanオーバーフロークラッシュ修正
+upstream取り込み: Tooltip更新ロジック分離、UI遅延処理、Editorメニューundo対応
+PlaylistLoaderのTooltipテキストを修正
+
 v2.0.0-beta.4-kawa.3
 PlaylistLoaderにAuto Load On Start機能を追加
 
