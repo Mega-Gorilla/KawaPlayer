@@ -2,6 +2,8 @@
 
 [YamaPlayer](https://github.com/koorimizuw/YamaPlayer) のフォークリポジトリです。YamaPlayer の全機能に加え、外部プレイリストのランタイム読み込み機能 (PlaylistLoader) を搭載しています（基本機能実装済み・VRChat 実機検証継続中）。
 
+> **KawaPlayer は YamaPlayer を置き換えて使用するパッケージです。** YamaPlayer と同時にインストールすることはできません。YamaPlayer を導入済みの場合は、下記の「YamaPlayer からの移行」手順に従ってください。
+
 ## PlaylistLoader
 
 [playlist.vrc-hub.com](https://playlist.vrc-hub.com) で作成したプレイリストを、VRChat ワールド内の動画プレイヤーに読み込む機能です。
@@ -32,10 +34,27 @@ YamaPlayer は VRChat で使うことを想定して作られた動画プレイ�
 
 ## 導入手順
 
+### 新規導入（YamaPlayer 未導入の場合）
+
 1. VRChat Worlds SDK (>=3.8.1) が導入済みの Unity プロジェクトを用意
 2. [Releases ページ](https://github.com/Mega-Gorilla/KawaPlayer/releases) から `com.vhub.kawaplayer-x.x.x.unitypackage` をダウンロード
 3. Unity メニュー: **Assets > Import Package > Custom Package** で `.unitypackage` をインポート
 4. **GameObject > KawaPlayer > Main** メニュー、または `KawaPlayer.prefab` をシーンにドラッグして配置
+
+### YamaPlayer からの移行
+
+KawaPlayer は YamaPlayer と同じアセンブリ定義を使用しているため、**YamaPlayer を先に削除してから** KawaPlayer を導入してください。両方が同時に存在するとコンパイルエラーが発生します。
+
+1. **Unity を閉じる**
+2. **YamaPlayer を削除**
+   - **VCC で導入した場合:** VCC の **Manage Project** でプロジェクトを開き、YamaPlayer の **Remove Package** をクリック
+   - **.unitypackage で導入した場合:** Unity メニュー **Window > Package Manager** で YamaPlayer を選択し **Remove** をクリック
+3. `Packages/net.kwxxw.yama-stream/` フォルダが残っていないことを確認
+4. **Unity を開き**、コンパイルエラーがないことを確認
+5. [Releases ページ](https://github.com/Mega-Gorilla/KawaPlayer/releases) から `.unitypackage` をダウンロードしインポート
+6. シーン内の YamaPlayer プレハブを `KawaPlayer.prefab` に置き換え
+
+### PlaylistLoader の設定
 
 PlaylistLoader は KawaPlayer.prefab に組み込み済みです。デフォルトの Pool ID (`default`) がそのまま利用可能です。Pool ID を変更する場合のみ、PlaylistLoader の Inspector で Pool ID を設定し Generate Pool を実行してください。
 
