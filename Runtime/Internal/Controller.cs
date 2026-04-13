@@ -71,16 +71,16 @@ namespace Yamadev.YamaStream
     public bool IsLocal => _isLocal;
     public PlayerState SyncedState => (PlayerState)_syncedState;
     public PlayerState State => Handler.IsStopped ? PlayerState.Idle : Handler.IsPaused ? PlayerState.Paused : Handler.IsPlaying ? PlayerState.Playing : PlayerState.Idle;
+    public bool IsLoading => Handler.IsLoading;
     public bool Paused => Handler.IsPaused;
     public bool Stopped => Handler.IsStopped;
     public bool IsPlaying => Handler.IsPlaying;
     public bool IsError => Handler.IsError;
     public float Duration => Handler.Duration;
-    public string FormatedDuration => TimeSpan.FromSeconds(Duration).ToString(_timeFormat);
     public float VideoTime => Handler.Time;
-    public string FormatedVideoTime => TimeSpan.FromSeconds(VideoTime).ToString(_timeFormat);
-    public bool IsLoading => Handler.IsLoading;
-    public bool IsLive => float.IsInfinity(Duration);
+    public bool IsLive => float.IsInfinity(Duration) || float.IsNaN(Duration);
+    public string FormatedDuration => IsLive ? string.Empty : TimeSpan.FromSeconds(Duration).ToString(_timeFormat);
+    public string FormatedVideoTime => IsLive ? string.Empty : TimeSpan.FromSeconds(VideoTime).ToString(_timeFormat);
 
     public YamaPlayerListener[] EventListeners
     {

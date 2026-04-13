@@ -6,10 +6,10 @@ namespace Yamadev.YamaStream.Editor
   public static class YamaPlayerMenu
   {
     const string menuPrefix = "GameObject/KawaPlayer/";
-    static string _yamaplayerPrefabGuid = "68f1537220fe62b40910a7187f8e5408";
-    static string _subScreenPrefabGuid = "1d1c026d8b023d04ea81f85594f05aec";
-    static string _controllerBarPrefabGuid = "ddf7f58d0d20d6843a79711f81f34bf2";
-    static string _playlistPanelPrefabGuid = "32aa1985af9229540a44cf22406ee1a2";
+    private static readonly string _yamaplayerPrefabGuid = "68f1537220fe62b40910a7187f8e5408";
+    private static readonly string _subScreenPrefabGuid = "1d1c026d8b023d04ea81f85594f05aec";
+    private static readonly string _controllerBarPrefabGuid = "ddf7f58d0d20d6843a79711f81f34bf2";
+    private static readonly string _playlistPanelPrefabGuid = "32aa1985af9229540a44cf22406ee1a2";
 
     [MenuItem(menuPrefix + "Main", priority = 1)]
     public static void CreateKawaPlayer() =>
@@ -37,6 +37,7 @@ namespace Yamadev.YamaStream.Editor
       if (obj == null) return;
 
       obj.name = GameObjectUtility.GetUniqueNameForSibling(parent, prefab.name);
+      Undo.RegisterCreatedObjectUndo(obj, $"Create {obj.name}");
       Selection.activeGameObject = obj;
     }
   }
