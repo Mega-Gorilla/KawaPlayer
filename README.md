@@ -45,11 +45,12 @@ YamaPlayer は VRChat で使うことを想定して作られた動画プレイ�
 
 KawaPlayer は YamaPlayer と同じアセンブリ定義を使用しているため、**YamaPlayer を先に削除してから** KawaPlayer を導入してください。両方が同時に存在するとコンパイルエラーが発生します。
 
-1. **VCC (VRChat Creator Companion) で YamaPlayer を削除**
-   - VCC でプロジェクトを開き、`YamaPlayer` パッケージを削除
-2. **Unity を閉じる**
-3. **残存ファイルの確認** — `Packages/net.kwxxw.yama-stream/` フォルダが残っている場合は手動で削除
-4. **Unity を再度開く**
+1. **Unity を閉じる**
+2. **YamaPlayer を削除**
+   - **VCC で導入した場合:** VCC でプロジェクトを開き、`YamaPlayer` パッケージを削除
+   - **.unitypackage で導入した場合:** `Packages/net.kwxxw.yama-stream/` フォルダを手動で削除
+3. `Packages/net.kwxxw.yama-stream/` フォルダが残っていないことを確認
+4. **Unity を開き**、コンパイルエラーがないことを確認
 5. [Releases ページ](https://github.com/Mega-Gorilla/KawaPlayer/releases) から `.unitypackage` をダウンロードしインポート
 6. シーン内の YamaPlayer プレハブを `KawaPlayer.prefab` に置き換え
 
