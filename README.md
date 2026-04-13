@@ -34,7 +34,20 @@ YamaPlayer は VRChat で使うことを想定して作られた動画プレイ�
 
 ## 導入手順
 
-### 新規導入（YamaPlayer 未導入の場合）
+### VCC（VRChat Creator Companion）で導入（推奨）
+
+1. VCC で以下の URL をリポジトリとして追加:
+   ```
+   https://mega-gorilla.github.io/vpm-repos/index.json
+   ```
+   VCC メニュー: **Settings > Packages > Add Repository** に URL を入力
+2. VCC の **Manage Project** でプロジェクトを開く
+3. **KawaPlayer** の **Add** をクリック
+4. Unity を開き、**GameObject > KawaPlayer > Main** メニューまたは `KawaPlayer.prefab` をシーンにドラッグして配置
+
+> VCC で導入した場合、アップデートも VCC 上からワンクリックで実行できます。
+
+### .unitypackage で導入
 
 1. VRChat Worlds SDK (>=3.8.1) が導入済みの Unity プロジェクトを用意
 2. [Releases ページ](https://github.com/Mega-Gorilla/KawaPlayer/releases) から `com.vhub.kawaplayer-x.x.x.unitypackage` をダウンロード
@@ -51,7 +64,7 @@ KawaPlayer は YamaPlayer と同じアセンブリ定義を使用しているた
    - **.unitypackage で導入した場合:** Unity メニュー **Window > Package Manager** で YamaPlayer を選択し **Remove** をクリック
 3. `Packages/net.kwxxw.yama-stream/` フォルダが残っていないことを確認
 4. **Unity を開き**、コンパイルエラーがないことを確認
-5. [Releases ページ](https://github.com/Mega-Gorilla/KawaPlayer/releases) から `.unitypackage` をダウンロードしインポート
+5. 上記の「VCC で導入」または「.unitypackage で導入」の手順で KawaPlayer を導入
 6. シーン内の YamaPlayer プレハブを `KawaPlayer.prefab` に置き換え
 
 ### PlaylistLoader の設定
