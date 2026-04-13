@@ -1,5 +1,9 @@
 更新履歴:
 
+v2.0.0-kawa.1.0.0
+正式リリース初版(VCC Show Pre-Release不要)
+KawaPlayerプレハブの初期Transform値を修正(位置・回転・スケール)
+
 v2.0.0-beta.4-kawa.3.1
 VCC/VPM対応(VPMリポジトリ経由のインストール・更新が可能に)
 upstream取り込み: ライブ配信TimeSpanオーバーフロークラッシュ修正
