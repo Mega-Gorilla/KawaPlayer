@@ -65,6 +65,14 @@ Custom inspectors, build processors, menu items, and the module/localization edi
 
 This repository is a fork of `koorimizuw/YamaPlayer` (upstream). When using `gh` CLI commands (issue, PR, etc.), **always** specify `--repo Mega-Gorilla/KawaPlayer` explicitly. Never create issues, PRs, or comments on the upstream repository (`koorimizuw/YamaPlayer`).
 
+## Testing Project
+
+The testing project `kawa-player-playlist-testing-chamber` (`D:\vrchat\kawa-player-playlist-testing-chamber`) references KawaPlayer via `file:` path in `Packages/manifest.json`. This means Unity opens the package source directly.
+
+**Prefab Override vs Prefab Edit**: Changes made to KawaPlayer objects in the testing project's scene Hierarchy are stored as **Prefab Instance Overrides** in the scene file (`.unity`) only — they are NOT included in the KawaPlayer package. To include changes in the package, edit `KawaPlayer.prefab` directly (via Prefab Mode in Unity or text edit in this repository). Never rely on scene-level overrides for changes intended to ship with the package.
+
+**`.meta` file regeneration**: Opening the testing project may cause Unity to regenerate `.meta` files in the KawaPlayer source directory with new GUIDs. This breaks asmdef cross-references and causes CS0246 compilation errors. If this happens, discard the changes with `git checkout -- .` in the KawaPlayer repository.
+
 ## Key Constraints
 
 - All runtime scripts must be valid UdonSharp (subset of C#). Many standard C# features are unavailable (no generics on UdonSharpBehaviour, limited reflection, no async/await, etc.).

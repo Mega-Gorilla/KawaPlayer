@@ -100369,7 +100369,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: "\u30D7\u30EC\u30A4\u30EA\u30B9\u30C8URL\u3092\u5165\u529B"
+  m_Text: VHub Playlist URL
 --- !u!1 &6274543012114569435
 GameObject:
   m_ObjectHideFlags: 0
