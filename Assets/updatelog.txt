@@ -3,27 +3,14 @@
 v1.0.0
 KawaPlayer正式リリース初版(YamaPlayer 2.0.0ベース)
 VCC/VPM対応(VPMリポジトリ経由のインストール・更新が可能に)
-upstream取り込み: ライブ配信TimeSpanオーバーフロークラッシュ修正、Tooltip更新ロジック分離、UI遅延処理、Editorメニューundo対応
+PlaylistLoaderモジュールを統合したプレハブを追加
+PlaylistLoaderにAuto Load On Start機能を追加
 PlaylistLoaderのTooltipテキストを修正
 KawaPlayerプレハブの初期Transform値を修正(位置・回転・スケール)
-
-v2.0.0-beta.4-kawa.3.1
-VCC/VPM対応(VPMリポジトリ経由のインストール・更新が可能に)
-upstream取り込み: ライブ配信TimeSpanオーバーフロークラッシュ修正
-upstream取り込み: Tooltip更新ロジック分離、UI遅延処理、Editorメニューundo対応
-PlaylistLoaderのTooltipテキストを修正
-
-v2.0.0-beta.4-kawa.3
-PlaylistLoaderにAuto Load On Start機能を追加
-
-v2.0.0-beta.4-kawa.2
 Info画面をKawaPlayer向けに更新
-非アクティブモジュールのビルド処理を修正(upstream取り込み)
-
-v2.0.0-beta.4-kawa.1
-KawaPlayerとしての初回リリース
-PlaylistLoaderモジュールを統合したプレハブを追加
 キューからのシャッフル再生が機能しない不具合を修正
+非アクティブモジュールのビルド処理を修正(upstream取り込み)
+upstream取り込み: ライブ配信TimeSpanオーバーフロークラッシュ修正、Tooltip更新ロジック分離、UI遅延処理、Editorメニューundo対応
 
 --- 以下はベース版(YamaPlayer)の更新履歴 ---
 
