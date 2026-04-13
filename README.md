@@ -47,8 +47,8 @@ KawaPlayer は YamaPlayer と同じアセンブリ定義を使用しているた
 
 1. **Unity を閉じる**
 2. **YamaPlayer を削除**
-   - **VCC で導入した場合:** VCC の **Manage Project** でプロジェクトを開き、YamaPlayer の **Remove Package** をクリックして削除
-   - **.unitypackage で導入した場合:** `Packages/net.kwxxw.yama-stream/` フォルダを手動で削除
+   - **VCC で導入した場合:** VCC の **Manage Project** でプロジェクトを開き、YamaPlayer の **Remove Package** をクリック
+   - **.unitypackage で導入した場合:** Unity メニュー **Window > Package Manager** で YamaPlayer を選択し **Remove** をクリック
 3. `Packages/net.kwxxw.yama-stream/` フォルダが残っていないことを確認
 4. **Unity を開き**、コンパイルエラーがないことを確認
 5. [Releases ページ](https://github.com/Mega-Gorilla/KawaPlayer/releases) から `.unitypackage` をダウンロードしインポート
