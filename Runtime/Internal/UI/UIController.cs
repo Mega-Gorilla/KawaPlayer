@@ -90,7 +90,7 @@ namespace Yamadev.YamaStream.UI
     [Header("Settings - Audio/Video")]
     [SerializeField, RegisterEvent(nameof(Toggle.onValueChanged), nameof(SetMirrorFlipOn))] private Toggle _mirrorFlipOnToggle;
     [SerializeField, RegisterEvent(nameof(Toggle.onValueChanged), nameof(SetMirrorFlipOff))] private Toggle _mirrorFlipOffToggle;
-    [SerializeField, RegisterEventTrigger(EventTriggerType.EndDrag, nameof(SetBrightness))] private Slider _brightnessSlider;
+    [SerializeField, RegisterEvent(nameof(Toggle.onValueChanged), nameof(SetBrightness))] private Slider _brightnessSlider;
     [SerializeField] private Text _brightnessValueText;
     [SerializeField, RegisterEvent(nameof(Toggle.onValueChanged), nameof(SetMaxResolution360))] private Toggle _maxResolution360Toggle;
     [SerializeField, RegisterEvent(nameof(Toggle.onValueChanged), nameof(SetMaxResolution480))] private Toggle _maxResolution480Toggle;
@@ -605,7 +605,7 @@ namespace Yamadev.YamaStream.UI
     public void SetSpeed()
     {
       if (!Utilities.IsValid(_speedSlider)) return;
-      if ((byte)_controller.SyncedState != (byte)PlayerState.Idle && (_controller.Stopped || _controller.IsLoading))
+      if (_controller.SyncedState != PlayerState.Idle && (_controller.Stopped || _controller.IsLoading))
       {
         UpdateUI();
         return;

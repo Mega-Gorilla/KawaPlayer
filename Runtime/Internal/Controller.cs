@@ -70,7 +70,6 @@ namespace Yamadev.YamaStream
     public string TimeFormat => _timeFormat;
     public bool IsLocal => _isLocal;
     public PlayerState SyncedState => (PlayerState)_syncedState;
-    public PlayerState State => Handler.IsStopped ? PlayerState.Idle : Handler.IsPaused ? PlayerState.Paused : Handler.IsPlaying ? PlayerState.Playing : PlayerState.Idle;
     public bool IsLoading => Handler.IsLoading;
     public bool Paused => Handler.IsPaused;
     public bool Stopped => Handler.IsStopped;
