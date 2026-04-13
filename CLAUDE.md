@@ -27,9 +27,21 @@ There is no local build command — the project is opened and compiled in the Un
 - Published at `https://mega-gorilla.github.io/vpm-repos/index.json`
 - Users add this URL in VCC (Settings > Packages > Add Repository) to install/update KawaPlayer
 
-**Required secrets**: `PAT` — Personal Access Token with write access to `vpm-repos`, used by `release.yml` for repository-dispatch.
+**Required secrets**: `PAT` — Fine-grained Personal Access Token with `contents: read and write` permission on `vpm-repos`. `read-only` では `repository-dispatch` が `Resource not accessible` エラーで失敗する。
 
-**Version bumping**: Update `version` in `package.json` before running the release workflow. Published VPM versions must not be deleted (breaks projects using source control).
+**Version format**: `{YamaPlayer版}-kawa.{Major}.{Minor}.{Patch}` (例: `2.0.0-kawa.1.0.0`)
+- YamaPlayer版: upstream ベースバージョン (例: `2.0.0`)
+- kawa.Major.Minor.Patch: KawaPlayer 独自の3桁バージョン (upstream 取り込み時もリセットしない)
+- `beta` を含むバージョンは VCC で「Show Pre-Release Packages」を ON にしないと表示されない
+
+**Release checklist**:
+1. `package.json` の `version` を更新
+2. `Assets/updatelog.txt` の先頭に新バージョンのエントリを追加
+3. コミット・push
+4. GitHub Actions の「Build Release」ワークフローを手動実行 (develop ブランチ)
+5. GitHub Release 作成 → repository-dispatch → vpm-repos listing 再ビルドを確認
+
+Published VPM versions must not be deleted (breaks projects using source control).
 
 ## Architecture
 
