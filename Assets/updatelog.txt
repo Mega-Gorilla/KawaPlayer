@@ -1,7 +1,10 @@
 更新履歴:
 
-v2.0.0-kawa.1.0.0
-正式リリース初版(VCC Show Pre-Release不要)
+v1.0.0
+KawaPlayer正式リリース初版(YamaPlayer 2.0.0ベース)
+VCC/VPM対応(VPMリポジトリ経由のインストール・更新が可能に)
+upstream取り込み: ライブ配信TimeSpanオーバーフロークラッシュ修正、Tooltip更新ロジック分離、UI遅延処理、Editorメニューundo対応
+PlaylistLoaderのTooltipテキストを修正
 KawaPlayerプレハブの初期Transform値を修正(位置・回転・スケール)
 
 v2.0.0-beta.4-kawa.3.1

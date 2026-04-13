@@ -29,10 +29,10 @@ There is no local build command — the project is opened and compiled in the Un
 
 **Required secrets**: `PAT` — Fine-grained Personal Access Token with `contents: read and write` permission on `vpm-repos`. `read-only` では `repository-dispatch` が `Resource not accessible` エラーで失敗する。
 
-**Version format**: `{YamaPlayer版}-kawa.{Major}.{Minor}.{Patch}` (例: `2.0.0-kawa.1.0.0`)
-- YamaPlayer版: upstream ベースバージョン (例: `2.0.0`)
-- kawa.Major.Minor.Patch: KawaPlayer 独自の3桁バージョン (upstream 取り込み時もリセットしない)
-- `beta` を含むバージョンは VCC で「Show Pre-Release Packages」を ON にしないと表示されない
+**Version format**: 独立した SemVer (`Major.Minor.Patch`)。`1.0.0` から開始。
+- KawaPlayer は独立パッケージのため、upstream YamaPlayer のバージョンには従わない
+- upstream のベースバージョンは `Assets/updatelog.txt` とコミット履歴で追跡する
+- SemVer の pre-release 識別子 (`-beta`, `-kawa` 等) を含むと VCC で「Show Pre-Release Packages」を ON にしないと表示されないため、正式リリースでは使用しない
 
 **Release checklist**:
 1. `package.json` の `version` を更新
