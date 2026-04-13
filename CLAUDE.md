@@ -36,7 +36,7 @@ There is no local build command — the project is opened and compiled in the Un
 
 **Release checklist**:
 1. `package.json` の `version` を更新
-2. `Assets/updatelog.txt` の先頭に新バージョンのエントリを追加
+2. `Assets/updatelog.txt` の先頭に新バージョンのエントリを追加（主要な変更のみ簡潔に。軽微な修正は省略可）
 3. コミット・push
 4. GitHub Actions の「Build Release」ワークフローを手動実行 (develop ブランチ)
 5. GitHub Release 作成 → repository-dispatch → vpm-repos listing 再ビルドを確認
