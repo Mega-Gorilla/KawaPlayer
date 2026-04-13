@@ -12,7 +12,24 @@ KawaPlayer is a VRChat video player (YamaPlayer fork) with PlaylistLoader for lo
 
 ## Build & Release
 
-There is no local build command — the project is opened and compiled in the Unity Editor with VRChat SDK installed. Releases are created via a manual GitHub Actions workflow (`.github/workflows/release.yml`) that packages into ZIP and UnityPackage formats and publishes to the VPM repository at `https://vpm.kwxxw.net/`.
+There is no local build command — the project is opened and compiled in the Unity Editor with VRChat SDK installed.
+
+**Release workflow** (`.github/workflows/release.yml`, manual trigger):
+1. Reads version from `package.json`
+2. Packages into ZIP and UnityPackage formats
+3. Creates a GitHub Release with both artifacts
+4. Triggers `repository-dispatch` to `Mega-Gorilla/vpm-repos` to rebuild the VPM listing
+
+**VPM distribution** (`Mega-Gorilla/vpm-repos`):
+- Built from VRChat's `template-package-listing` template
+- `source.json` references `Mega-Gorilla/KawaPlayer` in `githubRepos`
+- GitHub Actions auto-generates `index.json` from GitHub Releases
+- Published at `https://mega-gorilla.github.io/vpm-repos/index.json`
+- Users add this URL in VCC (Settings > Packages > Add Repository) to install/update KawaPlayer
+
+**Required secrets**: `PAT` — Personal Access Token with write access to `vpm-repos`, used by `release.yml` for repository-dispatch.
+
+**Version bumping**: Update `version` in `package.json` before running the release workflow. Published VPM versions must not be deleted (breaks projects using source control).
 
 ## Architecture
 
