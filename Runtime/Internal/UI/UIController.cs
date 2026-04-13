@@ -81,6 +81,10 @@ namespace Yamadev.YamaStream.UI
     [SerializeField, RegisterEvent(nameof(Toggle.onValueChanged), nameof(Repeat))] private Toggle _repeatOnToggle;
     [SerializeField] private Text _repeatStartTimeText;
     [SerializeField] private Text _repeatEndTimeText;
+    [SerializeField, RegisterEvent(nameof(Button.onClick), nameof(Subtract100ms))] private Button _localDelaySubtract100msButton;
+    [SerializeField, RegisterEvent(nameof(Button.onClick), nameof(Subtract50ms))] private Button _localDelaySubtract50msButton;
+    [SerializeField, RegisterEvent(nameof(Button.onClick), nameof(Add50ms))] private Button _localDelayAdd50msButton;
+    [SerializeField, RegisterEvent(nameof(Button.onClick), nameof(Add100ms))] private Button _localDelayAdd100msButton;
     [SerializeField] private Text _localDelayValueText;
 
     [Header("Settings - Audio/Video")]
@@ -759,17 +763,22 @@ namespace Yamadev.YamaStream.UI
         _progressSlider.SetValueWithoutNotify(progressValue);
       }
 
-      if (Utilities.IsValid(_progressSliderHelper) && Utilities.IsValid(_progressTooltipText))
-      {
-        var showTooltip = !_controller.Stopped && !_controller.IsLive && _controller.Handler.Type != VideoPlayerType.ImageViewer;
-        _progressSliderHelper.gameObject.SetActive(showTooltip);
+      UpdateTooltip();
+    }
 
-        if (showTooltip)
-        {
-          var tooltipText = _controller.IsLive ? "Live" : TimeSpan.FromSeconds(_controller.Duration * _progressSliderHelper.Percent).ToString(_controller.TimeFormat);
-          _progressTooltipText.text = tooltipText;
-        }
-      }
+    private void UpdateTooltip()
+    {
+      if (!Utilities.IsValid(_progressSliderHelper) || !Utilities.IsValid(_progressTooltipText)) return;
+
+      var showTooltip = !_controller.Stopped && !_controller.IsLive && _controller.Handler.Type != VideoPlayerType.ImageViewer;
+      _progressSliderHelper.gameObject.SetActive(showTooltip);
+
+      if (!showTooltip) return;
+
+      var seekSeconds = _controller.Duration * _progressSliderHelper.Percent;
+      var tooltipText = float.IsInfinity(seekSeconds) || float.IsNaN(seekSeconds) ? "Live" : TimeSpan.FromSeconds(seekSeconds).ToString(_controller.TimeFormat);
+
+      _progressTooltipText.text = tooltipText;
     }
 
     private void UpdatePlaybackView()
