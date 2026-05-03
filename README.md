@@ -25,8 +25,9 @@ VRChat/Udon の制約（ランタイムで `string → VRCUrl` 変換が不可�
 
 1. ワールドに入る (Instance Owner として)
 2. KawaPlayer UI を開く → **Settings** → **Playback** タブ
-3. 末尾の **Default URL** セクションで URL を入力 → **Save URL** をクリック
-4. 即時に再生が開始され、その URL は **次回以降も自動的に復元** されます (VRChat Persistence)
+3. 末尾の **Default URL** セクションで URL を入力 → **保存** をクリック
+4. プレイヤーが停止中であれば即時に再生が開始されます (再生中・一時停止中の場合は中断せず、URL は次回以降の autoplay 対象として保存されます)
+5. 保存した URL は **次回以降の入室時にも自動的に復元** されます (VRChat Persistence による永続化)
 
 ### 仕組み
 
