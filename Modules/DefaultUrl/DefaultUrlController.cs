@@ -5,10 +5,9 @@ using VRC.SDKBase;
 namespace Yamadev.YamaStream.Modules.DefaultUrl
 {
   [UdonBehaviourSyncMode(BehaviourSyncMode.Manual)]
-  public class DefaultUrlController : YamaPlayerListener
+  public class DefaultUrlController : YamaPlayerModule
   {
     [SerializeField] private Yamadev.YamaStream.Modules.PlaylistLoader.PlaylistLoader _playlistLoader;
-    [SerializeField] private Controller _controller;
     [SerializeField] private VideoPlayerType _videoPlayerType = VideoPlayerType.AVProVideoPlayer;
 
     [UdonSynced] private VRCUrl _defaultUrl = VRCUrl.Empty;
@@ -48,9 +47,6 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
       }
       else
       {
-        // Take ownership before PlayTrack so that Controller.LoadTrack
-        // can RequestSerialization to broadcast playback state to all clients.
-        // Mirrors UIController.PlayUrlInternal pattern (UIController.cs:380-381).
         _controller.TakeOwnership();
         _controller.PlayTrack(TrackUtils.NewTrack(_videoPlayerType, "", _defaultUrl));
       }
@@ -61,8 +57,6 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
     {
       if (_playlistLoader == null)
         Debug.LogWarning("[DefaultUrlController] " + gameObject.name + ": _playlistLoader is not set.", this);
-      if (_controller == null)
-        Debug.LogWarning("[DefaultUrlController] " + gameObject.name + ": _controller is not set.", this);
     }
 #endif
   }
