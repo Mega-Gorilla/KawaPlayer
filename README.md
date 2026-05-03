@@ -1,6 +1,6 @@
 # KawaPlayer
 
-[YamaPlayer](https://github.com/koorimizuw/YamaPlayer) のフォークリポジトリです。YamaPlayer の全機能に加え、外部プレイリストのランタイム読み込み機能 (PlaylistLoader) を搭載しています（基本機能実装済み・VRChat 実機検証継続中）。
+[YamaPlayer](https://github.com/koorimizuw/YamaPlayer) のフォークリポジトリです。YamaPlayer の全機能に加え、外部プレイリストのランタイム読み込み機能 (PlaylistLoader) と Owner-tied default URL 機能 (DefaultUrl) を搭載しています（基本機能実装済み・VRChat 実機検証継続中）。
 
 > **KawaPlayer は YamaPlayer を置き換えて使用するパッケージです。** YamaPlayer と同時にインストールすることはできません。YamaPlayer を導入済みの場合は、下記の「YamaPlayer からの移行」手順に従ってください。
 
@@ -16,6 +16,30 @@
 4. 停止中なら自動再生開始
 
 VRChat/Udon の制約（ランタイムで `string → VRCUrl` 変換が不可能）を回避するため、**Pre-baked URL Pool + リダイレクトサーバー方式**を採用しています。
+
+## DefaultUrl
+
+ワールドの **「デフォルト動画 / プレイリスト URL」** を VRChat 内で Instance Owner が設定し、自動再生 + セッション間永続化する機能です。
+
+### 使い方 (Owner として)
+
+1. ワールドに入る (Instance Owner として)
+2. KawaPlayer UI を開く → **Settings** → **Playback** タブ
+3. 末尾の **Default URL** セクションで URL を入力 → **Save URL** をクリック
+4. 即時に再生が開始され、その URL は **次回以降も自動的に復元** されます (VRChat Persistence)
+
+### 仕組み
+
+- **Layer 1 (instance sync)**: 設定された URL は `[UdonSynced]` で同 instance の全 player に同期、Master が autoplay を起動
+- **Layer 2 (Owner persistence)**: Owner の `VRCPlayerObject + VRCEnablePersistence` で URL を永続化、再 join 時に自動復元
+- **URL 種別自動判定**: `playlist.vrc-hub.com` を含めば PlaylistLoader 経路、それ以外は直接動画再生
+- **Owner 限定 UI**: Save / Clear ボタンは Instance Owner にのみ表示 (他 player は現在の URL 表示のみ)
+
+### KawaPlayer.prefab に内蔵 (zero-setup)
+
+`v1.1.0` 以降、DefaultUrl は **KawaPlayer.prefab に内蔵されています**。`KawaPlayer.prefab` を scene に配置するだけで利用可能で、別途 prefab を追加する必要はありません。
+
+> **注意**: `Packages/com.vhub.kawaplayer/Modules/DefaultUrl/DefaultUrl.prefab` を手動で scene に追加する必要はありません。これは standalone 配置 (KawaPlayer.prefab を使わない advanced / manual 用) のためのもので、通常配置と併用すると UI が二重に生成されます。
 
 ## YamaPlayer について
 
@@ -70,6 +94,10 @@ KawaPlayer は YamaPlayer と同じアセンブリ定義を使用しているた
 ### PlaylistLoader の設定
 
 PlaylistLoader は KawaPlayer.prefab に組み込み済みです。デフォルトの Pool ID (`default`) がそのまま利用可能です。Pool ID を変更する場合のみ、PlaylistLoader の Inspector で Pool ID を設定し Generate Pool を実行してください。
+
+### DefaultUrl の設定
+
+DefaultUrl は KawaPlayer.prefab に組み込み済みです (v1.1.0 以降)。設定不要で、配置後そのまま VRChat 内 Settings UI から利用できます。Owner として URL を設定すると、次回以降も自動復元されます。
 
 ## 利用規約
 

@@ -1,5 +1,12 @@
 更新履歴:
 
+v1.1.0
+DefaultUrlモジュール統合 - Owner-tied default URL + autoplay + 永続化
+KawaPlayer.prefabに内蔵 (zero-setup、別途配置不要)
+Settings → Playbackタブで Owner が URL 設定可能
+VRChat Persistenceで永続化、再join時に自動復元
+直接動画URLとVHub Playlist URLを自動判定して再生
+
 v1.0.0
 KawaPlayer正式リリース初版(YamaPlayer 2.0.0ベース)
 VCC/VPM対応
