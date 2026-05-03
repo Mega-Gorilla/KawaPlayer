@@ -17,7 +17,6 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
 
     void Start()
     {
-      if (!Utilities.IsValid(Networking.LocalPlayer)) return;
       UpdateOwnerVisibility();
       UpdateDisplay();
       SchedulePoll();
@@ -25,11 +24,6 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
 
     public void SchedulePoll()
     {
-      if (!Utilities.IsValid(Networking.LocalPlayer))
-      {
-        SendCustomEventDelayedSeconds(nameof(SchedulePoll), 1.0f);
-        return;
-      }
       UpdateOwnerVisibility();
       UpdateDisplay();
       SendCustomEventDelayedSeconds(nameof(SchedulePoll), 1.0f);
@@ -47,7 +41,11 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
     private void UpdateOwnerVisibility()
     {
       if (_ownerOnlySection == null) return;
-      if (!Utilities.IsValid(Networking.LocalPlayer)) return;
+      if (!Utilities.IsValid(Networking.LocalPlayer))
+      {
+        _ownerOnlySection.SetActive(false);
+        return;
+      }
       _ownerOnlySection.SetActive(Networking.LocalPlayer.isInstanceOwner);
     }
 
