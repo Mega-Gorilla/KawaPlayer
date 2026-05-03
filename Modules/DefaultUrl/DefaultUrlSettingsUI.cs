@@ -17,6 +17,7 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
 
     void Start()
     {
+      if (!Utilities.IsValid(Networking.LocalPlayer)) return;
       UpdateOwnerVisibility();
       UpdateDisplay();
       SchedulePoll();
@@ -24,6 +25,11 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
 
     public void SchedulePoll()
     {
+      if (!Utilities.IsValid(Networking.LocalPlayer))
+      {
+        SendCustomEventDelayedSeconds(nameof(SchedulePoll), 1.0f);
+        return;
+      }
       UpdateOwnerVisibility();
       UpdateDisplay();
       SendCustomEventDelayedSeconds(nameof(SchedulePoll), 1.0f);
