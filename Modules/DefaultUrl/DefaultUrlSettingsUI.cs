@@ -55,9 +55,9 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
       if (_controller == null) return;
       var url = _controller.DefaultUrl;
       if (Utilities.IsValid(url) && !string.IsNullOrEmpty(url.Get()))
-        _currentUrlDisplay.text = "Current: " + url.Get();
+        _currentUrlDisplay.text = "現在: " + url.Get();
       else
-        _currentUrlDisplay.text = "(no default URL set)";
+        _currentUrlDisplay.text = "(デフォルト URL は未設定です)";
     }
 
     public void OnSavePressed()
