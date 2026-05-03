@@ -52,12 +52,13 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
       }
     }
 
-#if UNITY_EDITOR
-    private void OnValidate()
-    {
-      if (_playlistLoader == null)
-        Debug.LogWarning("[DefaultUrlController] " + gameObject.name + ": _playlistLoader is not set.", this);
-    }
-#endif
+    // OnValidate warning was removed (#56 review feedback): the warning was a false positive when
+    // viewing Modules/DefaultUrl/DefaultUrl.prefab standalone in Project view, since the canonical
+    // path wires _playlistLoader via KawaPlayer.prefab override. The built-in nested instance is
+    // pre-wired, and standalone scene placements rely on TryAutoPlay's defensive null guard
+    // (silent no-op for playlist URLs when _playlistLoader is null) — no crash.
+    // UdonSharp does not expose UnityEditor.PrefabUtility or Scene.IsValid() for in-Udon detection
+    // of prefab-asset context, so we cannot conditionally suppress; removing OnValidate is cleaner
+    // and matches existing modules (PermissionManagement etc.) which do not use OnValidate validation.
   }
 }
