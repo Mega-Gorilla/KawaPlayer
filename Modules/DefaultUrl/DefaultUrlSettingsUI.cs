@@ -15,10 +15,13 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
     [SerializeField] private Text _currentUrlDisplay;
     [SerializeField] private GameObject _ownerOnlySection;
 
+    private string _lastSyncedUrl = null;
+
     void Start()
     {
       UpdateOwnerVisibility();
       UpdateDisplay();
+      RefreshInputField();
       SchedulePoll();
     }
 
@@ -26,6 +29,7 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
     {
       UpdateOwnerVisibility();
       UpdateDisplay();
+      RefreshInputField();
       SendCustomEventDelayedSeconds(nameof(SchedulePoll), 1.0f);
     }
 
@@ -35,6 +39,7 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
       {
         UpdateOwnerVisibility();
         UpdateDisplay();
+        RefreshInputField();
       }
     }
 
@@ -60,6 +65,24 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
         _currentUrlDisplay.text = "(デフォルト URL は未設定です)";
     }
 
+    private void RefreshInputField()
+    {
+      if (_urlInput == null) return;
+      if (_controller == null) return;
+      if (!Utilities.IsValid(Networking.LocalPlayer)) return;
+      if (!Networking.LocalPlayer.isInstanceOwner) return;
+
+      var url = _controller.DefaultUrl;
+      bool hasUrl = Utilities.IsValid(url) && !string.IsNullOrEmpty(url.Get());
+      string urlStr = hasUrl ? url.Get() : "";
+
+      if (_lastSyncedUrl != urlStr)
+      {
+        _lastSyncedUrl = urlStr;
+        _urlInput.SetUrl(hasUrl ? url : VRCUrl.Empty);
+      }
+    }
+
     public void OnSavePressed()
     {
       if (!Utilities.IsValid(Networking.LocalPlayer)) return;
@@ -80,6 +103,7 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
       }
 
       UpdateDisplay();
+      RefreshInputField();
     }
 
     public void OnClearPressed()
@@ -98,22 +122,14 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
       }
 
       UpdateDisplay();
+      RefreshInputField();
     }
 
-#if UNITY_EDITOR
-    private void OnValidate()
-    {
-      if (_controller == null)
-        Debug.LogWarning("[DefaultUrlSettingsUI] " + gameObject.name + ": _controller is not set.", this);
-      if (_storageTemplate == null)
-        Debug.LogWarning("[DefaultUrlSettingsUI] " + gameObject.name + ": _storageTemplate is not set.", this);
-      if (_urlInput == null)
-        Debug.LogWarning("[DefaultUrlSettingsUI] " + gameObject.name + ": _urlInput is not set.", this);
-      if (_currentUrlDisplay == null)
-        Debug.LogWarning("[DefaultUrlSettingsUI] " + gameObject.name + ": _currentUrlDisplay is not set.", this);
-      if (_ownerOnlySection == null)
-        Debug.LogWarning("[DefaultUrlSettingsUI] " + gameObject.name + ": _ownerOnlySection is not set.", this);
-    }
-#endif
+    // OnValidate warning was removed (#59): _controller / _storageTemplate are intentionally null
+    // at ScreenUI.prefab asset level (this script lives in ScreenUI.prefab/.../DefaultUrlSetting/).
+    // Cross-prefab override in KawaPlayer.prefab wires them at runtime instance level.
+    // Same approach as DefaultUrlController.OnValidate removal in PR #58 (UdonSharp does not expose
+    // UnityEditor.PrefabUtility/Scene.IsValid() for in-Udon detection of prefab-asset context, so
+    // we cannot conditionally suppress; removing OnValidate is cleaner and matches existing modules).
   }
 }

@@ -38,7 +38,7 @@ VRChat/Udon の制約（ランタイムで `string → VRCUrl` 変換が不可�
 
 ### KawaPlayer.prefab に内蔵 (zero-setup)
 
-`v1.1.0` 以降、DefaultUrl は **KawaPlayer.prefab に内蔵されています**。`KawaPlayer.prefab` を scene に配置するだけで利用可能で、別途 prefab を追加する必要はありません。`v1.1.1` 以降は直接 embed され、別 `DefaultUrl.prefab` ファイルは存在しません (KawaPlayer 機能として完全統合)。
+`v1.1.0` 以降、DefaultUrl は **KawaPlayer.prefab に内蔵されています**。`KawaPlayer.prefab` を scene に配置するだけで利用可能で、別途 prefab を追加する必要はありません。`v1.1.1` 以降は直接 embed され、別 `DefaultUrl.prefab` ファイルは存在しません。`v1.1.2` 以降は UI セクションが他 settings (再生速度・区間リピート 等) と同じ `ScreenUI/.../PlaybackView/Content` 配下に直接配置され、Hierarchy 上で WYSIWYG に編集可能です。
 
 ## YamaPlayer について
 
