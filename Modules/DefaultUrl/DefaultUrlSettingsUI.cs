@@ -15,10 +15,13 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
     [SerializeField] private Text _currentUrlDisplay;
     [SerializeField] private GameObject _ownerOnlySection;
 
+    private string _lastSyncedUrl = null;
+
     void Start()
     {
       UpdateOwnerVisibility();
       UpdateDisplay();
+      RefreshInputField();
       SchedulePoll();
     }
 
@@ -26,6 +29,7 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
     {
       UpdateOwnerVisibility();
       UpdateDisplay();
+      RefreshInputField();
       SendCustomEventDelayedSeconds(nameof(SchedulePoll), 1.0f);
     }
 
@@ -35,6 +39,7 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
       {
         UpdateOwnerVisibility();
         UpdateDisplay();
+        RefreshInputField();
       }
     }
 
@@ -58,6 +63,24 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
         _currentUrlDisplay.text = "現在: " + url.Get();
       else
         _currentUrlDisplay.text = "(デフォルト URL は未設定です)";
+    }
+
+    private void RefreshInputField()
+    {
+      if (_urlInput == null) return;
+      if (_controller == null) return;
+      if (!Utilities.IsValid(Networking.LocalPlayer)) return;
+      if (!Networking.LocalPlayer.isInstanceOwner) return;
+
+      var url = _controller.DefaultUrl;
+      bool hasUrl = Utilities.IsValid(url) && !string.IsNullOrEmpty(url.Get());
+      string urlStr = hasUrl ? url.Get() : "";
+
+      if (_lastSyncedUrl != urlStr)
+      {
+        _lastSyncedUrl = urlStr;
+        _urlInput.SetUrl(hasUrl ? url : VRCUrl.Empty);
+      }
     }
 
     public void OnSavePressed()
