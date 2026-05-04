@@ -100,20 +100,11 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
       UpdateDisplay();
     }
 
-#if UNITY_EDITOR
-    private void OnValidate()
-    {
-      if (_controller == null)
-        Debug.LogWarning("[DefaultUrlSettingsUI] " + gameObject.name + ": _controller is not set.", this);
-      if (_storageTemplate == null)
-        Debug.LogWarning("[DefaultUrlSettingsUI] " + gameObject.name + ": _storageTemplate is not set.", this);
-      if (_urlInput == null)
-        Debug.LogWarning("[DefaultUrlSettingsUI] " + gameObject.name + ": _urlInput is not set.", this);
-      if (_currentUrlDisplay == null)
-        Debug.LogWarning("[DefaultUrlSettingsUI] " + gameObject.name + ": _currentUrlDisplay is not set.", this);
-      if (_ownerOnlySection == null)
-        Debug.LogWarning("[DefaultUrlSettingsUI] " + gameObject.name + ": _ownerOnlySection is not set.", this);
-    }
-#endif
+    // OnValidate warning was removed (#59): _controller / _storageTemplate are intentionally null
+    // at ScreenUI.prefab asset level (this script lives in ScreenUI.prefab/.../DefaultUrlSetting/).
+    // Cross-prefab override in KawaPlayer.prefab wires them at runtime instance level.
+    // Same approach as DefaultUrlController.OnValidate removal in PR #58 (UdonSharp does not expose
+    // UnityEditor.PrefabUtility/Scene.IsValid() for in-Udon detection of prefab-asset context, so
+    // we cannot conditionally suppress; removing OnValidate is cleaner and matches existing modules).
   }
 }
