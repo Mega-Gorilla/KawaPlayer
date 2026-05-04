@@ -103,6 +103,7 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
       }
 
       UpdateDisplay();
+      RefreshInputField();
     }
 
     public void OnClearPressed()
@@ -121,6 +122,7 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
       }
 
       UpdateDisplay();
+      RefreshInputField();
     }
 
     // OnValidate warning was removed (#59): _controller / _storageTemplate are intentionally null
