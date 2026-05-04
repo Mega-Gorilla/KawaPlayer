@@ -40,14 +40,33 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
     private void UpdateTranslation()
     {
       if (_uiController == null) return;
+      // Skip writes when GetTranslation returns "" so a missing key (e.g. before
+      // LocalizationBuildProcess has merged module translations) does not wipe
+      // out the prefab-baked Japanese fallback text.
       if (_titleText != null)
-        _titleText.text = $"{_uiController.GetTranslation("module.defaultUrl.title")}<size=44>(Global)</size>";
+      {
+        string t = _uiController.GetTranslation("module.defaultUrl.title");
+        if (!string.IsNullOrEmpty(t))
+          _titleText.text = $"{t}<size=44>(Global)</size>";
+      }
       if (_descriptionText != null)
-        _descriptionText.text = _uiController.GetTranslation("module.defaultUrl.description");
+      {
+        string t = _uiController.GetTranslation("module.defaultUrl.description");
+        if (!string.IsNullOrEmpty(t))
+          _descriptionText.text = t;
+      }
       if (_saveButtonLabel != null)
-        _saveButtonLabel.text = _uiController.GetTranslation("module.defaultUrl.save");
+      {
+        string t = _uiController.GetTranslation("module.defaultUrl.save");
+        if (!string.IsNullOrEmpty(t))
+          _saveButtonLabel.text = t;
+      }
       if (_clearButtonLabel != null)
-        _clearButtonLabel.text = _uiController.GetTranslation("module.defaultUrl.clear");
+      {
+        string t = _uiController.GetTranslation("module.defaultUrl.clear");
+        if (!string.IsNullOrEmpty(t))
+          _clearButtonLabel.text = t;
+      }
       UpdateDisplay();
     }
 
@@ -86,12 +105,15 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
       if (_controller == null) return;
       var url = _controller.DefaultUrl;
       bool hasUrl = Utilities.IsValid(url) && !string.IsNullOrEmpty(url.Get());
-      string prefix = _uiController != null
-        ? _uiController.GetTranslation("module.defaultUrl.currentPrefix")
-        : "現在: ";
-      string notSet = _uiController != null
-        ? _uiController.GetTranslation("module.defaultUrl.notSet")
-        : "(デフォルト URL は未設定です)";
+      string prefix = "現在: ";
+      string notSet = "(デフォルト URL は未設定です)";
+      if (_uiController != null)
+      {
+        string p = _uiController.GetTranslation("module.defaultUrl.currentPrefix");
+        if (!string.IsNullOrEmpty(p)) prefix = p;
+        string n = _uiController.GetTranslation("module.defaultUrl.notSet");
+        if (!string.IsNullOrEmpty(n)) notSet = n;
+      }
       _currentUrlDisplay.text = hasUrl ? prefix + url.Get() : notSet;
     }
 

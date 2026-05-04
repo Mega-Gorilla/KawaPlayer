@@ -81,12 +81,14 @@ namespace Yamadev.YamaStream.Editor
         return translationFiles;
       }
 
-      foreach (Transform child in moduleManager.transform)
+      // Recurse into ModuleManager's full subtree so embedded modules whose
+      // YamaPlayerModuleDefinition lives one or more levels deep (e.g.
+      // KawaPlayer.prefab's Modules/DefaultUrl/Controller) are also included.
+      var moduleDefs = moduleManager.GetComponentsInChildren<YamaPlayerModuleDefinition>(true);
+      foreach (var moduleDef in moduleDefs)
       {
-        if (!child.gameObject.activeSelf) continue;
-
-        var moduleDef = child.GetComponent<YamaPlayerModuleDefinition>();
-        if (moduleDef != null && moduleDef.playerTranslationFile != null)
+        if (moduleDef == null || !moduleDef.gameObject.activeInHierarchy) continue;
+        if (moduleDef.playerTranslationFile != null)
         {
           translationFiles.Add(moduleDef.playerTranslationFile);
         }
