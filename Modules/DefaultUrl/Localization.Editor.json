@@ -1,0 +1,38 @@
+{
+  "ja": {
+    "module.defaultUrl.name": "デフォルト URL",
+    "module.defaultUrl.description": "ワールド入室時に自動再生されるデフォルト URL を Instance Owner が VRChat 内 UI から設定可能にし、セッション間で永続化する。"
+  },
+  "en": {
+    "module.defaultUrl.name": "Default URL",
+    "module.defaultUrl.description": "Lets the Instance Owner configure a default URL via the in-VRChat UI that auto-plays when entering the world, persisted across sessions."
+  },
+  "ko": {
+    "module.defaultUrl.name": "기본 URL",
+    "module.defaultUrl.description": "Instance Owner가 VRChat 내 UI에서 월드 입장 시 자동 재생되는 기본 URL을 설정할 수 있게 하고 세션 간 영구화합니다."
+  },
+  "zh-CN": {
+    "module.defaultUrl.name": "默认 URL",
+    "module.defaultUrl.description": "允许 Instance Owner 通过 VRChat 内 UI 配置进入世界时自动播放的默认 URL，跨会话持久化。"
+  },
+  "zh-HK": {
+    "module.defaultUrl.name": "預設 URL",
+    "module.defaultUrl.description": "允許 Instance Owner 透過 VRChat 內 UI 設定進入世界時自動播放的預設 URL，跨工作階段持久化。"
+  },
+  "es": {
+    "module.defaultUrl.name": "URL predeterminada",
+    "module.defaultUrl.description": "Permite al Instance Owner configurar una URL predeterminada desde la UI de VRChat que se reproduce automáticamente al entrar al mundo, persistida entre sesiones."
+  },
+  "it": {
+    "module.defaultUrl.name": "URL predefinito",
+    "module.defaultUrl.description": "Consente all'Instance Owner di configurare un URL predefinito tramite la UI di VRChat che si riproduce automaticamente all'ingresso nel mondo, persistito tra le sessioni."
+  },
+  "ru": {
+    "module.defaultUrl.name": "URL по умолчанию",
+    "module.defaultUrl.description": "Позволяет Instance Owner настроить URL по умолчанию через UI VRChat, который автоматически воспроизводится при входе в мир и сохраняется между сессиями."
+  },
+  "uk": {
+    "module.defaultUrl.name": "URL за замовчуванням",
+    "module.defaultUrl.description": "Дозволяє Instance Owner налаштувати URL за замовчуванням через UI VRChat, який автоматично відтворюється при вході у світ і зберігається між сесіями."
+  }
+}

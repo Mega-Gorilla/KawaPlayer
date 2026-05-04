@@ -4,6 +4,7 @@ v1.1.2
 DefaultUrl UIをScreenUI/Content直下に直接配置 (WYSIWYG化)
 他settings sections (PlaybackDelay等) と同じ階層になりHierarchyで編集可能
 build-time clone機構を廃止、uiSlots空化 (no-op)
+DefaultUrlモジュールを9言語対応化 (ja/en/ko/zh-CN/zh-HK/es/it/ru/uk)
 標準利用には影響なし
 
 v1.1.1

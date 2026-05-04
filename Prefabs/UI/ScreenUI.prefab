@@ -13146,6 +13146,10 @@ MonoBehaviour:
   _urlInput: {fileID: 2721875334348629764}
   _currentUrlDisplay: {fileID: 1354605419755083021}
   _ownerOnlySection: {fileID: 2768358823049365496}
+  _titleText: {fileID: 3524977813665446290}
+  _descriptionText: {fileID: 7467433195813207821}
+  _saveButtonLabel: {fileID: 1689873095500570038}
+  _clearButtonLabel: {fileID: 2873338480460215035}
 --- !u!114 &546974722492781435
 MonoBehaviour:
   m_ObjectHideFlags: 0
