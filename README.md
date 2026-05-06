@@ -31,8 +31,6 @@ KawaPlayer は YamaPlayer の全機能を継承しつつ、**ワールド作成�
      vcc://vpm/addRepo?url=https://mega-gorilla.github.io/vpm-repos/index.json
      ```
 
-     [VCC で開く](vcc://vpm/addRepo?url=https://mega-gorilla.github.io/vpm-repos/index.json) (リンクが効く環境ではこちらをクリックでも可)
-
    - **手動追加**: VCC の **Settings > Packages > Add Repository** に下記 URL を入力
 
      ```
