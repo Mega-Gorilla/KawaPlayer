@@ -86,31 +86,61 @@ namespace Yamadev.YamaStream.Editor
     {
       ModuleManagerEditor.FindYamaPlayerModules();
 
+      // Standalone modules: editor translation file is reachable via the
+      // module definition registered with ModuleManager.ModuleDefinitions.
       foreach (var (moduleDefinition, _) in ModuleManager.ModuleDefinitions)
       {
-        if (moduleDefinition.editorTranslationFile == null) continue;
+        MergeEditorTranslations(moduleDefinition.editorTranslationFile, moduleDefinition.moduleName);
+      }
 
-        try
+      // Embedded modules (e.g. KawaPlayer.prefab/Modules/DefaultUrl/Controller):
+      // their YamaPlayerModuleDefinition is intentionally NOT in
+      // ModuleDefinitions because that dictionary feeds Module Manager's
+      // Available Modules section (where the dictionary value is the prefab to
+      // InstantiatePrefab). Registering an embedded definition there would
+      // clone the parent prefab (KawaPlayer.prefab) into the scene. Instead we
+      // walk every prefab independently here just to harvest editor
+      // translation files, deduping against the standalone set.
+      string[] guids = AssetDatabase.FindAssets("t:Prefab");
+      foreach (string guid in guids)
+      {
+        string path = AssetDatabase.GUIDToAssetPath(guid);
+        GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(path);
+        if (prefab == null) continue;
+
+        var nestedDefinitions = prefab.GetComponentsInChildren<YamaPlayerModuleDefinition>(true);
+        foreach (var def in nestedDefinitions)
         {
-          var nested = JsonConvert.DeserializeObject<Dictionary<string, Dictionary<string, string>>>(
-            moduleDefinition.editorTranslationFile.text);
-          if (nested == null) continue;
+          if (def == null) continue;
+          if (ModuleManager.ModuleDefinitions.ContainsKey(def)) continue; // already merged above
+          MergeEditorTranslations(def.editorTranslationFile, def.moduleName);
+        }
+      }
+    }
 
-          foreach (var (langCode, translations) in nested)
+    private static void MergeEditorTranslations(TextAsset file, string label)
+    {
+      if (file == null) return;
+
+      try
+      {
+        var nested = JsonConvert.DeserializeObject<Dictionary<string, Dictionary<string, string>>>(file.text);
+        if (nested == null) return;
+
+        foreach (var (langCode, translations) in nested)
+        {
+          if (!_translations.ContainsKey(langCode))
+            _translations[langCode] = new Dictionary<string, string>();
+
+          foreach (var (key, value) in translations)
           {
-            if (!_translations.ContainsKey(langCode))
-              _translations[langCode] = new Dictionary<string, string>();
-
-            foreach (var (key, value) in translations)
-            {
-              _translations[langCode][key] = value;
-            }
+            _translations[langCode][key] = value;
           }
         }
-        catch (Exception e)
-        {
-          Debug.LogWarning($"[EditorLocalization] Failed to parse module translation ({moduleDefinition.moduleName}): {e.Message}");
-        }
+      }
+      catch (Exception e)
+      {
+        Debug.LogWarning($"[EditorLocalization] Failed to parse module translation ({label}): {e.Message}");
       }
     }
 
