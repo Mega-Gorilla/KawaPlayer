@@ -1,11 +1,10 @@
 更新履歴:
 
 v1.1.2
-DefaultUrl UIをScreenUI/Content直下に直接配置 (WYSIWYG化)
-他settings sections (PlaybackDelay等) と同じ階層になりHierarchyで編集可能
-build-time clone機構を廃止、uiSlots空化 (no-op)
 DefaultUrlモジュールを9言語対応化 (ja/en/ko/zh-CN/zh-HK/es/it/ru/uk)
-標準利用には影響なし
+Ownerの入力欄に現在のデフォルトURLを自動表示 (Save/Clearで即時反映)
+DefaultUrl設定UIのデザイン改善 (タイトル位置揃え・ボタンレイアウト修正・配色統一)
+DefaultUrl UIをScreenUI/Content直下に直接配置 (WYSIWYG編集可能化、build-time clone機構廃止)
 
 v1.1.1
 DefaultUrlモジュールをKawaPlayer.prefabにfull embed化 (architectural cleanup)
