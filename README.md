@@ -1,6 +1,6 @@
 # KawaPlayer
 
-VRChat の動画プレイヤー [YamaPlayer](https://github.com/koorimizuw/YamaPlayer) のフォーク。**ワールド作成者が VRChat 内で直接プレイリストやデフォルト URL を設定できる**ようにすることで、World creator 体験 (WCX) を強化しています。
+VRChat の動画プレイヤー [YamaPlayer](https://github.com/koorimizuw/YamaPlayer) のフォーク。**ワールド作成者が VRChat 内から直接プレイリストやデフォルト URL を設定できる**機能を追加しています。
 
 > **YamaPlayer を置き換えて使用するパッケージです。** 同時インストール不可。既存 YamaPlayer ユーザは [移行手順](#yamaplayer-からの移行) を参照してください。
 
