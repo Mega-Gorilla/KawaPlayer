@@ -1,6 +1,6 @@
 # KawaPlayer
 
-VRChat の動画プレイヤー [YamaPlayer](https://github.com/koorimizuw/YamaPlayer) のフォーク。**ワールド作成者が VRChat 内から直接プレイリストやデフォルト URL を設定できる**機能を追加しています。
+VRChat の動画プレイヤー [YamaPlayer](https://github.com/koorimizuw/YamaPlayer) のフォーク。**ワールド作成者が VRChat 内から直接プレイリストやデフォルト動画URL を設定できる**機能を追加しています。
 
 > **YamaPlayer を置き換えて使用するパッケージです。** 同時インストール不可。既存 YamaPlayer ユーザは [移行手順](#yamaplayer-からの移行) を参照してください。
 
@@ -15,8 +15,8 @@ VRChat の動画プレイヤー [YamaPlayer](https://github.com/koorimizuw/YamaP
 | AudioLink / LTCGI / Light Volume 連携 | ✓ | ✓ (継承) |
 | 多言語対応 (9 言語) | ✓ | ✓ (継承) |
 | **外部プレイリスト URL の読込** (`playlist.vrc-hub.com`) | — | ✅ NEW |
-| **ワールドのデフォルト URL を VRChat 内から設定** | — | ✅ NEW |
-| **デフォルト URL の永続化** (再 join で自動復元) | — | ✅ NEW |
+| **ワールドのデフォルト動画URL を VRChat 内から設定** | — | ✅ NEW |
+| **デフォルト動画URL の永続化** (再 join で自動復元) | — | ✅ NEW |
 
 KawaPlayer は YamaPlayer の全機能を継承しつつ、**ワールド作成者が VRChat 内で動画/プレイリストを直接管理できる**機能を追加しています。
 
@@ -50,7 +50,7 @@ KawaPlayer は YamaPlayer の全機能を継承しつつ、**ワールド作成�
 
 外部プレイリストを世界の事前ビルドに焼き込む必要なく、**VRChat に居ながら好みのプレイリストを切替できます**。
 
-### デフォルト URL 機能 (DefaultUrl)
+### デフォルト動画URL 機能 (DefaultUrl)
 
 ワールドの **「入室時に自動再生される動画 / プレイリスト URL」** を、Instance Owner が VRChat 内から設定できる機能です。
 
