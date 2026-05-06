@@ -15,7 +15,7 @@
     "module.defaultUrl.name": "默认 URL",
     "module.defaultUrl.description": "允许 Instance Owner 通过 VRChat 内 UI 配置进入世界时自动播放的默认 URL，跨会话持久化。"
   },
-  "zh-HK": {
+  "zh-TW": {
     "module.defaultUrl.name": "預設 URL",
     "module.defaultUrl.description": "允許 Instance Owner 透過 VRChat 內 UI 設定進入世界時自動播放的預設 URL，跨工作階段持久化。"
   },
