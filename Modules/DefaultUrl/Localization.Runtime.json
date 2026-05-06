@@ -1,0 +1,74 @@
+{
+  "ja": {
+    "module.defaultUrl.title": "デフォルト URL",
+    "module.defaultUrl.description": "ワールド入室時に自動再生されるデフォルト URL を設定する。インスタンスオーナーのみ編集可能、セッション間で永続化される。",
+    "module.defaultUrl.notSet": "(デフォルト URL は未設定です)",
+    "module.defaultUrl.currentPrefix": "現在: ",
+    "module.defaultUrl.save": "保存",
+    "module.defaultUrl.clear": "クリア"
+  },
+  "en": {
+    "module.defaultUrl.title": "Default URL",
+    "module.defaultUrl.description": "Sets the default URL that auto-plays when entering the world. Editable by Instance Owner only, persisted across sessions.",
+    "module.defaultUrl.notSet": "(No default URL set)",
+    "module.defaultUrl.currentPrefix": "Current: ",
+    "module.defaultUrl.save": "Save",
+    "module.defaultUrl.clear": "Clear"
+  },
+  "ko": {
+    "module.defaultUrl.title": "기본 URL",
+    "module.defaultUrl.description": "월드 입장 시 자동 재생되는 기본 URL을 설정합니다. Instance Owner만 편집 가능하며 세션 간 영구화됩니다.",
+    "module.defaultUrl.notSet": "(기본 URL이 설정되지 않음)",
+    "module.defaultUrl.currentPrefix": "현재: ",
+    "module.defaultUrl.save": "저장",
+    "module.defaultUrl.clear": "지우기"
+  },
+  "zh-CN": {
+    "module.defaultUrl.title": "默认 URL",
+    "module.defaultUrl.description": "设置进入世界时自动播放的默认 URL。仅 Instance Owner 可编辑，跨会话持久化。",
+    "module.defaultUrl.notSet": "(未设置默认 URL)",
+    "module.defaultUrl.currentPrefix": "当前: ",
+    "module.defaultUrl.save": "保存",
+    "module.defaultUrl.clear": "清除"
+  },
+  "zh-HK": {
+    "module.defaultUrl.title": "預設 URL",
+    "module.defaultUrl.description": "設定進入世界時自動播放的預設 URL。僅 Instance Owner 可編輯，跨工作階段持久化。",
+    "module.defaultUrl.notSet": "(未設定預設 URL)",
+    "module.defaultUrl.currentPrefix": "目前: ",
+    "module.defaultUrl.save": "儲存",
+    "module.defaultUrl.clear": "清除"
+  },
+  "es": {
+    "module.defaultUrl.title": "URL predeterminada",
+    "module.defaultUrl.description": "Establece la URL predeterminada que se reproduce automáticamente al entrar al mundo. Editable solo por el Instance Owner, persistida entre sesiones.",
+    "module.defaultUrl.notSet": "(URL predeterminada no establecida)",
+    "module.defaultUrl.currentPrefix": "Actual: ",
+    "module.defaultUrl.save": "Guardar",
+    "module.defaultUrl.clear": "Borrar"
+  },
+  "it": {
+    "module.defaultUrl.title": "URL predefinito",
+    "module.defaultUrl.description": "Imposta l'URL predefinito che si riproduce automaticamente all'ingresso nel mondo. Modificabile solo dall'Instance Owner, persistito tra le sessioni.",
+    "module.defaultUrl.notSet": "(URL predefinito non impostato)",
+    "module.defaultUrl.currentPrefix": "Attuale: ",
+    "module.defaultUrl.save": "Salva",
+    "module.defaultUrl.clear": "Cancella"
+  },
+  "ru": {
+    "module.defaultUrl.title": "URL по умолчанию",
+    "module.defaultUrl.description": "Устанавливает URL по умолчанию, который автоматически воспроизводится при входе в мир. Может редактировать только Instance Owner, сохраняется между сессиями.",
+    "module.defaultUrl.notSet": "(URL по умолчанию не установлен)",
+    "module.defaultUrl.currentPrefix": "Текущий: ",
+    "module.defaultUrl.save": "Сохранить",
+    "module.defaultUrl.clear": "Очистить"
+  },
+  "uk": {
+    "module.defaultUrl.title": "URL за замовчуванням",
+    "module.defaultUrl.description": "Встановлює URL за замовчуванням, який автоматично відтворюється при вході у світ. Може редагувати лише Instance Owner, зберігається між сесіями.",
+    "module.defaultUrl.notSet": "(URL за замовчуванням не встановлено)",
+    "module.defaultUrl.currentPrefix": "Поточний: ",
+    "module.defaultUrl.save": "Зберегти",
+    "module.defaultUrl.clear": "Очистити"
+  }
+}

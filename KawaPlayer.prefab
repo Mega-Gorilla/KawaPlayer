@@ -100722,10 +100722,10 @@ MonoBehaviour:
   allowMultiple: 0
   noNeedSetUp: 0
   uiSlots: []
-  moduleNameTranslationKey: 
-  moduleDescriptionTranslationKey: 
-  editorTranslationFile: {fileID: 0}
-  playerTranslationFile: {fileID: 0}
+  moduleNameTranslationKey: module.defaultUrl.name
+  moduleDescriptionTranslationKey: module.defaultUrl.description
+  editorTranslationFile: {fileID: 4900000, guid: 1164676ff54f6464888c5719898445d4, type: 3}
+  playerTranslationFile: {fileID: 4900000, guid: 9381146c68e49c041bf13abfbad7844a, type: 3}
 --- !u!1 &8773549493001596059
 GameObject:
   m_ObjectHideFlags: 0

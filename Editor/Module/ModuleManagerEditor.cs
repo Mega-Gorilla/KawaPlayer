@@ -270,6 +270,12 @@ namespace Yamadev.YamaStream.Editor
     {
       ModuleManager.ModuleDefinitions.Clear();
 
+      // Standalone module prefabs only: the dictionary value is used by
+      // AddModule() to InstantiatePrefab(...), so registering an embedded
+      // module here would clone the parent prefab (e.g. all of
+      // KawaPlayer.prefab) into the scene's ModuleManager. Embedded module
+      // discovery (for editor translation lookup, etc.) must use a separate
+      // path that does not feed Available Modules.
       string[] guids = AssetDatabase.FindAssets("t:Prefab");
       foreach (string guid in guids)
       {
