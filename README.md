@@ -24,10 +24,13 @@ KawaPlayer は YamaPlayer の全機能を継承しつつ、**ワールド作成�
 
 ## クイックスタート (VCC 推奨)
 
-1. VCC の **Settings > Packages > Add Repository** に以下を追加:
-   ```
-   https://mega-gorilla.github.io/vpm-repos/index.json
-   ```
+1. VCC にリポジトリを追加 — 以下のいずれかの方法で:
+   - **ワンクリック追加**: [このリンクをクリック](vcc://vpm/addRepo?url=https://mega-gorilla.github.io/vpm-repos/index.json) して VCC で開く
+   - **手動追加**: VCC の **Settings > Packages > Add Repository** に下記 URL を入力
+
+     ```
+     https://mega-gorilla.github.io/vpm-repos/index.json
+     ```
 2. **Manage Project** で対象プロジェクトを開き、**KawaPlayer** の **Add** をクリック
 3. Unity で `KawaPlayer.prefab` をシーンにドラッグ (または **GameObject > KawaPlayer > Main** メニュー)
 
