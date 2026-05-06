@@ -1,25 +1,20 @@
 更新履歴:
 
 v1.1.2
-DefaultUrlモジュールを9言語対応化 (ja/en/ko/zh-CN/zh-HK/es/it/ru/uk)
-Ownerの入力欄に現在のデフォルトURLを自動表示 (Save/Clearで即時反映)
-DefaultUrl設定UIのデザイン改善 (タイトル位置揃え・ボタンレイアウト修正・配色統一)
-DefaultUrl UIをScreenUI/Content直下に直接配置 (WYSIWYG編集可能化、build-time clone機構廃止)
+デフォルト URL 機能を9言語対応 (日本語/英語/韓国語/中国語簡体・繁体/スペイン語/イタリア語/ロシア語/ウクライナ語)
+入力欄に現在のデフォルト URL を自動表示
+UI デザインを改善
 
 v1.1.1
-DefaultUrlモジュールをKawaPlayer.prefabにfull embed化 (architectural cleanup)
-nested prefabからplain GameObject構造に変換、override機構解消
-標準利用には影響なし(VCC/VPMアップデートで透過的)
+内部改善のみ (利用方法は変わりません)
 
 v1.1.0
-DefaultUrlモジュール統合 - Owner-tied default URL + autoplay + 永続化
-KawaPlayer.prefabに内蔵 (zero-setup、別途配置不要)
-Settings → Playbackタブで Owner が URL 設定可能
-VRChat Persistenceで永続化、再join時に自動復元
-直接動画URLとVHub Playlist URLを自動判定して再生
+デフォルト URL 機能を追加
+- Owner がワールド入室時に自動再生される URL を VRChat 内から設定可能
+- 設定した URL は次回入室時にも自動復元
+- 動画 URL / VHub プレイリスト URL の両方に対応
 
 v1.0.0
-KawaPlayer正式リリース初版(YamaPlayer 2.0.0ベース)
-VCC/VPM対応
-PlaylistLoaderモジュール統合
-シャッフル再生の不具合修正
+KawaPlayer 正式リリース (YamaPlayer ベース)
+VHub プレイリスト読み込み機能を搭載
+シャッフル再生の不具合を修正
