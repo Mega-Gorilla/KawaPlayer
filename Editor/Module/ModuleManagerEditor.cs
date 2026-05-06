@@ -277,9 +277,15 @@ namespace Yamadev.YamaStream.Editor
         GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(path);
         if (prefab == null) continue;
 
-        YamaPlayerModuleDefinition moduleDefinition = prefab.GetComponent<YamaPlayerModuleDefinition>();
-        if (moduleDefinition != null)
+        // Recurse so embedded module definitions (e.g. KawaPlayer.prefab's
+        // Modules/DefaultUrl/Controller) are discovered alongside standalone
+        // module prefabs whose root carries YamaPlayerModuleDefinition.
+        YamaPlayerModuleDefinition[] moduleDefinitions =
+          prefab.GetComponentsInChildren<YamaPlayerModuleDefinition>(true);
+        foreach (var moduleDefinition in moduleDefinitions)
         {
+          if (moduleDefinition == null) continue;
+          if (ModuleManager.ModuleDefinitions.ContainsKey(moduleDefinition)) continue;
           ModuleManager.ModuleDefinitions[moduleDefinition] = prefab;
         }
       }

@@ -84,10 +84,12 @@ namespace Yamadev.YamaStream.Editor
       // Recurse into ModuleManager's full subtree so embedded modules whose
       // YamaPlayerModuleDefinition lives one or more levels deep (e.g.
       // KawaPlayer.prefab's Modules/DefaultUrl/Controller) are also included.
+      // Use activeSelf to match the enable/disable convention used by
+      // YamaPlayerModuleBuildProcess.
       var moduleDefs = moduleManager.GetComponentsInChildren<YamaPlayerModuleDefinition>(true);
       foreach (var moduleDef in moduleDefs)
       {
-        if (moduleDef == null || !moduleDef.gameObject.activeInHierarchy) continue;
+        if (moduleDef == null || !moduleDef.gameObject.activeSelf) continue;
         if (moduleDef.playerTranslationFile != null)
         {
           translationFiles.Add(moduleDef.playerTranslationFile);
