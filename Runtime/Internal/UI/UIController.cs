@@ -201,6 +201,7 @@ namespace Yamadev.YamaStream.UI
         UpdateUI();
         return;
       }
+      _controller.TakeOwnership();
       _controller.SetPlayerType(VideoPlayerType.UnityVideoPlayer);
     }
 
@@ -229,6 +230,7 @@ namespace Yamadev.YamaStream.UI
         UpdateUI();
         return;
       }
+      _controller.TakeOwnership();
       _controller.SetPlayerType(VideoPlayerType.AVProVideoPlayer);
     }
 
@@ -257,6 +259,7 @@ namespace Yamadev.YamaStream.UI
         UpdateUI();
         return;
       }
+      _controller.TakeOwnership();
       _controller.SetPlayerType(VideoPlayerType.ImageViewer);
     }
 
