@@ -248,7 +248,11 @@ namespace Yamadev.YamaStream
     public void UpdateSpeed()
     {
       int len = _videoPlayerHandlers.Length;
-      for (int i = 0; i < len; i++) _videoPlayerHandlers[i].Speed = _speed;
+      for (int i = 0; i < len; i++)
+      {
+        var handler = _videoPlayerHandlers[i];
+        if (Utilities.IsValid(handler)) handler.Speed = _speed;
+      }
       if (!Stopped && Handler.Type == VideoPlayerType.AVProVideoPlayer && !Handler.UseFallbackHandler)
         SendCustomEventDelayedFrames(nameof(Reload), 0);
       UpdateAudioPitch();

@@ -11,7 +11,7 @@ namespace Yamadev.YamaStream.Modules.Persistence
   [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
   public class Persistence : YamaPlayerModule
   {
-    private const string KEY_PREFIX = "YamaPlayer";
+    public const string KEY_PREFIX = "YamaPlayer";
 
     [SerializeField] internal string _uniqueId;
     [SerializeField, HideInInspector] internal string _pathBasedKey;
