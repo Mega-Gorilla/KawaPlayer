@@ -11,6 +11,8 @@ namespace Yamadev.YamaStream
     [SerializeField, Range(0f, 1f)] private float _syncMargin = 0.3f;
     [UdonSynced] private float _syncedVideoTime = 0;
     [UdonSynced] private long _networkDataTimeTicks = 0;
+    [UdonSynced] private int _trackVersion = 0;
+    private int _appliedTrackVersion = 0;
     private float _lastSync = 0;
     private float _localDelay = 0;
 
@@ -21,7 +23,7 @@ namespace Yamadev.YamaStream
       {
         case PlayerState.Idle:
           if (Stopped) return;
-          Handler.Stop();
+          StopLocal();
           break;
         case PlayerState.Playing:
           if (IsPlaying) return;
@@ -107,22 +109,17 @@ namespace Yamadev.YamaStream
         if (Utilities.IsValid(listener)) listener.AfterTrackSynced();
       }
 
-      byte syncedState = _syncedState;
-      int activePlaylistIndex = _activePlaylistIndex;
-      int playingTrackIndex = _playingTrackIndex;
+      bool trackChanged = _trackVersion != _appliedTrackVersion || TrackUtils.GetUrl(track).Get() != TrackUtils.GetUrl(Track).Get();
+      _appliedTrackVersion = _trackVersion;
 
-      if (syncedState != (byte)PlayerState.Idle && TrackUtils.GetUrl(track).Get() != TrackUtils.GetUrl(Track).Get())
+      if (_syncedState != (byte)PlayerState.Idle && trackChanged)
       {
         LoadTrack(track);
       }
       else
       {
-        SetPlayerType(_playerType);
+        SwitchHandler(_playerType);
       }
-
-      _syncedState = syncedState;
-      _activePlaylistIndex = activePlaylistIndex;
-      _playingTrackIndex = playingTrackIndex;
 
       ApplySyncedState();
       EnsureVideoTime();

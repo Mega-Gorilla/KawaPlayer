@@ -38,6 +38,7 @@ namespace Yamadev.YamaStream
     private bool _reloading;
     private int _lastSetTimeFrame = 0;
     private float _lastLoadTime = 0f;
+    private bool _checkRepeatRunning = false;
 
     private const float SAFETY_RETRY_INTERVAL = 5.1f;
 
@@ -155,6 +156,13 @@ namespace Yamadev.YamaStream
     {
       if (Utilities.IsValid(Handler) && Handler.Type == playerType) return;
       Stop();
+      SwitchHandler(playerType);
+    }
+
+    private void SwitchHandler(VideoPlayerType playerType)
+    {
+      if (Utilities.IsValid(Handler) && Handler.Type == playerType) return;
+      StopLocal();
 
       int len = _videoPlayerHandlers.Length;
       for (int i = 0; i < len; i++)
@@ -191,6 +199,12 @@ namespace Yamadev.YamaStream
       if (Stopped && !IsError && !force) return;
       _syncedState = (byte)PlayerState.Idle;
       ClearPlaylistIndexes();
+      StopLocal();
+    }
+
+    private void StopLocal()
+    {
+      _autoForward = false;
       Handler.Stop();
     }
 
@@ -264,7 +278,7 @@ namespace Yamadev.YamaStream
       set
       {
         _repeat = value;
-        SendCustomEventDelayedFrames(nameof(CheckRepeat), 0);
+        CheckRepeat();
         if (Networking.IsOwner(gameObject) && !_isLocal) RequestSerialization();
         int len = _listeners.Length;
         for (int i = 0; i < len; i++)
@@ -279,13 +293,27 @@ namespace Yamadev.YamaStream
 
     public void CheckRepeat()
     {
-      if (!IsPlaying || IsLive || !RepeatUtils.IsOn(_repeat)) return;
+      if (_checkRepeatRunning) return;
+      _checkRepeatRunning = true;
+      SendCustomEventDelayedFrames(nameof(_CheckRepeat), 0);
+    }
 
-      var start = RepeatUtils.GetStartTime(_repeat);
-      var end = RepeatUtils.GetEndTime(_repeat);
-      if (Handler.Time > end || Handler.Time < start) SetTime(start);
+    public void _CheckRepeat()
+    {
+      if (!RepeatUtils.IsOn(_repeat) || IsLive || Stopped)
+      {
+        _checkRepeatRunning = false;
+        return;
+      }
 
-      SendCustomEventDelayedSeconds(nameof(CheckRepeat), 0.5f);
+      if (IsPlaying)
+      {
+        var start = RepeatUtils.GetStartTime(_repeat);
+        var end = RepeatUtils.GetEndTime(_repeat);
+        if (Handler.Time > end || Handler.Time < start) SetTime(start);
+      }
+
+      SendCustomEventDelayedSeconds(nameof(_CheckRepeat), 0.5f);
     }
 
     public void SetTime(float time)
@@ -355,12 +383,10 @@ namespace Yamadev.YamaStream
 
     private void LoadTrack(object[] track, bool isReload = false)
     {
-      _autoForward = false;
       _reloading = isReload;
-      Handler.Stop();
+      StopLocal();
 
-      var trackPlayerType = TrackUtils.GetPlayerType(track);
-      SetPlayerType(trackPlayerType);
+      SwitchHandler(TrackUtils.GetPlayerType(track));
 
       if (!_reloading) Track = track;
       Handler.LoadUrl(TrackUtils.GetUrl(track));
@@ -368,6 +394,8 @@ namespace Yamadev.YamaStream
 
       if (Networking.IsOwner(gameObject) && !_isLocal && !isReload)
       {
+        _trackVersion++;
+        _appliedTrackVersion = _trackVersion;
         RequestSerialization();
       }
 

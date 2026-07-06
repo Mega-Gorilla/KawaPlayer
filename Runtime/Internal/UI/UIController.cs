@@ -925,7 +925,11 @@ namespace Yamadev.YamaStream.UI
     public override void AfterSpeedChanged(float speed) => UpdatePlaybackView();
     public override void AfterLocalDelayChanged(float localDelay) => UpdatePlaybackView();
     public override void AfterShufflePlayChanged(bool shufflePlay) => UpdatePlaybackView();
-    public override void AfterTrackLoaded() => UpdateUI();
+    public override void AfterTrackLoaded()
+    {
+      UpdateUI();
+      GeneratePlaylistTracks();
+    }
     public override void AfterTrackUpdated() => UpdateTrackView();
     public override void AfterVideoRetry() => UpdateLoadingView();
     public override void AfterQueueUpdated()
