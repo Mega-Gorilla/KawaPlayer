@@ -45,7 +45,7 @@
   },
   "zh-HK": {
     "module.slideshower.slideMode.title": "幻燈片模式",
-    "module.slideshower.slideMode.description": "將視頻顯示為幻燈片",
+    "module.slideshower.slideMode.description": "將影片顯示為幻燈片",
     "module.slideshower.slideMode.on": "開啟",
     "module.slideshower.slideMode.off": "關閉",
     "module.slideshower.slideSeconds.title": "幻燈片秒數",
