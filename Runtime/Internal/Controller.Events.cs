@@ -175,11 +175,13 @@ namespace Yamadev.YamaStream
           PrintError("Access denied - no retry will be attempted");
           _errorRetryCount = 0;
           _retryTargetUrl = VRCUrl.Empty;
+          _reloading = false;
           return;
         case VideoError.InvalidURL:
           PrintError("Invalid URL - no retry will be attempted");
           _errorRetryCount = 0;
           _retryTargetUrl = VRCUrl.Empty;
+          _reloading = false;
           return;
         case VideoError.PlayerError:
           if (_useFallbackAfterErrors > 0 && _errorRetryCount == _useFallbackAfterErrors - 1)
@@ -211,6 +213,7 @@ namespace Yamadev.YamaStream
       {
         _errorRetryCount = 0;
         _retryTargetUrl = VRCUrl.Empty;
+        _reloading = false;
         PrintError($"Maximum retry count ({_maxErrorRetry}) reached. Stopping retry attempts.");
       }
     }

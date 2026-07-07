@@ -84,15 +84,17 @@ namespace Yamadev.YamaStream
 
     public override void OnPreSerialization()
     {
-      _playerType = string.IsNullOrEmpty(TrackUtils.GetUrl(Track).Get())
+      VideoPlayerType playerType = string.IsNullOrEmpty(TrackUtils.GetUrl(Track).Get())
         ? Handler.Type
         : TrackUtils.GetPlayerType(Track);
+      _handlerIndex = GetHandlerIndex(playerType);
       _title = TrackUtils.GetTitle(Track);
       _url = TrackUtils.GetUrl(Track);
     }
 
     public override void OnDeserialization()
     {
+      VideoPlayerType playerType = GetPlayerTypeByIndex(_handlerIndex);
       object[] track;
       if (Utilities.IsValid(ActivePlaylist) && _playingTrackIndex >= 0 && _playingTrackIndex < ActivePlaylist.TrackCount)
       {
@@ -100,7 +102,7 @@ namespace Yamadev.YamaStream
       }
       else
       {
-        track = TrackUtils.NewTrack(_playerType, _title, _url);
+        track = TrackUtils.NewTrack(playerType, _title, _url);
       }
       int len = _listeners.Length;
       for (int i = 0; i < len; i++)
@@ -118,7 +120,7 @@ namespace Yamadev.YamaStream
       }
       else
       {
-        SwitchHandler(_playerType);
+        SwitchHandler(playerType);
       }
 
       ApplySyncedState();

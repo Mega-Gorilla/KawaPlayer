@@ -27,7 +27,7 @@ namespace Yamadev.YamaStream
     [UdonSynced, FieldChangeCallback(nameof(Speed))] private float _speed = 1f;
     [UdonSynced, FieldChangeCallback(nameof(Repeat))] private ulong _repeat;
     [UdonSynced] private byte _syncedState;
-    [UdonSynced] private VideoPlayerType _playerType;
+    [UdonSynced] private int _handlerIndex;
     [UdonSynced] private string _title = string.Empty;
     [UdonSynced] private VRCUrl _url = VRCUrl.Empty;
     private object[] _track;
@@ -179,6 +179,25 @@ namespace Yamadev.YamaStream
       PrintError("Could not find player handler for player type: " + playerType.GetString());
     }
 
+    private int GetHandlerIndex(VideoPlayerType playerType)
+    {
+      int len = _videoPlayerHandlers.Length;
+      for (int i = 0; i < len; i++)
+      {
+        var handler = _videoPlayerHandlers[i];
+        if (Utilities.IsValid(handler) && handler.Type == playerType) return i;
+      }
+      return -1;
+    }
+
+    private VideoPlayerType GetPlayerTypeByIndex(int index)
+    {
+      if (index < 0 || index >= _videoPlayerHandlers.Length) return Handler.Type;
+      var handler = _videoPlayerHandlers[index];
+      if (!Utilities.IsValid(handler)) return Handler.Type;
+      return handler.Type;
+    }
+
     public void Play(bool force = false)
     {
       if ((Stopped || IsPlaying) && !force) return;
@@ -196,6 +215,7 @@ namespace Yamadev.YamaStream
     public void Stop(bool force = false)
     {
       _autoForward = false;
+      _reloading = false;
       if (Stopped && !IsError && !force) return;
       _syncedState = (byte)PlayerState.Idle;
       ClearPlaylistIndexes();
