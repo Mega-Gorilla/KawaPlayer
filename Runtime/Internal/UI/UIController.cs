@@ -270,7 +270,7 @@ namespace Yamadev.YamaStream.UI
     private void PlayUrlField(VRCUrlInputField urlInputField)
     {
       if (!Utilities.IsValid(urlInputField)) return;
-      if (!urlInputField.GetUrl().IsValidUrl())
+      if (_controller.FindHandlerIndexForUrl(urlInputField.GetUrl()) < 0)
       {
         urlInputField.SetUrl(VRCUrl.Empty);
         return;

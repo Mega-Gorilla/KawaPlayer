@@ -101,7 +101,7 @@ namespace Yamadev.YamaStream
       if (!Utilities.IsValid(track)) return;
 
       var url = TrackUtils.GetUrl(track);
-      if (!url.IsValidUrl())
+      if (ResolveHandlerIndexForTrack(track) < 0)
       {
         PrintError($"URL {url.Get()} is not valid.");
         return;
@@ -116,7 +116,7 @@ namespace Yamadev.YamaStream
       _playingTrackIndex = index;
 
       _syncedState = (byte)PlayerState.Playing;
-      LoadTrack(track);
+      ResolveAndLoadTrack(track);
     }
 
     public void Backward()

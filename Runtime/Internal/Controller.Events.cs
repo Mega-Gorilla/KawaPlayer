@@ -48,7 +48,7 @@ namespace Yamadev.YamaStream
       if (!_reloading)
       {
         _repeat = 0;
-        Handler.UseFallbackHandler = false;
+        SetUseFallback(false);
 
         if (Networking.IsOwner(gameObject) && !_isLocal)
         {
@@ -79,8 +79,8 @@ namespace Yamadev.YamaStream
     {
       _errorRetryCount = 0;
       _retryTargetUrl = VRCUrl.Empty;
-      if (SyncedState == PlayerState.Playing) Handler.Play();
-      if (SyncedState == PlayerState.Idle) Handler.Stop();
+      if (SyncedState == PlayerState.Playing) ActiveHandler.Play();
+      if (SyncedState == PlayerState.Idle) ActiveHandler.Stop();
       CheckRepeat();
 
       if (Networking.IsOwner(gameObject) && !_isLocal && !_reloading)
@@ -142,7 +142,7 @@ namespace Yamadev.YamaStream
           ClearPlaylistIndexes();
         }
         _syncedState = (byte)PlayerState.Idle;
-        Handler.Stop();
+        ActiveHandler.Stop();
       }
 
       int len = _listeners.Length;
@@ -188,13 +188,13 @@ namespace Yamadev.YamaStream
           {
             if (Utilities.IsValid(Handler.FallbackHandler))
             {
-              Handler.UseFallbackHandler = true;
+              SetUseFallback(true);
               PrintLog($"Switching to fallback handler: {Handler.FallbackHandler.Type.GetString()}");
             }
           }
           else
           {
-            Handler.UseFallbackHandler = false;
+            SetUseFallback(false);
           }
           break;
       }
@@ -230,13 +230,13 @@ namespace Yamadev.YamaStream
         return;
       }
 
-      if (IsPlaying || !currentUrl.IsValidUrl())
+      if (IsPlaying || !ActiveHandler.IsValidUrl(currentUrl))
       {
         _retryTargetUrl = VRCUrl.Empty;
         return;
       }
 
-      Handler.LoadUrl(currentUrl);
+      ActiveHandler.LoadUrl(currentUrl);
       _lastLoadTime = Time.time;
 
       int len = _listeners.Length;

@@ -18,7 +18,7 @@ namespace Yamadev.YamaStream
 
     private void ApplySyncedState()
     {
-      if (!Handler.IsReady) return;
+      if (!ActiveHandler.IsReady) return;
       switch (SyncedState)
       {
         case PlayerState.Idle:
@@ -27,11 +27,11 @@ namespace Yamadev.YamaStream
           break;
         case PlayerState.Playing:
           if (IsPlaying) return;
-          Handler.Play();
+          ActiveHandler.Play();
           break;
         case PlayerState.Paused:
           if (Paused) return;
-          Handler.Pause();
+          ActiveHandler.Pause();
           break;
       }
     }
@@ -84,26 +84,24 @@ namespace Yamadev.YamaStream
 
     public override void OnPreSerialization()
     {
-      VideoPlayerType playerType = string.IsNullOrEmpty(TrackUtils.GetUrl(Track).Get())
-        ? Handler.Type
-        : TrackUtils.GetPlayerType(Track);
-      _handlerIndex = GetHandlerIndex(playerType);
       _title = TrackUtils.GetTitle(Track);
       _url = TrackUtils.GetUrl(Track);
     }
 
     public override void OnDeserialization()
     {
-      VideoPlayerType playerType = GetPlayerTypeByIndex(_handlerIndex);
-      object[] track;
-      if (Utilities.IsValid(ActivePlaylist) && _playingTrackIndex >= 0 && _playingTrackIndex < ActivePlaylist.TrackCount)
+      int handlerIndex = _handlerIndex;
+      bool syncedIndexValid = handlerIndex >= 0 && handlerIndex < _videoPlayerHandlers.Length && Utilities.IsValid(_videoPlayerHandlers[handlerIndex]);
+      if (!syncedIndexValid)
       {
-        track = ActivePlaylist.GetTrack(_playingTrackIndex);
+        handlerIndex = Mathf.Max(Array.IndexOf(_videoPlayerHandlers, Handler), 0);
       }
-      else
-      {
-        track = TrackUtils.NewTrack(playerType, _title, _url);
-      }
+
+      bool playlistTrackAvailable = Utilities.IsValid(ActivePlaylist) && _playingTrackIndex >= 0 && _playingTrackIndex < ActivePlaylist.TrackCount;
+      object[] track = playlistTrackAvailable
+        ? ActivePlaylist.GetTrack(_playingTrackIndex)
+        : TrackUtils.NewTrack(_videoPlayerHandlers[handlerIndex].Type, _title, _url);
+
       int len = _listeners.Length;
       for (int i = 0; i < len; i++)
       {
@@ -114,13 +112,10 @@ namespace Yamadev.YamaStream
       bool trackChanged = _trackVersion != _appliedTrackVersion || TrackUtils.GetUrl(track).Get() != TrackUtils.GetUrl(Track).Get();
       _appliedTrackVersion = _trackVersion;
 
-      if (_syncedState != (byte)PlayerState.Idle && trackChanged)
+      SwitchToHandlerIndex(handlerIndex);
+      if (SyncedState != PlayerState.Idle && trackChanged)
       {
-        LoadTrack(track);
-      }
-      else
-      {
-        SwitchHandler(playerType);
+        LoadTrackLocal(track, false);
       }
 
       ApplySyncedState();

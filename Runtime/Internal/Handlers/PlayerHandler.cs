@@ -26,21 +26,13 @@ namespace Yamadev.YamaStream
 
     public PlayerHandler FallbackHandler => _fallbackHandler;
 
-
     public virtual VRCUrl LoadedUrl => _loadedUrl;
 
-    public virtual bool UseFallbackHandler
+    public virtual bool IsValidUrl(VRCUrl url)
     {
-      get
-      {
-        if (!Utilities.IsValid(_fallbackHandler)) return false;
-        return _useFallbackHandler;
-      }
-      set
-      {
-        if (!Utilities.IsValid(_fallbackHandler) || _useFallbackHandler == value) return;
-        _useFallbackHandler = value;
-      }
+      if (!Utilities.IsValid(url)) return false;
+      string u = url.Get().ToLower();
+      return u.StartsWith("http://") || u.StartsWith("https://");
     }
 
     public virtual bool IsLoading { get; }
