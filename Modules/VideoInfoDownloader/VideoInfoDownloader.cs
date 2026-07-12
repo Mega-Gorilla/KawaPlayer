@@ -91,7 +91,11 @@ namespace Yamadev.YamaStream.Modules.VideoInfoDownloader
           return;
       }
 
-      if (string.IsNullOrEmpty(title)) return;
+      if (string.IsNullOrEmpty(title))
+      {
+        _error.SetValue(urlStr, true);
+        return;
+      }
 
       _videoInfo.SetValue(urlStr, title);
       PrintLog($"Loaded video info from {provider}: {title} ({urlStr})");
