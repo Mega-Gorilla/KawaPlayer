@@ -97,6 +97,7 @@ namespace Yamadev.YamaStream.Editor
           drawHeaderCallback = (rect) => EditorGUI.LabelField(rect, EditorLocalization.GetLayout("settings.screen.targets"), EditorStyles.boldLabel),
           onAddCallback = OnAddScreen,
           onRemoveCallback = OnRemoveScreen,
+          onReorderCallbackWithDetails = OnReorderScreen,
           drawElementCallback = DrawScreenElement,
           elementHeight = (EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing) * 2,
         };
@@ -645,6 +646,12 @@ namespace Yamadev.YamaStream.Editor
       _screenTypes.DeleteArrayElementAtIndex(list.index);
       _screens.DeleteArrayElementAtIndex(list.index);
       _textureProperties.DeleteArrayElementAtIndex(list.index);
+    }
+
+    private void OnReorderScreen(ReorderableList list, int oldIndex, int newIndex)
+    {
+      _screenTypes.MoveArrayElement(oldIndex, newIndex);
+      _textureProperties.MoveArrayElement(oldIndex, newIndex);
     }
 
     private void DrawScreenElement(Rect rect, int index, bool isActive, bool isFocused)

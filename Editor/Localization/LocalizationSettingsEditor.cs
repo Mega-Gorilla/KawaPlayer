@@ -14,6 +14,7 @@ namespace Yamadev.YamaStream.Editor
 
     private Dictionary<int, bool> _foldouts = new Dictionary<int, bool>();
     private Dictionary<int, string> _keyValidationMessages = new Dictionary<int, string>();
+    private int _pendingDeleteIndex = -1;
 
     private void OnEnable()
     {
@@ -108,6 +109,21 @@ namespace Yamadev.YamaStream.Editor
       }
 
       EditorGUILayout.EndVertical();
+
+      ExecutePendingDelete();
+    }
+
+    private void ExecutePendingDelete()
+    {
+      if (_pendingDeleteIndex < 0) return;
+
+      if (_pendingDeleteIndex < _languages.arraySize)
+      {
+        _languages.DeleteArrayElementAtIndex(_pendingDeleteIndex);
+        _foldouts.Clear();
+        _keyValidationMessages.Clear();
+      }
+      _pendingDeleteIndex = -1;
     }
 
     private void DrawLanguageRow(int index)
@@ -160,10 +176,7 @@ namespace Yamadev.YamaStream.Editor
               EditorLocalization.Get("localization.delete"),
               EditorLocalization.Get("button.cancel")))
           {
-            _languages.DeleteArrayElementAtIndex(index);
-            EditorGUILayout.EndHorizontal();
-            EditorGUILayout.EndVertical();
-            return;
+            _pendingDeleteIndex = index;
           }
         }
         GUILayout.Space(4);

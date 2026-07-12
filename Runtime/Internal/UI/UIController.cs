@@ -504,7 +504,7 @@ namespace Yamadev.YamaStream.UI
         return;
       }
 
-      if (!Utilities.IsValid(_repeatRangeSlider) || !Utilities.IsValid(_repeatRangeSlider.LeftValue) || !Utilities.IsValid(_repeatRangeSlider.RightValue)) return;
+      if (!Utilities.IsValid(_repeatRangeSlider) || !_repeatRangeSlider.IsReady) return;
 
       var repeat = RepeatUtils.NewRepeatStatus(_controller.Repeat);
       if (!on)
@@ -525,7 +525,7 @@ namespace Yamadev.YamaStream.UI
 
     public void SetRepeatStart()
     {
-      if (!Utilities.IsValid(_repeatRangeSlider) || !Utilities.IsValid(_repeatRangeSlider.LeftValue) || _controller.Stopped || _controller.IsLive) return;
+      if (!Utilities.IsValid(_repeatRangeSlider) || !_repeatRangeSlider.IsReady || _controller.Stopped || _controller.IsLive) return;
 
       if (RepeatUtils.IsOn(_controller.Repeat))
       {
@@ -542,7 +542,7 @@ namespace Yamadev.YamaStream.UI
 
     public void SetRepeatEnd()
     {
-      if (!Utilities.IsValid(_repeatRangeSlider) || !Utilities.IsValid(_repeatRangeSlider.RightValue) || _controller.Stopped || _controller.IsLive) return;
+      if (!Utilities.IsValid(_repeatRangeSlider) || !_repeatRangeSlider.IsReady || _controller.Stopped || _controller.IsLive) return;
 
       if (RepeatUtils.IsOn(_controller.Repeat))
       {
