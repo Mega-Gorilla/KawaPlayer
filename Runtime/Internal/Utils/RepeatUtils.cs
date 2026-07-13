@@ -30,7 +30,9 @@ namespace Yamadev.YamaStream
     public static ulong GetPackedData(object[] repeat)
     {
       ulong flagBit = ((bool)repeat[0] ? 1ul : 0ul) << 63;
-      uint startBits = BitConverter.ToUInt32(BitConverter.GetBytes((float)repeat[1]), 0);
+      float startTime = (float)repeat[1];
+      if (startTime < 0f) startTime = 0f;
+      uint startBits = BitConverter.ToUInt32(BitConverter.GetBytes(startTime), 0);
       uint endBits = BitConverter.ToUInt32(BitConverter.GetBytes((float)repeat[2]), 0);
       return flagBit | ((ulong)startBits << 32) | endBits;
     }

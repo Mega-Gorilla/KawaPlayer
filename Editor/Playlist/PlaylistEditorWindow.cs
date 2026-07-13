@@ -104,6 +104,7 @@ namespace Yamadev.YamaStream.Editor
       var originalPlaylists = container.GetPlaylists();
       _playlists = originalPlaylists.Select(item => new PlaylistData(item)).ToList();
       _selectedPlaylist = null;
+      _playlistTracksTable = null;
       IsDirty = false;
       GeneratePlaylistsView();
     }
@@ -355,9 +356,16 @@ namespace Yamadev.YamaStream.Editor
           if (Event.current.type == EventType.DragPerform)
           {
             DragAndDrop.AcceptDrag();
-            var imported = PlaylistImporter.ImportPlaylists(DragAndDrop.objectReferences);
-            _playlists.AddRange(imported);
-            if (imported.Count > 0) IsDirty = true;
+            if (_playlists == null)
+            {
+              EditorUtility.DisplayDialog("Import playlists", "Assign a YamaPlayer to the editor before importing.", "OK");
+            }
+            else
+            {
+              var imported = PlaylistImporter.ImportPlaylists(DragAndDrop.objectReferences);
+              _playlists.AddRange(imported);
+              if (imported.Count > 0) IsDirty = true;
+            }
           }
           Event.current.Use();
           break;
@@ -542,6 +550,12 @@ namespace Yamadev.YamaStream.Editor
 
     private void Import()
     {
+      if (_playlists == null)
+      {
+        EditorUtility.DisplayDialog("Import playlists", "Assign a YamaPlayer to the editor before importing.", "OK");
+        return;
+      }
+
       var imported = PlaylistExporter.Import();
       _playlists.AddRange(imported);
 

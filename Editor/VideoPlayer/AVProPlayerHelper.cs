@@ -85,6 +85,7 @@ namespace Yamadev.YamaStream.Editor
     {
       string tempPath = Path.GetTempFileName();
       const string progressTitle = "Downloading AVPro";
+      bool importScheduled = false;
 
       try
       {
@@ -111,17 +112,45 @@ namespace Yamadev.YamaStream.Editor
         }
 
         EditorUtility.DisplayProgressBar(progressTitle, "Importing package...", 0.9f);
-        AssetDatabase.ImportPackage(tempPath, false);
+
+        string expectedPackageName = Path.GetFileNameWithoutExtension(tempPath);
+        void Cleanup()
+        {
+          AssetDatabase.importPackageCompleted -= OnImportCompleted;
+          AssetDatabase.importPackageFailed -= OnImportFailed;
+          if (File.Exists(tempPath)) File.Delete(tempPath);
+        }
+        void OnImportCompleted(string packageName)
+        {
+          if (packageName == expectedPackageName) Cleanup();
+        }
+        void OnImportFailed(string packageName, string errorMessage)
+        {
+          if (packageName == expectedPackageName) Cleanup();
+        }
+
+        AssetDatabase.importPackageCompleted += OnImportCompleted;
+        AssetDatabase.importPackageFailed += OnImportFailed;
+
+        try
+        {
+          AssetDatabase.ImportPackage(tempPath, false);
+        }
+        catch
+        {
+          Cleanup();
+          throw;
+        }
+        importScheduled = true;
         return true;
       }
       finally
       {
         EditorUtility.ClearProgressBar();
-        if (File.Exists(tempPath))
+        if (!importScheduled && File.Exists(tempPath))
         {
           File.Delete(tempPath);
         }
-
       }
     }
 
