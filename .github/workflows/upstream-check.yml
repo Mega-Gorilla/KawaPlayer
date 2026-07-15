@@ -1,0 +1,61 @@
+name: Check upstream YamaPlayer
+
+on:
+  schedule:
+    # 毎月1日 12:00 JST (03:00 UTC)
+    - cron: '0 3 1 * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+env:
+  UPSTREAM_REPO: https://github.com/koorimizuw/YamaPlayer.git
+  UPSTREAM_BRANCH: develop
+  TRACKING_ISSUE: 66
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: develop
+          fetch-depth: 0
+
+      - name: Fetch upstream
+        run: |
+          git remote add upstream "$UPSTREAM_REPO"
+          git fetch upstream "$UPSTREAM_BRANCH"
+
+      - name: Comment on tracking issue if new commits exist
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          COUNT=$(git rev-list --count "HEAD..upstream/$UPSTREAM_BRANCH")
+          if [ "$COUNT" -eq 0 ]; then
+            echo "No unmerged upstream commits."
+            exit 0
+          fi
+
+          HEAD_HASH=$(git rev-parse --short "upstream/$UPSTREAM_BRANCH")
+
+          # 前回の自動コメントと upstream HEAD が同じなら重複コメントを避ける
+          LAST_MARK=$(gh issue view "$TRACKING_ISSUE" --repo "${{ github.repository }}" --json comments \
+            --jq '[.comments[].body | capture("<!-- upstream-head: (?<h>[0-9a-f]+) -->")? | .h] | last // empty')
+          if [ "$LAST_MARK" = "$HEAD_HASH" ]; then
+            echo "Already reported up to $HEAD_HASH."
+            exit 0
+          fi
+
+          {
+            echo "<!-- upstream-head: $HEAD_HASH -->"
+            echo "🤖 **自動チェック**: upstream \`$UPSTREAM_BRANCH\` に未取り込みコミットが **$COUNT 件** あります ($(date -u +%Y-%m-%d) 時点)。"
+            echo ""
+            git log --reverse --date=short \
+              --format="- [\`%h\`](https://github.com/koorimizuw/YamaPlayer/commit/%H) %ad %s" \
+              "HEAD..upstream/$UPSTREAM_BRANCH"
+          } > comment.md
+
+          gh issue comment "$TRACKING_ISSUE" --repo "${{ github.repository }}" --body-file comment.md
