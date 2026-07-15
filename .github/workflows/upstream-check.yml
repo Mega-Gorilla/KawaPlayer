@@ -14,6 +14,10 @@ env:
   UPSTREAM_REPO: https://github.com/koorimizuw/YamaPlayer.git
   UPSTREAM_BRANCH: develop
   TRACKING_ISSUE: 66
+  # 確認済み (取り込み or 見送り判断済み) の upstream SHA を記録するファイル。
+  # 同期作業の PR でこのファイルを更新すること。cherry-pick で一部コミットを
+  # 見送っても、このファイルの SHA 以降だけが「未確認」として報告される。
+  BASE_FILE: .github/UPSTREAM_BASE
 
 jobs:
   check:
@@ -33,9 +37,20 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          COUNT=$(git rev-list --count "HEAD..upstream/$UPSTREAM_BRANCH")
+          if [ -f "$BASE_FILE" ]; then
+            BASE=$(head -1 "$BASE_FILE" | tr -d '[:space:]')
+          else
+            echo "::warning::$BASE_FILE not found; falling back to merge-base."
+            BASE=$(git merge-base HEAD "upstream/$UPSTREAM_BRANCH")
+          fi
+          if ! git cat-file -e "$BASE^{commit}" 2>/dev/null; then
+            echo "::error::Invalid SHA in $BASE_FILE: $BASE"
+            exit 1
+          fi
+
+          COUNT=$(git rev-list --count "$BASE..upstream/$UPSTREAM_BRANCH")
           if [ "$COUNT" -eq 0 ]; then
-            echo "No unmerged upstream commits."
+            echo "No unreviewed upstream commits since $BASE."
             exit 0
           fi
 
@@ -51,11 +66,13 @@ jobs:
 
           {
             echo "<!-- upstream-head: $HEAD_HASH -->"
-            echo "🤖 **自動チェック**: upstream \`$UPSTREAM_BRANCH\` に未取り込みコミットが **$COUNT 件** あります ($(date -u +%Y-%m-%d) 時点)。"
+            echo "🤖 **自動チェック**: 確認済み SHA (\`${BASE:0:7}\`) 以降、upstream \`$UPSTREAM_BRANCH\` に未確認コミットが **$COUNT 件** あります ($(date -u +%Y-%m-%d) 時点)。"
             echo ""
             git log --reverse --date=short \
               --format="- [\`%h\`](https://github.com/koorimizuw/YamaPlayer/commit/%H) %ad %s" \
-              "HEAD..upstream/$UPSTREAM_BRANCH"
+              "$BASE..upstream/$UPSTREAM_BRANCH"
+            echo ""
+            echo "> 取り込み or 見送りの判断が済んだら \`.github/UPSTREAM_BASE\` を確認済み SHA に更新してください。"
           } > comment.md
 
           gh issue comment "$TRACKING_ISSUE" --repo "${{ github.repository }}" --body-file comment.md
