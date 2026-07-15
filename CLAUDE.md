@@ -73,12 +73,16 @@ Entry point components that world creators place in their scenes:
 
 ### Modules (`Modules/`)
 
-Each module is an independent assembly with its own `.asmdef`:
+Each module is an independent assembly with its own `.asmdef`. Modules extend the player via the listener pattern and are optional dependencies.
+
+KawaPlayer-specific modules (the reason this fork exists):
+- **PlaylistLoader** — loads playlists from `playlist.vrc-hub.com` at runtime using the Pre-baked URL Pool pattern (see Key Constraints below). Design docs: `docs/design/url-pool-*.md`
+- **DefaultUrl** — lets the Instance Owner set the world's auto-play video/playlist URL from inside VRChat, synced to all players and persisted across visits
+
+Inherited from upstream YamaPlayer:
 - AudioLinkAdaptor, AutoPlay, LTCGIAdaptor, LightVolumeAdaptor
 - PermissionManagement, Persistence, PitchShifter, SlideShower
 - TimelineSync, VideoInfoDownloader
-
-Modules extend the player via the listener pattern and are optional dependencies.
 
 ### Editor Tools (`Editor/`)
 
@@ -96,14 +100,30 @@ This repository is a fork of `koorimizuw/YamaPlayer` (upstream). When using `gh`
 
 ## Testing Project
 
-The testing project `kawa-player-playlist-testing-chamber` (`D:\vrchat\kawa-player-playlist-testing-chamber`) references KawaPlayer via `file:` path in `Packages/manifest.json`. This means Unity opens the package source directly.
+The testing project `kawa-player-playlist-testing-chamber` (`D:\vrchat\kawa-player-playlist-testing-chamber`) references KawaPlayer via `file:` path in `Packages/manifest.json`. This means Unity opens the package source directly — changes in this repository are reflected in the testing project on the next Unity refresh, with no copy step. It also references the sibling package `KawaPlayer_PlaylistViewer` (separate repository at `D:\Nextcloud\Vhub\VRChat_Player\KawaPlayer_PlaylistViewer`) the same way.
 
 **Prefab Override vs Prefab Edit**: Changes made to KawaPlayer objects in the testing project's scene Hierarchy are stored as **Prefab Instance Overrides** in the scene file (`.unity`) only — they are NOT included in the KawaPlayer package. To include changes in the package, edit `KawaPlayer.prefab` directly (via Prefab Mode in Unity or text edit in this repository). Never rely on scene-level overrides for changes intended to ship with the package.
 
 **`.meta` file regeneration**: Opening the testing project may cause Unity to regenerate `.meta` files in the KawaPlayer source directory with new GUIDs. This breaks asmdef cross-references and causes CS0246 compilation errors. If this happens, discard the changes with `git checkout -- .` in the KawaPlayer repository.
 
+### Design & Analysis Docs (`docs/`)
+
+Japanese-language docs explaining the playlist/URL-loading architecture. Read these before touching PlaylistLoader, DefaultUrl, or the playlist pipeline:
+- `docs/analysis/` — how the playlist system works (Playlist/QueueList/HistoryList), URL-to-playback pipeline, and why runtime JSON playlists are impossible
+- `docs/design/` — the URL Pool design (Unity side, loader side, server side)
+
 ## Key Constraints
 
 - All runtime scripts must be valid UdonSharp (subset of C#). Many standard C# features are unavailable (no generics on UdonSharpBehaviour, limited reflection, no async/await, etc.).
+- **`string → VRCUrl` conversion is impossible at runtime** (`new VRCUrl(string)` is editor-only). Any feature needing dynamic URLs must use the Pre-baked URL Pool pattern: a large `VRCUrl[]` of redirect-server slot URLs is baked into serialized fields at build time, and the server maps slots to real URLs via HTTP 302. See `docs/design/url-pool-playlist-loader.md`.
 - Network sync uses `[UdonSynced]` fields with manual sync (`UdonBehaviourSyncMode.Manual`). Only the owner can modify synced variables.
 - The project is primarily documented in Japanese. README and UI localization files contain Japanese as the primary language.
+
+## Coding Style & Commits
+
+- C# style follows upstream: 2-space indentation, braces on their own lines, `PascalCase` types/methods/properties, `_camelCase` private fields, namespaces under `Yamadev.YamaStream`.
+- UnityEditor APIs belong only in `Editor/` or module editor assemblies; runtime assemblies must stay UdonSharp-safe.
+- Preserve Unity `.meta` files when moving or adding assets.
+- Commits use conventional-commit prefixes with optional scope: `fix:`, `feat:`, `docs(readme):`, etc. Keep subjects imperative.
+
+See also `AGENTS.md` (repository guidelines; overlaps with this file).
