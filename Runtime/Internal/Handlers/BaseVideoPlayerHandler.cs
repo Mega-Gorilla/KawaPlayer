@@ -32,6 +32,16 @@ namespace Yamadev.YamaStream
       _properties = new MaterialPropertyBlock();
     }
 
+    public override bool IsValidUrl(VRCUrl url)
+    {
+      if (_type != VideoPlayerType.AVProVideoPlayer) return base.IsValidUrl(url);
+      if (!Utilities.IsValid(url)) return false;
+      string u = url.Get().ToLower();
+      return u.StartsWith("http://") || u.StartsWith("https://")
+        || u.StartsWith("rtsp://") || u.StartsWith("rtspt://") || u.StartsWith("rtspu://")
+        || u.StartsWith("rtmp://") || u.StartsWith("rtmps://") || u.StartsWith("rtsps://");
+    }
+
     private void Update()
     {
       if (!Utilities.IsValid(_renderer) || _stopped || _loading) return;
@@ -59,21 +69,12 @@ namespace Yamadev.YamaStream
       if (Utilities.IsValid(_listener)) _listener.AfterTextureUpdated(_videoTexture);
     }
 
-    public override bool IsLoading
-    {
-      get
-      {
-        if (UseFallbackHandler) return _fallbackHandler.IsLoading;
-        return _loading;
-      }
-    }
+    public override bool IsLoading => _loading;
 
     public override bool IsPlaying
     {
       get
       {
-        if (UseFallbackHandler) return _fallbackHandler.IsPlaying;
-
         if (!Utilities.IsValid(_baseVideoPlayer)) return false;
         return _baseVideoPlayer.IsPlaying;
       }
@@ -83,46 +84,24 @@ namespace Yamadev.YamaStream
     {
       get
       {
-        if (UseFallbackHandler) return _fallbackHandler.IsPaused;
-
         if (_stopped || _loading) return false;
         return !IsPlaying;
       }
     }
 
-    public override bool IsStopped
-    {
-      get
-      {
-        if (UseFallbackHandler) return _fallbackHandler.IsStopped;
-        return _stopped;
-      }
-    }
+    public override bool IsStopped => _stopped;
 
-    public override bool IsError
-    {
-      get
-      {
-        if (UseFallbackHandler) return _fallbackHandler.IsError;
-        return _isError;
-      }
-    }
+    public override bool IsError => _isError;
 
     public override bool Loop
     {
       get
       {
-        if (UseFallbackHandler) return _fallbackHandler.Loop;
         if (!Utilities.IsValid(_baseVideoPlayer)) return false;
         return _baseVideoPlayer.Loop;
       }
       set
       {
-        if (UseFallbackHandler)
-        {
-          _fallbackHandler.Loop = value;
-          return;
-        }
         if (!Utilities.IsValid(_baseVideoPlayer)) return;
         _baseVideoPlayer.Loop = value;
       }
@@ -130,18 +109,9 @@ namespace Yamadev.YamaStream
 
     public override float Speed
     {
-      get
-      {
-        if (UseFallbackHandler) return _fallbackHandler.Speed;
-        return _speed;
-      }
+      get => _speed;
       set
       {
-        if (UseFallbackHandler)
-        {
-          _fallbackHandler.Speed = value;
-          return;
-        }
         if (!Utilities.IsValid(_animator)) return;
         _speed = value;
         _animator.SetFloat("Speed", _speed);
@@ -153,7 +123,6 @@ namespace Yamadev.YamaStream
     {
       get
       {
-        if (UseFallbackHandler) return _fallbackHandler.IsReady;
         if (!Utilities.IsValid(_baseVideoPlayer)) return false;
         return _baseVideoPlayer.IsReady;
       }
@@ -163,7 +132,6 @@ namespace Yamadev.YamaStream
     {
       get
       {
-        if (UseFallbackHandler) return _fallbackHandler.VideoWidth;
         if (!Utilities.IsValid(_baseVideoPlayer)) return 0;
         return _baseVideoPlayer.VideoWidth;
       }
@@ -173,7 +141,6 @@ namespace Yamadev.YamaStream
     {
       get
       {
-        if (UseFallbackHandler) return _fallbackHandler.VideoHeight;
         if (!Utilities.IsValid(_baseVideoPlayer)) return 0;
         return _baseVideoPlayer.VideoHeight;
       }
@@ -183,11 +150,6 @@ namespace Yamadev.YamaStream
     {
       set
       {
-        if (UseFallbackHandler)
-        {
-          _fallbackHandler.MaxResolution = value;
-          return;
-        }
         if (!Utilities.IsValid(_animator)) return;
         _animator.SetFloat("Resolution", value / 4320f);
         _animator.Update(0f);
@@ -198,17 +160,11 @@ namespace Yamadev.YamaStream
     {
       get
       {
-        if (UseFallbackHandler) return _fallbackHandler.Time;
         if (!Utilities.IsValid(_baseVideoPlayer)) return 0;
         return _baseVideoPlayer.GetTime();
       }
       set
       {
-        if (UseFallbackHandler)
-        {
-          _fallbackHandler.Time = value;
-          return;
-        }
         if (!Utilities.IsValid(_baseVideoPlayer)) return;
         _baseVideoPlayer.SetTime(value);
       }
@@ -218,28 +174,15 @@ namespace Yamadev.YamaStream
     {
       get
       {
-        if (UseFallbackHandler) return _fallbackHandler.Duration;
         if (!Utilities.IsValid(_baseVideoPlayer)) return 0;
         return _baseVideoPlayer.GetDuration();
       }
     }
 
-    public override bool IsLive
-    {
-      get
-      {
-        if (UseFallbackHandler) return _fallbackHandler.IsLive;
-        return float.IsInfinity(Duration);
-      }
-    }
+    public override bool IsLive => float.IsInfinity(Duration);
 
     public override void PlayUrl(VRCUrl url)
     {
-      if (UseFallbackHandler)
-      {
-        _fallbackHandler.PlayUrl(url);
-        return;
-      }
       if (!Utilities.IsValid(_baseVideoPlayer)) return;
 
       _baseVideoPlayer.PlayURL(url);
@@ -251,11 +194,6 @@ namespace Yamadev.YamaStream
 
     public override void LoadUrl(VRCUrl url)
     {
-      if (UseFallbackHandler)
-      {
-        _fallbackHandler.LoadUrl(url);
-        return;
-      }
       if (!Utilities.IsValid(_baseVideoPlayer)) return;
 
       _baseVideoPlayer.LoadURL(url);
@@ -267,11 +205,6 @@ namespace Yamadev.YamaStream
 
     public override void Play()
     {
-      if (UseFallbackHandler)
-      {
-        _fallbackHandler.Play();
-        return;
-      }
       if (_stopped || IsPlaying || !Utilities.IsValid(_baseVideoPlayer)) return;
       _baseVideoPlayer.Play();
       if (Utilities.IsValid(_listener)) _listener.AfterVideoPlayed();
@@ -279,11 +212,6 @@ namespace Yamadev.YamaStream
 
     public override void Pause()
     {
-      if (UseFallbackHandler)
-      {
-        _fallbackHandler.Pause();
-        return;
-      }
       if (_stopped || !IsPlaying || !Utilities.IsValid(_baseVideoPlayer)) return;
       _baseVideoPlayer.Pause();
       if (Utilities.IsValid(_listener)) _listener.AfterVideoPaused();
@@ -291,11 +219,6 @@ namespace Yamadev.YamaStream
 
     public override void Stop()
     {
-      if (UseFallbackHandler)
-      {
-        _fallbackHandler.Stop();
-        return;
-      }
       if (!Utilities.IsValid(_baseVideoPlayer) || _stopped) return;
 
       _baseVideoPlayer.Stop();
@@ -314,14 +237,7 @@ namespace Yamadev.YamaStream
       if (Utilities.IsValid(_listener)) _listener.AfterVideoStopped();
     }
 
-    public override Texture Texture
-    {
-      get
-      {
-        if (UseFallbackHandler) return _fallbackHandler.Texture;
-        return _blitTexture ?? _videoTexture;
-      }
-    }
+    public override Texture Texture => _blitTexture ?? _videoTexture;
 
     public void BlitLastUpdate()
     {

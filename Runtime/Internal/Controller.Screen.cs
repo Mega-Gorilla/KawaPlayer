@@ -34,7 +34,17 @@ namespace Yamadev.YamaStream
       }
 
       UpdateScreenMaterial();
-      if (Utilities.IsValid(Handler)) Handler.MaxResolution = _maxResolution;
+      UpdateHandlerMaxResolution();
+    }
+
+    private void UpdateHandlerMaxResolution()
+    {
+      int len = _videoPlayerHandlers.Length;
+      for (int i = 0; i < len; i++)
+      {
+        var handler = _videoPlayerHandlers[i];
+        if (Utilities.IsValid(handler)) handler.MaxResolution = _maxResolution;
+      }
     }
 
     private void InitializePropertyBlock()
@@ -58,7 +68,7 @@ namespace Yamadev.YamaStream
       get
       {
         if (!Utilities.IsValid(Handler)) return null;
-        return Handler.Texture;
+        return ActiveHandler.Texture;
       }
     }
 
@@ -73,7 +83,7 @@ namespace Yamadev.YamaStream
       {
         if (value == _maxResolution) return;
         _maxResolution = value;
-        if (Utilities.IsValid(Handler)) Handler.MaxResolution = value;
+        UpdateHandlerMaxResolution();
         if (!Stopped) SendCustomEventDelayedFrames(nameof(Reload), 0);
         int len = _listeners.Length;
         for (int i = 0; i < len; i++)

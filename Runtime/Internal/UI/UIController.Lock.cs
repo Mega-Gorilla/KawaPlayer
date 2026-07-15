@@ -78,6 +78,7 @@ namespace Yamadev.YamaStream.UI
     public void LockUI()
     {
       if (!Utilities.IsValid(_lockDetectionRect) || !Utilities.IsValid(_userUIAnimator)) return;
+      if (!Utilities.IsValid(_systemUIAnimator) || !Utilities.IsValid(_unlockProgressText)) return;
       _lockDetectionRect.gameObject.layer = UI_LAYER;
       _userUIAnimator.SetTrigger("ToggleUI");
       _locked = true;

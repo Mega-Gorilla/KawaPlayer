@@ -121,6 +121,7 @@ namespace Yamadev.YamaStream
       if (Utilities.IsValid(_imageDownloader))
       {
         _imageDownloader.Dispose();
+        _imageDownloader = null;
       }
       if (Utilities.IsValid(_listener)) _listener.AfterTextureUpdated(null);
       if (Utilities.IsValid(_listener)) _listener.AfterVideoStopped();

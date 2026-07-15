@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
+using VRC.SDK3.Components;
 using Yamadev.YamaStream.UI;
 
 namespace Yamadev.YamaStream.Editor
@@ -24,6 +25,11 @@ namespace Yamadev.YamaStream.Editor
     private UIController _uiController;
     private SerializedObject _uiControllerSerializedObject;
     private SerializedProperty _idleScreenSprite;
+
+    private VRCPickup _vrcPickup;
+    private SerializedObject _vrcPickupSerializedObject;
+    private SerializedProperty _pickupable;
+    private bool _globalSync;
 
     private void OnEnable()
     {
@@ -53,6 +59,13 @@ namespace Yamadev.YamaStream.Editor
       {
         _uiControllerSerializedObject = new SerializedObject(_uiController);
         _idleScreenSprite = _uiControllerSerializedObject.FindProperty("_idleScreenSprite");
+      }
+
+      _vrcPickup = _target.GetComponentInChildren<VRCPickup>(true);
+      if (_vrcPickup != null)
+      {
+        _vrcPickupSerializedObject = new SerializedObject(_vrcPickup);
+        _pickupable = _vrcPickupSerializedObject.FindProperty("pickupable");
       }
     }
 
@@ -87,6 +100,7 @@ namespace Yamadev.YamaStream.Editor
       DrawAppearanceSettings();
       DrawLocalizationSettings();
       DrawUISettings();
+      DrawPickupSettings();
 
       ApplyModifiedProperties();
     }
@@ -227,12 +241,40 @@ namespace Yamadev.YamaStream.Editor
       }
     }
 
+    private void DrawPickupSettings()
+    {
+      if (_vrcPickup == null || _pickupable == null) return;
+
+      EditorGUILayout.Space(SpaceMedium);
+      EditorGUILayout.LabelField(EditorLocalization.Get("settings.pickUp.label"), EditorStyles.boldLabel);
+
+      EditorGUILayout.PropertyField(_pickupable, EditorLocalization.GetLayout("settings.pickUp.label", "settings.pickUp.tooltip"));
+
+      if (_pickupable.boolValue)
+      {
+        VRCObjectSync objectSync = _vrcPickup.gameObject.GetComponent<VRCObjectSync>();
+        _globalSync = objectSync != null;
+
+        using (var check = new EditorGUI.ChangeCheckScope())
+        {
+          _globalSync = EditorGUILayout.Toggle(EditorLocalization.GetLayout("settings.globalSync.label", "settings.globalSync.tooltip"), _globalSync);
+
+          if (check.changed)
+          {
+            if (_globalSync && objectSync == null) _vrcPickup.gameObject.AddComponent<VRCObjectSync>();
+            if (!_globalSync && objectSync != null) GameObject.DestroyImmediate(objectSync);
+          }
+        }
+      }
+    }
+
     private void ApplyModifiedProperties()
     {
       serializedObject.ApplyModifiedProperties();
       _appearanceSerializedObject?.ApplyModifiedProperties();
       _localizationSerializedObject?.ApplyModifiedProperties();
       _uiControllerSerializedObject?.ApplyModifiedProperties();
+      _vrcPickupSerializedObject?.ApplyModifiedProperties();
     }
   }
 }

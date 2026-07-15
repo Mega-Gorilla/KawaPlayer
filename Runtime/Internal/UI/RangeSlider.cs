@@ -22,16 +22,18 @@ namespace Yamadev.YamaStream.UI
       Initialize();
     }
 
+    public bool IsReady => Utilities.IsValid(_sliderLeft) && Utilities.IsValid(_sliderRight);
+
     public float LeftValue
     {
-      get => _sliderLeft.value;
-      set => _sliderLeft.value = value;
+      get => Utilities.IsValid(_sliderLeft) ? _sliderLeft.value : 0f;
+      set { if (Utilities.IsValid(_sliderLeft)) _sliderLeft.value = value; }
     }
 
     public float RightValue
     {
-      get => _sliderRight.value;
-      set => _sliderRight.value = value;
+      get => Utilities.IsValid(_sliderRight) ? _sliderRight.value : 0f;
+      set { if (Utilities.IsValid(_sliderRight)) _sliderRight.value = value; }
     }
 
     private void Initialize()
@@ -60,6 +62,7 @@ namespace Yamadev.YamaStream.UI
 
     public void SetLeftValueWithoutNotify(float value)
     {
+      if (!Utilities.IsValid(_sliderLeft) || !Utilities.IsValid(_sliderRight)) return;
       _sliderLeft.SetValueWithoutNotify(value);
       FitFillArea();
       UpdateSliderOrder();
@@ -67,6 +70,7 @@ namespace Yamadev.YamaStream.UI
 
     public void SetRightValueWithoutNotify(float value)
     {
+      if (!Utilities.IsValid(_sliderLeft) || !Utilities.IsValid(_sliderRight)) return;
       _sliderRight.SetValueWithoutNotify(value);
       FitFillArea();
       UpdateSliderOrder();
