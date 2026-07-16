@@ -269,6 +269,7 @@ namespace Yamadev.YamaStream
       _syncedState = (byte)PlayerState.Idle;
       ClearPlaylistIndexes();
       StopLocal();
+      if (IsError) AfterVideoStopped();
     }
 
     private void StopLocal()

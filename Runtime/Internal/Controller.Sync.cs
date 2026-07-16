@@ -18,13 +18,16 @@ namespace Yamadev.YamaStream
 
     private void ApplySyncedState()
     {
+      if (SyncedState == PlayerState.Idle)
+      {
+        if (Stopped && !IsError) return;
+        StopLocal();
+        if (IsError) AfterVideoStopped();
+        return;
+      }
       if (!ActiveHandler.IsReady) return;
       switch (SyncedState)
       {
-        case PlayerState.Idle:
-          if (Stopped) return;
-          StopLocal();
-          break;
         case PlayerState.Playing:
           if (IsPlaying) return;
           ActiveHandler.Play();

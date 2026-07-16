@@ -45,7 +45,7 @@ namespace Yamadev.YamaStream.Modules.PermissionManagement
       {
         _permission = value;
 
-        if (Networking.IsOwner(_controller.gameObject) && !_controller.IsLocal) RequestSerialization();
+        if (IsObjectOwner && !_controller.IsLocal) RequestSerialization();
         int len = _listeners.Length;
         for (int i = 0; i < len; i++) _listeners[i].SendCustomEvent("AfterPermissionChanged");
         PrintLog("Permission updated.");
