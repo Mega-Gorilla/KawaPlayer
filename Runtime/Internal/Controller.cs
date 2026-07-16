@@ -31,12 +31,13 @@ namespace Yamadev.YamaStream
     [UdonSynced] private int _handlerIndex;
     [UdonSynced] private string _title = string.Empty;
     [UdonSynced] private VRCUrl _url = VRCUrl.Empty;
+    [UdonSynced] private byte[] _trackExtension = new byte[0];
     private object[] _track;
     private PlayerHandler _handler;
     private bool _useFallback;
     private YamaPlayerListener[] _listeners = new YamaPlayerListener[0];
     private int _errorRetryCount;
-    private VRCUrl _retryTargetUrl = VRCUrl.Empty;
+    private object[] _retryTargetTrack;
     private bool _reloading;
     private int _lastSetTimeFrame = 0;
     private float _lastLoadTime = 0f;
@@ -229,21 +230,25 @@ namespace Yamadev.YamaStream
 
     public int FindHandlerIndexForUrl(VRCUrl url)
     {
+      return FindHandlerIndexForTrack(TrackUtils.NewTrack(0, string.Empty, url));
+    }
+
+    public int FindHandlerIndexForTrack(object[] track)
+    {
       int len = _videoPlayerHandlers.Length;
       for (int i = 0; i < len; i++)
       {
         var handler = _videoPlayerHandlers[i];
-        if (Utilities.IsValid(handler) && handler.IsValidUrl(url)) return i;
+        if (Utilities.IsValid(handler) && handler.IsValidTrack(track)) return i;
       }
       return -1;
     }
 
     private int ResolveHandlerIndexForTrack(object[] track)
     {
-      VRCUrl url = TrackUtils.GetUrl(track);
       int declared = FindHandlerIndexByType(TrackUtils.GetPlayerType(track));
-      if (declared >= 0 && _videoPlayerHandlers[declared].IsValidUrl(url)) return declared;
-      if (_allowAutoSwitchHandler) return FindHandlerIndexForUrl(url);
+      if (declared >= 0 && _videoPlayerHandlers[declared].IsValidTrack(track)) return declared;
+      if (_allowAutoSwitchHandler) return FindHandlerIndexForTrack(track);
       return -1;
     }
 
@@ -433,10 +438,9 @@ namespace Yamadev.YamaStream
     {
       if (!Utilities.IsValid(track)) return;
 
-      var url = TrackUtils.GetUrl(track);
       if (ResolveHandlerIndexForTrack(track) < 0)
       {
-        PrintError($"URL {url.Get()} is not valid.");
+        PrintError($"Track is not playable: url={TrackUtils.GetUrl(track).Get()}, extension={TrackUtils.GetExtensionString(track)}.");
         return;
       }
 
@@ -474,7 +478,7 @@ namespace Yamadev.YamaStream
       StopLocal();
 
       if (!isReload) Track = track;
-      ActiveHandler.LoadUrl(TrackUtils.GetUrl(track));
+      ActiveHandler.LoadTrack(track);
       _lastLoadTime = Time.time;
 
       int len = _listeners.Length;

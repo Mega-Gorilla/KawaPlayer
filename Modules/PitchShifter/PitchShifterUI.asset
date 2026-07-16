@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c333ccfdd0cbdbc4ca30cef2dd6e6b9b, type: 3}
   m_Name: PitchShifterUI
   m_EditorClassIdentifier: 
-  serializedUdonProgramAsset: {fileID: 11400000, guid: b40b897e37d837241a48a885ddf69d02, type: 2}
+  serializedUdonProgramAsset: {fileID: 11400000, guid: a2fa7ffd3d5743d4999c86d60196086f, type: 2}
   udonAssembly: 
   assemblyError: 
   sourceCsScript: {fileID: 11500000, guid: e24b71de877145543b372bdb9e7ba3d1, type: 3}

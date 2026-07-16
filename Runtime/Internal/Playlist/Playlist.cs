@@ -58,5 +58,12 @@ namespace Yamadev.YamaStream
       if (index < 0 || index >= TrackCount) return TrackUtils.CreateEmptyTrack();
       return _tracks[index];
     }
+
+    public void SetTracks(string playlistName, object[][] tracks)
+    {
+      _playlistName = playlistName;
+      _tracks = tracks == null ? new object[0][] : tracks;
+      _initialized = true;
+    }
   }
 }

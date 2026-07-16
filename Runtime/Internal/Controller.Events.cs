@@ -43,7 +43,7 @@ namespace Yamadev.YamaStream
     public override void AfterVideoStopped()
     {
       _errorRetryCount = 0;
-      _retryTargetUrl = VRCUrl.Empty;
+      _retryTargetTrack = null;
 
       if (!_reloading)
       {
@@ -78,7 +78,7 @@ namespace Yamadev.YamaStream
     public override void AfterVideoReady()
     {
       _errorRetryCount = 0;
-      _retryTargetUrl = VRCUrl.Empty;
+      _retryTargetTrack = null;
       if (SyncedState == PlayerState.Playing) ActiveHandler.Play();
       if (SyncedState == PlayerState.Idle) ActiveHandler.Stop();
       CheckRepeat();
@@ -174,13 +174,13 @@ namespace Yamadev.YamaStream
         case VideoError.AccessDenied:
           PrintError("Access denied - no retry will be attempted");
           _errorRetryCount = 0;
-          _retryTargetUrl = VRCUrl.Empty;
+          _retryTargetTrack = null;
           _reloading = false;
           return;
         case VideoError.InvalidURL:
           PrintError("Invalid URL - no retry will be attempted");
           _errorRetryCount = 0;
-          _retryTargetUrl = VRCUrl.Empty;
+          _retryTargetTrack = null;
           _reloading = false;
           return;
         case VideoError.PlayerError:
@@ -202,7 +202,7 @@ namespace Yamadev.YamaStream
       if (_errorRetryCount < _maxErrorRetry)
       {
         _errorRetryCount++;
-        _retryTargetUrl = TrackUtils.GetUrl(Track);
+        _retryTargetTrack = Track;
 
         var nextSafeRetryTime = _lastLoadTime + SAFETY_RETRY_INTERVAL;
         var delay = Time.time >= nextSafeRetryTime ? 0 : nextSafeRetryTime - Time.time;
@@ -212,7 +212,7 @@ namespace Yamadev.YamaStream
       else
       {
         _errorRetryCount = 0;
-        _retryTargetUrl = VRCUrl.Empty;
+        _retryTargetTrack = null;
         _reloading = false;
         PrintError($"Maximum retry count ({_maxErrorRetry}) reached. Stopping retry attempts.");
       }
@@ -220,23 +220,21 @@ namespace Yamadev.YamaStream
 
     public void ErrorRetry()
     {
-      var currentUrl = TrackUtils.GetUrl(Track);
-
-      if (VRCUrl.IsNullOrEmpty(_retryTargetUrl) || !_retryTargetUrl.Equals(currentUrl))
+      if (_retryTargetTrack == null || !TrackUtils.Equals(_retryTargetTrack, Track))
       {
         _errorRetryCount = 0;
-        _retryTargetUrl = VRCUrl.Empty;
+        _retryTargetTrack = null;
         PrintLog("Retry cancelled: track has changed.");
         return;
       }
 
-      if (IsPlaying || !ActiveHandler.IsValidUrl(currentUrl))
+      if (IsPlaying || !ActiveHandler.IsValidTrack(Track))
       {
-        _retryTargetUrl = VRCUrl.Empty;
+        _retryTargetTrack = null;
         return;
       }
 
-      ActiveHandler.LoadUrl(currentUrl);
+      ActiveHandler.LoadTrack(Track);
       _lastLoadTime = Time.time;
 
       int len = _listeners.Length;

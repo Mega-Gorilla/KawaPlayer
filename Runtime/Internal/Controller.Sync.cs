@@ -89,6 +89,7 @@ namespace Yamadev.YamaStream
     {
       _title = TrackUtils.GetTitle(Track);
       _url = TrackUtils.GetUrl(Track);
+      _trackExtension = TrackUtils.GetExtension(Track);
     }
 
     public override void OnDeserialization()
@@ -100,9 +101,9 @@ namespace Yamadev.YamaStream
         handlerIndex = Mathf.Max(Array.IndexOf(_videoPlayerHandlers, Handler), 0);
       }
 
-      bool playlistTrackAvailable = Utilities.IsValid(ActivePlaylist) && _playingTrackIndex >= 0 && _playingTrackIndex < ActivePlaylist.TrackCount;
-      object[] track = playlistTrackAvailable
-        ? ActivePlaylist.GetTrack(_playingTrackIndex)
+      bool hasSyncedExtension = _trackExtension != null && _trackExtension.Length > 0;
+      object[] track = hasSyncedExtension
+        ? TrackUtils.NewTrackWithExtension(_videoPlayerHandlers[handlerIndex].Type, _title, _url, _trackExtension)
         : TrackUtils.NewTrack(_videoPlayerHandlers[handlerIndex].Type, _title, _url);
 
       int len = _listeners.Length;
@@ -112,7 +113,7 @@ namespace Yamadev.YamaStream
         if (Utilities.IsValid(listener)) listener.AfterTrackSynced();
       }
 
-      bool trackChanged = _trackVersion != _appliedTrackVersion || TrackUtils.GetUrl(track).Get() != TrackUtils.GetUrl(Track).Get();
+      bool trackChanged = _trackVersion != _appliedTrackVersion;
       _appliedTrackVersion = _trackVersion;
 
       SwitchToHandlerIndex(handlerIndex);
