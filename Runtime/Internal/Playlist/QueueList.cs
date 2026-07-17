@@ -1,3 +1,4 @@
+using System;
 using UdonSharp;
 using UnityEngine;
 using VRC.SDKBase;
@@ -40,10 +41,7 @@ namespace Yamadev.YamaStream
           if (start >= 0 && end > start && end <= _extensionsBlob.Length)
           {
             extension = new byte[end - start];
-            for (int j = 0; j < extension.Length; j++)
-            {
-              extension[j] = _extensionsBlob[start + j];
-            }
+            Buffer.BlockCopy(_extensionsBlob, start, extension, 0, extension.Length);
           }
         }
         _tracks[i] = extension == null
@@ -156,10 +154,7 @@ namespace Yamadev.YamaStream
       {
         _extensionOffsets[i] = cursor;
         byte[] extension = TrackUtils.GetExtension(_tracks[i]);
-        for (int j = 0; j < extension.Length; j++)
-        {
-          _extensionsBlob[cursor + j] = extension[j];
-        }
+        Buffer.BlockCopy(extension, 0, _extensionsBlob, cursor, extension.Length);
         cursor += extension.Length;
       }
       _extensionOffsets[trackCount] = cursor;

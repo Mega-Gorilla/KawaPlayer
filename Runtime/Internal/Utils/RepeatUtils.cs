@@ -16,8 +16,8 @@ namespace Yamadev.YamaStream
       uint startBits = (uint)((clearedPacked >> 32) & 0xFFFFFFFF);
       uint endBits = (uint)(clearedPacked & 0xFFFFFFFF);
 
-      float start = BitConverter.ToSingle(BitConverter.GetBytes(startBits), 0);
-      float end = BitConverter.ToSingle(BitConverter.GetBytes(endBits), 0);
+      float start = BitConverter.Int32BitsToSingle((int)startBits);
+      float end = BitConverter.Int32BitsToSingle((int)endBits);
 
       return new object[] { flag, start, end };
     }
@@ -32,8 +32,8 @@ namespace Yamadev.YamaStream
       ulong flagBit = ((bool)repeat[0] ? 1ul : 0ul) << 63;
       float startTime = (float)repeat[1];
       if (startTime < 0f) startTime = 0f;
-      uint startBits = BitConverter.ToUInt32(BitConverter.GetBytes(startTime), 0);
-      uint endBits = BitConverter.ToUInt32(BitConverter.GetBytes((float)repeat[2]), 0);
+      uint startBits = (uint)BitConverter.SingleToInt32Bits(startTime);
+      uint endBits = (uint)BitConverter.SingleToInt32Bits((float)repeat[2]);
       return flagBit | ((ulong)startBits << 32) | endBits;
     }
 
@@ -55,7 +55,7 @@ namespace Yamadev.YamaStream
     public static float GetStartTime(ulong packedData)
     {
       ulong clearedPacked = packedData & ~(1ul << 63);
-      return BitConverter.ToSingle(BitConverter.GetBytes((uint)((clearedPacked >> 32) & 0xFFFFFFFF)), 0);
+      return BitConverter.Int32BitsToSingle((int)(uint)((clearedPacked >> 32) & 0xFFFFFFFF));
     }
 
     public static float GetEndTime(object[] repeat)
@@ -65,7 +65,7 @@ namespace Yamadev.YamaStream
 
     public static float GetEndTime(ulong packedData)
     {
-      return BitConverter.ToSingle(BitConverter.GetBytes((uint)(packedData & 0xFFFFFFFF)), 0);
+      return BitConverter.Int32BitsToSingle((int)(uint)(packedData & 0xFFFFFFFF));
     }
 
     public static void SetStartTime(object[] repeat, float startTime)
