@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c333ccfdd0cbdbc4ca30cef2dd6e6b9b, type: 3}
   m_Name: AudioLinkAdaptorUI
   m_EditorClassIdentifier: 
-  serializedUdonProgramAsset: {fileID: 11400000, guid: f09b8c099250e5f46a24e24f64507167, type: 2}
+  serializedUdonProgramAsset: {fileID: 11400000, guid: b4fb376660955f64a950ba717ff29d99, type: 2}
   udonAssembly: 
   assemblyError: 
   sourceCsScript: {fileID: 11500000, guid: cfe1d679ba7949c4a8d7b2d3d92a93d2, type: 3}
@@ -61,7 +61,7 @@ MonoBehaviour:
       Data: 3|System.RuntimeType, mscorlib
     - Name: 
       Entry: 1
-      Data: UdonSharp.UdonSharpBehaviour, UdonSharp.Runtime
+      Data: Yamadev.YamaStream.Modules.AudioLinkAdaptor.AudioLinkAdaptor, Yamadev.YamaStream.Modules.AudioLinkAdaptor
     - Name: 
       Entry: 8
       Data: 

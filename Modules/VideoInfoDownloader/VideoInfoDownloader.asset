@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c333ccfdd0cbdbc4ca30cef2dd6e6b9b, type: 3}
   m_Name: VideoInfoDownloader
   m_EditorClassIdentifier: 
-  serializedUdonProgramAsset: {fileID: 11400000, guid: 5710496eec4f7f8418e30bfe3eb079cf, type: 2}
+  serializedUdonProgramAsset: {fileID: 11400000, guid: ccb5ad7dd6dadee42bdaf38e99c4478f, type: 2}
   udonAssembly: 
   assemblyError: 
   sourceCsScript: {fileID: 11500000, guid: 6cd160c72e6155c4d9b83da80cfa9289, type: 3}
