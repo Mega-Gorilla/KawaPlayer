@@ -114,7 +114,8 @@ namespace Yamadev.YamaStream.Modules.TimelineSync
     public override void AfterVideoReady()
     {
       UpdateCurrentTimeline();
-      PlayTimeline(_pendingTime);
+      if (Utilities.IsValid(_controller) && _controller.SyncedState == PlayerState.Playing) PlayTimeline(_pendingTime);
+      else PauseTimeline(_pendingTime);
     }
 
     public override void AfterVideoLooped()
