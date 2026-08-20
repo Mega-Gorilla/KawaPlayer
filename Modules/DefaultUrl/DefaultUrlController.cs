@@ -37,7 +37,7 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
 
       if (!Utilities.IsValid(_defaultUrl)) return;
       if (string.IsNullOrEmpty(_defaultUrl.Get())) return;
-      if (_controller.State != PlayerState.Idle) return;
+      if (!_controller.Stopped) return;
 
       if (_defaultUrl.Get().Contains("playlist.vrc-hub.com"))
       {

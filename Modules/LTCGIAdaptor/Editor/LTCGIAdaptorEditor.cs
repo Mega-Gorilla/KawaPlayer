@@ -181,6 +181,7 @@ namespace Yamadev.YamaStream.Modules.LTCGIAdaptor.Editor
     }
 
     private const string LTCGI_CONTROLLER_PREFAB_GUID = "4b1aac09caa0ea54ba902102643bb545";
+    private const string LTCGI_DEFAULT_TEXTURE_GUID = "68718da77206620438ca14e29cefa6fb";
 
     private void EnableLtcgiScreen(ScreenInfo info)
     {
@@ -192,6 +193,16 @@ namespace Yamadev.YamaStream.Modules.LTCGIAdaptor.Editor
         {
           var controllerObj = (GameObject)PrefabUtility.InstantiatePrefab(prefab);
           Undo.RegisterCreatedObjectUndo(controllerObj, "Create LTCGI Controller");
+        }
+      }
+
+      if (LTCGI_Controller.Singleton != null)
+      {
+        var defaultTexturePath = AssetDatabase.GUIDToAssetPath(LTCGI_DEFAULT_TEXTURE_GUID);
+        var defaultTexture = AssetDatabase.LoadAssetAtPath<Texture2D>(defaultTexturePath);
+        if (defaultTexture != null)
+        {
+          LTCGI_Controller.Singleton.VideoTexture = defaultTexture;
         }
       }
 

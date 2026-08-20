@@ -1,6 +1,5 @@
 using System;
 using UnityEngine;
-using UdonSharp;
 using VRC.SDKBase;
 
 namespace Yamadev.YamaStream
@@ -81,7 +80,7 @@ namespace Yamadev.YamaStream
 
     private void UpdateAudioPitch()
     {
-      var pitch = IsLive || Handler.Type == VideoPlayerType.UnityVideoPlayer ? 1f : _speed;
+      var pitch = IsLive || ActiveHandler.Type == VideoPlayerType.UnityVideoPlayer ? 1f : _speed;
       int len = _audioSources.Length;
       for (int i = 0; i < len; i++)
       {

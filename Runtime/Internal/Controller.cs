@@ -19,6 +19,7 @@ namespace Yamadev.YamaStream
   {
     [SerializeField, HideInInspector] private string _version;
     [SerializeField] private PlayerHandler[] _videoPlayerHandlers = new PlayerHandler[0];
+    [SerializeField] private bool _allowAutoSwitchHandler = true;
     [SerializeField, Range(0, 10)] private int _useFallbackAfterErrors = 1;
     [SerializeField] private string _timeFormat = @"hh\:mm\:ss";
     [SerializeField] private bool _isLocal;
@@ -27,17 +28,19 @@ namespace Yamadev.YamaStream
     [UdonSynced, FieldChangeCallback(nameof(Speed))] private float _speed = 1f;
     [UdonSynced, FieldChangeCallback(nameof(Repeat))] private ulong _repeat;
     [UdonSynced] private byte _syncedState;
-    [UdonSynced] private VideoPlayerType _playerType;
+    [UdonSynced] private int _handlerIndex;
     [UdonSynced] private string _title = string.Empty;
     [UdonSynced] private VRCUrl _url = VRCUrl.Empty;
     private object[] _track;
     private PlayerHandler _handler;
+    private bool _useFallback;
     private YamaPlayerListener[] _listeners = new YamaPlayerListener[0];
     private int _errorRetryCount;
     private VRCUrl _retryTargetUrl = VRCUrl.Empty;
     private bool _reloading;
     private int _lastSetTimeFrame = 0;
     private float _lastLoadTime = 0f;
+    private bool _checkRepeatRunning = false;
 
     private const float SAFETY_RETRY_INTERVAL = 5.1f;
 
@@ -70,14 +73,13 @@ namespace Yamadev.YamaStream
     public string TimeFormat => _timeFormat;
     public bool IsLocal => _isLocal;
     public PlayerState SyncedState => (PlayerState)_syncedState;
-    public PlayerState State => Handler.IsStopped ? PlayerState.Idle : Handler.IsPaused ? PlayerState.Paused : Handler.IsPlaying ? PlayerState.Playing : PlayerState.Idle;
-    public bool IsLoading => Handler.IsLoading;
-    public bool Paused => Handler.IsPaused;
-    public bool Stopped => Handler.IsStopped;
-    public bool IsPlaying => Handler.IsPlaying;
-    public bool IsError => Handler.IsError;
-    public float Duration => Handler.Duration;
-    public float VideoTime => Handler.Time;
+    public bool IsLoading => ActiveHandler.IsLoading;
+    public bool Paused => ActiveHandler.IsPaused;
+    public bool Stopped => ActiveHandler.IsStopped;
+    public bool IsPlaying => ActiveHandler.IsPlaying;
+    public bool IsError => ActiveHandler.IsError;
+    public float Duration => ActiveHandler.Duration;
+    public float VideoTime => ActiveHandler.Time;
     public bool IsLive => float.IsInfinity(Duration) || float.IsNaN(Duration);
     public string FormatedDuration => IsLive ? string.Empty : TimeSpan.FromSeconds(Duration).ToString(_timeFormat);
     public string FormatedVideoTime => IsLive ? string.Empty : TimeSpan.FromSeconds(VideoTime).ToString(_timeFormat);
@@ -115,7 +117,9 @@ namespace Yamadev.YamaStream
       }
       set
       {
+        SetUseFallback(false);
         _handler = value;
+        _handlerIndex = Array.IndexOf(_videoPlayerHandlers, value);
         if (Networking.IsOwner(gameObject) && !_isLocal) RequestSerialization();
         int len = _listeners.Length;
         for (int i = 0; i < len; i++)
@@ -129,6 +133,29 @@ namespace Yamadev.YamaStream
 
     [Obsolete("Use Handler instead")]
     public PlayerHandler VideoPlayerHandle => Handler;
+
+    public PlayerHandler ActiveHandler
+    {
+      get
+      {
+        if (_useFallback && Utilities.IsValid(Handler.FallbackHandler)) return Handler.FallbackHandler;
+        return Handler;
+      }
+    }
+
+    private void SetUseFallback(bool value)
+    {
+      if (_useFallback == value) return;
+      if (value)
+      {
+        if (!Utilities.IsValid(Handler.FallbackHandler)) return;
+        _useFallback = true;
+        return;
+      }
+      _useFallback = false;
+      var fallback = Handler.FallbackHandler;
+      if (Utilities.IsValid(fallback) && !fallback.IsStopped) fallback.Stop();
+    }
 
     private void RegisterHandlerListeners()
     {
@@ -152,52 +179,107 @@ namespace Yamadev.YamaStream
       }
     }
 
+    public bool AllowAutoSwitchHandler
+    {
+      get => _allowAutoSwitchHandler;
+      set => _allowAutoSwitchHandler = value;
+    }
+
     public void SetPlayerType(VideoPlayerType playerType)
     {
       if (Utilities.IsValid(Handler) && Handler.Type == playerType) return;
       Stop();
+      SwitchToHandlerIndex(FindHandlerIndexByType(playerType));
+    }
 
+    public void SetPlayerHandler(int index)
+    {
+      if (index >= 0 && index < _videoPlayerHandlers.Length && _videoPlayerHandlers[index] == Handler) return;
+      Stop();
+      SwitchToHandlerIndex(index);
+    }
+
+    private bool SwitchToHandlerIndex(int index)
+    {
+      if (index < 0 || index >= _videoPlayerHandlers.Length || !Utilities.IsValid(_videoPlayerHandlers[index]))
+      {
+        PrintError($"Cannot switch handler: invalid handler index {index}.");
+        return false;
+      }
+
+      var next = _videoPlayerHandlers[index];
+      _handlerIndex = index;
+      if (next == _handler) return true;
+
+      StopLocal();
+      Handler = next;
+      return true;
+    }
+
+    private int FindHandlerIndexByType(VideoPlayerType playerType)
+    {
       int len = _videoPlayerHandlers.Length;
       for (int i = 0; i < len; i++)
       {
         var handler = _videoPlayerHandlers[i];
-        if (!Utilities.IsValid(handler)) continue;
-        if (handler.Type == playerType)
-        {
-          Handler = handler;
-          return;
-        }
+        if (Utilities.IsValid(handler) && handler.Type == playerType) return i;
       }
+      return -1;
+    }
 
-      PrintError("Could not find player handler for player type: " + playerType.GetString());
+    public int FindHandlerIndexForUrl(VRCUrl url)
+    {
+      int len = _videoPlayerHandlers.Length;
+      for (int i = 0; i < len; i++)
+      {
+        var handler = _videoPlayerHandlers[i];
+        if (Utilities.IsValid(handler) && handler.IsValidUrl(url)) return i;
+      }
+      return -1;
+    }
+
+    private int ResolveHandlerIndexForTrack(object[] track)
+    {
+      VRCUrl url = TrackUtils.GetUrl(track);
+      int declared = FindHandlerIndexByType(TrackUtils.GetPlayerType(track));
+      if (declared >= 0 && _videoPlayerHandlers[declared].IsValidUrl(url)) return declared;
+      if (_allowAutoSwitchHandler) return FindHandlerIndexForUrl(url);
+      return -1;
     }
 
     public void Play(bool force = false)
     {
       if ((Stopped || IsPlaying) && !force) return;
       _syncedState = (byte)PlayerState.Playing;
-      Handler.Play();
+      ActiveHandler.Play();
     }
 
     public void Pause(bool force = false)
     {
       if ((Stopped || Paused) && !force) return;
       _syncedState = (byte)PlayerState.Paused;
-      Handler.Pause();
+      ActiveHandler.Pause();
     }
 
     public void Stop(bool force = false)
     {
       _autoForward = false;
+      _reloading = false;
       if (Stopped && !IsError && !force) return;
       _syncedState = (byte)PlayerState.Idle;
       ClearPlaylistIndexes();
-      Handler.Stop();
+      StopLocal();
+    }
+
+    private void StopLocal()
+    {
+      _autoForward = false;
+      ActiveHandler.Stop();
     }
 
     public void Reload()
     {
-      if (!Stopped && !IsLoading) LoadTrack(Track, true);
+      if (!Stopped && !IsLoading) ResolveAndLoadTrack(Track, true);
     }
 
     public bool Loop
@@ -249,8 +331,12 @@ namespace Yamadev.YamaStream
     public void UpdateSpeed()
     {
       int len = _videoPlayerHandlers.Length;
-      for (int i = 0; i < len; i++) _videoPlayerHandlers[i].Speed = _speed;
-      if (!Stopped && Handler.Type == VideoPlayerType.AVProVideoPlayer && !Handler.UseFallbackHandler)
+      for (int i = 0; i < len; i++)
+      {
+        var handler = _videoPlayerHandlers[i];
+        if (Utilities.IsValid(handler)) handler.Speed = _speed;
+      }
+      if (!Stopped && ActiveHandler.Type == VideoPlayerType.AVProVideoPlayer)
         SendCustomEventDelayedFrames(nameof(Reload), 0);
       UpdateAudioPitch();
     }
@@ -261,7 +347,7 @@ namespace Yamadev.YamaStream
       set
       {
         _repeat = value;
-        SendCustomEventDelayedFrames(nameof(CheckRepeat), 0);
+        CheckRepeat();
         if (Networking.IsOwner(gameObject) && !_isLocal) RequestSerialization();
         int len = _listeners.Length;
         for (int i = 0; i < len; i++)
@@ -276,13 +362,27 @@ namespace Yamadev.YamaStream
 
     public void CheckRepeat()
     {
-      if (!IsPlaying || IsLive || !RepeatUtils.IsOn(_repeat)) return;
+      if (_checkRepeatRunning) return;
+      _checkRepeatRunning = true;
+      SendCustomEventDelayedFrames(nameof(_CheckRepeat), 0);
+    }
 
-      var start = RepeatUtils.GetStartTime(_repeat);
-      var end = RepeatUtils.GetEndTime(_repeat);
-      if (Handler.Time > end || Handler.Time < start) SetTime(start);
+    public void _CheckRepeat()
+    {
+      if (!RepeatUtils.IsOn(_repeat) || IsLive || Stopped)
+      {
+        _checkRepeatRunning = false;
+        return;
+      }
 
-      SendCustomEventDelayedSeconds(nameof(CheckRepeat), 0.5f);
+      if (IsPlaying)
+      {
+        var start = RepeatUtils.GetStartTime(_repeat);
+        var end = RepeatUtils.GetEndTime(_repeat);
+        if (ActiveHandler.Time > end || ActiveHandler.Time < start) SetTime(start);
+      }
+
+      SendCustomEventDelayedSeconds(nameof(_CheckRepeat), 0.5f);
     }
 
     public void SetTime(float time)
@@ -290,7 +390,7 @@ namespace Yamadev.YamaStream
       if (IsLive || Time.frameCount == _lastSetTimeFrame) return;
       _lastSetTimeFrame = Time.frameCount;
 
-      Handler.Time = time;
+      ActiveHandler.Time = time;
       if (Networking.IsOwner(gameObject) && !_isLocal)
       {
         UpdateSyncedVideoTime(time);
@@ -303,7 +403,7 @@ namespace Yamadev.YamaStream
         var listener = _listeners[i];
         if (Utilities.IsValid(listener)) listener.AfterTimeChanged(time);
       }
-      PrintLog($"{Handler.Type.GetString()}: Set video time: {time}.");
+      PrintLog($"{ActiveHandler.Type.GetString()}: Set video time: {time}.");
     }
 
     public object[] Track
@@ -333,7 +433,7 @@ namespace Yamadev.YamaStream
       if (!Utilities.IsValid(track)) return;
 
       var url = TrackUtils.GetUrl(track);
-      if (!url.IsValidUrl())
+      if (ResolveHandlerIndexForTrack(track) < 0)
       {
         PrintError($"URL {url.Get()} is not valid.");
         return;
@@ -347,26 +447,34 @@ namespace Yamadev.YamaStream
       ClearPlaylistIndexes();
 
       _syncedState = (byte)PlayerState.Playing;
-      LoadTrack(track);
+      ResolveAndLoadTrack(track);
     }
 
-    private void LoadTrack(object[] track, bool isReload = false)
+    private void ResolveAndLoadTrack(object[] track, bool isReload = false)
     {
-      _autoForward = false;
       _reloading = isReload;
-      Handler.Stop();
 
-      var trackPlayerType = TrackUtils.GetPlayerType(track);
-      SetPlayerType(trackPlayerType);
+      int index = ResolveHandlerIndexForTrack(track);
+      if (index >= 0) SwitchToHandlerIndex(index);
 
-      if (!_reloading) Track = track;
-      Handler.LoadUrl(TrackUtils.GetUrl(track));
-      _lastLoadTime = Time.time;
+      LoadTrackLocal(track, isReload);
 
       if (Networking.IsOwner(gameObject) && !_isLocal && !isReload)
       {
+        _trackVersion++;
+        _appliedTrackVersion = _trackVersion;
         RequestSerialization();
       }
+    }
+
+    private void LoadTrackLocal(object[] track, bool isReload)
+    {
+      _reloading = isReload;
+      StopLocal();
+
+      if (!isReload) Track = track;
+      ActiveHandler.LoadUrl(TrackUtils.GetUrl(track));
+      _lastLoadTime = Time.time;
 
       int len = _listeners.Length;
       for (int i = 0; i < len; i++)

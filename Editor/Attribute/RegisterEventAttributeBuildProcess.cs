@@ -54,8 +54,8 @@ namespace Yamadev.YamaStream.Editor
           foreach (var (field, attributes) in fieldTriggers)
           {
             if (field.GetValue(component) is not Component target) continue;
-            var trigger = target.gameObject.GetComponent<EventTrigger>()
-                       ?? target.gameObject.AddComponent<EventTrigger>();
+            if (!target.gameObject.TryGetComponent<EventTrigger>(out var trigger))
+              trigger = target.gameObject.AddComponent<EventTrigger>();
             foreach (var attr in attributes)
             {
               var entry = new EventTrigger.Entry

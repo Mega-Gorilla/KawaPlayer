@@ -21,6 +21,7 @@ namespace Yamadev.YamaStream.Modules.PitchShifter
       _uiController = GetComponentInParent<UIController>();
       if (!Utilities.IsValid(_uiController) || !Utilities.IsValid(_pitchShifter)) return;
       _pitchShifter.AddListener(this);
+      _uiController.AddListener(this);
       UpdateTranslation();
       UpdateSemitonesDisplay();
     }

@@ -43,10 +43,11 @@ namespace Yamadev.YamaStream.Modules.Persistence.Editor
       if (!string.IsNullOrEmpty(_uniqueId.stringValue))
       {
         EditorGUI.BeginDisabledGroup(true);
-        EditorGUILayout.TextField(EditorLocalization.Get("module.persistence.volumeKey"), $"YamaStream.{_uniqueId.stringValue}.Volume");
-        EditorGUILayout.TextField(EditorLocalization.Get("module.persistence.muteKey"), $"YamaStream.{_uniqueId.stringValue}.Mute");
-        EditorGUILayout.TextField(EditorLocalization.Get("module.persistence.mirrorFlipKey"), $"YamaStream.{_uniqueId.stringValue}.MirrorFlip");
-        EditorGUILayout.TextField(EditorLocalization.Get("module.persistence.brightnessKey"), $"YamaStream.{_uniqueId.stringValue}.Brightness");
+        string keyBase = $"{Persistence.KEY_PREFIX}.{_uniqueId.stringValue}";
+        EditorGUILayout.TextField(EditorLocalization.Get("module.persistence.volumeKey"), $"{keyBase}.Volume");
+        EditorGUILayout.TextField(EditorLocalization.Get("module.persistence.muteKey"), $"{keyBase}.Mute");
+        EditorGUILayout.TextField(EditorLocalization.Get("module.persistence.mirrorFlipKey"), $"{keyBase}.MirrorFlip");
+        EditorGUILayout.TextField(EditorLocalization.Get("module.persistence.brightnessKey"), $"{keyBase}.Brightness");
         EditorGUI.EndDisabledGroup();
       }
       else

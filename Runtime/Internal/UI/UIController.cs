@@ -90,7 +90,7 @@ namespace Yamadev.YamaStream.UI
     [Header("Settings - Audio/Video")]
     [SerializeField, RegisterEvent(nameof(Toggle.onValueChanged), nameof(SetMirrorFlipOn))] private Toggle _mirrorFlipOnToggle;
     [SerializeField, RegisterEvent(nameof(Toggle.onValueChanged), nameof(SetMirrorFlipOff))] private Toggle _mirrorFlipOffToggle;
-    [SerializeField, RegisterEventTrigger(EventTriggerType.EndDrag, nameof(SetBrightness))] private Slider _brightnessSlider;
+    [SerializeField, RegisterEvent(nameof(Toggle.onValueChanged), nameof(SetBrightness))] private Slider _brightnessSlider;
     [SerializeField] private Text _brightnessValueText;
     [SerializeField, RegisterEvent(nameof(Toggle.onValueChanged), nameof(SetMaxResolution360))] private Toggle _maxResolution360Toggle;
     [SerializeField, RegisterEvent(nameof(Toggle.onValueChanged), nameof(SetMaxResolution480))] private Toggle _maxResolution480Toggle;
@@ -201,6 +201,7 @@ namespace Yamadev.YamaStream.UI
         UpdateUI();
         return;
       }
+      _controller.TakeOwnership();
       _controller.SetPlayerType(VideoPlayerType.UnityVideoPlayer);
     }
 
@@ -229,6 +230,7 @@ namespace Yamadev.YamaStream.UI
         UpdateUI();
         return;
       }
+      _controller.TakeOwnership();
       _controller.SetPlayerType(VideoPlayerType.AVProVideoPlayer);
     }
 
@@ -257,6 +259,7 @@ namespace Yamadev.YamaStream.UI
         UpdateUI();
         return;
       }
+      _controller.TakeOwnership();
       _controller.SetPlayerType(VideoPlayerType.ImageViewer);
     }
 
@@ -267,7 +270,7 @@ namespace Yamadev.YamaStream.UI
     private void PlayUrlField(VRCUrlInputField urlInputField)
     {
       if (!Utilities.IsValid(urlInputField)) return;
-      if (!urlInputField.GetUrl().IsValidUrl())
+      if (_controller.FindHandlerIndexForUrl(urlInputField.GetUrl()) < 0)
       {
         urlInputField.SetUrl(VRCUrl.Empty);
         return;
@@ -501,7 +504,7 @@ namespace Yamadev.YamaStream.UI
         return;
       }
 
-      if (!Utilities.IsValid(_repeatRangeSlider) || !Utilities.IsValid(_repeatRangeSlider.LeftValue) || !Utilities.IsValid(_repeatRangeSlider.RightValue)) return;
+      if (!Utilities.IsValid(_repeatRangeSlider) || !_repeatRangeSlider.IsReady) return;
 
       var repeat = RepeatUtils.NewRepeatStatus(_controller.Repeat);
       if (!on)
@@ -522,7 +525,7 @@ namespace Yamadev.YamaStream.UI
 
     public void SetRepeatStart()
     {
-      if (!Utilities.IsValid(_repeatRangeSlider) || !Utilities.IsValid(_repeatRangeSlider.LeftValue) || _controller.Stopped || _controller.IsLive) return;
+      if (!Utilities.IsValid(_repeatRangeSlider) || !_repeatRangeSlider.IsReady || _controller.Stopped || _controller.IsLive) return;
 
       if (RepeatUtils.IsOn(_controller.Repeat))
       {
@@ -539,7 +542,7 @@ namespace Yamadev.YamaStream.UI
 
     public void SetRepeatEnd()
     {
-      if (!Utilities.IsValid(_repeatRangeSlider) || !Utilities.IsValid(_repeatRangeSlider.RightValue) || _controller.Stopped || _controller.IsLive) return;
+      if (!Utilities.IsValid(_repeatRangeSlider) || !_repeatRangeSlider.IsReady || _controller.Stopped || _controller.IsLive) return;
 
       if (RepeatUtils.IsOn(_controller.Repeat))
       {
@@ -605,7 +608,7 @@ namespace Yamadev.YamaStream.UI
     public void SetSpeed()
     {
       if (!Utilities.IsValid(_speedSlider)) return;
-      if ((byte)_controller.SyncedState != (byte)PlayerState.Idle && (_controller.Stopped || _controller.IsLoading))
+      if (_controller.SyncedState != PlayerState.Idle && (_controller.Stopped || _controller.IsLoading))
       {
         UpdateUI();
         return;
@@ -922,7 +925,11 @@ namespace Yamadev.YamaStream.UI
     public override void AfterSpeedChanged(float speed) => UpdatePlaybackView();
     public override void AfterLocalDelayChanged(float localDelay) => UpdatePlaybackView();
     public override void AfterShufflePlayChanged(bool shufflePlay) => UpdatePlaybackView();
-    public override void AfterTrackLoaded() => UpdateUI();
+    public override void AfterTrackLoaded()
+    {
+      UpdateUI();
+      GeneratePlaylistTracks();
+    }
     public override void AfterTrackUpdated() => UpdateTrackView();
     public override void AfterVideoRetry() => UpdateLoadingView();
     public override void AfterQueueUpdated()

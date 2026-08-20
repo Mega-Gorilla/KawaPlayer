@@ -48,7 +48,7 @@ namespace Yamadev.YamaStream
       if (!_reloading)
       {
         _repeat = 0;
-        Handler.UseFallbackHandler = false;
+        SetUseFallback(false);
 
         if (Networking.IsOwner(gameObject) && !_isLocal)
         {
@@ -79,9 +79,9 @@ namespace Yamadev.YamaStream
     {
       _errorRetryCount = 0;
       _retryTargetUrl = VRCUrl.Empty;
-      if (SyncedState == PlayerState.Playing) Handler.Play();
-      if (SyncedState == PlayerState.Idle) Handler.Stop();
-      SendCustomEventDelayedFrames(nameof(CheckRepeat), 0);
+      if (SyncedState == PlayerState.Playing) ActiveHandler.Play();
+      if (SyncedState == PlayerState.Idle) ActiveHandler.Stop();
+      CheckRepeat();
 
       if (Networking.IsOwner(gameObject) && !_isLocal && !_reloading)
       {
@@ -142,7 +142,7 @@ namespace Yamadev.YamaStream
           ClearPlaylistIndexes();
         }
         _syncedState = (byte)PlayerState.Idle;
-        Handler.Stop();
+        ActiveHandler.Stop();
       }
 
       int len = _listeners.Length;
@@ -175,24 +175,26 @@ namespace Yamadev.YamaStream
           PrintError("Access denied - no retry will be attempted");
           _errorRetryCount = 0;
           _retryTargetUrl = VRCUrl.Empty;
+          _reloading = false;
           return;
         case VideoError.InvalidURL:
           PrintError("Invalid URL - no retry will be attempted");
           _errorRetryCount = 0;
           _retryTargetUrl = VRCUrl.Empty;
+          _reloading = false;
           return;
         case VideoError.PlayerError:
           if (_useFallbackAfterErrors > 0 && _errorRetryCount == _useFallbackAfterErrors - 1)
           {
             if (Utilities.IsValid(Handler.FallbackHandler))
             {
-              Handler.UseFallbackHandler = true;
+              SetUseFallback(true);
               PrintLog($"Switching to fallback handler: {Handler.FallbackHandler.Type.GetString()}");
             }
           }
           else
           {
-            Handler.UseFallbackHandler = false;
+            SetUseFallback(false);
           }
           break;
       }
@@ -211,6 +213,7 @@ namespace Yamadev.YamaStream
       {
         _errorRetryCount = 0;
         _retryTargetUrl = VRCUrl.Empty;
+        _reloading = false;
         PrintError($"Maximum retry count ({_maxErrorRetry}) reached. Stopping retry attempts.");
       }
     }
@@ -227,13 +230,13 @@ namespace Yamadev.YamaStream
         return;
       }
 
-      if (IsPlaying || !currentUrl.IsValidUrl())
+      if (IsPlaying || !ActiveHandler.IsValidUrl(currentUrl))
       {
         _retryTargetUrl = VRCUrl.Empty;
         return;
       }
 
-      Handler.LoadUrl(currentUrl);
+      ActiveHandler.LoadUrl(currentUrl);
       _lastLoadTime = Time.time;
 
       int len = _listeners.Length;

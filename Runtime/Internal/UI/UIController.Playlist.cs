@@ -128,7 +128,7 @@ namespace Yamadev.YamaStream.UI
         var track = tracks[_playlistTracksScroll.Indexes[i]];
         var trackTitle = TrackUtils.GetTitle(track);
         var trackUrl = TrackUtils.GetUrl(track);
-        bool isPlaying = _playlistIndex == _controller.ActivePlaylistIndex && _playlistTracksScroll.Indexes[i] == _controller.PlayingTrackIndex;
+        bool isPlaying = !IsQueuePage && !IsHistoryPage && _playlistIndex == _controller.ActivePlaylistIndex && _playlistTracksScroll.Indexes[i] == _controller.PlayingTrackIndex;
 
         var cell = _playlistTracksScroll.GetComponent<ScrollRect>().content.GetChild(i);
         var info = cell.Find("Info");
