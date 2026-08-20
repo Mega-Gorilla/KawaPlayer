@@ -95,7 +95,7 @@ namespace Yamadev.YamaStream.Editor
 
     private static PlaylistTrack ParsePlaylistTrack(JObject trackObj)
     {
-      int mode = trackObj["mode"]?.Value<int>() ?? trackObj["Mode"]?.Value<int>() ?? 0;
+      int mode = trackObj["playerType"]?.Value<int>() ?? trackObj["mode"]?.Value<int>() ?? trackObj["Mode"]?.Value<int>() ?? 0;
       string title = trackObj["title"]?.Value<string>() ?? trackObj["Title"]?.Value<string>() ?? "";
       string url = trackObj["url"]?.Value<string>() ?? trackObj["Url"]?.Value<string>() ?? "";
 

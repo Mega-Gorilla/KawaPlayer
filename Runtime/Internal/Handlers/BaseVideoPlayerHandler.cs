@@ -32,7 +32,7 @@ namespace Yamadev.YamaStream
       _properties = new MaterialPropertyBlock();
     }
 
-    public override bool IsValidUrl(VRCUrl url)
+    protected override bool IsValidUrl(VRCUrl url)
     {
       if (_type != VideoPlayerType.AVProVideoPlayer) return base.IsValidUrl(url);
       if (!Utilities.IsValid(url)) return false;

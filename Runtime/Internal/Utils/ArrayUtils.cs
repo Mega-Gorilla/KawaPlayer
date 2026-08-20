@@ -7,7 +7,7 @@ namespace Yamadev.YamaStream
   {
     public static void Resize<T>(ref T[] array, int newSize)
     {
-      if (newSize < 0) array = new T[0];
+      if (newSize < 0) { array = new T[0]; return; }
       T[] array2 = array;
       if (!Utilities.IsValid(array2)) array = new T[newSize];
       else if (array2.Length != newSize)

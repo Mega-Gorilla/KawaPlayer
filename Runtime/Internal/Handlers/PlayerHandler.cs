@@ -28,7 +28,12 @@ namespace Yamadev.YamaStream
 
     public virtual VRCUrl LoadedUrl => _loadedUrl;
 
-    public virtual bool IsValidUrl(VRCUrl url)
+    public virtual bool IsValidTrack(object[] track)
+    {
+      return IsValidUrl(TrackUtils.GetUrl(track));
+    }
+
+    protected virtual bool IsValidUrl(VRCUrl url)
     {
       if (!Utilities.IsValid(url)) return false;
       string u = url.Get().ToLower();
@@ -64,6 +69,11 @@ namespace Yamadev.YamaStream
     public virtual void PlayUrl(VRCUrl url) { }
 
     public virtual void LoadUrl(VRCUrl url) { }
+
+    public virtual void LoadTrack(object[] track)
+    {
+      LoadUrl(TrackUtils.GetUrl(track));
+    }
 
     public virtual void Play() { }
 
