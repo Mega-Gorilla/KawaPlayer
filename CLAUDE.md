@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-KawaPlayer is a VRChat video player (YamaPlayer fork) with PlaylistLoader for loading playlists from playlist.vrc-hub.com. Package name: `com.vhub.kawaplayer`.
+KawaPlayer is a fork of the VRChat video player [YamaPlayer](https://github.com/koorimizuw/YamaPlayer), adapted to integrate with the **VHub Playlist** service (`playlist.vrc-hub.com`). The purpose of the fork is to let world creators manage videos/playlists from inside VRChat: loading VHub playlists at runtime (PlaylistLoader module) and setting the world's auto-play default URL in-world (DefaultUrl module). All other player functionality is inherited from upstream YamaPlayer. Package name: `com.vhub.kawaplayer`.
 
 - **Unity version**: 2022.3
 - **Language**: C# / UdonSharp (VRChat's Udon scripting layer)
@@ -84,6 +84,10 @@ Inherited from upstream YamaPlayer:
 - PermissionManagement, Persistence, PitchShifter, SlideShower
 - TimelineSync, VideoInfoDownloader
 
+### Prefabs
+
+`KawaPlayer.prefab` at the repository root is the main all-in-one prefab that users drop into scenes (also reachable via the **GameObject > KawaPlayer > Main** menu). Additional prefabs (ControlBar, PlaylistPanel, SubScreen, UI parts) live in `Prefabs/`.
+
 ### Editor Tools (`Editor/`)
 
 Custom inspectors, build processors, menu items, and the module/localization editors. Separate assembly (`Yamadev.YamaStream.Editor.asmdef`) referencing the runtime assembly.
@@ -97,6 +101,11 @@ Custom inspectors, build processors, menu items, and the module/localization edi
 ## GitHub Operations
 
 This repository is a fork of `koorimizuw/YamaPlayer` (upstream). When using `gh` CLI commands (issue, PR, etc.), **always** specify `--repo Mega-Gorilla/KawaPlayer` explicitly. Never create issues, PRs, or comments on the upstream repository (`koorimizuw/YamaPlayer`).
+
+### Upstream Sync Tracking
+
+- `.github/workflows/upstream-check.yml` runs monthly (and on manual dispatch), comparing upstream `develop` against the last reviewed SHA and commenting the unreviewed commit list on tracking issue #66.
+- The last reviewed SHA lives in `.github/UPSTREAM_BASE` (first line). **Update this file in every upstream sync PR** — after adopting or deliberately skipping upstream commits, set it to the upstream SHA reviewed up to. `HEAD..upstream` counting is not used because cherry-picked/skipped commits would be misreported as unmerged.
 
 ## Testing Project
 
