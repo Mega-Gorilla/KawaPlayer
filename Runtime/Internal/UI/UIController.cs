@@ -889,17 +889,16 @@ namespace Yamadev.YamaStream.UI
 
     private bool ShouldShowYouTubeHint(VideoError videoError)
     {
-      // The hint states only the observed outcome ("could not play"), which
-      // holds whatever the failing layer is, so PlayerError is included.
-      // InvalidURL (bad URL) and RateLimited (VRChat's 5s limit) would make
-      // the hint misleading. Only direct YouTube URLs are detectable here:
-      // PlaylistLoader stores VHub redirect URLs in tracks, so those never
-      // match (see issue #72 for provider-based detection).
+      // Unknown only: AccessDenied already carries an actionable base message
+      // (Allow Untrusted URLs) and PlayerError points at the player itself,
+      // so the YouTube hint is reserved for the case where the failing layer
+      // is unidentified. InvalidURL (bad URL) and RateLimited (VRChat's 5s
+      // limit) would make the hint misleading. Only direct YouTube URLs are
+      // detectable here: PlaylistLoader stores VHub redirect URLs in tracks,
+      // so those never match (see issue #72 for provider-based detection).
       switch (videoError)
       {
-        case VideoError.AccessDenied:
         case VideoError.Unknown:
-        case VideoError.PlayerError:
           return UrlUtils.IsYouTubeUrl(TrackUtils.GetUrl(_controller.Track).Get());
         default:
           return false;
