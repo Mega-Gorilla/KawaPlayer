@@ -897,15 +897,17 @@ namespace Yamadev.YamaStream.UI
     {
       // Unknown and InvalidURL only: AccessDenied already carries an
       // actionable base message (Allow Untrusted URLs), PlayerError points at
-      // the player itself, and RateLimited is VRChat's 5s limit. Only direct
-      // YouTube URLs are detectable here: PlaylistLoader stores VHub redirect
-      // URLs in tracks, so those never match (see issue #72 for
-      // provider-based detection).
+      // the player itself, and RateLimited is VRChat's 5s limit. Detection is
+      // additive: direct YouTube URLs match by host, and PlaylistLoader
+      // tracks (VHub redirect URLs) match by the provider carried in the
+      // track extension when the server supplies one (issue #72).
       switch (videoError)
       {
         case VideoError.Unknown:
         case VideoError.InvalidURL:
-          return UrlUtils.IsYouTubeUrl(TrackUtils.GetUrl(_controller.Track).Get());
+          var track = _controller.Track;
+          return UrlUtils.IsYouTubeUrl(TrackUtils.GetUrl(track).Get())
+              || TrackProviderUtils.IsYouTube(track);
         default:
           return false;
       }
