@@ -148,8 +148,17 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
             && t.TokenType == TokenType.String)
           title = t.String;
 
-        tempTracks[addedCount] = TrackUtils.NewTrack(
-            (VideoPlayerType)mode, title, _redirectPool[index]);
+        // Optional provider field (issue #72): only "youtube" is defined in
+        // v1. Missing, null, non-string, or unknown values get no extension.
+        string provider = "";
+        if (dict.TryGetValue("provider", out DataToken pv)
+            && pv.TokenType == TokenType.String)
+          provider = pv.String;
+
+        tempTracks[addedCount] = provider == "youtube"
+            ? TrackUtils.NewTrackWithExtension((VideoPlayerType)mode, title, _redirectPool[index],
+                TrackProviderUtils.BuildProviderExtension(TrackProviderUtils.ProviderYouTube))
+            : TrackUtils.NewTrack((VideoPlayerType)mode, title, _redirectPool[index]);
         addedCount++;
       }
 
