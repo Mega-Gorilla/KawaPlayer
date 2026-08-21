@@ -98,6 +98,5 @@
   "error.invalidUrl": "Invalid URL...\n您輸入的 URL 無效。",
   "error.playerError": "Player Error...\n影片播放器發生錯誤。",
   "error.rateLimited": "Rate Limited...\n達到速率限制，5秒內僅能載入一次影片。",
-  "error.youtubeHint": "無法從 YouTube 取得資料。",
-  "error.youtubeHintUnknown": "無法播放 YouTube 影片。"
+  "error.youtubeHint": "無法播放 YouTube 影片，請稍後重試。"
 }

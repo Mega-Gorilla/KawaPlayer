@@ -858,41 +858,52 @@ namespace Yamadev.YamaStream.UI
       if (Utilities.IsValid(_loadingIndicator)) _loadingIndicator.SetActive(true);
       if (Utilities.IsValid(_userUIAnimator)) _userUIAnimator.SetBool("Loading", false);
       if (!_statusMessageText) return;
+      string message;
       switch (videoError)
       {
         case VideoError.Unknown:
-          _statusMessageText.text = WithYouTubeHint(GetTranslation("error.unknown"), "error.youtubeHintUnknown");
+          message = GetTranslation("error.unknown");
           break;
         case VideoError.InvalidURL:
-          _statusMessageText.text = GetTranslation("error.invalidUrl");
+          message = GetTranslation("error.invalidUrl");
           break;
         case VideoError.AccessDenied:
-          _statusMessageText.text = WithYouTubeHint(GetTranslation("error.accessDenied"), "error.youtubeHint");
+          message = GetTranslation("error.accessDenied");
           break;
         case VideoError.RateLimited:
-          _statusMessageText.text = GetTranslation("error.rateLimited");
+          message = GetTranslation("error.rateLimited");
           break;
         case VideoError.PlayerError:
-          _statusMessageText.text = GetTranslation("error.playerError");
+          message = GetTranslation("error.playerError");
           break;
         default:
-          break;
+          return;
       }
+      if (ShouldShowYouTubeHint(videoError))
+      {
+        string hint = GetTranslation("error.youtubeHint");
+        if (!string.IsNullOrEmpty(hint)) message = $"{message}\n{hint}";
+      }
+      _statusMessageText.text = message;
     }
 
-    private string WithYouTubeHint(string message, string hintKey)
+    private bool ShouldShowYouTubeHint(VideoError videoError)
     {
-      // AccessDenied/Unknown only: for PlayerError the failure may be on the
-      // player side, so claiming a YouTube fetch failure could be wrong.
-      // The hint states only what is observable per error type: AccessDenied
-      // means no data was retrieved, while Unknown cannot pin the failing
-      // layer, so its hint says only that playback failed (see #71 rev.4).
-      // Only direct YouTube URLs are detectable here: PlaylistLoader stores
-      // VHub redirect URLs in tracks, so those never match (see issue #72).
-      if (!UrlUtils.IsYouTubeUrl(TrackUtils.GetUrl(_controller.Track).Get())) return message;
-      string hint = GetTranslation(hintKey);
-      if (string.IsNullOrEmpty(hint)) return message;
-      return $"{message}\n{hint}";
+      // The hint states only the observed outcome ("could not play"), which
+      // holds whatever the failing layer is, so PlayerError is included.
+      // InvalidURL (bad URL) and RateLimited (VRChat's 5s limit) would make
+      // the hint misleading. Only direct YouTube URLs are detectable here:
+      // PlaylistLoader stores VHub redirect URLs in tracks, so those never
+      // match (see issue #72 for provider-based detection).
+      switch (videoError)
+      {
+        case VideoError.AccessDenied:
+        case VideoError.Unknown:
+        case VideoError.PlayerError:
+          return UrlUtils.IsYouTubeUrl(TrackUtils.GetUrl(_controller.Track).Get());
+        default:
+          return false;
+      }
     }
 
     private void UpdateLoadingView()

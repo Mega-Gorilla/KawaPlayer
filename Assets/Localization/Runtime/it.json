@@ -98,6 +98,5 @@
   "error.invalidUrl": "URL Invalido...\nL'url deve essere valido.",
   "error.playerError": "Errore Player...\nSi è verificato un errore nel video player.",
   "error.rateLimited": "Limitazione tentativi...\nIl limite tentativi è stato raggiunto. Il video sarà caricato in 5 secondi.",
-  "error.youtubeHint": "Impossibile ottenere i dati da YouTube.",
-  "error.youtubeHintUnknown": "Impossibile riprodurre il video di YouTube."
+  "error.youtubeHint": "Impossibile riprodurre il video di YouTube. Riprova più tardi."
 }
