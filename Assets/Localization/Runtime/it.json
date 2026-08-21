@@ -97,5 +97,7 @@
   "error.unknown": "Errore sconosciuto...\nE' avvenuto un errore sconosciuto.",
   "error.invalidUrl": "URL Invalido...\nL'url deve essere valido.",
   "error.playerError": "Errore Player...\nSi è verificato un errore nel video player.",
-  "error.rateLimited": "Limitazione tentativi...\nIl limite tentativi è stato raggiunto. Il video sarà caricato in 5 secondi."
+  "error.rateLimited": "Limitazione tentativi...\nIl limite tentativi è stato raggiunto. Il video sarà caricato in 5 secondi.",
+  "error.youtubeHint": "Impossibile riprodurre il video di YouTube. Riprova più tardi.",
+  "error.youtubeHintInvalidUrl": "Il video potrebbe non esistere o YouTube potrebbe avere problemi."
 }

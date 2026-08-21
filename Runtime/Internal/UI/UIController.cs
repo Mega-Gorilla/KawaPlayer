@@ -858,25 +858,56 @@ namespace Yamadev.YamaStream.UI
       if (Utilities.IsValid(_loadingIndicator)) _loadingIndicator.SetActive(true);
       if (Utilities.IsValid(_userUIAnimator)) _userUIAnimator.SetBool("Loading", false);
       if (!_statusMessageText) return;
+      string message;
       switch (videoError)
       {
         case VideoError.Unknown:
-          _statusMessageText.text = GetTranslation("error.unknown");
+          message = GetTranslation("error.unknown");
           break;
         case VideoError.InvalidURL:
-          _statusMessageText.text = GetTranslation("error.invalidUrl");
+          message = GetTranslation("error.invalidUrl");
           break;
         case VideoError.AccessDenied:
-          _statusMessageText.text = GetTranslation("error.accessDenied");
+          message = GetTranslation("error.accessDenied");
           break;
         case VideoError.RateLimited:
-          _statusMessageText.text = GetTranslation("error.rateLimited");
+          message = GetTranslation("error.rateLimited");
           break;
         case VideoError.PlayerError:
-          _statusMessageText.text = GetTranslation("error.playerError");
+          message = GetTranslation("error.playerError");
           break;
         default:
-          break;
+          return;
+      }
+      if (ShouldShowYouTubeHint(videoError))
+      {
+        // InvalidURL gets its own wording: a YouTube URL that passed the host
+        // check is syntactically valid, so the failure is in resolution (video
+        // missing/private, or a yt-dlp failure - the editor resolver maps
+        // empty yt-dlp output to InvalidURL). Retrying is not suggested there
+        // because the video may simply not exist.
+        string hintKey = videoError == VideoError.InvalidURL ? "error.youtubeHintInvalidUrl" : "error.youtubeHint";
+        string hint = GetTranslation(hintKey);
+        if (!string.IsNullOrEmpty(hint)) message = $"{message}\n{hint}";
+      }
+      _statusMessageText.text = message;
+    }
+
+    private bool ShouldShowYouTubeHint(VideoError videoError)
+    {
+      // Unknown and InvalidURL only: AccessDenied already carries an
+      // actionable base message (Allow Untrusted URLs), PlayerError points at
+      // the player itself, and RateLimited is VRChat's 5s limit. Only direct
+      // YouTube URLs are detectable here: PlaylistLoader stores VHub redirect
+      // URLs in tracks, so those never match (see issue #72 for
+      // provider-based detection).
+      switch (videoError)
+      {
+        case VideoError.Unknown:
+        case VideoError.InvalidURL:
+          return UrlUtils.IsYouTubeUrl(TrackUtils.GetUrl(_controller.Track).Get());
+        default:
+          return false;
       }
     }
 

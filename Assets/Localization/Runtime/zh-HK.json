@@ -97,5 +97,7 @@
   "error.unknown": "Unknown Error...\n發生未知的錯誤。",
   "error.invalidUrl": "Invalid URL...\n您輸入的 URL 無效。",
   "error.playerError": "Player Error...\n影片播放器發生錯誤。",
-  "error.rateLimited": "Rate Limited...\n達到速率限制，5秒內僅能載入一次影片。"
+  "error.rateLimited": "Rate Limited...\n達到速率限制，5秒內僅能載入一次影片。",
+  "error.youtubeHint": "無法播放 YouTube 影片，請稍後重試。",
+  "error.youtubeHintInvalidUrl": "影片可能不存在，或因 YouTube 方面的問題而無法播放。"
 }
