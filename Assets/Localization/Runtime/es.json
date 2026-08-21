@@ -98,5 +98,6 @@
   "error.invalidUrl": "Invalid URL...\nLa URL que has introducido no es válida.",
   "error.playerError": "Player Error...\nSe ha producido un error en el reproductor de video.",
   "error.rateLimited": "Rate Limited...\nSe ha alcanzado el límite de velocidad. Solo se puede cargar un video cada 5 segundos.",
-  "error.youtubeHint": "No se pudieron obtener datos de YouTube."
+  "error.youtubeHint": "No se pudieron obtener datos de YouTube.",
+  "error.youtubeHintUnknown": "No se pudo reproducir el video de YouTube."
 }

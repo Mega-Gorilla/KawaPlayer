@@ -98,5 +98,6 @@
   "error.invalidUrl": "Неверный URL...\nВведённый адрес недействителен.",
   "error.playerError": "Ошибка плеера...\nПроизошла ошибка при воспроизведении.",
   "error.rateLimited": "Ограничение скорости...\nВидео можно запускать не чаще одного раза в 5 секунд.",
-  "error.youtubeHint": "Не удалось получить данные с YouTube."
+  "error.youtubeHint": "Не удалось получить данные с YouTube.",
+  "error.youtubeHintUnknown": "Не удалось воспроизвести видео YouTube."
 }

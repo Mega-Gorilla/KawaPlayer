@@ -861,13 +861,13 @@ namespace Yamadev.YamaStream.UI
       switch (videoError)
       {
         case VideoError.Unknown:
-          _statusMessageText.text = WithYouTubeHint(GetTranslation("error.unknown"));
+          _statusMessageText.text = WithYouTubeHint(GetTranslation("error.unknown"), "error.youtubeHintUnknown");
           break;
         case VideoError.InvalidURL:
           _statusMessageText.text = GetTranslation("error.invalidUrl");
           break;
         case VideoError.AccessDenied:
-          _statusMessageText.text = WithYouTubeHint(GetTranslation("error.accessDenied"));
+          _statusMessageText.text = WithYouTubeHint(GetTranslation("error.accessDenied"), "error.youtubeHint");
           break;
         case VideoError.RateLimited:
           _statusMessageText.text = GetTranslation("error.rateLimited");
@@ -880,14 +880,17 @@ namespace Yamadev.YamaStream.UI
       }
     }
 
-    private string WithYouTubeHint(string message)
+    private string WithYouTubeHint(string message, string hintKey)
     {
       // AccessDenied/Unknown only: for PlayerError the failure may be on the
       // player side, so claiming a YouTube fetch failure could be wrong.
+      // The hint states only what is observable per error type: AccessDenied
+      // means no data was retrieved, while Unknown cannot pin the failing
+      // layer, so its hint says only that playback failed (see #71 rev.4).
       // Only direct YouTube URLs are detectable here: PlaylistLoader stores
       // VHub redirect URLs in tracks, so those never match (see issue #72).
       if (!UrlUtils.IsYouTubeUrl(TrackUtils.GetUrl(_controller.Track).Get())) return message;
-      string hint = GetTranslation("error.youtubeHint");
+      string hint = GetTranslation(hintKey);
       if (string.IsNullOrEmpty(hint)) return message;
       return $"{message}\n{hint}";
     }

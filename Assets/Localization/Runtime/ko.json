@@ -98,5 +98,6 @@
   "error.invalidUrl": "Invalid URL...\n입력하신 URL은 유효한 URL이 아닙니다.",
   "error.playerError": "Player Error...\n동영상 플레이어의 오류가 발생했습니다.",
   "error.rateLimited": "Rate Limited...\n재생 제한에 도달했습니다. 5초에 한 번만 동영상 재생이 가능합니다.",
-  "error.youtubeHint": "YouTube에서 데이터를 가져오지 못했습니다."
+  "error.youtubeHint": "YouTube에서 데이터를 가져오지 못했습니다.",
+  "error.youtubeHintUnknown": "YouTube 동영상을 재생하지 못했습니다."
 }
