@@ -881,7 +881,13 @@ namespace Yamadev.YamaStream.UI
       }
       if (ShouldShowYouTubeHint(videoError))
       {
-        string hint = GetTranslation("error.youtubeHint");
+        // InvalidURL gets its own wording: a YouTube URL that passed the host
+        // check is syntactically valid, so the failure is in resolution (video
+        // missing/private, or a yt-dlp failure - the editor resolver maps
+        // empty yt-dlp output to InvalidURL). Retrying is not suggested there
+        // because the video may simply not exist.
+        string hintKey = videoError == VideoError.InvalidURL ? "error.youtubeHintInvalidUrl" : "error.youtubeHint";
+        string hint = GetTranslation(hintKey);
         if (!string.IsNullOrEmpty(hint)) message = $"{message}\n{hint}";
       }
       _statusMessageText.text = message;
@@ -889,16 +895,16 @@ namespace Yamadev.YamaStream.UI
 
     private bool ShouldShowYouTubeHint(VideoError videoError)
     {
-      // Unknown only: AccessDenied already carries an actionable base message
-      // (Allow Untrusted URLs) and PlayerError points at the player itself,
-      // so the YouTube hint is reserved for the case where the failing layer
-      // is unidentified. InvalidURL (bad URL) and RateLimited (VRChat's 5s
-      // limit) would make the hint misleading. Only direct YouTube URLs are
-      // detectable here: PlaylistLoader stores VHub redirect URLs in tracks,
-      // so those never match (see issue #72 for provider-based detection).
+      // Unknown and InvalidURL only: AccessDenied already carries an
+      // actionable base message (Allow Untrusted URLs), PlayerError points at
+      // the player itself, and RateLimited is VRChat's 5s limit. Only direct
+      // YouTube URLs are detectable here: PlaylistLoader stores VHub redirect
+      // URLs in tracks, so those never match (see issue #72 for
+      // provider-based detection).
       switch (videoError)
       {
         case VideoError.Unknown:
+        case VideoError.InvalidURL:
           return UrlUtils.IsYouTubeUrl(TrackUtils.GetUrl(_controller.Track).Get());
         default:
           return false;

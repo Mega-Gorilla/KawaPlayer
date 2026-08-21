@@ -98,5 +98,6 @@
   "error.invalidUrl": "Invalid URL...\n您输入的url是无效url。",
   "error.playerError": "Player Error...\n视频播放器发生错误。",
   "error.rateLimited": "Rate Limited...\n达到速率限制，5秒内仅能加载一次视频。",
-  "error.youtubeHint": "无法播放 YouTube 视频，请稍后重试。"
+  "error.youtubeHint": "无法播放 YouTube 视频，请稍后重试。",
+  "error.youtubeHintInvalidUrl": "视频可能不存在，或因 YouTube 方面的问题而无法播放。"
 }
