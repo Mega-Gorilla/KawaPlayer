@@ -98,5 +98,5 @@
   "error.invalidUrl": "URL Invalido...\nL'url deve essere valido.",
   "error.playerError": "Errore Player...\nSi è verificato un errore nel video player.",
   "error.rateLimited": "Limitazione tentativi...\nIl limite tentativi è stato raggiunto. Il video sarà caricato in 5 secondi.",
-  "error.youtubeHint": "I video di YouTube potrebbero non essere riprodotti temporaneamente a seconda dello stato di YouTube o del sistema di risoluzione URL di VRChat. Attendi e riprova, oppure prova un altro video."
+  "error.youtubeHint": "YouTube potrebbe non funzionare temporaneamente. Riprova più tardi."
 }
