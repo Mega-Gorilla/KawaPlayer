@@ -873,7 +873,7 @@ namespace Yamadev.YamaStream.UI
           _statusMessageText.text = GetTranslation("error.rateLimited");
           break;
         case VideoError.PlayerError:
-          _statusMessageText.text = WithYouTubeHint(GetTranslation("error.playerError"));
+          _statusMessageText.text = GetTranslation("error.playerError");
           break;
         default:
           break;
@@ -882,6 +882,8 @@ namespace Yamadev.YamaStream.UI
 
     private string WithYouTubeHint(string message)
     {
+      // AccessDenied/Unknown only: for PlayerError the failure may be on the
+      // player side, so claiming a YouTube fetch failure could be wrong.
       // Only direct YouTube URLs are detectable here: PlaylistLoader stores
       // VHub redirect URLs in tracks, so those never match (see issue #72).
       if (!UrlUtils.IsYouTubeUrl(TrackUtils.GetUrl(_controller.Track).Get())) return message;

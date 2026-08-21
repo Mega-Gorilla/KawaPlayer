@@ -98,5 +98,5 @@
   "error.invalidUrl": "Invalid URL...\nご入力されたURLは有効なURLではありません。",
   "error.playerError": "Player Error...\n動画プレイヤーのエラーが発生しました。",
   "error.rateLimited": "Rate Limited...\nレート制限に達しています、5秒に一回だけ動画再生が可能です。",
-  "error.youtubeHint": "YouTube 側または VRChat の状況により、一時的に再生できないことがあります。"
+  "error.youtubeHint": "YouTube からデータを取得できませんでした。"
 }
