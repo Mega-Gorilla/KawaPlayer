@@ -25,7 +25,9 @@ namespace Yamadev.YamaStream
       if (extension.Length != 4) return ProviderUnknown;
       if (extension[0] != MagicByte0 || extension[1] != MagicByte1) return ProviderUnknown;
       if (extension[2] != Version) return ProviderUnknown;
-      return extension[3];
+      // Values not defined in v1 normalize to ProviderUnknown so callers
+      // never observe undefined provider ids.
+      return extension[3] == ProviderYouTube ? ProviderYouTube : ProviderUnknown;
     }
 
     public static bool IsYouTube(object[] track) => GetProvider(track) == ProviderYouTube;
