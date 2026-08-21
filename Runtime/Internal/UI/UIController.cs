@@ -861,23 +861,33 @@ namespace Yamadev.YamaStream.UI
       switch (videoError)
       {
         case VideoError.Unknown:
-          _statusMessageText.text = GetTranslation("error.unknown");
+          _statusMessageText.text = WithYouTubeHint(GetTranslation("error.unknown"));
           break;
         case VideoError.InvalidURL:
           _statusMessageText.text = GetTranslation("error.invalidUrl");
           break;
         case VideoError.AccessDenied:
-          _statusMessageText.text = GetTranslation("error.accessDenied");
+          _statusMessageText.text = WithYouTubeHint(GetTranslation("error.accessDenied"));
           break;
         case VideoError.RateLimited:
           _statusMessageText.text = GetTranslation("error.rateLimited");
           break;
         case VideoError.PlayerError:
-          _statusMessageText.text = GetTranslation("error.playerError");
+          _statusMessageText.text = WithYouTubeHint(GetTranslation("error.playerError"));
           break;
         default:
           break;
       }
+    }
+
+    private string WithYouTubeHint(string message)
+    {
+      // Only direct YouTube URLs are detectable here: PlaylistLoader stores
+      // VHub redirect URLs in tracks, so those never match (see issue #72).
+      if (!UrlUtils.IsYouTubeUrl(TrackUtils.GetUrl(_controller.Track).Get())) return message;
+      string hint = GetTranslation("error.youtubeHint");
+      if (string.IsNullOrEmpty(hint)) return message;
+      return $"{message}\n{hint}";
     }
 
     private void UpdateLoadingView()

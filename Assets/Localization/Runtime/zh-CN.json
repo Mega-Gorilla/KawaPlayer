@@ -97,5 +97,6 @@
   "error.unknown": "Unknown Error...\n发生未知错误。",
   "error.invalidUrl": "Invalid URL...\n您输入的url是无效url。",
   "error.playerError": "Player Error...\n视频播放器发生错误。",
-  "error.rateLimited": "Rate Limited...\n达到速率限制，5秒内仅能加载一次视频。"
+  "error.rateLimited": "Rate Limited...\n达到速率限制，5秒内仅能加载一次视频。",
+  "error.youtubeHint": "受 YouTube 或 VRChat URL 解析功能的状况影响，YouTube 视频可能暂时无法播放。请稍后重试，或尝试其他视频。"
 }

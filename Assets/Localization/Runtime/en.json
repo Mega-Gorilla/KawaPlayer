@@ -97,5 +97,6 @@
   "error.unknown": "Unknown Error...\nAn unknown error occurred.",
   "error.invalidUrl": "Invalid URL...\nThe url you entered is an invalid url.",
   "error.playerError": "Player Error...\nAn error occurred in the video player.",
-  "error.rateLimited": "Rate Limited...\nThe rate limit is reached. Video can only be loaded once in 5 seconds."
+  "error.rateLimited": "Rate Limited...\nThe rate limit is reached. Video can only be loaded once in 5 seconds.",
+  "error.youtubeHint": "YouTube videos may temporarily fail to play depending on the status of YouTube or VRChat's URL resolver. Please wait and retry, or try another video."
 }
