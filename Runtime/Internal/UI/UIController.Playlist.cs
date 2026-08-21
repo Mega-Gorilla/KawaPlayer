@@ -91,14 +91,15 @@ namespace Yamadev.YamaStream.UI
       }
       else if (_playlistIndex >= 0 && _playlistIndex < _controller.Playlists.Length)
       {
-        trackCount = _controller.Playlists[_playlistIndex].TrackCount;
+        var playlist = _controller.Playlists[_playlistIndex];
+        trackCount = playlist.TrackCount;
+
+        if (Utilities.IsValid(_currentPlaylistNameText))
+        {
+          _currentPlaylistNameText.text = playlist.PlaylistName;
+        }
       }
       else return;
-
-      if (Utilities.IsValid(_currentPlaylistNameText) && _playlistsTabToggle.isOn)
-      {
-        _currentPlaylistNameText.text = _controller.Playlists[_playlistIndex].PlaylistName;
-      }
 
       _playlistTracksScroll.SetUp(trackCount, this, nameof(UpdatePlaylistTracksContent));
     }
