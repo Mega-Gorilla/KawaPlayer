@@ -34,6 +34,11 @@ namespace Yamadev.YamaStream.UI
     [SerializeField] private Toggle _modalAVProPlayerToggle;
     [SerializeField] private Toggle _modalImageViewerToggle;
 
+    [Header("URL Interceptor")]
+    // Wired at build time by PlaylistLoaderBuildProcess when the module is
+    // present; see the contract in PlayUrlField.
+    [SerializeField] private UdonSharpBehaviour _urlInterceptor;
+
     [Header("Track Info Display (Top Bar)")]
     [SerializeField, RegisterEvent(nameof(VRCUrlInputField.onEndEdit), nameof(PlayUrlTop))] private VRCUrlInputField _urlInputFieldTop;
     [SerializeField] private Text _trackTitleText;
@@ -270,6 +275,26 @@ namespace Yamadev.YamaStream.UI
     private void PlayUrlField(VRCUrlInputField urlInputField)
     {
       if (!Utilities.IsValid(urlInputField)) return;
+
+      // Optional URL interceptor (issue #82): a module (PlaylistLoader) can
+      // claim the entered URL before the video path sees it. Wired by the
+      // module's build process; unassigned means the hook is inert. This is a
+      // dedicated slot rather than a Before event because _actionCancelled is
+      // a single shared flag — the interceptor itself invokes
+      // InvokeBeforeEvent("BeforeUserLoadPlaylist"), and nesting that inside
+      // another InvokeBeforeEvent would race the flag.
+      if (Utilities.IsValid(_urlInterceptor))
+      {
+        _urlInterceptor.SetProgramVariable("interceptUrl", urlInputField.GetUrl());
+        _urlInterceptor.SetProgramVariable("interceptHandled", false);
+        _urlInterceptor.SendCustomEvent("OnUrlSubmitted");
+        if ((bool)_urlInterceptor.GetProgramVariable("interceptHandled"))
+        {
+          urlInputField.SetUrl(VRCUrl.Empty);
+          return;
+        }
+      }
+
       if (_controller.FindHandlerIndexForUrl(urlInputField.GetUrl()) < 0)
       {
         urlInputField.SetUrl(VRCUrl.Empty);

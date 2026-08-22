@@ -39,9 +39,19 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
       if (string.IsNullOrEmpty(_defaultUrl.Get())) return;
       if (!_controller.Stopped) return;
 
-      if (_defaultUrl.Get().Contains("playlist.vrc-hub.com"))
+      // Strict playlist-URL check via the loader (issue #82). When the
+      // loader is absent, keep the old substring guard so a stored playlist
+      // URL stays a silent no-op instead of falling into the video path.
+      if (_playlistLoader == null)
       {
-        if (_playlistLoader == null) return;
+        if (_defaultUrl.Get().Contains("playlist.vrc-hub.com")) return;
+        _controller.TakeOwnership();
+        _controller.PlayTrack(TrackUtils.NewTrack(_videoPlayerType, "", _defaultUrl));
+        return;
+      }
+
+      if (_playlistLoader.IsOwnPlaylistUrl(_defaultUrl.Get()))
+      {
         if (_playlistLoader.IsLoading) return;
         _playlistLoader.LoadPlaylistFromUrl(_defaultUrl);
       }

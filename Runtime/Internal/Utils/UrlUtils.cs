@@ -39,6 +39,25 @@ namespace Yamadev.YamaStream
 
     public static string GetHost(this VRCUrl url) => GetHostFromUrl(url.Get());
 
+    public static string GetPathFromUrl(string url)
+    {
+      if (string.IsNullOrEmpty(url)) return string.Empty;
+      int schemeEnd = url.IndexOf("://");
+      if (schemeEnd == -1) return string.Empty;
+      string rest = url.Substring(schemeEnd + 3);
+      // The path ends at the first `?` or `#`; a `?`/`#` before any `/`
+      // means the authority has no path component at all.
+      int cut = rest.Length;
+      int queryIndex = rest.IndexOf('?');
+      if (queryIndex != -1 && queryIndex < cut) cut = queryIndex;
+      int fragmentIndex = rest.IndexOf('#');
+      if (fragmentIndex != -1 && fragmentIndex < cut) cut = fragmentIndex;
+      rest = rest.Substring(0, cut);
+      int slashIndex = rest.IndexOf('/');
+      if (slashIndex == -1) return "/";
+      return rest.Substring(slashIndex);
+    }
+
     public static bool IsYouTubeUrl(string url)
     {
       string host = GetHostFromUrl(url);
