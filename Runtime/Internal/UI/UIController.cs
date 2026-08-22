@@ -895,9 +895,12 @@ namespace Yamadev.YamaStream.UI
 
     private bool ShouldShowYouTubeHint(VideoError videoError)
     {
-      // Unknown, InvalidURL and PlayerError: on the real client YouTube
-      // failures arrive as PlayerError (issue #80), while the editor resolver
-      // maps them to InvalidURL. AccessDenied already carries an actionable
+      // Unknown, InvalidURL and PlayerError: YouTube playback failures
+      // observed on the real client arrived as PlayerError (issue #80), while
+      // the editor resolver maps them to InvalidURL. PlayerError alone cannot
+      // tell where the failure happened (resolver, YouTube, AVPro, network),
+      // but the hint only states the observed result and a retry suggestion,
+      // so it stays accurate. AccessDenied already carries an actionable
       // base message (Allow Untrusted URLs) and RateLimited is VRChat's 5s
       // limit, so those get no hint. Detection is additive: direct YouTube
       // URLs match by host, and PlaylistLoader tracks (VHub redirect URLs)
