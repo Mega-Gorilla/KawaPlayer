@@ -28,7 +28,11 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader.Editor
       if (loaderUi == null || !loaderUi.gameObject.activeInHierarchy) return;
       var loader = loaderUi.GetProgramVariable("_loader") as PlaylistLoader;
       if (loader == null) return;
+      // Prefer the parent chain (module under Controller/Modules), but fall
+      // back to the serialized _controller reference for placements outside
+      // that chain.
       var controller = loader.GetComponentInParent<Controller>(true);
+      if (controller == null) controller = loader.GetProgramVariable("_controller") as Controller;
       if (controller == null) return;
 
       var uiControllers = Object.FindObjectsByType<UIController>(FindObjectsInactive.Include, FindObjectsSortMode.None);
