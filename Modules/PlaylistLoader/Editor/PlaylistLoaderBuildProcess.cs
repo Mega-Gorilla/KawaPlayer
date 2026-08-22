@@ -47,6 +47,9 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader.Editor
 
         uiController.SetProgramVariable("_urlInterceptor", loaderUi);
         loaderUi.SetProgramVariable("_uiController", uiController);
+        // Tells the player which URL kinds this world accepts (issue #84).
+        // Set on every paired UIController so multi-panel setups all show it.
+        uiController.SetProgramVariable("_urlHintKey", "module.playlistLoader.inputHint");
       }
     }
   }

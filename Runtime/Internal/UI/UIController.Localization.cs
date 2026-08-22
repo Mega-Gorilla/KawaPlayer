@@ -309,6 +309,10 @@ namespace Yamadev.YamaStream.UI
       if (Utilities.IsValid(_languageSelectTitleLabel)) _languageSelectTitleLabel.text = GetTranslation("label.languageSelect");
       if (Utilities.IsValid(_modalImageViewerLabel)) _modalImageViewerLabel.text = GetTranslation("label.imageViewer");
 
+      // Re-resolves the URL hint (issue #84) in the new language along with
+      // the track info it shares the bar with.
+      UpdateTrackView();
+
       if (Utilities.IsValid(_unlockUiMessageLabel))
       {
         if (IsInVR) _unlockUiMessageLabel.text = GetTranslation("msg.unlockUiVr");

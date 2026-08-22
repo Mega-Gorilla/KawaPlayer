@@ -38,6 +38,12 @@ namespace Yamadev.YamaStream.UI
     // Wired at build time by PlaylistLoaderBuildProcess when the module is
     // present; see the contract in PlayUrlField.
     [SerializeField] private UdonSharpBehaviour _urlInterceptor;
+    // Optional hint shown in the (otherwise empty) track info bar while
+    // nothing is loaded, telling users what the URL input accepts. The key
+    // is supplied by an interceptor module's build process (issue #84);
+    // empty means no hint, which is the vanilla behavior.
+    [SerializeField] private Text _urlHintText;
+    [SerializeField, HideInInspector] private string _urlHintKey;
 
     [Header("Track Info Display (Top Bar)")]
     [SerializeField, RegisterEvent(nameof(VRCUrlInputField.onEndEdit), nameof(PlayUrlTop))] private VRCUrlInputField _urlInputFieldTop;
@@ -858,6 +864,19 @@ namespace Yamadev.YamaStream.UI
       var url = TrackUtils.GetUrl(track).Get();
       if (Utilities.IsValid(_trackTitleText)) _trackTitleText.text = !string.IsNullOrEmpty(title) ? title : url;
       if (Utilities.IsValid(_trackUrlText)) _trackUrlText.text = !string.IsNullOrEmpty(title) ? url : string.Empty;
+      UpdateUrlHintView(string.IsNullOrEmpty(title) && string.IsNullOrEmpty(url));
+    }
+
+    private void UpdateUrlHintView(bool trackInfoEmpty)
+    {
+      if (!Utilities.IsValid(_urlHintText)) return;
+      // A missing key resolves to an empty string, so an unwired module or a
+      // stale key hides the hint rather than showing a blank line.
+      string hint = trackInfoEmpty && !string.IsNullOrEmpty(_urlHintKey)
+          ? GetTranslation(_urlHintKey)
+          : string.Empty;
+      _urlHintText.text = hint;
+      _urlHintText.gameObject.SetActive(!string.IsNullOrEmpty(hint));
     }
 
     private void UpdateAudioView()
