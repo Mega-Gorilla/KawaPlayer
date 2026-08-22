@@ -51,6 +51,7 @@ namespace Yamadev.YamaStream.Modules.PermissionManagement
     public void BeforeUserChangeSpeed() => CheckPermission();
     public void BeforeUserChangeRepeat() => CheckPermission();
     public void BeforeUserAddTrackToQueue() => CheckPermission();
+    public void BeforeUserLoadPlaylist() => CheckPermission();
     public void BeforeUserRemoveTrackFromQueue() => CheckPermission();
     public void BeforeUserMoveTrackUp() => CheckPermission();
     public void BeforeUserMoveTrackDown() => CheckPermission();
