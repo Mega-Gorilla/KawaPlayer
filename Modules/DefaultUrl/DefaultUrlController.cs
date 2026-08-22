@@ -39,12 +39,18 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
       if (string.IsNullOrEmpty(_defaultUrl.Get())) return;
       if (!_controller.Stopped) return;
 
-      // Strict playlist-URL check via the loader (issue #82). When the
-      // loader is absent, keep the old substring guard so a stored playlist
-      // URL stays a silent no-op instead of falling into the video path.
+      // Strict playlist-URL check (issue #82). When the loader is absent,
+      // classify with the default VHub host and an empty pool: any
+      // playlist-intent URL (/r/..., /playlists/...) stays a silent no-op
+      // (nothing can load it), while /vrcurl/... slot URLs and lookalike
+      // hosts fall through to the video path as ordinary video URLs.
       if (_playlistLoader == null)
       {
-        if (_defaultUrl.Get().Contains("playlist.vrc-hub.com")) return;
+        if (Yamadev.YamaStream.Modules.PlaylistLoader.PlaylistUrlUtils.Classify(
+                _defaultUrl.Get(),
+                Yamadev.YamaStream.Modules.PlaylistLoader.PlaylistUrlUtils.DefaultPoolBaseUrl,
+                "") != Yamadev.YamaStream.Modules.PlaylistLoader.PlaylistUrlUtils.KindNotOurs)
+          return;
         _controller.TakeOwnership();
         _controller.PlayTrack(TrackUtils.NewTrack(_videoPlayerType, "", _defaultUrl));
         return;

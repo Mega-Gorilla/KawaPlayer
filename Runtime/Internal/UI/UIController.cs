@@ -286,6 +286,9 @@ namespace Yamadev.YamaStream.UI
       if (Utilities.IsValid(_urlInterceptor))
       {
         _urlInterceptor.SetProgramVariable("interceptUrl", urlInputField.GetUrl());
+        // Pass the calling UIController so a shared interceptor talks back
+        // to the panel the URL was entered on, not a fixed one.
+        _urlInterceptor.SetProgramVariable("interceptSource", this);
         _urlInterceptor.SetProgramVariable("interceptHandled", false);
         _urlInterceptor.SendCustomEvent("OnUrlSubmitted");
         if ((bool)_urlInterceptor.GetProgramVariable("interceptHandled"))

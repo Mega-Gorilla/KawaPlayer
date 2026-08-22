@@ -10,12 +10,13 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
   [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
   public class PlaylistLoader : YamaPlayerModule
   {
-    // ClassifyUrl results (issue #82).
-    public const int UrlKindNotOurs = 0;
-    public const int UrlKindOwnPlaylist = 1;
-    public const int UrlKindOtherPool = 2;
-    public const int UrlKindWebPage = 3;
-    public const int UrlKindMalformed = 4;
+    // ClassifyUrl results (issue #82); canonical values live in
+    // PlaylistUrlUtils, aliased here for callers holding a loader reference.
+    public const int UrlKindNotOurs = PlaylistUrlUtils.KindNotOurs;
+    public const int UrlKindOwnPlaylist = PlaylistUrlUtils.KindOwnPlaylist;
+    public const int UrlKindOtherPool = PlaylistUrlUtils.KindOtherPool;
+    public const int UrlKindWebPage = PlaylistUrlUtils.KindWebPage;
+    public const int UrlKindMalformed = PlaylistUrlUtils.KindMalformed;
 
     // OnLoadResult codes reported to PlaylistLoaderUI (issue #82).
     public const int LoadResultSuccess = 0;
@@ -47,31 +48,8 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
     public bool IsLoading => _isLoading;
 
     // Classifies a user-entered URL against this loader's pool config
-    // (issue #82). Accepts http and https so a pasted http playlist URL
-    // surfaces a playlist-flavored error instead of a video-player error.
-    public int ClassifyUrl(string url)
-    {
-      if (string.IsNullOrEmpty(url)) return UrlKindNotOurs;
-      string scheme = UrlUtils.GetProtocolFromUrl(url);
-      if (scheme != "http" && scheme != "https") return UrlKindNotOurs;
-      string host = UrlUtils.GetHostFromUrl(url);
-      if (string.IsNullOrEmpty(host) || host != UrlUtils.GetHostFromUrl(_poolBaseUrl)) return UrlKindNotOurs;
-
-      string path = UrlUtils.GetPathFromUrl(url);
-      while (path.EndsWith("/") && path.Length > 1) path = path.Substring(0, path.Length - 1);
-
-      if (path.StartsWith("/playlists/")) return UrlKindWebPage;
-      if (path == "/r") return UrlKindMalformed;
-      if (!path.StartsWith("/r/")) return UrlKindNotOurs;
-
-      // path = /r/{pool}/{playlistId...}; any non-empty remainder counts as
-      // the id (the server rejects ids it does not know).
-      string rest = path.Substring(3);
-      int slashIndex = rest.IndexOf('/');
-      if (slashIndex <= 0 || slashIndex == rest.Length - 1) return UrlKindMalformed;
-      string pool = rest.Substring(0, slashIndex);
-      return pool == _poolId ? UrlKindOwnPlaylist : UrlKindOtherPool;
-    }
+    // (issue #82).
+    public int ClassifyUrl(string url) => PlaylistUrlUtils.Classify(url, _poolBaseUrl, _poolId);
 
     public bool IsOwnPlaylistUrl(string url) => ClassifyUrl(url) == UrlKindOwnPlaylist;
 
