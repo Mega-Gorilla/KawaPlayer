@@ -1,6 +1,5 @@
 {
   "ja": {
-    "label.inputUrl": "動画 / プレイリスト URL を入力",
     "module.playlistLoader.loadedTitle": "プレイリストを追加しました",
     "module.playlistLoader.loadedMessage": "『{0}』の {1} 曲をキューに追加しました。",
     "module.playlistLoader.loadedPartialMessage": "{0} 曲を追加しました ({1} 曲はスキップ)。",
@@ -16,7 +15,6 @@
     "module.playlistLoader.errorInternal": "プレイヤー内部エラーでキューに追加できませんでした。"
   },
   "en": {
-    "label.inputUrl": "Enter video / playlist URL",
     "module.playlistLoader.loadedTitle": "Playlist added",
     "module.playlistLoader.loadedMessage": "Added {1} tracks from \"{0}\" to the queue.",
     "module.playlistLoader.loadedPartialMessage": "Added {0} tracks ({1} skipped).",
@@ -32,7 +30,6 @@
     "module.playlistLoader.errorInternal": "An internal player error prevented adding to the queue."
   },
   "ko": {
-    "label.inputUrl": "동영상 / 플레이리스트 URL 입력",
     "module.playlistLoader.loadedTitle": "플레이리스트를 추가했습니다",
     "module.playlistLoader.loadedMessage": "\"{0}\"의 {1}곡을 대기열에 추가했습니다.",
     "module.playlistLoader.loadedPartialMessage": "{0}곡을 추가했습니다 ({1}곡 건너뜀).",
@@ -48,7 +45,6 @@
     "module.playlistLoader.errorInternal": "플레이어 내부 오류로 대기열에 추가하지 못했습니다."
   },
   "zh-CN": {
-    "label.inputUrl": "输入视频 / 播放列表 URL",
     "module.playlistLoader.loadedTitle": "已添加播放列表",
     "module.playlistLoader.loadedMessage": "已将「{0}」的 {1} 首曲目添加到队列。",
     "module.playlistLoader.loadedPartialMessage": "已添加 {0} 首曲目 (跳过 {1} 首)。",
@@ -64,7 +60,6 @@
     "module.playlistLoader.errorInternal": "播放器内部错误，无法添加到队列。"
   },
   "zh-HK": {
-    "label.inputUrl": "輸入影片 / 播放清單 URL",
     "module.playlistLoader.loadedTitle": "已加入播放清單",
     "module.playlistLoader.loadedMessage": "已將「{0}」的 {1} 首曲目加入佇列。",
     "module.playlistLoader.loadedPartialMessage": "已加入 {0} 首曲目 (略過 {1} 首)。",
@@ -80,7 +75,6 @@
     "module.playlistLoader.errorInternal": "播放器內部錯誤，無法加入佇列。"
   },
   "es": {
-    "label.inputUrl": "Introducir URL de vídeo / lista",
     "module.playlistLoader.loadedTitle": "Lista de reproducción añadida",
     "module.playlistLoader.loadedMessage": "Se añadieron {1} pistas de \"{0}\" a la cola.",
     "module.playlistLoader.loadedPartialMessage": "Se añadieron {0} pistas ({1} omitidas).",
@@ -96,7 +90,6 @@
     "module.playlistLoader.errorInternal": "Un error interno del reproductor impidió añadir a la cola."
   },
   "it": {
-    "label.inputUrl": "Inserisci URL video / playlist",
     "module.playlistLoader.loadedTitle": "Playlist aggiunta",
     "module.playlistLoader.loadedMessage": "Aggiunte {1} tracce da \"{0}\" alla coda.",
     "module.playlistLoader.loadedPartialMessage": "Aggiunte {0} tracce ({1} saltate).",
@@ -112,7 +105,6 @@
     "module.playlistLoader.errorInternal": "Un errore interno del player ha impedito l'aggiunta alla coda."
   },
   "ru": {
-    "label.inputUrl": "Введите URL видео / плейлиста",
     "module.playlistLoader.loadedTitle": "Плейлист добавлен",
     "module.playlistLoader.loadedMessage": "В очередь добавлено {1} треков из \"{0}\".",
     "module.playlistLoader.loadedPartialMessage": "Добавлено {0} треков ({1} пропущено).",
@@ -128,7 +120,6 @@
     "module.playlistLoader.errorInternal": "Внутренняя ошибка плеера: не удалось добавить в очередь."
   },
   "uk": {
-    "label.inputUrl": "Введіть URL відео / плейлиста",
     "module.playlistLoader.loadedTitle": "Плейлист додано",
     "module.playlistLoader.loadedMessage": "До черги додано {1} треків із \"{0}\".",
     "module.playlistLoader.loadedPartialMessage": "Додано {0} треків ({1} пропущено).",
