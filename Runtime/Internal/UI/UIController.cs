@@ -38,10 +38,11 @@ namespace Yamadev.YamaStream.UI
     // Wired at build time by PlaylistLoaderBuildProcess when the module is
     // present; see the contract in PlayUrlField.
     [SerializeField] private UdonSharpBehaviour _urlInterceptor;
-    // Optional hint shown in the (otherwise empty) track info bar while
-    // nothing is loaded, telling users what the URL input accepts. The key
-    // is supplied by an interceptor module's build process (issue #84);
-    // empty means no hint, which is the vanilla behavior.
+    // Line shown in the (otherwise empty) track info bar while nothing is
+    // loaded: the player name and version, optionally followed by what the
+    // URL input accepts. The trailing sentence's key is supplied by an
+    // interceptor module's build process (issue #84); empty means the
+    // branding shows on its own.
     [SerializeField] private Text _urlHintText;
     [SerializeField, HideInInspector] private string _urlHintKey;
 
@@ -870,11 +871,21 @@ namespace Yamadev.YamaStream.UI
     private void UpdateUrlHintView(bool trackInfoEmpty)
     {
       if (!Utilities.IsValid(_urlHintText)) return;
-      // A missing key resolves to an empty string, so an unwired module or a
-      // stale key hides the hint rather than showing a blank line.
-      string hint = trackInfoEmpty && !string.IsNullOrEmpty(_urlHintKey)
-          ? GetTranslation(_urlHintKey)
-          : string.Empty;
+      string hint = string.Empty;
+      if (trackInfoEmpty)
+      {
+        // The branding always shows while idle, matching the version string
+        // in the info panel so it never goes stale. An interceptor module
+        // appends what its URL input accepts; a missing key resolves to an
+        // empty string, so an unwired module or a stale key leaves the
+        // branding alone instead of adding a blank tail.
+        hint = $"KawaPlayer v{_controller.Version}";
+        if (!string.IsNullOrEmpty(_urlHintKey))
+        {
+          string accepts = GetTranslation(_urlHintKey);
+          if (!string.IsNullOrEmpty(accepts)) hint = $"{hint} / {accepts}";
+        }
+      }
       _urlHintText.text = hint;
       _urlHintText.gameObject.SetActive(!string.IsNullOrEmpty(hint));
     }
