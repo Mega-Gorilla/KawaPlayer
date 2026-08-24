@@ -883,7 +883,7 @@ namespace Yamadev.YamaStream.UI
         if (!string.IsNullOrEmpty(_urlHintKey))
         {
           string accepts = GetTranslation(_urlHintKey);
-          if (!string.IsNullOrEmpty(accepts)) hint = $"{hint} {accepts}";
+          if (!string.IsNullOrEmpty(accepts)) hint = $"{hint} / {accepts}";
         }
       }
       _urlHintText.text = hint;
