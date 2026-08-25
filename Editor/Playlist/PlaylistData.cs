@@ -12,6 +12,7 @@ namespace Yamadev.YamaStream.Editor
     public string name;
     public List<PlaylistTrack> tracks;
     public string youtubeListId;
+    public string vhubPlaylistUrl;
 
     [JsonIgnore] public PlaylistItem originalItem;
     [JsonIgnore] public bool isNameEditing;
@@ -21,6 +22,7 @@ namespace Yamadev.YamaStream.Editor
       active = true;
       tracks = new List<PlaylistTrack>();
       youtubeListId = "";
+      vhubPlaylistUrl = "";
     }
 
     public PlaylistData(PlaylistItem item)
@@ -30,6 +32,7 @@ namespace Yamadev.YamaStream.Editor
       name = item.playlistName;
       tracks = item.tracks?.ToList() ?? new List<PlaylistTrack>();
       youtubeListId = item.youtubePlaylistId ?? "";
+      vhubPlaylistUrl = item.vhubPlaylistUrl ?? "";
       isNameEditing = false;
     }
   }

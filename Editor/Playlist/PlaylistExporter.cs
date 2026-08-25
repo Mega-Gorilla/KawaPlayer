@@ -25,7 +25,8 @@ namespace Yamadev.YamaStream.Editor
           active = p.gameObject.activeSelf,
           name = p.playlistName,
           tracks = p.tracks?.ToList() ?? new List<PlaylistTrack>(),
-          youtubeListId = p.youtubePlaylistId
+          youtubeListId = p.youtubePlaylistId,
+          vhubPlaylistUrl = p.vhubPlaylistUrl
         }).ToList()
       };
 
@@ -71,6 +72,7 @@ namespace Yamadev.YamaStream.Editor
       bool active = item["active"]?.Value<bool>() ?? item["Active"]?.Value<bool>() ?? true;
       string name = item["name"]?.Value<string>() ?? item["Name"]?.Value<string>() ?? "";
       string youtubeListId = item["youtubeListId"]?.Value<string>() ?? item["YoutubeListId"]?.Value<string>() ?? "";
+      string vhubPlaylistUrl = item["vhubPlaylistUrl"]?.Value<string>() ?? item["VhubPlaylistUrl"]?.Value<string>() ?? "";
 
       JArray tracksArray = item["tracks"] as JArray ?? item["Tracks"] as JArray;
       List<PlaylistTrack> tracks = new List<PlaylistTrack>();
@@ -89,7 +91,8 @@ namespace Yamadev.YamaStream.Editor
         active = active,
         name = name,
         tracks = tracks,
-        youtubeListId = youtubeListId
+        youtubeListId = youtubeListId,
+        vhubPlaylistUrl = vhubPlaylistUrl
       };
     }
 
