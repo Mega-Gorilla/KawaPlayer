@@ -272,11 +272,20 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
         // character as an ASCII URL; 16 covers the player type and the
         // per-element array overhead.
         int trackBytes = (_redirectPool[index].Get().Length + title.Length) * 2 + 16;
-        if (addedCount > 0 && estimatedBytes + trackBytes > _maxSyncBytes)
+        if (estimatedBytes + trackBytes > _maxSyncBytes)
         {
-          failedCount += totalCount - i;
-          PrintWarning($"Playlist truncated at {addedCount} tracks: ~{estimatedBytes + trackBytes} bytes exceeds the {_maxSyncBytes} byte sync budget ({totalCount - i} dropped).");
-          break;
+          if (addedCount > 0)
+          {
+            failedCount += totalCount - i;
+            PrintWarning($"Playlist truncated at {addedCount} tracks: ~{estimatedBytes + trackBytes} bytes exceeds the {_maxSyncBytes} byte sync budget ({totalCount - i} dropped).");
+            break;
+          }
+          // A single track over the budget still goes in, because dropping
+          // it would turn a valid playlist into an empty one over a
+          // KawaPlayer-side estimate rather than a platform limit. Say so
+          // rather than exceeding the configured budget silently;
+          // OnPostSerialization reports what actually went out.
+          PrintWarning($"First track alone is ~{trackBytes} bytes, over the {_maxSyncBytes} byte sync budget. Loading it anyway; raise Max Sync Bytes if this playlist should hold more.");
         }
         estimatedBytes += trackBytes;
 

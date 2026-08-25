@@ -14,6 +14,8 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader.Editor
     private SerializedProperty _poolId;
     private SerializedProperty _poolBaseUrl;
     private SerializedProperty _poolSize;
+    private SerializedProperty _maxTracks;
+    private SerializedProperty _maxSyncBytes;
     private SerializedProperty _autoLoadOnStart;
     private SerializedProperty _autoLoadUrl;
     private SerializedProperty _autoLoadDelay;
@@ -28,6 +30,8 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader.Editor
       _poolId = serializedObject.FindProperty("_poolId");
       _poolBaseUrl = serializedObject.FindProperty("_poolBaseUrl");
       _poolSize = serializedObject.FindProperty("_poolSize");
+      _maxTracks = serializedObject.FindProperty("_maxTracks");
+      _maxSyncBytes = serializedObject.FindProperty("_maxSyncBytes");
       _autoLoadOnStart = serializedObject.FindProperty("_autoLoadOnStart");
       _autoLoadUrl = serializedObject.FindProperty("_autoLoadUrl");
       _autoLoadDelay = serializedObject.FindProperty("_autoLoadDelay");
@@ -45,6 +49,8 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader.Editor
       DrawPoolStatus();
       EditorGUILayout.Space(SpaceMedium);
       DrawPoolActions();
+      EditorGUILayout.Space(SpaceMedium);
+      DrawPlaylistLimits();
       EditorGUILayout.Space(SpaceMedium);
       DrawAutoLoadSection();
 
@@ -113,6 +119,28 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader.Editor
       {
         GeneratePool();
       }
+    }
+
+    // This inspector draws only the properties it lists (EditorBase does not
+    // call DrawDefaultInspector), so anything omitted here is unreachable
+    // from the Inspector.
+    private void DrawPlaylistLimits()
+    {
+      EditorGUILayout.LabelField("Playlist Limits", EditorStyles.boldLabel);
+      EditorGUILayout.Space(SpaceSmall);
+
+      EditorGUILayout.PropertyField(_maxTracks, new GUIContent("Max Tracks"));
+      EditorGUILayout.PropertyField(_maxSyncBytes, new GUIContent("Max Sync Bytes"));
+
+      EditorGUILayout.HelpBox(
+        "読み込んだプレイリスト 1 件あたりの上限です。"
+        + "曲数とサイズのどちらかに達した時点で打ち切り、超過分は「N/M 曲追加」として表示されます。",
+        MessageType.Info);
+      EditorGUILayout.HelpBox(
+        "Max Sync Bytes は VRChat のハード上限ではなく、同期の帯域と待ち時間を抑えるための目安です "
+        + "(Manual Sync の上限は 1 回あたり約 280,496 bytes、Udon 全体の送信量は約 11KB/秒)。"
+        + "帯域はワールド全体で共有されるため、大きくすると読み込み後に全員へ行き渡るまでの時間が延びます。",
+        MessageType.Info);
     }
 
     private void DrawAutoLoadSection()
