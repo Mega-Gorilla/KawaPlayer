@@ -38,15 +38,18 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
     // Wired at build time by PlaylistLoaderBuildProcess from the Controller
     // hierarchy, so worlds get whatever the prefab ships with.
     [SerializeField, HideInInspector] private DynamicPlaylist[] _dynamicPlaylists = new DynamicPlaylist[0];
-    // Caps one playlist's synced payload. 200 tracks of VHub redirect URLs
-    // plus titles lands around 23KB, comfortably inside Udon's manual sync
-    // budget; raise it only with that budget in mind.
+    // Bounds one playlist by track count. 200 tracks of VHub redirect URLs
+    // plus titles is roughly 36KB, so in practice the byte budget below is
+    // what usually stops a large playlist first.
     [SerializeField, Range(1, 500)] private int _maxTracks = 200;
     // Track count alone does not bound the payload: titles dominate it and
-    // vary wildly. Udon's per-behaviour manual sync ceiling is ~49KB and the
-    // world-wide budget is roughly 11KB/s shared by everything, so cap the
-    // estimated bytes too and stop well short of the hard limit.
-    [SerializeField, Range(4096, 49152)] private int _maxSyncBytes = 32768;
+    // vary wildly. This is a KawaPlayer-side estimate for keeping bandwidth
+    // and late-joiner latency reasonable, NOT a platform ceiling -- Udon's
+    // hard limit is ~280,496 bytes per manual serialization. The binding
+    // constraint is the ~11KB/s that all Udon in the world shares, which
+    // already makes 32KB take about three seconds to go out.
+    // https://creators.vrchat.com/worlds/udon/networking/network-details/
+    [SerializeField, Range(4096, 65536)] private int _maxSyncBytes = 32768;
     [SerializeField] private bool _autoLoadOnStart;
     [SerializeField] private VRCUrl _autoLoadUrl;
     [SerializeField, Range(0, 60)] private float _autoLoadDelay;
@@ -264,9 +267,11 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
             && pv.TokenType == TokenType.String)
           provider = pv.String;
 
-        // Rough per-track sync cost: the redirect URL, the title as UTF-8
-        // (up to 3 bytes per char), the player type, and array overhead.
-        int trackBytes = _redirectPool[index].Get().Length + title.Length * 3 + 16;
+        // Rough per-track sync cost. VRChat bills a networked string at
+        // 2 bytes per character, so a Japanese title costs the same per
+        // character as an ASCII URL; 16 covers the player type and the
+        // per-element array overhead.
+        int trackBytes = (_redirectPool[index].Get().Length + title.Length) * 2 + 16;
         if (addedCount > 0 && estimatedBytes + trackBytes > _maxSyncBytes)
         {
           failedCount += totalCount - i;
@@ -343,9 +348,12 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
     }
 
     // Reloading the same playlist reuses its slot; otherwise an empty slot
-    // is taken. When every slot is full the least recently filled one is
+    // is taken. When every slot is full the one filled longest ago is
     // replaced, so loading never dead-ends in a world where nobody can free
-    // a slot.
+    // a slot. Note this is least-recently-LOADED, not least-recently-played:
+    // _sequence only moves on a load, so the slot being played right now is
+    // still a candidate. Overwriting it leaves the current track playing and
+    // the next Forward() wraps to the new contents.
     private DynamicPlaylist SelectSlot(string sourceKey)
     {
       DynamicPlaylist empty = null;
