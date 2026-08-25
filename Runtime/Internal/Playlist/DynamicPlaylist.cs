@@ -29,9 +29,13 @@ namespace Yamadev.YamaStream
     [SerializeField] private Controller _controller;
     [SerializeField] private Playlist _playlist;
     [UdonSynced] private string _playlistName = string.Empty;
-    // Identifies what filled the slot, so reloading the same source reuses
-    // its slot instead of consuming a fresh one.
-    [UdonSynced] private string _sourceKey = string.Empty;
+    // Where the contents came from, kept so the slot can be re-fetched and so
+    // reloading the same source reuses its slot instead of consuming a fresh
+    // one. Stored as the URL rather than a derived key because a string
+    // cannot be turned back into a VRCUrl at runtime; whoever fills the slot
+    // derives whatever comparison key it needs. Only meaningful while the
+    // slot holds tracks -- see CanRefresh.
+    [UdonSynced] private VRCUrl _sourceUrl = VRCUrl.Empty;
     // Fill order, assigned by the caller. 0 means never filled, which makes
     // empty slots sort first when picking the least recently filled one.
     [UdonSynced] private int _sequence = 0;
@@ -59,7 +63,12 @@ namespace Yamadev.YamaStream
 
     public string PlaylistName => _playlistName;
 
-    public string SourceKey => _sourceKey;
+    public VRCUrl SourceUrl => _sourceUrl;
+
+    // An empty slot's _sourceUrl is meaningless, and reading it is actively
+    // unsafe in ClientSim, where VRCUrl.Empty.Get() returns a stale URL from
+    // elsewhere in the session. Gate every read of SourceUrl on this.
+    public bool CanRefresh => _tracks.Length > 0 && Utilities.IsValid(_sourceUrl) && !string.IsNullOrEmpty(_sourceUrl.Get());
 
     public int Sequence => _sequence;
 
@@ -71,16 +80,38 @@ namespace Yamadev.YamaStream
 
     // Replaces the slot contents. The caller owns sequencing so that a single
     // load can compare every slot before deciding which one to overwrite.
-    public void Fill(string sourceKey, string playlistName, object[][] tracks, int sequence)
+    public void Fill(VRCUrl sourceUrl, string playlistName, object[][] tracks, int sequence)
     {
       if (!Utilities.IsValid(_playlist)) return;
 
       TakeOwnership();
 
-      _sourceKey = sourceKey == null ? string.Empty : sourceKey;
+      _sourceUrl = Utilities.IsValid(sourceUrl) ? sourceUrl : VRCUrl.Empty;
       _playlistName = playlistName == null ? string.Empty : playlistName;
       _sequence = sequence;
       _tracks = tracks == null ? new object[0][] : tracks;
+
+      if (Networking.IsOwner(_controller.gameObject) && !_controller.IsLocal)
+      {
+        RequestSerialization();
+      }
+      ApplyLocal();
+    }
+
+    // Empties the slot so it can be reused. Resetting _sequence matters as
+    // much as clearing the tracks: a slot that keeps a high sequence would
+    // sort last when the filler looks for somewhere to put a new playlist,
+    // even though it is now the obvious place to use.
+    public void Clear()
+    {
+      if (!Utilities.IsValid(_playlist)) return;
+
+      TakeOwnership();
+
+      _sourceUrl = VRCUrl.Empty;
+      _playlistName = string.Empty;
+      _sequence = 0;
+      _tracks = new object[0][];
 
       if (Networking.IsOwner(_controller.gameObject) && !_controller.IsLocal)
       {

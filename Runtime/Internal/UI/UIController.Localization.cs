@@ -282,6 +282,8 @@ namespace Yamadev.YamaStream.UI
       if (Utilities.IsValid(_tabQueueLabel)) _tabQueueLabel.text = GetTranslation("label.playQueue");
       if (Utilities.IsValid(_tabHistoryLabel)) _tabHistoryLabel.text = GetTranslation("label.playHistory");
       if (Utilities.IsValid(_tabPlaylistsLabel)) _tabPlaylistsLabel.text = GetTranslation("tab.playlist");
+      if (Utilities.IsValid(_playlistRefreshButtonLabel)) _playlistRefreshButtonLabel.text = GetTranslation("button.refreshPlaylist");
+      if (Utilities.IsValid(_playlistDeleteButtonLabel)) _playlistDeleteButtonLabel.text = GetTranslation("button.remove");
 
       if (Utilities.IsValid(_videoPlayerTitleLabel)) _videoPlayerTitleLabel.text = $"{GetTranslation("label.videoPlayer")}<size=44>(Global)</size>";
       if (Utilities.IsValid(_videoPlayerDescLabel)) _videoPlayerDescLabel.text = GetTranslation("desc.videoPlayer");

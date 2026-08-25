@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using UnityEngine;
 using Yamadev.YamaStream.Editor;
 using Yamadev.YamaStream.UI;
@@ -12,6 +11,7 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader.Editor
   //
   // - Playlist slots (issue #88), per PlaylistLoader
   // - The URL interceptor (issue #82), per PlaylistLoaderUI
+  // - The playlist refresh handler (issue #91), per PlaylistLoaderUI
   public class PlaylistLoaderBuildProcess : IYamaPlayerBuildProcess
   {
     public int callbackOrder => -2500;
@@ -32,6 +32,27 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader.Editor
       foreach (var loaderUi in loaderUis)
       {
         ProcessInterceptor(loaderUi);
+        ProcessRefreshHandler(loaderUi);
+      }
+    }
+
+    // The refresh button (issue #91) lives in the Playlists tab, which exists
+    // on panels that have no URL input at all -- PlaylistPanel is one. So this
+    // deliberately does NOT reuse the interceptor's "owns the main URL input"
+    // filter, or the button would never work there.
+    private static void ProcessRefreshHandler(PlaylistLoaderUI loaderUi)
+    {
+      if (loaderUi == null || !loaderUi.gameObject.activeInHierarchy) return;
+      var loader = loaderUi.GetProgramVariable("_loader") as PlaylistLoader;
+      if (loader == null) return;
+      var controller = ResolveController(loader);
+      if (controller == null) return;
+
+      var uiControllers = Object.FindObjectsByType<UIController>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+      foreach (var uiController in uiControllers)
+      {
+        if (uiController == null || uiController.GetProgramVariable("_controller") as Controller != controller) continue;
+        uiController.SetProgramVariable("_playlistRefreshHandler", loaderUi);
       }
     }
 
@@ -44,22 +65,7 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader.Editor
       var controller = ResolveController(loader);
       if (controller == null) return;
 
-      // ReadPlaylists collects with the active-only overload of
-      // GetComponentsInChildren, so a slot whose Playlist is inactive never
-      // enters Controller.Playlists. Wiring such a slot would let a load
-      // report success into a playlist that no one can see and that
-      // Forward() cannot advance through, because Array.IndexOf leaves
-      // _activePlaylistIndex at -1. Match what the runtime will collect.
-      var slots = new List<DynamicPlaylist>();
-      foreach (var slot in controller.GetComponentsInChildren<DynamicPlaylist>(true))
-      {
-        if (slot == null) continue;
-        var playlist = slot.GetProgramVariable("_playlist") as Playlist;
-        if (playlist == null || !playlist.gameObject.activeInHierarchy) continue;
-        slots.Add(slot);
-      }
-
-      loader.SetProgramVariable("_dynamicPlaylists", slots.ToArray());
+      loader.SetProgramVariable("_dynamicPlaylists", DynamicPlaylistBuildProcess.CollectUsableSlots(controller));
     }
 
     // Prefer the parent chain (module under Controller/Modules), but fall
