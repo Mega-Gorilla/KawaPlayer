@@ -1037,7 +1037,14 @@ namespace Yamadev.YamaStream.UI
     {
       if (Utilities.IsValid(_historyTabToggle) && _historyTabToggle.isOn) GeneratePlaylistTracks();
     }
-    public override void AfterPlaylistsUpdated() => GeneratePlaylistView();
+    public override void AfterPlaylistsUpdated()
+    {
+      // A dynamic slot going from empty to filled (issue #88) changes both
+      // the playlist list and, when that slot is the one on screen, the
+      // track list under it.
+      GeneratePlaylistView();
+      GeneratePlaylistTracks();
+    }
     public override void AfterVolumeChanged(float volume) => UpdateAudioView();
     public override void AfterMuteChanged(bool mute) => UpdateAudioView();
     public override void AfterMaxResolutionChanged(int maxResolution) => UpdateScreenView();
