@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using Yamadev.YamaStream.Editor;
 using Yamadev.YamaStream.UI;
@@ -43,7 +44,22 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader.Editor
       var controller = ResolveController(loader);
       if (controller == null) return;
 
-      loader.SetProgramVariable("_dynamicPlaylists", controller.GetComponentsInChildren<DynamicPlaylist>(true));
+      // ReadPlaylists collects with the active-only overload of
+      // GetComponentsInChildren, so a slot whose Playlist is inactive never
+      // enters Controller.Playlists. Wiring such a slot would let a load
+      // report success into a playlist that no one can see and that
+      // Forward() cannot advance through, because Array.IndexOf leaves
+      // _activePlaylistIndex at -1. Match what the runtime will collect.
+      var slots = new List<DynamicPlaylist>();
+      foreach (var slot in controller.GetComponentsInChildren<DynamicPlaylist>(true))
+      {
+        if (slot == null) continue;
+        var playlist = slot.GetProgramVariable("_playlist") as Playlist;
+        if (playlist == null || !playlist.gameObject.activeInHierarchy) continue;
+        slots.Add(slot);
+      }
+
+      loader.SetProgramVariable("_dynamicPlaylists", slots.ToArray());
     }
 
     // Prefer the parent chain (module under Controller/Modules), but fall

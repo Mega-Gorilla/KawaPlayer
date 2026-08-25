@@ -280,12 +280,13 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
             PrintWarning($"Playlist truncated at {addedCount} tracks: ~{estimatedBytes + trackBytes} bytes exceeds the {_maxSyncBytes} byte sync budget ({totalCount - i} dropped).");
             break;
           }
-          // A single track over the budget still goes in, because dropping
-          // it would turn a valid playlist into an empty one over a
-          // KawaPlayer-side estimate rather than a platform limit. Say so
-          // rather than exceeding the configured budget silently;
-          // OnPostSerialization reports what actually went out.
-          PrintWarning($"First track alone is ~{trackBytes} bytes, over the {_maxSyncBytes} byte sync budget. Loading it anyway; raise Max Sync Bytes if this playlist should hold more.");
+          // Nothing has been added yet, so there is no partial playlist to
+          // cut short: skip this one and keep looking for a track that fits.
+          // Breaking here would empty an otherwise loadable playlist, and
+          // taking it would put the payload over the configured budget.
+          failedCount++;
+          PrintWarning($"Track {i + 1} is ~{trackBytes} bytes on its own, over the {_maxSyncBytes} byte sync budget; skipping it.");
+          continue;
         }
         estimatedBytes += trackBytes;
 
