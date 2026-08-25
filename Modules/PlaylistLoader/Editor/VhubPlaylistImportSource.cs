@@ -96,9 +96,15 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader.Editor
 
         if (request.result != UnityWebRequest.Result.Success)
         {
-          Debug.LogError($"[VhubPlaylistImport] Failed to fetch playlist: {request.error}");
-          return PlaylistImportResult.Failed(
-            request.responseCode == 404 ? L("errorNotFound") : L("errorDownload"));
+          // A 404 is a mistyped or deleted playlist id: routine authoring
+          // input that the panel already reports back. Logging it as an
+          // error would put a red entry in the Console for every typo,
+          // where it competes with the failures that do need attention.
+          bool notFound = request.responseCode == 404;
+          string log = $"[VhubPlaylistImport] Failed to fetch playlist: {request.error}";
+          if (notFound) Debug.LogWarning(log);
+          else Debug.LogError(log);
+          return PlaylistImportResult.Failed(notFound ? L("errorNotFound") : L("errorDownload"));
         }
         body = request.downloadHandler.text;
       }
