@@ -1041,7 +1041,8 @@ namespace Yamadev.YamaStream.UI
     {
       // A dynamic slot going from empty to filled (issue #88) changes both
       // the playlist list and, when that slot is the one on screen, the
-      // track list under it.
+      // track list under it. Going the other way drops the selection.
+      ClearSelectionIfEmptied();
       GeneratePlaylistView();
       GeneratePlaylistTracks();
     }

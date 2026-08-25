@@ -34,10 +34,14 @@ namespace Yamadev.YamaStream.UI
 
     private int _playlistIndex = -1;
     private int _playlistTrackIndex = -1;
-    // Which slot the open confirmation dialog is about. Re-checked on
-    // confirm so a selection change while the dialog is up cannot delete
-    // something the player never pointed at.
+    // What the open confirmation dialog is about. An index alone is not an
+    // identity: anyone can overwrite that slot while the dialog is up (LRU
+    // replacement, or a reload into a slot freed a moment ago), and the
+    // confirm would then delete a playlist the player never saw. Hold the
+    // slot itself and the source it was showing, and re-check both.
     private int _pendingDeletePlaylistIndex = -1;
+    private DynamicPlaylist _pendingDeleteSlot;
+    private string _pendingDeleteSourceUrl = string.Empty;
 
     private bool IsQueuePage => Utilities.IsValid(_queueTabToggle) && _queueTabToggle.isOn;
     private bool IsHistoryPage => Utilities.IsValid(_historyTabToggle) && _historyTabToggle.isOn;
@@ -126,6 +130,35 @@ namespace Yamadev.YamaStream.UI
       _playlistRefreshHandler.SendCustomEvent("OnPlaylistRefreshRequested");
     }
 
+    // A slot the player is looking at can be emptied by anyone, on any
+    // client, so this has to run wherever the playlist set changes rather
+    // than only where the delete was pressed. Leaving the selection pointed
+    // at the index would hand the detail view and the action buttons to
+    // whatever refills the slot, without the player ever choosing it.
+    //
+    // Static playlists never reach zero tracks (PlaylistBuildProcess drops
+    // empty ones at build time), so this only ever fires on a freed slot.
+    private void ClearSelectionIfEmptied()
+    {
+      if (_playlistIndex < 0) return;
+
+      var playlists = _controller.Playlists;
+      if (_playlistIndex < playlists.Length)
+      {
+        var playlist = playlists[_playlistIndex];
+        if (Utilities.IsValid(playlist) && playlist.TrackCount > 0) return;
+      }
+
+      _playlistIndex = -1;
+      _playlistTrackIndex = -1;
+      if (Utilities.IsValid(_currentPlaylistNameText)) _currentPlaylistNameText.text = string.Empty;
+      // GeneratePlaylistTracks returns early with no selection, so the rows
+      // have to be dropped here. The queue and history pages feed the same
+      // scroll and are redrawn right after, so leave them alone.
+      if (!IsQueuePage && !IsHistoryPage && Utilities.IsValid(_playlistTracksScroll))
+        _playlistTracksScroll.SetUp(0, this, nameof(UpdatePlaylistTracksContent));
+    }
+
     public void DeletePlaylist()
     {
       if (!InvokeBeforeEvent("BeforeUserDeletePlaylist")) return;
@@ -138,6 +171,9 @@ namespace Yamadev.YamaStream.UI
       if (!Utilities.IsValid(_modalDialog)) return;
 
       _pendingDeletePlaylistIndex = _playlistIndex;
+      _pendingDeleteSlot = slot;
+      _pendingDeleteSourceUrl = slot.CanRefresh ? slot.SourceUrl.Get() : string.Empty;
+
       _modalDialog.Show(
         GetTranslation("msg.confirmDeletePlaylist"),
         GetTranslation("msg.confirmDeletePlaylistDetail"),
@@ -151,25 +187,44 @@ namespace Yamadev.YamaStream.UI
     public void DeletePlaylistInternal()
     {
       int index = _pendingDeletePlaylistIndex;
+      var expectedSlot = _pendingDeleteSlot;
+      string expectedSourceUrl = _pendingDeleteSourceUrl;
       _pendingDeletePlaylistIndex = -1;
+      _pendingDeleteSlot = null;
+      _pendingDeleteSourceUrl = string.Empty;
 
       var slot = FindDynamicPlaylist(index);
-      if (!Utilities.IsValid(slot) || slot.IsEmpty) return;
+      string currentSourceUrl = Utilities.IsValid(slot) && slot.CanRefresh ? slot.SourceUrl.Get() : string.Empty;
+
+      // Anything other than the exact playlist the dialog was opened on is
+      // left alone: the slot may have been refilled by someone else while
+      // the dialog was up. Sequence is no help as an identity, because
+      // deleting resets it to 0 and the same value comes back around.
+      if (!Utilities.IsValid(slot) || slot != expectedSlot || slot.IsEmpty || currentSourceUrl != expectedSourceUrl)
+      {
+        GeneratePlaylistView();
+        GeneratePlaylistTracks();
+        return;
+      }
 
       _controller.TakeOwnership();
       // Deleting the playlist that is playing leaves the current video
-      // alone: stopping someone else's playback as a side effect of a list
+      // alone: stopping someone else playback as a side effect of a list
       // edit would be worse than the list going away. Dropping the indexes
       // makes Forward() return early, so playback simply does not advance
       // when the video ends.
-      if (_controller.ActivePlaylistIndex == index) _controller.ClearPlaylistIndexes();
+      //
+      // ClearPlaylistIndexes only writes the synced fields. Without pushing
+      // them, everyone else keeps the old indexes, and once this slot is
+      // refilled they would advance into a playlist nobody queued.
+      if (_controller.ActivePlaylistIndex == index)
+      {
+        _controller.ClearPlaylistIndexes();
+        if (!_controller.IsLocal) _controller.SyncVariables();
+      }
 
-      // Drop the selection before clearing, so the AfterPlaylistsUpdated
-      // that Clear() raises redraws against the new state.
-      _playlistIndex = -1;
-      if (Utilities.IsValid(_playlistTracksScroll)) _playlistTracksScroll.SetUp(0, this, nameof(UpdatePlaylistTracksContent));
-      if (Utilities.IsValid(_currentPlaylistNameText)) _currentPlaylistNameText.text = string.Empty;
-
+      // Clear() raises AfterPlaylistsUpdated on every listener, on every
+      // client, and that is what drops the selection here and elsewhere.
       slot.Clear();
     }
 
