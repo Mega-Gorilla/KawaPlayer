@@ -54,15 +54,7 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
     [SerializeField] private VRCUrl _autoLoadUrl;
     [SerializeField, Range(0, 60)] private float _autoLoadDelay;
 
-    // How long to wait for VRCStringDownloader before giving up on a
-    // download that is never going to report back (issue #95). The response
-    // is a few kilobytes of JSON, so anything near this is already broken;
-    // the value only has to be long enough that a slow-but-working fetch is
-    // never cut off.
-    private const float LoadTimeoutSeconds = 30f;
-
     private bool _isLoading;
-    private float _loadStartTime;
     private VRCUrl _pendingResolveUrl;
     // Set only by LoadPlaylistFromUrlWithFeedback; notified exactly once per
     // load on every terminal path, then cleared. Null for DefaultUrl / auto
@@ -104,35 +96,30 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
         return;
       }
 
+      // Every caller funnels through here -- the URL field, DefaultUrl, Auto
+      // Load -- so this is where a URL that cannot be fetched is turned away.
+      //
+      // A non-https playlist URL redirects, and VRCStringDownloader has been
+      // observed to report neither success nor failure for that. Those two
+      // callbacks are the only things that clear _isLoading, so starting the
+      // download would leave this client's loader busy until the player
+      // rejoins the instance (issue #95). Refusing here means the flag is
+      // never set, rather than trying to recover from it afterwards: a timer
+      // cannot tell a lost callback from one still queued behind VRChat's
+      // one-download-per-five-seconds limit, and would eventually cut off a
+      // request that was going to succeed.
+      string scheme = Utilities.IsValid(resolveUrl) ? UrlUtils.GetProtocolFromUrl(resolveUrl.Get()) : string.Empty;
+      if (scheme != "https")
+      {
+        PrintError($"Refusing a playlist URL that is not https: {scheme}");
+        NotifyResult(LoadResultDownloadError, "", 0, 0, 0);
+        return;
+      }
+
       _isLoading = true;
-      _loadStartTime = Time.time;
       _pendingResolveUrl = resolveUrl;
       VRCStringDownloader.LoadUrl(resolveUrl, (IUdonEventReceiver)this);
-      SendCustomEventDelayedSeconds(nameof(AbortStalledLoad), LoadTimeoutSeconds);
       PrintLog($"Downloading playlist from {resolveUrl.Get()}...");
-    }
-
-    // Both callbacks below are the only places _isLoading is cleared, and
-    // both are gated on the callback arriving with a matching URL. When one
-    // never fires -- an http:// URL produces neither -- the loader stays busy
-    // for the rest of the instance and nobody can load a playlist again, so
-    // every load also arms this (issue #95).
-    //
-    // Several of these can be in flight at once, so it checks how long the
-    // load running *now* has been going rather than assuming it is the one it
-    // was armed for: a newer load has a newer start time and is left to its
-    // own timer.
-    public void AbortStalledLoad()
-    {
-      if (!_isLoading) return;
-      if (Time.time - _loadStartTime < LoadTimeoutSeconds) return;
-
-      _isLoading = false;
-      // Forget the URL as well, so a callback arriving after the player has
-      // already been told this failed cannot revive the load behind them.
-      _pendingResolveUrl = null;
-      PrintError($"Playlist download timed out after {LoadTimeoutSeconds} seconds.");
-      NotifyResult(LoadResultDownloadError, "", 0, 0, 0);
     }
 
     // Same as LoadPlaylistFromUrl, but reports the outcome back to the UI
