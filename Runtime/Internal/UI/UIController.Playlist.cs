@@ -22,10 +22,41 @@ namespace Yamadev.YamaStream.UI
     private bool IsQueuePage => Utilities.IsValid(_queueTabToggle) && _queueTabToggle.isOn;
     private bool IsHistoryPage => Utilities.IsValid(_historyTabToggle) && _historyTabToggle.isOn;
 
+    // Empty playlists are dynamic slots waiting to be filled (issue #88);
+    // static ones are dropped at build time when they have no tracks
+    // (PlaylistBuildProcess), so an empty entry is never something the
+    // player should see. The list is rendered over visible playlists only,
+    // while _playlistIndex stays a real index into Controller.Playlists so
+    // every consumer below is unaffected.
+    private int VisiblePlaylistCount()
+    {
+      var playlists = _controller.Playlists;
+      int count = 0;
+      for (int i = 0; i < playlists.Length; i++)
+      {
+        if (Utilities.IsValid(playlists[i]) && playlists[i].TrackCount > 0) count++;
+      }
+      return count;
+    }
+
+    private int ToRealPlaylistIndex(int visibleIndex)
+    {
+      if (visibleIndex < 0) return -1;
+      var playlists = _controller.Playlists;
+      int seen = 0;
+      for (int i = 0; i < playlists.Length; i++)
+      {
+        if (!Utilities.IsValid(playlists[i]) || playlists[i].TrackCount == 0) continue;
+        if (seen == visibleIndex) return i;
+        seen++;
+      }
+      return -1;
+    }
+
     public void GeneratePlaylistView()
     {
       if (!Utilities.IsValid(_playlistsListScroll)) return;
-      _playlistsListScroll.SetUp(_controller.Playlists.Length, this, nameof(UpdatePlaylistsContent));
+      _playlistsListScroll.SetUp(VisiblePlaylistCount(), this, nameof(UpdatePlaylistsContent));
     }
 
     public void UpdatePlaylistsContent()
@@ -33,15 +64,17 @@ namespace Yamadev.YamaStream.UI
       for (int i = 0; i < _playlistsListScroll.LineCount; i++)
       {
         if (_playlistsListScroll.Indexes[i] == _playlistsListScroll.LastIndexes[i] || _playlistsListScroll.Indexes[i] == -1) continue;
+        int realIndex = ToRealPlaylistIndex(_playlistsListScroll.Indexes[i]);
+        if (realIndex < 0) continue;
         var cell = _playlistsListScroll.GetComponent<ScrollRect>().content.GetChild(i);
-        var playlist = _controller.Playlists[_playlistsListScroll.Indexes[i]];
+        var playlist = _controller.Playlists[realIndex];
 
         var n = cell.Find("Text");
         if (Utilities.IsValid(n))
         {
           var name = n.GetComponent<Text>();
           if (Utilities.IsValid(name))
-            name.text = _controller.Playlists[_playlistsListScroll.Indexes[i]].PlaylistName;
+            name.text = playlist.PlaylistName;
         }
 
         var tr = cell.Find("TrackCount");
@@ -53,7 +86,7 @@ namespace Yamadev.YamaStream.UI
         }
 
         var trigger = cell.GetComponent<IndexTrigger>();
-        if (Utilities.IsValid(trigger)) trigger.SetProgramVariable("_variableObject", _playlistsListScroll.Indexes[i]);
+        if (Utilities.IsValid(trigger)) trigger.SetProgramVariable("_variableObject", realIndex);
       }
     }
 
@@ -72,7 +105,7 @@ namespace Yamadev.YamaStream.UI
     public void GeneratePlaylistsView()
     {
       if (!Utilities.IsValid(_playlistsTabToggle) || !_playlistsTabToggle.isOn || !Utilities.IsValid(_playlistsListScroll) || _playlistIndex < 0) return;
-      _playlistsListScroll.SetUp(_controller.Playlists.Length, this, nameof(UpdatePlaylistsContent));
+      _playlistsListScroll.SetUp(VisiblePlaylistCount(), this, nameof(UpdatePlaylistsContent));
     }
 
     public void GeneratePlaylistTracks()

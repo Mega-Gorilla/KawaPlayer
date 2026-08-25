@@ -41,5 +41,25 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
       string pool = rest.Substring(0, slashIndex);
       return pool == poolId ? KindOwnPlaylist : KindOtherPool;
     }
+
+    // Stable identity for a playlist URL, used to recognize a reload of the
+    // same playlist (issue #88). Reduces /r/{pool}/{id} to "{pool}/{id}" so a
+    // trailing slash or a different scheme does not read as a different
+    // playlist and consume a second slot. Anything unrecognized falls back to
+    // the path (or the raw URL), which still matches itself.
+    public static string GetSourceKey(string url)
+    {
+      if (string.IsNullOrEmpty(url)) return string.Empty;
+
+      string path = UrlUtils.GetPathFromUrl(url);
+      while (path.EndsWith("/") && path.Length > 1) path = path.Substring(0, path.Length - 1);
+
+      if (!path.StartsWith("/r/")) return path.Length > 1 ? path : url;
+
+      string rest = path.Substring(3);
+      int slashIndex = rest.IndexOf('/');
+      if (slashIndex <= 0 || slashIndex == rest.Length - 1) return path;
+      return rest;
+    }
   }
 }

@@ -35,6 +35,11 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader.Editor
       if (controller == null) controller = loader.GetProgramVariable("_controller") as Controller;
       if (controller == null) return;
 
+      // Instance-lifetime playlist slots the loader may fill (issue #88).
+      // Read from the Controller hierarchy so the slot count is whatever the
+      // prefab ships with, and Controller.ReadPlaylists sees the same set.
+      loader.SetProgramVariable("_dynamicPlaylists", controller.GetComponentsInChildren<DynamicPlaylist>(true));
+
       var uiControllers = Object.FindObjectsByType<UIController>(FindObjectsInactive.Include, FindObjectsSortMode.None);
       foreach (var uiController in uiControllers)
       {
