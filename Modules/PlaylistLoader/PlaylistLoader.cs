@@ -333,7 +333,7 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
       }
 
       _controller.TakeOwnership();
-      slot.Fill(sourceKey, playlistName, tracks, NextSequence());
+      slot.Fill(_pendingResolveUrl, playlistName, tracks, NextSequence());
 
       // 自動再生仕様:
       // - プレイヤーが停止中 (Stopped) の場合のみ自動再生する
@@ -376,8 +376,18 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
         var slot = _dynamicPlaylists[i];
         if (!Utilities.IsValid(slot)) continue;
 
-        if (hasSourceKey && slot.SourceKey == sourceKey) return slot;
-        if (!Utilities.IsValid(empty) && slot.IsEmpty) empty = slot;
+        // Empty slots first: their source URL says nothing about what they
+        // hold, and reading it is unsafe in ClientSim where VRCUrl.Empty
+        // resolves to a stale URL from elsewhere in the session.
+        if (!slot.CanRefresh)
+        {
+          if (!Utilities.IsValid(empty) && slot.IsEmpty) empty = slot;
+        }
+        else if (hasSourceKey && PlaylistUrlUtils.GetSourceKey(slot.SourceUrl.Get()) == sourceKey)
+        {
+          return slot;
+        }
+
         if (!Utilities.IsValid(oldest) || slot.Sequence < oldestSequence)
         {
           oldest = slot;
