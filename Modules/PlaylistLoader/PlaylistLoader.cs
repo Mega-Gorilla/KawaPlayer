@@ -96,6 +96,26 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
         return;
       }
 
+      // Every caller funnels through here -- the URL field, DefaultUrl, Auto
+      // Load -- so this is where a URL that cannot be fetched is turned away.
+      //
+      // A non-https playlist URL redirects, and VRCStringDownloader has been
+      // observed to report neither success nor failure for that. Those two
+      // callbacks are the only things that clear _isLoading, so starting the
+      // download would leave this client's loader busy until the player
+      // rejoins the instance (issue #95). Refusing here means the flag is
+      // never set, rather than trying to recover from it afterwards: a timer
+      // cannot tell a lost callback from one still queued behind VRChat's
+      // one-download-per-five-seconds limit, and would eventually cut off a
+      // request that was going to succeed.
+      string scheme = Utilities.IsValid(resolveUrl) ? UrlUtils.GetProtocolFromUrl(resolveUrl.Get()) : string.Empty;
+      if (scheme != "https")
+      {
+        PrintError($"Refusing a playlist URL that is not https: {scheme}");
+        NotifyResult(LoadResultDownloadError, "", 0, 0, 0);
+        return;
+      }
+
       _isLoading = true;
       _pendingResolveUrl = resolveUrl;
       VRCStringDownloader.LoadUrl(resolveUrl, (IUdonEventReceiver)this);
