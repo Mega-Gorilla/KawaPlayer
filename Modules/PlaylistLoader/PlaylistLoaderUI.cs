@@ -25,6 +25,12 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
     public UIController interceptSource;
     public bool interceptHandled;
 
+    // Contract with UIController.RefreshPlaylist (issue #91): the caller
+    // writes these before sending OnPlaylistRefreshRequested. refreshSource
+    // is the panel the button was pressed on, so the result lands there.
+    public VRCUrl refreshUrl;
+    public UIController refreshSource;
+
     // The UI that initiated the load currently in flight; OnLoadResult
     // reports back to it.
     private UIController _resultUi;
@@ -67,6 +73,33 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
 
       _resultUi = ui;
       _loader.LoadPlaylistFromUrlWithFeedback(interceptUrl, this);
+    }
+
+    // Refetches a slot from the URL that filled it (issue #91). Deliberately
+    // mirrors OnUrlSubmitted: same permission gate (applied by the caller),
+    // same busy handling, same feedback surface.
+    public void OnPlaylistRefreshRequested()
+    {
+      if (!Utilities.IsValid(_loader) || !Utilities.IsValid(refreshUrl)) return;
+
+      var ui = Utilities.IsValid(refreshSource) ? refreshSource : _uiController;
+
+      if (_loader.ClassifyUrl(refreshUrl.Get()) != PlaylistLoader.UrlKindOwnPlaylist)
+      {
+        ShowError(ui, "errorPoolMismatch");
+        return;
+      }
+
+      if (_loader.IsLoading)
+      {
+        ShowError(ui, "errorBusy");
+        return;
+      }
+
+      // _resultUi is not cleared after a load, so leaving it alone here
+      // would report this refresh on whichever panel last submitted a URL.
+      _resultUi = ui;
+      _loader.LoadPlaylistFromUrlWithFeedback(refreshUrl, this);
     }
 
     // Called by PlaylistLoader exactly once per feedback load, on every

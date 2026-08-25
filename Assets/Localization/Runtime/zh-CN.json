@@ -83,6 +83,7 @@
   "button.moveUp": "向上移动",
   "button.moveDown": "向下移动",
   "button.remove": "移除",
+  "button.refreshPlaylist": "刷新",
   "placeholder.inputKeyword": "在此处输入关键词...",
   "msg.loading": "加载中",
   "msg.videoLoading": "正在加载视频...",

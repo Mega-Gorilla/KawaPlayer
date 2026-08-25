@@ -83,6 +83,7 @@
   "button.moveUp": "위로 이동",
   "button.moveDown": "아래로 이동",
   "button.remove": "삭제",
+  "button.refreshPlaylist": "새로고침",
   "placeholder.inputKeyword": "키워드 입력",
   "msg.loading": "로딩 중",
   "msg.videoLoading": "동영상을 읽고 있습니다···",

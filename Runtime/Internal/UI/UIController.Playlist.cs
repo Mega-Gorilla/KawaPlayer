@@ -1,3 +1,4 @@
+using UdonSharp;
 using UnityEngine;
 using UnityEngine.UI;
 using VRC.SDKBase;
@@ -22,6 +23,12 @@ namespace Yamadev.YamaStream.UI
     // build time by DynamicPlaylistBuildProcess. Lets the header tell a
     // runtime-filled playlist apart from one baked into the world.
     [SerializeField, HideInInspector] private DynamicPlaylist[] _dynamicPlaylists = new DynamicPlaylist[0];
+    // Refetches the open playlist from wherever it came from (issue #91).
+    // Wired at build time by the module that fills slots, the same way
+    // _urlInterceptor is; core never learns what a VHub playlist is.
+    [SerializeField, HideInInspector] private UdonSharpBehaviour _playlistRefreshHandler;
+    [SerializeField, RegisterEvent(nameof(Button.onClick), nameof(RefreshPlaylist))] private Button _playlistRefreshButton;
+    [SerializeField] private Text _playlistRefreshButtonLabel;
     [SerializeField, RegisterEvent(nameof(Button.onClick), nameof(DeletePlaylist))] private Button _playlistDeleteButton;
     [SerializeField] private Text _playlistDeleteButtonLabel;
 
@@ -98,6 +105,25 @@ namespace Yamadev.YamaStream.UI
       bool isDynamic = Utilities.IsValid(slot) && !slot.IsEmpty && Utilities.IsValid(_modalDialog);
 
       if (Utilities.IsValid(_playlistDeleteButton)) _playlistDeleteButton.gameObject.SetActive(isDynamic);
+      if (Utilities.IsValid(_playlistRefreshButton))
+        _playlistRefreshButton.gameObject.SetActive(isDynamic && Utilities.IsValid(_playlistRefreshHandler) && slot.CanRefresh);
+    }
+
+    public void RefreshPlaylist()
+    {
+      if (!Utilities.IsValid(_playlistRefreshHandler)) return;
+
+      var slot = FindDynamicPlaylist(_playlistIndex);
+      if (!Utilities.IsValid(slot) || !slot.CanRefresh) return;
+
+      // Refetching is a load, so it answers to the same permission as one.
+      if (!InvokeBeforeEvent("BeforeUserLoadPlaylist")) return;
+
+      // Hand over the panel that asked, so the result modal opens here
+      // rather than wherever a URL was last typed.
+      _playlistRefreshHandler.SetProgramVariable("refreshUrl", slot.SourceUrl);
+      _playlistRefreshHandler.SetProgramVariable("refreshSource", this);
+      _playlistRefreshHandler.SendCustomEvent("OnPlaylistRefreshRequested");
     }
 
     public void DeletePlaylist()

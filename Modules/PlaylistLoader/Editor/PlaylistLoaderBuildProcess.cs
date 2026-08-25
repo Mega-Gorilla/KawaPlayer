@@ -11,6 +11,7 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader.Editor
   //
   // - Playlist slots (issue #88), per PlaylistLoader
   // - The URL interceptor (issue #82), per PlaylistLoaderUI
+  // - The playlist refresh handler (issue #91), per PlaylistLoaderUI
   public class PlaylistLoaderBuildProcess : IYamaPlayerBuildProcess
   {
     public int callbackOrder => -2500;
@@ -31,6 +32,27 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader.Editor
       foreach (var loaderUi in loaderUis)
       {
         ProcessInterceptor(loaderUi);
+        ProcessRefreshHandler(loaderUi);
+      }
+    }
+
+    // The refresh button (issue #91) lives in the Playlists tab, which exists
+    // on panels that have no URL input at all -- PlaylistPanel is one. So this
+    // deliberately does NOT reuse the interceptor's "owns the main URL input"
+    // filter, or the button would never work there.
+    private static void ProcessRefreshHandler(PlaylistLoaderUI loaderUi)
+    {
+      if (loaderUi == null || !loaderUi.gameObject.activeInHierarchy) return;
+      var loader = loaderUi.GetProgramVariable("_loader") as PlaylistLoader;
+      if (loader == null) return;
+      var controller = ResolveController(loader);
+      if (controller == null) return;
+
+      var uiControllers = Object.FindObjectsByType<UIController>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+      foreach (var uiController in uiControllers)
+      {
+        if (uiController == null || uiController.GetProgramVariable("_controller") as Controller != controller) continue;
+        uiController.SetProgramVariable("_playlistRefreshHandler", loaderUi);
       }
     }
 

@@ -83,6 +83,7 @@
   "button.moveUp": "Muovi sopra",
   "button.moveDown": "Muovi giù",
   "button.remove": "Rimuovi",
+  "button.refreshPlaylist": "Aggiorna",
   "placeholder.inputKeyword": "Inserisci la parola qui...",
   "msg.loading": "Caricamento",
   "msg.videoLoading": "Caricamento...",

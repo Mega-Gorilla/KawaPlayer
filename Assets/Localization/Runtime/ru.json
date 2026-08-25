@@ -83,6 +83,7 @@
   "button.moveUp": "Переместить вверх",
   "button.moveDown": "Переместить вниз",
   "button.remove": "Удалить",
+  "button.refreshPlaylist": "Обновить",
   "placeholder.inputKeyword": "Введите ключевое слово...",
   "msg.loading": "Загрузка...",
   "msg.videoLoading": "Загрузка...",

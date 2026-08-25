@@ -83,6 +83,7 @@
   "button.moveUp": "往上移動",
   "button.moveDown": "往下移動",
   "button.remove": "刪除",
+  "button.refreshPlaylist": "重新整理",
   "placeholder.inputKeyword": "在此輸入關鍵字...",
   "msg.loading": "載入中",
   "msg.videoLoading": "正在載入影片...",
