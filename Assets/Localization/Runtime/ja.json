@@ -90,6 +90,8 @@
   "msg.noPermissionDetail": "権限がないため操作できません。",
   "msg.confirmChangePlayer": "動画プレイヤーを変えますか？",
   "msg.confirmChangePlayerDetail": "動画プレイヤーを変えると再生中の動画が停止します。",
+  "msg.confirmDeletePlaylist": "このプレイリストを削除しますか？",
+  "msg.confirmDeletePlaylistDetail": "このインスタンスに読み込まれたプレイリストを削除します。全員の一覧から消えます。再生中の動画はそのまま続きます。",
   "msg.confirmPlayUrlDetail": "再生中の動画が停止します。",
   "msg.unlockUiVr": "ロック解除するにはコントローラーを画面に向けてトリガーを長押ししてください...",
   "msg.unlockUiDesktop": "ロック解除するにはカーソルを画面に向けて左クリックを長押ししてください...",

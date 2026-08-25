@@ -90,6 +90,8 @@
   "msg.noPermissionDetail": "Non sei autorizzato e non puoi operare.",
   "msg.confirmChangePlayer": "Vuoi cambiare il video player?",
   "msg.confirmChangePlayerDetail": "Cambiare il video player fermerà il video corrente.",
+  "msg.confirmDeletePlaylist": "Eliminare questa playlist?",
+  "msg.confirmDeletePlaylistDetail": "Rimuove la playlist caricata in questa istanza e scompare per tutti. Il video in riproduzione continua.",
   "msg.confirmPlayUrlDetail": "Il video corrente si fermerà.",
   "msg.unlockUiVr": "Premi e tieni premuto il trigger mentre guardi lo schermo per sbloccare...",
   "msg.unlockUiDesktop": "Premi e tieni premuto il tasto sinistro mentre guardi lo schermo per sbloccare...",

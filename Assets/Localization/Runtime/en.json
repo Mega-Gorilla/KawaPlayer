@@ -90,6 +90,8 @@
   "msg.noPermissionDetail": "You are not authorized and cannot operate.",
   "msg.confirmChangePlayer": "Do you want to change the video player?",
   "msg.confirmChangePlayerDetail": "Changing the video player will stop the video currently playing.",
+  "msg.confirmDeletePlaylist": "Delete this playlist?",
+  "msg.confirmDeletePlaylistDetail": "This removes the playlist loaded into this instance. It disappears for everyone. The video playing now keeps playing.",
   "msg.confirmPlayUrlDetail": "The video currently playing will stop.",
   "msg.unlockUiVr": "Please press and hold the trigger while looking at the screen to unlock...",
   "msg.unlockUiDesktop": "Please press and hold the left click while looking at the screen to unlock...",

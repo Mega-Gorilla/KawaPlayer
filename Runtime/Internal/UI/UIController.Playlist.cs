@@ -16,8 +16,21 @@ namespace Yamadev.YamaStream.UI
     [SerializeField, RegisterEvent(nameof(Toggle.onValueChanged), nameof(GenerateQueueView))] private Toggle _queueTabToggle;
     [SerializeField, RegisterEvent(nameof(Toggle.onValueChanged), nameof(GenerateHistoryView))] private Toggle _historyTabToggle;
     [SerializeField] private Toggle _playlistsTabToggle;
+
+    [Header("Playlist - Actions")]
+    // Dynamic playlist slots under this Controller (issue #92), wired at
+    // build time by DynamicPlaylistBuildProcess. Lets the header tell a
+    // runtime-filled playlist apart from one baked into the world.
+    [SerializeField, HideInInspector] private DynamicPlaylist[] _dynamicPlaylists = new DynamicPlaylist[0];
+    [SerializeField, RegisterEvent(nameof(Button.onClick), nameof(DeletePlaylist))] private Button _playlistDeleteButton;
+    [SerializeField] private Text _playlistDeleteButtonLabel;
+
     private int _playlistIndex = -1;
     private int _playlistTrackIndex = -1;
+    // Which slot the open confirmation dialog is about. Re-checked on
+    // confirm so a selection change while the dialog is up cannot delete
+    // something the player never pointed at.
+    private int _pendingDeletePlaylistIndex = -1;
 
     private bool IsQueuePage => Utilities.IsValid(_queueTabToggle) && _queueTabToggle.isOn;
     private bool IsHistoryPage => Utilities.IsValid(_historyTabToggle) && _historyTabToggle.isOn;
@@ -51,6 +64,87 @@ namespace Yamadev.YamaStream.UI
         seen++;
       }
       return -1;
+    }
+
+    // The dynamic slot backing a playlist, or null when the playlist is a
+    // static one baked into the world. The slot count is small (five in the
+    // stock prefab), so scanning beats keeping a parallel map in sync.
+    private DynamicPlaylist FindDynamicPlaylist(int realIndex)
+    {
+      var playlists = _controller.Playlists;
+      if (realIndex < 0 || realIndex >= playlists.Length) return null;
+
+      var playlist = playlists[realIndex];
+      for (int i = 0; i < _dynamicPlaylists.Length; i++)
+      {
+        var slot = _dynamicPlaylists[i];
+        if (Utilities.IsValid(slot) && slot.Playlist == playlist) return slot;
+      }
+      return null;
+    }
+
+    // Per-playlist actions only apply to a filled dynamic slot the player is
+    // actually looking at. Call this BEFORE the early returns in the three
+    // view generators: leaving a tab fires that tab's toggle too, and those
+    // generators bail out as soon as their page stops being the active one.
+    //
+    // A dialog surface is part of the requirement, not a nicety: deleting is
+    // destructive and shared, so it has to be confirmed. PlaylistPanel ships
+    // without a Modal of its own, so its buttons stay hidden until a world
+    // creator points its _modalDialog at one.
+    private void UpdatePlaylistActionButtons()
+    {
+      var slot = IsQueuePage || IsHistoryPage ? null : FindDynamicPlaylist(_playlistIndex);
+      bool isDynamic = Utilities.IsValid(slot) && !slot.IsEmpty && Utilities.IsValid(_modalDialog);
+
+      if (Utilities.IsValid(_playlistDeleteButton)) _playlistDeleteButton.gameObject.SetActive(isDynamic);
+    }
+
+    public void DeletePlaylist()
+    {
+      if (!InvokeBeforeEvent("BeforeUserDeletePlaylist")) return;
+
+      var slot = FindDynamicPlaylist(_playlistIndex);
+      if (!Utilities.IsValid(slot) || slot.IsEmpty) return;
+
+      // No silent fallback: without a dialog there is no way to confirm, and
+      // the button is hidden in that case anyway.
+      if (!Utilities.IsValid(_modalDialog)) return;
+
+      _pendingDeletePlaylistIndex = _playlistIndex;
+      _modalDialog.Show(
+        GetTranslation("msg.confirmDeletePlaylist"),
+        GetTranslation("msg.confirmDeletePlaylistDetail"),
+        GetTranslation("button.cancel"),
+        GetTranslation("button.remove"),
+        this,
+        null,
+        nameof(DeletePlaylistInternal));
+    }
+
+    public void DeletePlaylistInternal()
+    {
+      int index = _pendingDeletePlaylistIndex;
+      _pendingDeletePlaylistIndex = -1;
+
+      var slot = FindDynamicPlaylist(index);
+      if (!Utilities.IsValid(slot) || slot.IsEmpty) return;
+
+      _controller.TakeOwnership();
+      // Deleting the playlist that is playing leaves the current video
+      // alone: stopping someone else's playback as a side effect of a list
+      // edit would be worse than the list going away. Dropping the indexes
+      // makes Forward() return early, so playback simply does not advance
+      // when the video ends.
+      if (_controller.ActivePlaylistIndex == index) _controller.ClearPlaylistIndexes();
+
+      // Drop the selection before clearing, so the AfterPlaylistsUpdated
+      // that Clear() raises redraws against the new state.
+      _playlistIndex = -1;
+      if (Utilities.IsValid(_playlistTracksScroll)) _playlistTracksScroll.SetUp(0, this, nameof(UpdatePlaylistTracksContent));
+      if (Utilities.IsValid(_currentPlaylistNameText)) _currentPlaylistNameText.text = string.Empty;
+
+      slot.Clear();
     }
 
     public void GeneratePlaylistView()
@@ -92,12 +186,14 @@ namespace Yamadev.YamaStream.UI
 
     public void GenerateQueueView()
     {
+      UpdatePlaylistActionButtons();
       if (!IsQueuePage || !Utilities.IsValid(_playlistTracksScroll)) return;
       _playlistTracksScroll.SetUp(_controller.Queue.TrackCount, this, nameof(UpdatePlaylistTracksContent));
     }
 
     public void GenerateHistoryView()
     {
+      UpdatePlaylistActionButtons();
       if (!IsHistoryPage || !Utilities.IsValid(_playlistTracksScroll)) return;
       _playlistTracksScroll.SetUp(_controller.History.TrackCount, this, nameof(UpdatePlaylistTracksContent));
     }
@@ -110,6 +206,7 @@ namespace Yamadev.YamaStream.UI
 
     public void GeneratePlaylistTracks()
     {
+      UpdatePlaylistActionButtons();
       if (!Utilities.IsValid(_playlistsListScroll) || !Utilities.IsValid(_playlistTracksScroll)) return;
       if (!IsQueuePage && !IsHistoryPage && _playlistIndex < 0) return;
 

@@ -98,6 +98,28 @@ namespace Yamadev.YamaStream
       ApplyLocal();
     }
 
+    // Empties the slot so it can be reused. Resetting _sequence matters as
+    // much as clearing the tracks: a slot that keeps a high sequence would
+    // sort last when the filler looks for somewhere to put a new playlist,
+    // even though it is now the obvious place to use.
+    public void Clear()
+    {
+      if (!Utilities.IsValid(_playlist)) return;
+
+      TakeOwnership();
+
+      _sourceUrl = VRCUrl.Empty;
+      _playlistName = string.Empty;
+      _sequence = 0;
+      _tracks = new object[0][];
+
+      if (Networking.IsOwner(_controller.gameObject) && !_controller.IsLocal)
+      {
+        RequestSerialization();
+      }
+      ApplyLocal();
+    }
+
     // Pushes the current tracks into the child Playlist and lets the UI
     // know the playlist set changed. Called on the filling client directly
     // and on every other client from OnDeserialization.
