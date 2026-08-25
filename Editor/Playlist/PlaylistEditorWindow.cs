@@ -18,9 +18,11 @@ namespace Yamadev.YamaStream.Editor
     private PlaylistData _selectedPlaylist;
     private bool _useYoutubePlaylistName;
     private VideoPlayerType _defaultTrackMode = VideoPlayerType.AVProVideoPlayer;
-    // URL import bar (issue #90). Sources are contributed by modules through
-    // IPlaylistImportSource, so this state is source-agnostic.
-    private bool _importBarOpen;
+    // Toolbar entries open one panel at a time below the toolbar (issue #90).
+    private enum ToolbarPanel { None, Ytdlp, ImportUrl, ImportJson, ExportJson }
+    private ToolbarPanel _activePanel = ToolbarPanel.None;
+    // URL import state. Sources are contributed by modules through
+    // IPlaylistImportSource, so this is source-agnostic.
     private int _importSourceIndex;
     private string _importInput = "";
     private bool _importInFlight;
@@ -290,18 +292,13 @@ namespace Yamadev.YamaStream.Editor
       {
         YamaPlayer = EditorGUILayout.ObjectField(YamaPlayer, typeof(YamaPlayer), true) as YamaPlayer;
 
-        var ytdlpButtonText = YtdlpResolver.IsAvailable ? EditorLocalization.Get("ytdlp.update") : EditorLocalization.Get("ytdlp.download");
-        if (GUILayout.Button(ytdlpButtonText, EditorStyles.toolbarButton, GUILayout.ExpandWidth(false)))
-        {
-          YtdlpResolver.DownloadYtdlpExecutable().Forget();
-        }
-
-        if (PlaylistImportSources.Get().Length > 0)
-        {
-          _importBarOpen = GUILayout.Toggle(_importBarOpen, EditorLocalization.Get("playlist.importFromUrl"), EditorStyles.toolbarButton, GUILayout.ExpandWidth(false));
-        }
-        if (GUILayout.Button(EditorLocalization.Get("playlist.importFromJson"), EditorStyles.toolbarButton, GUILayout.ExpandWidth(false))) Import();
-        if (GUILayout.Button(EditorLocalization.Get("playlist.exportToJson"), EditorStyles.toolbarButton, GUILayout.ExpandWidth(false))) Export();
+        // Every toolbar entry that leads somewhere opens its own panel below
+        // the toolbar, so they all behave the same way. Save is the exception:
+        // it is the action itself, not a way in to one.
+        DrawPanelToggle(ToolbarPanel.Ytdlp, YtdlpResolver.IsAvailable ? "ytdlp.update" : "ytdlp.download");
+        if (PlaylistImportSources.Get().Length > 0) DrawPanelToggle(ToolbarPanel.ImportUrl, "playlist.importFromUrl");
+        DrawPanelToggle(ToolbarPanel.ImportJson, "playlist.importFromJson");
+        DrawPanelToggle(ToolbarPanel.ExportJson, "playlist.exportToJson");
         using (new EditorGUI.DisabledGroupScope(!IsDirty))
         {
           var saveStyle = new GUIStyle(EditorStyles.toolbarButton);
@@ -313,7 +310,7 @@ namespace Yamadev.YamaStream.Editor
           if (GUILayout.Button(EditorLocalization.Get("button.save"), saveStyle, GUILayout.ExpandWidth(false))) Save();
         }
       }
-      if (_importBarOpen) DrawImportBar();
+      if (_activePanel != ToolbarPanel.None) DrawActivePanel();
       using (new EditorGUILayout.HorizontalScope())
       {
         using (var vert = new EditorGUILayout.VerticalScope(GUILayout.MaxWidth(380)))
@@ -433,43 +430,93 @@ namespace Yamadev.YamaStream.Editor
       }
     }
 
-    private void DrawImportBar()
+    private void DrawPanelToggle(ToolbarPanel panel, string labelKey)
+    {
+      bool open = _activePanel == panel;
+      bool next = GUILayout.Toggle(open, EditorLocalization.Get(labelKey), EditorStyles.toolbarButton, GUILayout.ExpandWidth(false));
+      if (next != open) _activePanel = next ? panel : ToolbarPanel.None;
+    }
+
+    private void DrawActivePanel()
+    {
+      using (new GUILayout.VerticalScope(GUI.skin.box))
+      {
+        switch (_activePanel)
+        {
+          case ToolbarPanel.Ytdlp: DrawYtdlpPanel(); break;
+          case ToolbarPanel.ImportUrl: DrawImportUrlPanel(); break;
+          case ToolbarPanel.ImportJson: DrawJsonPanel(false); break;
+          case ToolbarPanel.ExportJson: DrawJsonPanel(true); break;
+        }
+      }
+    }
+
+    private void DrawYtdlpPanel()
+    {
+      EditorGUILayout.HelpBox(EditorLocalization.Get("playlist.panel.ytdlp"), MessageType.Info);
+      using (new EditorGUILayout.HorizontalScope())
+      {
+        EditorGUILayout.LabelField(EditorLocalization.Get(
+          YtdlpResolver.IsAvailable ? "playlist.panel.ytdlpInstalled" : "playlist.panel.ytdlpMissing"));
+        if (GUILayout.Button(
+          EditorLocalization.Get(YtdlpResolver.IsAvailable ? "ytdlp.update" : "ytdlp.download"),
+          GUILayout.ExpandWidth(false)))
+        {
+          YtdlpResolver.DownloadYtdlpExecutable().Forget();
+        }
+      }
+    }
+
+    private void DrawJsonPanel(bool export)
+    {
+      EditorGUILayout.HelpBox(EditorLocalization.Get(
+        export ? "playlist.panel.exportJson" : "playlist.panel.importJson"), MessageType.Info);
+      using (new EditorGUILayout.HorizontalScope())
+      {
+        GUILayout.FlexibleSpace();
+        if (GUILayout.Button(
+          EditorLocalization.Get(export ? "playlist.exportToJson" : "playlist.importFromJson"),
+          GUILayout.ExpandWidth(false)))
+        {
+          if (export) Export(); else Import();
+        }
+      }
+    }
+
+    private void DrawImportUrlPanel()
     {
       var sources = PlaylistImportSources.Get();
       if (sources.Length == 0) return;
 
-      using (new GUILayout.VerticalScope(GUI.skin.box))
+      if (sources.Length > 1)
       {
-        if (sources.Length > 1)
-        {
-          _importSourceIndex = EditorGUILayout.Popup(
-            _importSourceIndex,
-            sources.Select(s => EditorLocalization.Get(s.TitleKey)).ToArray());
-        }
-        _importSourceIndex = Mathf.Clamp(_importSourceIndex, 0, sources.Length - 1);
-        var source = sources[_importSourceIndex];
+        _importSourceIndex = EditorGUILayout.Popup(
+          _importSourceIndex,
+          sources.Select(s => EditorLocalization.Get(s.TitleKey)).ToArray());
+      }
+      _importSourceIndex = Mathf.Clamp(_importSourceIndex, 0, sources.Length - 1);
+      var source = sources[_importSourceIndex];
 
-        if (!source.IsAvailable(_player, out string unavailable))
-        {
-          EditorGUILayout.HelpBox(unavailable, MessageType.Warning);
-          return;
-        }
+      if (!source.IsAvailable(_player, out string unavailable))
+      {
+        EditorGUILayout.HelpBox(unavailable, MessageType.Warning);
+        return;
+      }
 
-        using (new EditorGUILayout.HorizontalScope())
-        using (new EditorGUI.DisabledScope(_importInFlight))
+      using (new EditorGUILayout.HorizontalScope())
+      using (new EditorGUI.DisabledScope(_importInFlight))
+      {
+        if (sources.Length == 1) EditorGUILayout.LabelField(EditorLocalization.Get(source.TitleKey), GUILayout.Width(120));
+        _importInput = EditorGUILayout.TextField(_importInput);
+        using (new EditorGUI.DisabledScope(string.IsNullOrWhiteSpace(_importInput)))
         {
-          if (sources.Length == 1) EditorGUILayout.LabelField(EditorLocalization.Get(source.TitleKey), GUILayout.Width(120));
-          _importInput = EditorGUILayout.TextField(_importInput);
-          using (new EditorGUI.DisabledScope(string.IsNullOrWhiteSpace(_importInput)))
+          if (GUILayout.Button(EditorLocalization.Get("playlist.importFromUrl"), GUILayout.ExpandWidth(false)))
           {
-            if (GUILayout.Button(EditorLocalization.Get("playlist.importFromUrl"), GUILayout.ExpandWidth(false)))
-            {
-              RunImport(source, _importInput).Forget();
-            }
+            RunImport(source, _importInput).Forget();
           }
         }
-        EditorGUILayout.HelpBox(EditorLocalization.Get(source.InputHintKey), MessageType.Info);
       }
+      EditorGUILayout.HelpBox(EditorLocalization.Get(source.InputHintKey), MessageType.Info);
     }
 
     // The request outlives the GUI event that started it, so nothing is
