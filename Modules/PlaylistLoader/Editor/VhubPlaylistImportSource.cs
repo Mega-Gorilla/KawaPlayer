@@ -18,6 +18,18 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader.Editor
   {
     private const string KeyPrefix = "module.playlistLoader.import.";
 
+    // UnityWebRequest never times out on its own, and the Playlist Editor
+    // keeps the import controls disabled until the request comes back, so a
+    // server that stops responding would lock the window out of retrying.
+    private const int RequestTimeoutSeconds = 20;
+
+    // A mode is cast straight to VideoPlayerType, but only the three types
+    // that a player actually has a handler for can play: Controller
+    // .FindHandlerIndexByType returns -1 for anything else, so a track with
+    // an unknown mode would be baked into the world and then silently refuse
+    // to load. Skipping it here keeps the failure in the Editor.
+    private const int MaxPlayableMode = (int)VideoPlayerType.ImageViewer;
+
     public int Order => 0;
     public string TitleKey => KeyPrefix + "title";
     public string InputHintKey => KeyPrefix + "hint";
@@ -71,6 +83,8 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader.Editor
       string body;
       using (var request = UnityWebRequest.Get(url))
       {
+        request.timeout = RequestTimeoutSeconds;
+
         try
         {
           await request.SendWebRequest();
@@ -143,6 +157,7 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader.Editor
         if (string.IsNullOrEmpty(slotUrl)) { skipped++; continue; }
 
         int mode = track["mode"]?.Type == JTokenType.Integer ? track["mode"].Value<int>() : 0;
+        if (mode < 0 || mode > MaxPlayableMode) { skipped++; continue; }
         string title = track["title"]?.Type == JTokenType.String ? track["title"].Value<string>() : string.Empty;
 
         tracks.Add(new PlaylistTrack
