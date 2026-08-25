@@ -18,6 +18,12 @@ namespace Yamadev.YamaStream.Editor
     private PlaylistData _selectedPlaylist;
     private bool _useYoutubePlaylistName;
     private VideoPlayerType _defaultTrackMode = VideoPlayerType.AVProVideoPlayer;
+    // URL import bar (issue #90). Sources are contributed by modules through
+    // IPlaylistImportSource, so this state is source-agnostic.
+    private bool _importBarOpen;
+    private int _importSourceIndex;
+    private string _importInput = "";
+    private bool _importInFlight;
     private bool _isDirty;
     private bool IsDirty
     {
@@ -127,6 +133,7 @@ namespace Yamadev.YamaStream.Editor
             name = EditorLocalization.Get("playlist.new"),
             active = true,
             youtubeListId = "",
+            vhubPlaylistUrl = "",
             tracks = new List<PlaylistTrack>(),
             isNameEditing = false
           });
@@ -289,6 +296,10 @@ namespace Yamadev.YamaStream.Editor
           YtdlpResolver.DownloadYtdlpExecutable().Forget();
         }
 
+        if (PlaylistImportSources.Get().Length > 0)
+        {
+          _importBarOpen = GUILayout.Toggle(_importBarOpen, EditorLocalization.Get("playlist.importFromUrl"), EditorStyles.toolbarButton, GUILayout.ExpandWidth(false));
+        }
         if (GUILayout.Button(EditorLocalization.Get("playlist.importFromJson"), EditorStyles.toolbarButton, GUILayout.ExpandWidth(false))) Import();
         if (GUILayout.Button(EditorLocalization.Get("playlist.exportToJson"), EditorStyles.toolbarButton, GUILayout.ExpandWidth(false))) Export();
         using (new EditorGUI.DisabledGroupScope(!IsDirty))
@@ -302,6 +313,7 @@ namespace Yamadev.YamaStream.Editor
           if (GUILayout.Button(EditorLocalization.Get("button.save"), saveStyle, GUILayout.ExpandWidth(false))) Save();
         }
       }
+      if (_importBarOpen) DrawImportBar();
       using (new EditorGUILayout.HorizontalScope())
       {
         using (var vert = new EditorGUILayout.VerticalScope(GUILayout.MaxWidth(380)))
@@ -408,7 +420,138 @@ namespace Yamadev.YamaStream.Editor
             }
           }
         }
+        // Imported playlists carry the URL they came from. Showing it read-only
+        // keeps that saved metadata visible without inviting hand edits, since
+        // the URL only means anything alongside the tracks it produced.
+        if (!string.IsNullOrEmpty(_selectedPlaylist?.vhubPlaylistUrl))
+        {
+          using (new EditorGUI.DisabledScope(true))
+          {
+            EditorGUILayout.TextField(EditorLocalization.Get("playlist.sourceUrl"), _selectedPlaylist.vhubPlaylistUrl);
+          }
+        }
       }
+    }
+
+    private void DrawImportBar()
+    {
+      var sources = PlaylistImportSources.Get();
+      if (sources.Length == 0) return;
+
+      using (new GUILayout.VerticalScope(GUI.skin.box))
+      {
+        if (sources.Length > 1)
+        {
+          _importSourceIndex = EditorGUILayout.Popup(
+            _importSourceIndex,
+            sources.Select(s => EditorLocalization.Get(s.TitleKey)).ToArray());
+        }
+        _importSourceIndex = Mathf.Clamp(_importSourceIndex, 0, sources.Length - 1);
+        var source = sources[_importSourceIndex];
+
+        if (!source.IsAvailable(_player, out string unavailable))
+        {
+          EditorGUILayout.HelpBox(unavailable, MessageType.Warning);
+          return;
+        }
+
+        using (new EditorGUILayout.HorizontalScope())
+        using (new EditorGUI.DisabledScope(_importInFlight))
+        {
+          if (sources.Length == 1) EditorGUILayout.LabelField(EditorLocalization.Get(source.TitleKey), GUILayout.Width(120));
+          _importInput = EditorGUILayout.TextField(_importInput);
+          using (new EditorGUI.DisabledScope(string.IsNullOrWhiteSpace(_importInput)))
+          {
+            if (GUILayout.Button(EditorLocalization.Get("playlist.importFromUrl"), GUILayout.ExpandWidth(false)))
+            {
+              RunImport(source, _importInput).Forget();
+            }
+          }
+        }
+        EditorGUILayout.HelpBox(EditorLocalization.Get(source.InputHintKey), MessageType.Info);
+      }
+    }
+
+    // The request outlives the GUI event that started it, so nothing is
+    // applied until we confirm the window still exists and is still pointed
+    // at the player the import was started for.
+    private async UniTaskVoid RunImport(IPlaylistImportSource source, string input)
+    {
+      if (_importInFlight) return;
+      var startedFor = _player;
+      _importInFlight = true;
+
+      PlaylistImportResult result;
+      try
+      {
+        result = await source.ImportAsync(startedFor, input);
+      }
+      catch (Exception ex)
+      {
+        Debug.LogException(ex);
+        result = PlaylistImportResult.Failed(ex.Message);
+      }
+      finally
+      {
+        _importInFlight = false;
+      }
+
+      if (this == null || _player != startedFor || _playlists == null) return;
+
+      if (result == null || !result.Success || result.Data == null)
+      {
+        EditorUtility.DisplayDialog(
+          EditorLocalization.Get("playlist.import.title"),
+          result?.Message ?? "",
+          EditorLocalization.Get("button.ok"));
+        return;
+      }
+
+      ApplyImportResult(source, result);
+      Repaint();
+    }
+
+    private void ApplyImportResult(IPlaylistImportSource source, PlaylistImportResult result)
+    {
+      var existing = _playlists.FirstOrDefault(p => p != null && source.MatchesSource(p, result));
+      if (existing != null)
+      {
+        int choice = EditorUtility.DisplayDialogComplex(
+          EditorLocalization.Get("playlist.import.title"),
+          string.Format(EditorLocalization.Get("playlist.import.duplicate"), existing.name),
+          EditorLocalization.Get("button.doUpdate"),
+          EditorLocalization.Get("button.cancel"),
+          EditorLocalization.Get("playlist.import.addNew"));
+        if (choice == 1) return;
+        if (choice == 0)
+        {
+          existing.name = result.Data.name;
+          existing.tracks = result.Data.tracks ?? new List<PlaylistTrack>();
+          // Provenance comes wholesale from the result so importing from one
+          // source clears the identifiers belonging to any other.
+          existing.youtubeListId = result.Data.youtubeListId ?? "";
+          existing.vhubPlaylistUrl = result.Data.vhubPlaylistUrl ?? "";
+          IsDirty = true;
+          GeneratePlaylistsView();
+          GeneratePlaylistTracksView(_playlistsTable);
+          ShowImportSummary(result);
+          return;
+        }
+      }
+
+      _playlists.Add(result.Data);
+      IsDirty = true;
+      GeneratePlaylistsView();
+      ShowImportSummary(result);
+    }
+
+    private void ShowImportSummary(PlaylistImportResult result)
+    {
+      if (string.IsNullOrEmpty(result.Message)) return;
+      EditorUtility.DisplayDialog(
+        EditorLocalization.Get("playlist.import.title"),
+        result.Message,
+        EditorLocalization.Get("button.ok"));
     }
 
     private void ApplyModeForAllTracks()
@@ -437,6 +580,9 @@ namespace Yamadev.YamaStream.Editor
       }
 
       _selectedPlaylist.tracks = data.tracks ?? new List<PlaylistTrack>();
+      // The tracks now come from YouTube, so a VHub source URL saved on this
+      // playlist would misdescribe it (issue #90).
+      _selectedPlaylist.vhubPlaylistUrl = "";
 
       IsDirty = true;
       GeneratePlaylistTracksView(_playlistsTable);
@@ -498,6 +644,7 @@ namespace Yamadev.YamaStream.Editor
         var so = new SerializedObject(item);
         so.FindProperty("playlistName").stringValue = playlist.name;
         so.FindProperty("youtubePlaylistId").stringValue = playlist.youtubeListId;
+        so.FindProperty("vhubPlaylistUrl").stringValue = playlist.vhubPlaylistUrl ?? "";
 
         var tracksProp = so.FindProperty("tracks");
         tracksProp.arraySize = playlist.tracks?.Count ?? 0;

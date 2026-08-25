@@ -76,7 +76,8 @@ namespace Yamadev.YamaStream.Editor
               active = true,
               name = "USharp Video Playlist",
               tracks = usharpTracks,
-              youtubeListId = ""
+              youtubeListId = "",
+              vhubPlaylistUrl = ""
             });
           }
           break;
@@ -89,7 +90,8 @@ namespace Yamadev.YamaStream.Editor
               active = true,
               name = "ProTV Playlist",
               tracks = protvTracks,
-              youtubeListId = ""
+              youtubeListId = "",
+              vhubPlaylistUrl = ""
             });
           }
           break;
@@ -114,7 +116,8 @@ namespace Yamadev.YamaStream.Editor
             title = track.title,
             url = track.url,
           }).ToList(),
-          youtubeListId = YtdlpResolver.GetYoutubePlaylistIdFromUrl(playlistUrl)
+          youtubeListId = YtdlpResolver.GetYoutubePlaylistIdFromUrl(playlistUrl),
+          vhubPlaylistUrl = ""
         };
       }
       catch (Exception ex)
@@ -171,7 +174,8 @@ namespace Yamadev.YamaStream.Editor
             url = data.url,
             playerType = (VideoPlayerType)data.mode,
           }).ToList(),
-          youtubeListId = YtdlpResolver.GetYoutubePlaylistIdFromUrl(li.playlistUrl)
+          youtubeListId = YtdlpResolver.GetYoutubePlaylistIdFromUrl(li.playlistUrl),
+          vhubPlaylistUrl = ""
         };
       }
       catch (Exception ex)
@@ -252,7 +256,8 @@ namespace Yamadev.YamaStream.Editor
             active = true,
             name = playListTitles[i],
             tracks = tracks,
-            youtubeListId = ""
+            youtubeListId = "",
+            vhubPlaylistUrl = ""
           });
         }
       }
@@ -328,7 +333,8 @@ namespace Yamadev.YamaStream.Editor
           active = true,
           name = name,
           tracks = playlistTracks,
-          youtubeListId = playlistId
+          youtubeListId = playlistId,
+          vhubPlaylistUrl = ""
         };
       }
       catch (Exception ex)

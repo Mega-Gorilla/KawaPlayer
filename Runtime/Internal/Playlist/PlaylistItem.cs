@@ -19,5 +19,10 @@ namespace Yamadev.YamaStream
     public PlaylistTrack[] tracks;
 
     [FormerlySerializedAs("YouTubePlayListID")] public string youtubePlaylistId;
+
+    // Where a VHub-imported playlist came from (issue #90). Editor-only
+    // metadata for re-importing: PlaylistBuildProcess does not copy it to the
+    // Udon Playlist, so it is never available at runtime as a VRCUrl.
+    public string vhubPlaylistUrl;
   }
 }

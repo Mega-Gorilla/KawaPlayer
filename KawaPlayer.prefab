@@ -56,7 +56,8 @@ MonoBehaviour:
   uiSlots: []
   moduleNameTranslationKey: 
   moduleDescriptionTranslationKey: 
-  editorTranslationFile: {fileID: 0}
+  editorTranslationFile: {fileID: 4900000, guid: 7c41b0d2e5ba48f4a9d1c6f0b3e28471,
+    type: 3}
   playerTranslationFile: {fileID: 4900000, guid: 61ed3ab176f14330931a8801d5041782,
     type: 3}
 --- !u!114 &1853352154412826092
