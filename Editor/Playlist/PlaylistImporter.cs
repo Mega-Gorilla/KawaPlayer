@@ -350,6 +350,7 @@ namespace Yamadev.YamaStream.Editor
           SkippedCount = fetched.ExpectedCount.HasValue
             ? Math.Max(0, fetched.ExpectedCount.Value - playlistTracks.Count)
             : 0,
+          IsPartial = fetched.IsPartial,
           Data = new PlaylistData
           {
             active = true,

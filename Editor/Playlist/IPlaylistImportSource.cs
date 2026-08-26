@@ -48,6 +48,11 @@ namespace Yamadev.YamaStream.Editor
     public string SourceKey;
     public int ImportedCount;
     public int SkippedCount;
+    // The import succeeded but may be missing entries. Distinct from
+    // SkippedCount because a source can know something went wrong without
+    // being able to say how much (issue #101). A window applying the result
+    // should confirm with the user before replacing anything.
+    public bool IsPartial;
 
     public static PlaylistImportResult Failed(string message)
     {

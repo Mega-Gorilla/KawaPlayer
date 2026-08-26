@@ -22,6 +22,10 @@ namespace Yamadev.YamaStream.Editor
   public class YtdlpPlaylistResult
   {
     public bool Success;
+    // Set alongside Success when the dump may be incomplete. Kept separate
+    // from the counts because a shortfall is not always measurable: yt-dlp can
+    // report trouble through the exit code alone.
+    public bool IsPartial;
     public int ExitCode;
     public bool TimedOut;
     public bool Cancelled;
@@ -233,6 +237,14 @@ namespace Yamadev.YamaStream.Editor
           // exited cleanly. That misreads a genuinely empty playlist, but the
           // alternative is overwriting the playlist being edited with nothing.
           result.Success = result.JsonLines.Count > 0;
+          // Entries came back, but something still went wrong along the way:
+          // --ignore-errors lets yt-dlp finish a playlist it could not read in
+          // full and report that only through a non-zero exit code, so the
+          // shortfall is not always countable. Either signal is enough to stop
+          // and ask before the result replaces anything.
+          result.IsPartial = result.Success
+            && (result.ExitCode != 0
+              || (result.ExpectedCount.HasValue && result.JsonLines.Count < result.ExpectedCount.Value));
 
           LogDiagnostics(result);
           return result;

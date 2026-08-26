@@ -653,7 +653,7 @@ namespace Yamadev.YamaStream.Editor
         return;
       }
 
-      if (result.SkippedCount > 0 && !EditorUtility.DisplayDialog(
+      if (result.IsPartial && !EditorUtility.DisplayDialog(
         EditorLocalization.Get("playlist.import.title"),
         string.Format(EditorLocalization.Get("ytdlp.partialWarning"), result.ImportedCount),
         EditorLocalization.Get("button.yes"),
