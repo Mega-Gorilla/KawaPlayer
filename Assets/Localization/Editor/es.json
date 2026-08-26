@@ -172,6 +172,8 @@
   "ytdlp.startFailed": "No se pudo iniciar el proceso de yt-dlp.",
   "ytdlp.extractException": "Ocurrió una excepción mientras se obtenía la lista de reproducción.",
   "ytdlp.emptyOutput": "La salida de yt-dlp está vacía.",
+  "ytdlp.timeout": "Se detuvo la obtención porque no hubo respuesta. Inténtalo de nuevo más tarde.",
+  "ytdlp.partialWarning": "Es posible que algunos elementos no se hayan obtenido. Pistas obtenidas: {0}. ¿Actualizar con este contenido?",
   "button.active": "Activo",
   "button.inactive": "Inactivo",
   "button.edit": "Editar",

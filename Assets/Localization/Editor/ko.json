@@ -172,6 +172,8 @@
   "ytdlp.startFailed": "yt-dlp 프로세스를 시작할 수 없습니다.",
   "ytdlp.extractException": "재생목록을 가져오는 중 예외가 발생했습니다.",
   "ytdlp.emptyOutput": "yt-dlp 출력이 비어 있습니다.",
+  "ytdlp.timeout": "응답이 없어 가져오기를 중단했습니다. 잠시 후 다시 시도해 주세요.",
+  "ytdlp.partialWarning": "일부 항목을 가져오지 못했을 수 있습니다. 가져온 트랙: {0}개. 이 내용으로 업데이트할까요?",
   "button.active": "활성화",
   "button.inactive": "비활성화",
   "button.edit": "편집",

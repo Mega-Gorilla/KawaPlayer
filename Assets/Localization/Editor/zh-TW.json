@@ -172,6 +172,8 @@
   "ytdlp.startFailed": "無法啟動yt-dlp程序。",
   "ytdlp.extractException": "取得播放清單時發生例外。",
   "ytdlp.emptyOutput": "yt-dlp輸出為空。",
+  "ytdlp.timeout": "由於沒有回應，已中止取得。請稍後再試。",
+  "ytdlp.partialWarning": "部分項目可能未能取得。已取得曲目：{0} 首。是否以此內容更新？",
   "button.active": "啟用",
   "button.inactive": "停用",
   "button.edit": "編輯",

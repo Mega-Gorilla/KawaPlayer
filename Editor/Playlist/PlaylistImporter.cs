@@ -314,12 +314,24 @@ namespace Yamadev.YamaStream.Editor
       public int duration;
     }
 
-    public static async UniTask<PlaylistData> GetYouTubePlaylistData(string playlistId)
+    // Returns the same result shape the URL import sources use, so the window
+    // can apply it with the one rule that matters: nothing is written to the
+    // playlist being edited unless Success is set (issue #101).
+    public static async UniTask<PlaylistImportResult> GetYouTubePlaylistData(string playlistId)
     {
       try
       {
-        List<string> jsonList = await YtdlpResolver.GetPlaylist(playlistId);
-        List<YouTubePlaylistTrack> tracks = jsonList.Select(x => JsonUtility.FromJson<YouTubePlaylistTrack>(x)).ToList();
+        YtdlpPlaylistResult fetched = await YtdlpResolver.GetPlaylist(playlistId);
+        if (!fetched.Success)
+        {
+          // Cancelling is the user's own doing, so it reports failure without
+          // a message and the window stays quiet.
+          if (fetched.Cancelled) return PlaylistImportResult.Failed(null);
+          return PlaylistImportResult.Failed(EditorLocalization.Get(
+            fetched.TimedOut ? "ytdlp.timeout" : "ytdlp.extractFailed"));
+        }
+
+        List<YouTubePlaylistTrack> tracks = fetched.JsonLines.Select(x => JsonUtility.FromJson<YouTubePlaylistTrack>(x)).ToList();
         string name = tracks.Count > 0 ? tracks[0].playlist : "";
         var playlistTracks = tracks.Select(track => new PlaylistTrack
         {
@@ -328,20 +340,31 @@ namespace Yamadev.YamaStream.Editor
           url = track.url,
         }).ToList();
 
-        return new PlaylistData
+        return new PlaylistImportResult
         {
-          active = true,
-          name = name,
-          tracks = playlistTracks,
-          youtubeListId = playlistId,
-          vhubPlaylistUrl = ""
+          Success = true,
+          SourceKind = "youtube",
+          SourceKey = playlistId,
+          ImportedCount = playlistTracks.Count,
+          // Only claimed when yt-dlp said how many entries it meant to emit.
+          SkippedCount = fetched.ExpectedCount.HasValue
+            ? Math.Max(0, fetched.ExpectedCount.Value - playlistTracks.Count)
+            : 0,
+          Data = new PlaylistData
+          {
+            active = true,
+            name = name,
+            tracks = playlistTracks,
+            youtubeListId = playlistId,
+            vhubPlaylistUrl = ""
+          }
         };
       }
       catch (Exception ex)
       {
         Debug.LogException(ex);
+        return PlaylistImportResult.Failed(EditorLocalization.Get("ytdlp.extractFailed"));
       }
-      return null;
     }
   }
 }

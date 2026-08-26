@@ -171,6 +171,8 @@
   "ytdlp.startFailed": "yt-dlpのプロセスを開始できませんでした。",
   "ytdlp.extractException": "プレイリストの取得中に例外が発生しました。",
   "ytdlp.emptyOutput": "yt-dlpの出力は空です。",
+  "ytdlp.timeout": "応答がないため取得を中止しました。時間をおいて再試行してください。",
+  "ytdlp.partialWarning": "一部の項目を取得できなかった可能性があります。取得できたトラック: {0} 件。この内容で更新しますか？",
   "button.active": "有効",
   "button.inactive": "無効",
   "button.edit": "編集",
