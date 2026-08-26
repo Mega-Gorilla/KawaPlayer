@@ -171,6 +171,8 @@
   "ytdlp.startFailed": "Impossibile avviare il processo yt-dlp.",
   "ytdlp.extractException": "Si è verificata un'eccezione durante il recupero della playlist.",
   "ytdlp.emptyOutput": "L'output di yt-dlp è vuoto.",
+  "ytdlp.timeout": "Il recupero è stato interrotto per mancanza di risposta. Riprova più tardi.",
+  "ytdlp.partialWarning": "Alcuni elementi potrebbero non essere stati recuperati. Tracce recuperate: {0}. Aggiornare con questo contenuto?",
   "button.active": "Attivo",
   "button.inactive": "Inattivo",
   "button.edit": "Modifica",

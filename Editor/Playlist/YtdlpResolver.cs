@@ -7,11 +7,37 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Text;
 
 using Debug = UnityEngine.Debug;
 
 namespace Yamadev.YamaStream.Editor
 {
+  // What the yt-dlp process actually reported, with no interpretation layered
+  // on top. Callers need every field to tell a real failure apart from an
+  // empty playlist: yt-dlp signals trouble through the exit code, through
+  // stderr and through an empty stdout, and reading only one of them is how
+  // a failed fetch used to reach the editor disguised as a valid result
+  // (issue #101).
+  public class YtdlpPlaylistResult
+  {
+    public bool Success;
+    // Set alongside Success when the dump may be incomplete. Kept separate
+    // from the counts because a shortfall is not always measurable: yt-dlp can
+    // report trouble through the exit code alone.
+    public bool IsPartial;
+    public int ExitCode;
+    public bool TimedOut;
+    public bool Cancelled;
+    public List<string> JsonLines = new List<string>();
+    // n_entries from the flat playlist dump: how many items yt-dlp meant to
+    // emit. Null when the field is absent, in which case a shortfall cannot
+    // be measured and no partial-success claim is made.
+    public int? ExpectedCount;
+    // Raw stderr. Never parsed or translated, only forwarded to the Console.
+    public string Diagnostics;
+  }
+
   public static class YtdlpResolver
   {
 #if UNITY_EDITOR_WIN
@@ -30,6 +56,12 @@ namespace Yamadev.YamaStream.Editor
 
     private static readonly string DownloadUrl = $"https://github.com/yt-dlp/yt-dlp/releases/latest/download/{FILENAME}";
     private static readonly string ExecutablePath = Path.Combine(Path.GetTempPath(), FILENAME);
+
+    // Generous enough for a playlist with a few thousand entries, but finite:
+    // yt-dlp retries ten times per request by default, so an unreachable host
+    // would otherwise hold the progress bar open indefinitely.
+    private const int ExtractionTimeoutSeconds = 90;
+    private const int PollIntervalMilliseconds = 100;
 
 #if UNITY_EDITOR_OSX || UNITY_EDITOR_LINUX
     [DllImport("libc", EntryPoint = "chmod", SetLastError = true)]
@@ -57,18 +89,18 @@ namespace Yamadev.YamaStream.Editor
       return await DownloadYtdlpExecutable();
     }
 
-    public static async UniTask<List<string>> GetPlaylist(string playlistUrl)
+    public static async UniTask<YtdlpPlaylistResult> GetPlaylist(string playlistUrl)
     {
       if (string.IsNullOrEmpty(playlistUrl))
       {
         Debug.LogError(EditorLocalization.Get("ytdlp.urlEmpty"));
-        return new List<string>();
+        return new YtdlpPlaylistResult();
       }
 
       if (!await EnsureYtdlpAvailable())
       {
         Debug.LogError(EditorLocalization.Get("ytdlp.notAvailable"));
-        return new List<string>();
+        return new YtdlpPlaylistResult();
       }
 
       return await ExecutePlaylistExtraction(playlistUrl);
@@ -142,14 +174,13 @@ namespace Yamadev.YamaStream.Editor
 #endif
     }
 
-    private static async UniTask<List<string>> ExecutePlaylistExtraction(string playlistUrl)
+    private static async UniTask<YtdlpPlaylistResult> ExecutePlaylistExtraction(string playlistUrl)
     {
       var progressTitle = EditorLocalization.Get("ytdlp.extracting");
+      var result = new YtdlpPlaylistResult();
 
       try
       {
-        EditorUtility.DisplayProgressBar(progressTitle, $"{progressTitle}: {playlistUrl}", 0.5f);
-
         var processInfo = CreatePlaylistExtractionProcess(playlistUrl);
 
         using (var process = Process.Start(processInfo))
@@ -161,21 +192,68 @@ namespace Yamadev.YamaStream.Editor
 
           var outputTask = process.StandardOutput.ReadToEndAsync();
           var errorTask = process.StandardError.ReadToEndAsync();
+          var reads = System.Threading.Tasks.Task.WhenAll(outputTask, errorTask);
 
-          await UniTask.WhenAll(
-              outputTask.AsUniTask(),
-              errorTask.AsUniTask()
-          );
+          // Waiting on the reads alone would hand the window to yt-dlp with no
+          // way back: it retries ten times per request by default and nothing
+          // here bounds the total. Polling instead lets the progress bar offer
+          // Cancel and gives the wait a deadline. UniTask drives its player
+          // loop from EditorApplication.update outside play mode, so the delay
+          // ticks while the editor is idle.
+          double deadline = EditorApplication.timeSinceStartup + ExtractionTimeoutSeconds;
+          while (!reads.IsCompleted)
+          {
+            if (EditorUtility.DisplayCancelableProgressBar(progressTitle, $"{progressTitle}: {playlistUrl}", 0.5f))
+            {
+              result.Cancelled = true;
+              break;
+            }
+            if (EditorApplication.timeSinceStartup > deadline)
+            {
+              result.TimedOut = true;
+              break;
+            }
+            await UniTask.Delay(PollIntervalMilliseconds, DelayType.Realtime);
+          }
 
+          if (result.Cancelled || result.TimedOut)
+          {
+            // Killing the process releases the pending reads. Whatever they
+            // hold is a truncated dump, so it is never used.
+            KillProcess(process);
+            try { await reads.AsUniTask(); } catch (Exception) { }
+            if (result.TimedOut) Debug.LogError($"{EditorLocalization.Get("ytdlp.extractFailed")}: {EditorLocalization.Get("ytdlp.timeout")}");
+            return result;
+          }
+
+          await reads.AsUniTask();
           await UniTask.RunOnThreadPool(() => process.WaitForExit());
 
-          return ParsePlaylistOutput(errorTask.Result);
+          result.ExitCode = process.ExitCode;
+          result.Diagnostics = errorTask.Result;
+          result.JsonLines = ParsePlaylistOutput(outputTask.Result);
+          result.ExpectedCount = ReadExpectedCount(result.JsonLines);
+          // A dump with no entries is treated as a failure even when yt-dlp
+          // exited cleanly. That misreads a genuinely empty playlist, but the
+          // alternative is overwriting the playlist being edited with nothing.
+          result.Success = result.JsonLines.Count > 0;
+          // Entries came back, but something still went wrong along the way:
+          // --ignore-errors lets yt-dlp finish a playlist it could not read in
+          // full and report that only through a non-zero exit code, so the
+          // shortfall is not always countable. Either signal is enough to stop
+          // and ask before the result replaces anything.
+          result.IsPartial = result.Success
+            && (result.ExitCode != 0
+              || (result.ExpectedCount.HasValue && result.JsonLines.Count < result.ExpectedCount.Value));
+
+          LogDiagnostics(result);
+          return result;
         }
       }
       catch (Exception ex)
       {
         Debug.LogError($"{EditorLocalization.Get("ytdlp.extractException")}: {ex.Message}");
-        return new List<string>();
+        return result;
       }
       finally
       {
@@ -183,13 +261,31 @@ namespace Yamadev.YamaStream.Editor
       }
     }
 
+    private static void KillProcess(Process process)
+    {
+      try
+      {
+        if (!process.HasExited) process.Kill();
+      }
+      catch (Exception ex)
+      {
+        Debug.LogWarning($"{EditorLocalization.Get("ytdlp.extractException")}: {ex.Message}");
+      }
+    }
+
+    // yt-dlp writes its own messages in the console code page, which is CP932
+    // on a Japanese Windows, while the JSON is pure ASCII either way. Forcing
+    // both sides to UTF-8 is what keeps the "YouTube said: ..." text readable
+    // once it reaches the Console.
     private static ProcessStartInfo CreatePlaylistExtractionProcess(string playlistUrl)
     {
       var arguments = $"--extractor-args \"youtube:lang=ja\" " +
         $"--flat-playlist " +
         $"--no-write-playlist-metafiles " +
         $"--no-exec " +
-        $"-sijo - " +
+        $"--ignore-config " +
+        $"--encoding utf-8 " +
+        $"-sij " +
         $"\"{playlistUrl}\"";
 
       return new ProcessStartInfo(ExecutablePath, arguments)
@@ -197,25 +293,70 @@ namespace Yamadev.YamaStream.Editor
         UseShellExecute = false,
         RedirectStandardOutput = true,
         RedirectStandardError = true,
+        StandardOutputEncoding = new UTF8Encoding(false),
+        StandardErrorEncoding = new UTF8Encoding(false),
         CreateNoWindow = true,
         WorkingDirectory = Path.GetTempPath()
       };
     }
 
+    // The diagnostics go to the Console verbatim. Part of the text comes from
+    // YouTube itself and is already localized by the lang extractor argument,
+    // so matching phrases against it would be guesswork; the user-facing
+    // wording is chosen upstream from a fixed set instead.
+    private static void LogDiagnostics(YtdlpPlaylistResult result)
+    {
+      if (string.IsNullOrWhiteSpace(result.Diagnostics)) return;
+
+      var lines = result.Diagnostics
+        .Split('\n')
+        .Select(line => line.Trim())
+        .Where(line => line.Length > 0)
+        .ToList();
+      if (lines.Count == 0) return;
+
+      // The Console list only shows the first line of an entry, so the last
+      // line yt-dlp wrote is repeated up there: it reports the failure that
+      // ended the run, after any warnings it passed along the way. Picking by
+      // position keeps this free of any judgement about what the text says.
+      var message = $"[yt-dlp] exit={result.ExitCode} {lines[lines.Count - 1]}\n{string.Join("\n", lines)}";
+      if (result.Success) Debug.LogWarning(message);
+      else Debug.LogError(message);
+    }
+
     private static List<string> ParsePlaylistOutput(string output)
     {
-      if (string.IsNullOrEmpty(output))
-      {
-        Debug.LogWarning(EditorLocalization.Get("ytdlp.emptyOutput"));
-        return new List<string>();
-      }
+      if (string.IsNullOrEmpty(output)) return new List<string>();
 
-      var jsonLines = output
+      return output
         .Split('\n')
         .Where(line => !string.IsNullOrWhiteSpace(line) && line.Trim().StartsWith("{"))
         .ToList();
+    }
 
-      return jsonLines;
+    [Serializable]
+    private struct EntryCount
+    {
+      public int n_entries;
+    }
+
+    // n_entries is how many items yt-dlp set out to emit, which is what a
+    // short dump should be measured against. playlist_count is the size of the
+    // whole playlist and does not match once a range is requested. Absent or
+    // zero means the shortfall cannot be measured.
+    private static int? ReadExpectedCount(List<string> jsonLines)
+    {
+      if (jsonLines.Count == 0) return null;
+
+      try
+      {
+        var count = UnityEngine.JsonUtility.FromJson<EntryCount>(jsonLines[0]).n_entries;
+        return count > 0 ? count : (int?)null;
+      }
+      catch
+      {
+        return null;
+      }
     }
 
     public static string GetYoutubePlaylistIdFromUrl(string url)

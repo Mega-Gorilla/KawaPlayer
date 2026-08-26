@@ -400,7 +400,9 @@ namespace Yamadev.YamaStream.Editor
         _useYoutubePlaylistName = EditorGUILayout.Toggle(EditorLocalization.Get("playlist.overwriteName"), _useYoutubePlaylistName);
         using (new EditorGUILayout.HorizontalScope())
         {
-          using (new EditorGUI.DisabledScope(_selectedPlaylist == null))
+          // Disabled while any import is running so a second fetch cannot be
+          // started against a playlist the first one is about to replace.
+          using (new EditorGUI.DisabledScope(_selectedPlaylist == null || _importInFlight))
           {
             string currentYoutubeId = _selectedPlaylist?.youtubeListId ?? "";
 
@@ -612,27 +614,73 @@ namespace Yamadev.YamaStream.Editor
       IsDirty = true;
     }
 
+    // Nothing on the selected playlist is touched until the fetch has come
+    // back successfully. A failed fetch used to reach here as an empty result
+    // and wipe the tracks being edited, with no message anywhere (issue #101),
+    // so both the normalized id and the tracks are held in locals until then.
     public async UniTask ReadYouTubePlaylist()
     {
-      if (_selectedPlaylist == null) return;
+      if (_selectedPlaylist == null || _importInFlight) return;
 
-      _selectedPlaylist.youtubeListId = YtdlpResolver.GetYoutubePlaylistIdFromUrl(_selectedPlaylist.youtubeListId);
+      var startedFor = _player;
+      var target = _selectedPlaylist;
+      var normalizedId = YtdlpResolver.GetYoutubePlaylistIdFromUrl(target.youtubeListId);
 
-      var data = await PlaylistImporter.GetYouTubePlaylistData(_selectedPlaylist.youtubeListId);
-      if (data == null) return;
-
-      if (_useYoutubePlaylistName && !string.IsNullOrEmpty(data.name))
+      PlaylistImportResult result;
+      _importInFlight = true;
+      try
       {
-        _selectedPlaylist.name = data.name;
+        result = await PlaylistImporter.GetYouTubePlaylistData(normalizedId);
+      }
+      finally
+      {
+        _importInFlight = false;
       }
 
-      _selectedPlaylist.tracks = data.tracks ?? new List<PlaylistTrack>();
+      // The fetch outlives the GUI event that started it, so the playlist it
+      // was started for has to still be the one on screen.
+      if (this == null || _player != startedFor || _selectedPlaylist != target) return;
+
+      if (result == null || !result.Success || result.Data == null)
+      {
+        if (!string.IsNullOrEmpty(result?.Message))
+        {
+          EditorUtility.DisplayDialog(
+            EditorLocalization.Get("playlist.import.title"),
+            result.Message,
+            EditorLocalization.Get("button.ok"));
+        }
+        return;
+      }
+
+      if (result.IsPartial && !EditorUtility.DisplayDialog(
+        EditorLocalization.Get("playlist.import.title"),
+        string.Format(EditorLocalization.Get("ytdlp.partialWarning"), result.ImportedCount),
+        EditorLocalization.Get("button.yes"),
+        EditorLocalization.Get("button.no")))
+      {
+        return;
+      }
+
+      target.youtubeListId = normalizedId;
+      if (_useYoutubePlaylistName && !string.IsNullOrEmpty(result.Data.name))
+      {
+        target.name = result.Data.name;
+      }
+
+      target.tracks = result.Data.tracks ?? new List<PlaylistTrack>();
       // The tracks now come from YouTube, so a VHub source URL saved on this
       // playlist would misdescribe it (issue #90).
-      _selectedPlaylist.vhubPlaylistUrl = "";
+      target.vhubPlaylistUrl = "";
 
       IsDirty = true;
+      // Only the track list is rebuilt, because the tracks it was bound to
+      // have been replaced by a new list instance. The playlist list keeps its
+      // own table: rebuilding that one would reset the selection to the last
+      // row, and its rows read the name and count straight out of _playlists
+      // on every repaint anyway.
       GeneratePlaylistTracksView(_playlistsTable);
+      Repaint();
     }
 
     private bool ConfirmSave()

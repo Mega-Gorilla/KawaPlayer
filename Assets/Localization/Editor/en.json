@@ -171,6 +171,8 @@
   "ytdlp.startFailed": "Could not start yt-dlp process.",
   "ytdlp.extractException": "An exception occurred while getting playlist.",
   "ytdlp.emptyOutput": "yt-dlp output is empty.",
+  "ytdlp.timeout": "The fetch was stopped because there was no response. Please try again later.",
+  "ytdlp.partialWarning": "Some items may not have been retrieved. Tracks retrieved: {0}. Update with this content?",
   "button.active": "Active",
   "button.inactive": "Inactive",
   "button.edit": "Edit",
