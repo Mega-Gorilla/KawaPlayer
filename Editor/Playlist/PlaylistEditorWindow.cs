@@ -674,7 +674,11 @@ namespace Yamadev.YamaStream.Editor
       target.vhubPlaylistUrl = "";
 
       IsDirty = true;
-      GeneratePlaylistsView();
+      // Only the track list is rebuilt, because the tracks it was bound to
+      // have been replaced by a new list instance. The playlist list keeps its
+      // own table: rebuilding that one would reset the selection to the last
+      // row, and its rows read the name and count straight out of _playlists
+      // on every repaint anyway.
       GeneratePlaylistTracksView(_playlistsTable);
       Repaint();
     }
