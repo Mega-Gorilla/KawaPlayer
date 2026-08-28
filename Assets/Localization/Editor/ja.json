@@ -158,6 +158,7 @@
   "ytdlp.updateMessage": "最新のyt-dlpをダウンロードしますか？",
   "ytdlp.downloadMessage": "yt-dlpをダウンロードしますか？",
   "ytdlp.urlEmpty": "プレイリストのURLが空です。",
+  "ytdlp.invalidPlaylistId": "プレイリスト ID が正しくありません。YouTube のプレイリスト ID または URL を確認してください。",
   "ytdlp.notAvailable": "yt-dlpが利用できません。プレイリストを取得できません。",
   "ytdlp.cancelledByUser": "yt-dlpのダウンロードがユーザーによってキャンセルされました。",
   "ytdlp.downloading": "ダウンロード中",

@@ -632,7 +632,16 @@ namespace Yamadev.YamaStream.Editor
 
       var startedFor = _player;
       var target = _selectedPlaylist;
-      var normalizedId = YtdlpResolver.GetYoutubePlaylistIdFromUrl(target.youtubeListId);
+      // Rejected here rather than deeper down so the person gets a dialog
+      // instead of a Console line, and yt-dlp is never started (issue #104).
+      if (!YtdlpResolver.TryGetYoutubePlaylistId(target.youtubeListId, out string normalizedId))
+      {
+        EditorUtility.DisplayDialog(
+          EditorLocalization.Get("playlist.import.title"),
+          EditorLocalization.Get("ytdlp.invalidPlaylistId"),
+          EditorLocalization.Get("button.ok"));
+        return;
+      }
 
       PlaylistImportResult result;
       _importInFlight = true;
