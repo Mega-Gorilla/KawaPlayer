@@ -327,6 +327,8 @@ namespace Yamadev.YamaStream.Editor
           // Cancelling is the user's own doing, so it reports failure without
           // a message and the window stays quiet.
           if (fetched.Cancelled) return PlaylistImportResult.Failed(null);
+          if (fetched.InvalidInput)
+            return PlaylistImportResult.Failed(EditorLocalization.Get("ytdlp.invalidPlaylistId"));
           return PlaylistImportResult.Failed(EditorLocalization.Get(
             fetched.TimedOut ? "ytdlp.timeout" : "ytdlp.extractFailed"));
         }

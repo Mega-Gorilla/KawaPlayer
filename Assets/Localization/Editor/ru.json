@@ -159,6 +159,7 @@
   "ytdlp.updateMessage": "Хотите скачать последний yt-dlp?",
   "ytdlp.downloadMessage": "Хотите скачать yt-dlp?",
   "ytdlp.urlEmpty": "URL плейлиста пуст.",
+  "ytdlp.invalidPlaylistId": "Неверный идентификатор плейлиста. Проверьте идентификатор или URL плейлиста YouTube.",
   "ytdlp.notAvailable": "yt-dlp недоступен. Невозможно получить плейлист.",
   "ytdlp.cancelledByUser": "Загрузка yt-dlp отменена пользователем.",
   "ytdlp.downloading": "Загрузка",

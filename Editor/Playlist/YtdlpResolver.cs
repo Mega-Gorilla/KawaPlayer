@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Text.RegularExpressions;
 
 using Debug = UnityEngine.Debug;
 
@@ -36,6 +37,9 @@ namespace Yamadev.YamaStream.Editor
     public int? ExpectedCount;
     // Raw stderr. Never parsed or translated, only forwarded to the Console.
     public string Diagnostics;
+    // The request was turned away before yt-dlp ran because the id could not
+    // be one (issue #104). Distinct from a failed fetch: nothing was tried.
+    public bool InvalidInput;
   }
 
   public static class YtdlpResolver
@@ -55,7 +59,7 @@ namespace Yamadev.YamaStream.Editor
 #endif
 
     private static readonly string DownloadUrl = $"https://github.com/yt-dlp/yt-dlp/releases/latest/download/{FILENAME}";
-    private static readonly string ExecutablePath = Path.Combine(Path.GetTempPath(), FILENAME);
+    public static readonly string ExecutablePath = Path.Combine(Path.GetTempPath(), FILENAME);
 
     // Generous enough for a playlist with a few thousand entries, but finite:
     // yt-dlp retries ten times per request by default, so an unreachable host
@@ -89,12 +93,18 @@ namespace Yamadev.YamaStream.Editor
       return await DownloadYtdlpExecutable();
     }
 
-    public static async UniTask<YtdlpPlaylistResult> GetPlaylist(string playlistUrl)
+    public static async UniTask<YtdlpPlaylistResult> GetPlaylist(string playlistId)
     {
-      if (string.IsNullOrEmpty(playlistUrl))
+      if (string.IsNullOrEmpty(playlistId))
       {
         Debug.LogError(EditorLocalization.Get("ytdlp.urlEmpty"));
         return new YtdlpPlaylistResult();
+      }
+
+      if (!IsValidPlaylistId(playlistId))
+      {
+        Debug.LogError($"{EditorLocalization.Get("ytdlp.invalidPlaylistId")} ({playlistId})");
+        return new YtdlpPlaylistResult { InvalidInput = true };
       }
 
       if (!await EnsureYtdlpAvailable())
@@ -103,7 +113,19 @@ namespace Yamadev.YamaStream.Editor
         return new YtdlpPlaylistResult();
       }
 
-      return await ExecutePlaylistExtraction(playlistUrl);
+      return await ExecutePlaylistExtraction(playlistId);
+    }
+
+    // YouTube playlist ids are URL-safe base64 and always open with a letter
+    // or a digit. Turning anything else away keeps quotes, whitespace and
+    // leading dashes from ever reaching the argument boundary, and it costs
+    // nothing: no real id is excluded by this (issue #104).
+    private static readonly Regex PlaylistIdPattern =
+      new Regex(@"^[A-Za-z0-9][A-Za-z0-9_-]{1,99}$", RegexOptions.CultureInvariant);
+
+    public static bool IsValidPlaylistId(string playlistId)
+    {
+      return !string.IsNullOrEmpty(playlistId) && PlaylistIdPattern.IsMatch(playlistId);
     }
 
     public static async UniTask<bool> DownloadYtdlpExecutable()
@@ -277,18 +299,9 @@ namespace Yamadev.YamaStream.Editor
     // on a Japanese Windows, while the JSON is pure ASCII either way. Forcing
     // both sides to UTF-8 is what keeps the "YouTube said: ..." text readable
     // once it reaches the Console.
-    private static ProcessStartInfo CreatePlaylistExtractionProcess(string playlistUrl)
+    public static ProcessStartInfo CreatePlaylistExtractionProcess(string playlistId)
     {
-      var arguments = $"--extractor-args \"youtube:lang=ja\" " +
-        $"--flat-playlist " +
-        $"--no-write-playlist-metafiles " +
-        $"--no-exec " +
-        $"--ignore-config " +
-        $"--encoding utf-8 " +
-        $"-sij " +
-        $"\"{playlistUrl}\"";
-
-      return new ProcessStartInfo(ExecutablePath, arguments)
+      var startInfo = new ProcessStartInfo(ExecutablePath)
       {
         UseShellExecute = false,
         RedirectStandardOutput = true,
@@ -297,6 +310,33 @@ namespace Yamadev.YamaStream.Editor
         StandardErrorEncoding = new UTF8Encoding(false),
         CreateNoWindow = true,
         WorkingDirectory = Path.GetTempPath()
+      };
+
+      foreach (var argument in BuildPlaylistExtractionArguments(playlistId))
+        startInfo.ArgumentList.Add(argument);
+
+      return startInfo;
+    }
+
+    // One list entry per argv element. Building a single command line instead
+    // let a quote in the id close the quoting and append options of its own
+    // (issue #104); ArgumentList hands the value to the process as it stands,
+    // on every platform.
+    public static List<string> BuildPlaylistExtractionArguments(string playlistId)
+    {
+      return new List<string>
+      {
+        "--extractor-args", "youtube:lang=ja",
+        "--flat-playlist",
+        "--no-write-playlist-metafiles",
+        "--no-exec",
+        "--ignore-config",
+        "--encoding", "utf-8",
+        "-sij",
+        // Everything past this is positional, so even an id that opened with
+        // a dash could not be read as an option. yt-dlp honours it.
+        "--",
+        playlistId,
       };
     }
 
@@ -359,13 +399,49 @@ namespace Yamadev.YamaStream.Editor
       }
     }
 
+    // Accepts a bare playlist id or a YouTube address carrying one, and never
+    // throws: a malformed url, a repeated list parameter and stray whitespace
+    // all just mean "no id here". The old version returned anything that was
+    // not an https url unchanged, so an option-looking string reached yt-dlp
+    // intact, and it threw on two inputs a person can easily paste (issue
+    // #104): a url with two list parameters, and a truncated https url.
+    public static bool TryGetYoutubePlaylistId(string input, out string playlistId)
+    {
+      playlistId = string.Empty;
+      if (string.IsNullOrEmpty(input)) return false;
+
+      string trimmed = input.Trim();
+      if (IsValidPlaylistId(trimmed))
+      {
+        playlistId = trimmed;
+        return true;
+      }
+
+      if (!Uri.TryCreate(trimmed, UriKind.Absolute, out Uri uri)) return false;
+      if (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps) return false;
+
+      foreach (string pair in uri.Query.TrimStart('?').Split('&'))
+      {
+        int separator = pair.IndexOf('=');
+        if (separator < 0) continue;
+        if (pair.Substring(0, separator) != "list") continue;
+
+        // Decoded before it is judged, so a percent-encoded quote is seen for
+        // what it is. A repeated list parameter loses instead of throwing:
+        // the first one that reads as an id wins.
+        string candidate = Uri.UnescapeDataString(pair.Substring(separator + 1)).Trim();
+        if (!IsValidPlaylistId(candidate)) continue;
+
+        playlistId = candidate;
+        return true;
+      }
+
+      return false;
+    }
+
     public static string GetYoutubePlaylistIdFromUrl(string url)
     {
-      if (string.IsNullOrEmpty(url) || !url.StartsWith("https://")) return url ?? "";
-      Uri uri = new Uri(url);
-      Dictionary<string, string> queries = uri.Query.Replace("?", "").Split('&').ToDictionary(pair => pair.Split('=').First(), pair => pair.Split('=').Last());
-      if (queries.TryGetValue("list", out var list)) return list;
-      return string.Empty;
+      return TryGetYoutubePlaylistId(url, out string playlistId) ? playlistId : string.Empty;
     }
   }
 }

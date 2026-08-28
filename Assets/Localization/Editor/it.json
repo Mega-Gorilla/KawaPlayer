@@ -158,6 +158,7 @@
   "ytdlp.updateMessage": "Vuoi scaricare l'ultima versione di yt-dlp?",
   "ytdlp.downloadMessage": "Vuoi scaricare yt-dlp?",
   "ytdlp.urlEmpty": "L'URL della playlist è vuoto.",
+  "ytdlp.invalidPlaylistId": "L'id della playlist non è valido. Controlla l'id o l'URL della playlist di YouTube.",
   "ytdlp.notAvailable": "yt-dlp non è disponibile. Impossibile recuperare la playlist.",
   "ytdlp.cancelledByUser": "Download di yt-dlp annullato dall'utente.",
   "ytdlp.downloading": "Download in corso",

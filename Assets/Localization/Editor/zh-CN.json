@@ -159,6 +159,7 @@
   "ytdlp.updateMessage": "是否下载最新的yt-dlp？",
   "ytdlp.downloadMessage": "是否下载yt-dlp？",
   "ytdlp.urlEmpty": "播放列表URL为空。",
+  "ytdlp.invalidPlaylistId": "播放列表 ID 无效。请检查 YouTube 播放列表 ID 或 URL。",
   "ytdlp.notAvailable": "yt-dlp不可用。无法获取播放列表。",
   "ytdlp.cancelledByUser": "yt-dlp下载已被用户取消。",
   "ytdlp.downloading": "正在下载",

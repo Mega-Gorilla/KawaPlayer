@@ -134,6 +134,18 @@ namespace Yamadev.YamaStream.Editor
       //    return;
       //}
 
+      // The url reaches this callback from the scene, so it is not something
+      // the person pressing Play necessarily typed. Requiring an absolute uri
+      // turns away input that could not be a video address anyway, before a
+      // process is started (issue #104).
+      string urlString = url == null ? string.Empty : url.Get();
+      if (!Uri.TryCreate(urlString, UriKind.Absolute, out _))
+      {
+        Debug.LogWarning($"Refusing to resolve '{urlString}': not an absolute URL");
+        errorCallback(VideoError.InvalidURL);
+        return;
+      }
+
       var ytdlProcess = new System.Diagnostics.Process();
 
       ytdlProcess.StartInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden;
@@ -141,16 +153,37 @@ namespace Yamadev.YamaStream.Editor
       ytdlProcess.StartInfo.UseShellExecute = false;
       ytdlProcess.StartInfo.RedirectStandardOutput = true;
       ytdlProcess.StartInfo.FileName = _youtubeDLPath;
-      ytdlProcess.StartInfo.Arguments = $"--no-check-certificate --no-cache-dir --rm-cache-dir -f \"(mp4/best)[height<=?{resolution}][height>=?64][protocol^=http]\" --get-url \"{url}\"";
+      foreach (string argument in BuildResolveArguments(urlString, resolution))
+        ytdlProcess.StartInfo.ArgumentList.Add(argument);
 
-      Debug.Log($"Attempting to resolve URL '{url}'");
+      Debug.Log($"Attempting to resolve URL '{urlString}'");
 
       ytdlProcess.Start();
       _runningYtdlProcesses.Add(ytdlProcess);
 
-      ((MonoBehaviour)videoPlayer).StartCoroutine(URLResolveCoroutine(url.ToString(), ytdlProcess, videoPlayer, urlResolvedCallback, errorCallback));
+      ((MonoBehaviour)videoPlayer).StartCoroutine(URLResolveCoroutine(urlString, ytdlProcess, videoPlayer, urlResolvedCallback, errorCallback));
 
       _registeredBehaviours.Add((MonoBehaviour)videoPlayer);
+    }
+
+    // One list entry per argv element. Concatenating a command line instead
+    // let a quote in the url close the quoting and append options of its own
+    // (issue #104); ArgumentList hands the value to the process as it stands,
+    // on every platform.
+    public static List<string> BuildResolveArguments(string url, int resolution)
+    {
+      return new List<string>
+      {
+        "--no-check-certificate",
+        "--no-cache-dir",
+        "--rm-cache-dir",
+        "-f", $"(mp4/best)[height<=?{resolution}][height>=?64][protocol^=http]",
+        "--get-url",
+        // Everything past this is positional, so a url opening with a dash
+        // cannot be read as an option.
+        "--",
+        url,
+      };
     }
 
     private static IEnumerator URLResolveCoroutine(string originalUrl, System.Diagnostics.Process ytdlProcess, UnityEngine.Object videoPlayer, Action<string> urlResolvedCallback, Action<VideoError> errorCallback)
