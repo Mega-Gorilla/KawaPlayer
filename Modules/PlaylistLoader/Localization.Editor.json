@@ -1,7 +1,7 @@
 {
   "ja": {
     "module.playlistLoader.import.title": "VHub プレイリスト",
-    "module.playlistLoader.import.hint": "VHub の共有 URL を貼り付けると、その内容を静的プレイリストとして取り込みます。取り込んだ内容はビルドに焼き込まれ、再生時に VHub へ接続しません。",
+    "module.playlistLoader.import.hint": "VHub の共有 URL を貼り付けると、その内容を静的プレイリストとして取り込みます。曲名と並び順はビルドに焼き込まれ、実行時にプレイリストを取得し直しません。ただし各曲の URL は VHub のリダイレクトのままなので、再生には VHub が必要です。",
     "module.playlistLoader.import.errorNoPlayer": "KawaPlayer を選択してください。",
     "module.playlistLoader.import.errorNoLoader": "この KawaPlayer には Playlist Loader モジュールがありません。",
     "module.playlistLoader.import.errorNoPool": "URL プールが生成されていません。Playlist Loader の Generate Pool を実行してください。",
@@ -19,7 +19,7 @@
   },
   "en": {
     "module.playlistLoader.import.title": "VHub playlist",
-    "module.playlistLoader.import.hint": "Paste a VHub share URL to import its contents as a static playlist. The snapshot is baked into the build, so playback never contacts VHub.",
+    "module.playlistLoader.import.hint": "Paste a VHub share URL to import its contents as a static playlist. Titles and order are baked into the build, so the playlist is never re-fetched at runtime. Each track URL stays a VHub redirect, so playback still needs VHub.",
     "module.playlistLoader.import.errorNoPlayer": "Select a KawaPlayer first.",
     "module.playlistLoader.import.errorNoLoader": "This KawaPlayer has no Playlist Loader module.",
     "module.playlistLoader.import.errorNoPool": "The URL pool has not been generated. Run Generate Pool on the Playlist Loader.",
@@ -37,7 +37,7 @@
   },
   "ko": {
     "module.playlistLoader.import.title": "VHub 재생목록",
-    "module.playlistLoader.import.hint": "VHub 공유 URL을 붙여넣으면 그 내용을 정적 재생목록으로 가져옵니다. 가져온 내용은 빌드에 구워지므로 재생 시 VHub에 접속하지 않습니다.",
+    "module.playlistLoader.import.hint": "VHub 공유 URL을 붙여넣으면 그 내용을 정적 재생목록으로 가져옵니다. 제목과 순서는 빌드에 구워지므로 실행 중에 재생목록을 다시 가져오지 않습니다. 다만 각 곡의 URL은 VHub 리디렉션 그대로이므로 재생에는 VHub가 필요합니다.",
     "module.playlistLoader.import.errorNoPlayer": "먼저 KawaPlayer를 선택하세요.",
     "module.playlistLoader.import.errorNoLoader": "이 KawaPlayer에는 Playlist Loader 모듈이 없습니다.",
     "module.playlistLoader.import.errorNoPool": "URL 풀이 생성되지 않았습니다. Playlist Loader에서 Generate Pool을 실행하세요.",
@@ -55,7 +55,7 @@
   },
   "zh-CN": {
     "module.playlistLoader.import.title": "VHub 播放列表",
-    "module.playlistLoader.import.hint": "粘贴 VHub 分享 URL，即可将其内容导入为静态播放列表。导入的快照会烘焙进构建，播放时不会连接 VHub。",
+    "module.playlistLoader.import.hint": "粘贴 VHub 分享 URL，即可将其内容导入为静态播放列表。标题和顺序会烘焙进构建，运行时不会重新获取播放列表。但每首曲目的 URL 仍是 VHub 重定向，因此播放仍需要 VHub。",
     "module.playlistLoader.import.errorNoPlayer": "请先选择 KawaPlayer。",
     "module.playlistLoader.import.errorNoLoader": "此 KawaPlayer 没有 Playlist Loader 模块。",
     "module.playlistLoader.import.errorNoPool": "尚未生成 URL 池。请在 Playlist Loader 中执行 Generate Pool。",
@@ -73,7 +73,7 @@
   },
   "zh-TW": {
     "module.playlistLoader.import.title": "VHub 播放清單",
-    "module.playlistLoader.import.hint": "貼上 VHub 分享 URL，即可將其內容匯入為靜態播放清單。匯入的快照會烘焙進建置，播放時不會連線 VHub。",
+    "module.playlistLoader.import.hint": "貼上 VHub 分享 URL，即可將其內容匯入為靜態播放清單。標題與順序會烘焙進建置，執行時不會重新取得播放清單。但每首曲目的 URL 仍是 VHub 轉址，因此播放仍需要 VHub。",
     "module.playlistLoader.import.errorNoPlayer": "請先選擇 KawaPlayer。",
     "module.playlistLoader.import.errorNoLoader": "此 KawaPlayer 沒有 Playlist Loader 模組。",
     "module.playlistLoader.import.errorNoPool": "尚未產生 URL 池。請在 Playlist Loader 中執行 Generate Pool。",
@@ -91,7 +91,7 @@
   },
   "es": {
     "module.playlistLoader.import.title": "Lista de VHub",
-    "module.playlistLoader.import.hint": "Pega una URL compartida de VHub para importar su contenido como lista estática. La instantánea se integra en la compilación, así que la reproducción nunca contacta con VHub.",
+    "module.playlistLoader.import.hint": "Pega una URL compartida de VHub para importar su contenido como lista estática. Los títulos y el orden se integran en la compilación, así que la lista nunca se vuelve a descargar en tiempo de ejecución. Pero la URL de cada pista sigue siendo una redirección de VHub, así que la reproducción sigue necesitando VHub.",
     "module.playlistLoader.import.errorNoPlayer": "Selecciona primero un KawaPlayer.",
     "module.playlistLoader.import.errorNoLoader": "Este KawaPlayer no tiene el módulo Playlist Loader.",
     "module.playlistLoader.import.errorNoPool": "El grupo de URL no se ha generado. Ejecuta Generate Pool en el Playlist Loader.",
@@ -109,7 +109,7 @@
   },
   "it": {
     "module.playlistLoader.import.title": "Playlist VHub",
-    "module.playlistLoader.import.hint": "Incolla un URL condiviso di VHub per importarne il contenuto come playlist statica. Lo snapshot viene incluso nella build, quindi la riproduzione non contatta mai VHub.",
+    "module.playlistLoader.import.hint": "Incolla un URL condiviso di VHub per importarne il contenuto come playlist statica. Titoli e ordine vengono inclusi nella build, quindi la playlist non viene mai riscaricata in fase di esecuzione. Ma l'URL di ogni traccia resta un redirect VHub, quindi la riproduzione richiede ancora VHub.",
     "module.playlistLoader.import.errorNoPlayer": "Seleziona prima un KawaPlayer.",
     "module.playlistLoader.import.errorNoLoader": "Questo KawaPlayer non ha il modulo Playlist Loader.",
     "module.playlistLoader.import.errorNoPool": "Il pool di URL non è stato generato. Esegui Generate Pool sul Playlist Loader.",
@@ -127,7 +127,7 @@
   },
   "ru": {
     "module.playlistLoader.import.title": "Плейлист VHub",
-    "module.playlistLoader.import.hint": "Вставьте ссылку VHub, чтобы импортировать её содержимое как статический плейлист. Снимок встраивается в сборку, поэтому воспроизведение не обращается к VHub.",
+    "module.playlistLoader.import.hint": "Вставьте ссылку VHub, чтобы импортировать её содержимое как статический плейлист. Названия и порядок встраиваются в сборку, поэтому плейлист не загружается заново во время выполнения. Но URL каждого трека остаётся редиректом VHub, поэтому для воспроизведения VHub всё равно нужен.",
     "module.playlistLoader.import.errorNoPlayer": "Сначала выберите KawaPlayer.",
     "module.playlistLoader.import.errorNoLoader": "В этом KawaPlayer нет модуля Playlist Loader.",
     "module.playlistLoader.import.errorNoPool": "Пул URL не сгенерирован. Выполните Generate Pool в Playlist Loader.",
@@ -145,7 +145,7 @@
   },
   "uk": {
     "module.playlistLoader.import.title": "Плейлист VHub",
-    "module.playlistLoader.import.hint": "Вставте посилання VHub, щоб імпортувати його вміст як статичний плейлист. Знімок вбудовується у збірку, тож відтворення не звертається до VHub.",
+    "module.playlistLoader.import.hint": "Вставте посилання VHub, щоб імпортувати його вміст як статичний плейлист. Назви та порядок вбудовуються у збірку, тож плейлист не завантажується повторно під час виконання. Але URL кожного треку залишається редиректом VHub, тож для відтворення VHub усе одно потрібен.",
     "module.playlistLoader.import.errorNoPlayer": "Спочатку виберіть KawaPlayer.",
     "module.playlistLoader.import.errorNoLoader": "У цьому KawaPlayer немає модуля Playlist Loader.",
     "module.playlistLoader.import.errorNoPool": "Пул URL не згенеровано. Виконайте Generate Pool у Playlist Loader.",
