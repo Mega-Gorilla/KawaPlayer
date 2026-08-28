@@ -78,12 +78,19 @@ namespace Yamadev.YamaStream.Editor
     public void SelectPlaylist(PlaylistItem targetPlaylist)
     {
       if (_playlists == null || targetPlaylist == null) return;
-      int index = _playlists.FindIndex(p => p.originalItem == targetPlaylist);
-      if (index >= 0 && _playlistsTable != null)
-      {
-        _playlistsTable.index = index;
-        GeneratePlaylistTracksView(_playlistsTable);
-      }
+      SelectPlaylistAt(_playlists.FindIndex(p => p.originalItem == targetPlaylist));
+    }
+
+    // Moves the selection without rebuilding the playlist table. The table
+    // keeps the collection it was handed, so edits and additions surface on
+    // their own; rebuilding it would reset the index to the last row.
+    // Assigning index raises no onSelectCallback, so the detail pane is
+    // rebound here explicitly (issue #103).
+    private void SelectPlaylistAt(int index)
+    {
+      if (_playlistsTable == null || index < 0 || index >= _playlists.Count) return;
+      _playlistsTable.index = index;
+      GeneratePlaylistTracksView(_playlistsTable);
     }
 
     private void OnEnable()
@@ -581,8 +588,9 @@ namespace Yamadev.YamaStream.Editor
           existing.youtubeListId = result.Data.youtubeListId ?? "";
           existing.vhubPlaylistUrl = result.Data.vhubPlaylistUrl ?? "";
           IsDirty = true;
-          GeneratePlaylistsView();
-          GeneratePlaylistTracksView(_playlistsTable);
+          // The update target is whichever playlist matched the source, not
+          // necessarily the selected row, so the selection follows it.
+          SelectPlaylistAt(_playlists.IndexOf(existing));
           ShowImportSummary(result);
           return;
         }
@@ -590,7 +598,7 @@ namespace Yamadev.YamaStream.Editor
 
       _playlists.Add(result.Data);
       IsDirty = true;
-      GeneratePlaylistsView();
+      SelectPlaylistAt(_playlists.Count - 1);
       ShowImportSummary(result);
     }
 
