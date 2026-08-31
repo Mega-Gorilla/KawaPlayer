@@ -34,15 +34,23 @@
 
   > **固定 SHA は「コード候補」を指す。**文書だけの PR が入って HEAD が進むたびに固定し直すのは無駄なので、**`docs/` だけの差分は許容し、上のコマンドでそれを確認する**運用にしている。`docs/` 以外が出たなら、それはコードが変わったということなので **#68 の固定 SHA を更新し、J-1 の再実施要否も判断する** (→ `playlist-editor-verification.md`)。
 
-- [ ] ワールドをビルド・アップロードする
-- [ ] **build marker をワールド内に置く** — 固定 SHA の先頭 7 桁とアップロード日時を書いたテキストを、**入室してすぐ見える場所**に出す
+**順番が重要。**marker はシーンに入れてからビルドしないと、アップロード済みのワールドには載らない。
 
-- [ ] 記録用に控える
-  - **blueprint ID** — シーンの `VRCWorld` にある `PipelineManager` の `blueprintId` (`wrld_` で始まる)。SDK のビルドパネルにも出る
+- [ ] **run ID を決める** — 固定 SHA の先頭 7 桁 + 連番 (例: `53363c5-run1`)。**同じ SHA を撮り直したときに区別できる**ようにするため
+- [ ] **build marker をシーンへ置く** — **run ID** を書いたテキストを、**入室してすぐ見える場所**に出す
+  - **アップロード日時は marker に入れない。**ビルド前には確定しない。日時は記録シートへ書く
+- [ ] **marker を含めて**ビルド・アップロードする
+- [ ] **実際のアップロード日時**を控える
+- [ ] **アップロード完了後に新しいインスタンスを作る**
+- [ ] 入室して、**ワールド内の marker が run ID と一致する**ことを自分の目で確認する
+
+- [ ] 記録用に控える (記録シートと不具合報告の両方で使う)
+  - **run ID**
   - **アップロード日時**
   - **固定 SHA**
+  - **blueprint ID** — シーンの `VRCWorld` にある `PipelineManager` の `blueprintId` (`wrld_` で始まる)。SDK のビルドパネルにも出る
 
-> **⚠ blueprint ID ではビルドを区別できない。**blueprint ID は**そのワールドの ID**で、アップロードのたびに変わるものではない。旧ビルドと今回の候補は**同じ `wrld_...`** になる。プレイヤー内の情報ページも「KawaPlayer v1.2.0」固定なので、**画面からビルドを見分ける手段が標準では無い**。だから **build marker を自分で置く**。
+> **⚠ blueprint ID ではビルドを区別できない。**blueprint ID は**そのワールドの ID**で、アップロードのたびに変わるものではない。旧ビルドと今回の候補は**同じ `wrld_...`** になる。プレイヤー内の情報ページも「KawaPlayer v1.2.0」固定なので、**画面からビルドを見分ける手段が標準では無い**。だから **run ID の marker を自分で置く**。**blueprint ID はワールドの取り違えを防ぐためのもので、ビルドの新旧は判別しない。**
 >
 > **⚠ 更新前から動いているインスタンスは古いワールドのまま続く。**アップロードしても、既存インスタンスがその場で入れ替わるわけではない。**必ずアップロード完了後に新しく作ったインスタンス**で検証すること。
 
@@ -188,6 +196,16 @@ $before = (Get-FileHash $real -Algorithm MD5).Hash
 
 $stub = 'bin/Release/net8.0'
 $files = 'yt-dlp.exe','yt-dlp.dll','yt-dlp.runtimeconfig.json','yt-dlp.deps.json'
+
+# スタブ 4 ファイルが揃っているか (足りないと差し替え途中で止まる)
+foreach ($f in $files) {
+  if (-not (Test-Path (Join-Path $stub $f))) { throw "スタブが足りない: $f" }
+}
+# TEMP に前回の残骸が無いか。あると finally が「元からあったファイル」を消しかねない
+foreach ($f in $files | Where-Object { $_ -ne 'yt-dlp.exe' }) {
+  if (Test-Path (Join-Path $temp $f)) { throw "TEMP に残骸がある。先に片付けること: $f" }
+}
+
 try {
   Move-Item $real $backup
   foreach ($f in $files) { Copy-Item (Join-Path $stub $f) (Join-Path $temp $f) }
@@ -248,14 +266,32 @@ namespace HoshinoLabs.IwaSync3
 
 > **確認が終わったら消すこと。**本物のパッケージが持つ型名を占有するので、後から IwaSync3 を入れると衝突する。
 
-ドロップの手つきは `EditorWindow.SendEvent` で作れる。**`HandleDragEvent` の rect 判定と `DragAndDrop.AcceptDrag()` を含めて本物の経路が動く。**
+ドロップの手つきは `EditorWindow.SendEvent` で作れる。
+
+まず fixture の GameObject を作る (`tracks` は `SerializedObject` で埋める)。
 
 ```csharp
+var go = new UnityEngine.GameObject("QA IwaSync3 Fixture");
+go.AddComponent(System.Type.GetType("HoshinoLabs.IwaSync3.Playlist, Assembly-CSharp"));
+// so.FindProperty("tracks") を arraySize = 2 にして mode / title / url を入れる
+```
+
+そのうえでドロップの手つきを送る。**`HandleDragEvent` の rect 判定と `DragAndDrop.AcceptDrag()` を含めて本物の経路が動く。**
+
+```csharp
+var flags = System.Reflection.BindingFlags.NonPublic
+          | System.Reflection.BindingFlags.Instance
+          | System.Reflection.BindingFlags.Public;
+var window = UnityEngine.Resources
+  .FindObjectsOfTypeAll<Yamadev.YamaStream.Editor.PlaylistEditorWindow>()[0];
+var fixtureGameObject = UnityEngine.GameObject.Find("QA IwaSync3 Fixture");
+
 UnityEditor.DragAndDrop.PrepareStartDrag();
 UnityEditor.DragAndDrop.objectReferences = new UnityEngine.Object[] { fixtureGameObject };
 
 // SendEvent は internal なのでリフレクション経由
-var send = window.GetType().GetMethod("SendEvent", flags, null, new[] { typeof(UnityEngine.Event) }, null);
+var send = window.GetType().GetMethod(
+  "SendEvent", flags, null, new[] { typeof(UnityEngine.Event) }, null);
 send.Invoke(window, new object[] { new UnityEngine.Event {
   type = UnityEngine.EventType.DragUpdated,
   mousePosition = new UnityEngine.Vector2(120f, 260f) } });   // 左カラムの内側
@@ -282,7 +318,8 @@ send.Invoke(window, new object[] { new UnityEngine.Event {
 ### 各セッションの開始前に
 
 - [ ] **記録シートのヘッダを埋める** (下記)
-- [ ] **正しいワールドか確認する** — blueprint ID が開発者の控えと一致すること
+- [ ] **正しいビルドか確認する** — ワールド内の **build marker が run ID と一致する**こと。**blueprint ID の一致だけでは足りない** (旧ビルドでも同じ ID になる)
+- [ ] **アップロード後に作られたインスタンス**であることを確認する (既存インスタンスは古いワールドのまま続く)
 - [ ] **#68 の「標準リセット」を実行する**
 - [ ] 手元に **#68 の検証データ表**を開いておく (呼び名 → 実 URL / 曲名の対応表)
 
@@ -401,15 +438,21 @@ build marker      : (ワールド内の表示と一致したか  はい / いい
 ### 4. 最低限添えるもの
 
 ```text
-固定 SHA     :
-blueprint ID :
-項目         :
-手順         : 1. ... 2. ...
-期待         :
-実際         :
-再現性       : 毎回 / たまに / 1 回だけ
-ログ         : (貼るか、無いと書く)
+固定 SHA       :
+run ID         : (ワールド内の build marker と同じもの)
+アップロード日時 :
+blueprint ID   :
+新規インスタンス : アップロード後に作ったものか  はい / いいえ
+クライアント   : A / B / C のどれで起きたか  +  VR / Desktop  +  VRChat 版
+項目           :
+手順           : 1. ... 2. ...
+期待           :
+実際           :
+再現性         : 毎回 / たまに / 1 回だけ
+ログ           : (貼るか、無いと書く)
 ```
+
+> **記録シートのヘッダと同じ識別情報を持たせること。**どのビルドで起きたのか分からない報告は、追いかけようがない。
 
 ---
 
