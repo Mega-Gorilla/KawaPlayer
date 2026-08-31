@@ -34,7 +34,18 @@ Unity 2022.3.22f1 / テストプロジェクト `kawa-player-playlist-testing-ch
 | **J-1d 2** 正常系 4 形式 | ✅ | ID / `https://` / `http://` / 前後空白付き ID がすべて同一 ID に正規化され、**同一のトラック列** (ハッシュ一致) |
 | **J-1d 3** macOS / Linux | ⬜ | 【任意・ゲート外】Windows のみ実測 |
 
-**単体テスト**: EditMode 全 229 件を実行し、失敗は `Tests.GraphNodeTests.CheckHelpURLsForSystemNodes` の 1 件のみ。**本リポジトリに存在しない** UdonSharp 側の、Microsoft Docs の URL 到達性を見るネットワーク依存の検査である。同じ全件実行で出る `MonoBehaviour using the 'new' keyword` エラー 3 件も同じくサードパーティ側で、**本リポジトリのテストだけを実行すると Console は空**になる。
+**単体テスト**: **`Yamadev.YamaStream.Editor.Tests` の 61 件がすべて合格** (Console error / warning 0)。
+
+> **⚠ 全件実行 (229 件) の失敗数を合否の基準にしてはいけない。**同じ EditMode 実行には `com.vrchat.worlds` / UdonSharp 側のテストが含まれ、**ネットワーク到達性やシーンの状態に依存して落ちる**。実際、
+>
+> | 実行 | 全件実行での失敗 |
+> | --- | --- |
+> | 2026-08-31 の実施 | 1 件 — `Tests.GraphNodeTests.CheckHelpURLsForSystemNodes` (Microsoft Docs の URL 到達性を見る検査) |
+> | 同日・別環境での追試 | 2 件 — 上記 + `Tests.UdonGraphSettingsTests.GetGraphFromSceneTest` (SDK のシーン切替時検証で `IndexOutOfRangeException`) |
+>
+> と**環境によって数が変わる**。いずれも**本リポジトリに存在しないテスト**である。
+>
+> **判定はアセンブリを絞って行うこと。**`run_tests` に `group_names: ["Yamadev.YamaStream.Editor.Tests"]` を渡せば 61 件だけが走る。全件実行で出る `MonoBehaviour using the 'new' keyword` エラー 3 件も同様にサードパーティ側で、**絞って実行すれば Console は空**になる。
 
 ### 実施できない 2 項目
 
