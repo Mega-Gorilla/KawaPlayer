@@ -268,12 +268,27 @@ namespace HoshinoLabs.IwaSync3
 
 ドロップの手つきは `EditorWindow.SendEvent` で作れる。
 
-まず fixture の GameObject を作る (`tracks` は `SerializedObject` で埋める)。
+まず fixture の GameObject を作る。
 
 ```csharp
 var go = new UnityEngine.GameObject("QA IwaSync3 Fixture");
-go.AddComponent(System.Type.GetType("HoshinoLabs.IwaSync3.Playlist, Assembly-CSharp"));
-// so.FindProperty("tracks") を arraySize = 2 にして mode / title / url を入れる
+var comp = go.AddComponent(
+  System.Type.GetType("HoshinoLabs.IwaSync3.Playlist, Assembly-CSharp"));
+
+var so = new UnityEditor.SerializedObject(comp);
+var tracks = so.FindProperty("tracks");
+tracks.arraySize = 2;
+string[] titles = { "fixture track A", "fixture track B" };
+string[] urls = { "https://example.com/fixture/a.mp4", "https://example.com/fixture/b.mp4" };
+for (int i = 0; i < 2; i++)
+{
+  var e = tracks.GetArrayElementAtIndex(i);
+  e.FindPropertyRelative("mode").intValue = i;          // 0 = Unity, 1 = AVPro
+  e.FindPropertyRelative("title").stringValue = titles[i];
+  e.FindPropertyRelative("url").stringValue = urls[i];
+}
+so.FindProperty("playlistUrl").stringValue = "";
+so.ApplyModifiedProperties();
 ```
 
 そのうえでドロップの手つきを送る。**`HandleDragEvent` の rect 判定と `DragAndDrop.AcceptDrag()` を含めて本物の経路が動く。**
@@ -353,10 +368,11 @@ send.Invoke(window, new object[] { new UnityEngine.Event {
 開始時刻          :        終了時刻 :
 
 --- ビルドの同一性 (開発者が埋める) ---
-blueprint ID      : wrld_
-アップロード日時  :
+run ID            :            例: 53363c5-run1
 固定 SHA          :
-build marker      : (ワールド内の表示と一致したか  はい / いいえ)
+アップロード日時  :
+blueprint ID      : wrld_
+build marker      : 上の run ID と一致したか  はい / いいえ
 インスタンス      : アップロード後に新規作成したものか  はい / いいえ
 
 --- クライアント (使った分だけ) ---
