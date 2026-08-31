@@ -13,14 +13,38 @@
 
 **この節が終わるまでテスターは着手できない。**
 
-### 1. 固定 SHA を確認してビルドする
+### 1. 「固定 SHA の中身」をビルドしたことを確かめられる形にする
 
-- [ ] #68 の「検証対象 (固定 SHA)」を見て、**その SHA が現在の `develop` HEAD と一致している**ことを確認する
-- [ ] 一致していなければ、**ビルドを始める前に #68 を更新する** (SHA が動いたら J-1 の再実施要否も判断すること → `playlist-editor-verification.md`)
+**HEAD が固定 SHA と一致していても、それだけではビルド内容が一致した証明にならない。**未コミットの差分はそのままアップロードに入る。
+
+- [ ] **作業ツリーが clean であることを確認する**
+
+  ```bash
+  git rev-parse HEAD          # 固定 SHA と突き合わせる
+  git status --short          # 何も出ないこと
+  ```
+
+  > **⚠ このリポジトリでは UdonSharp の `.asset` が 30 件以上 churn することがある。**放置するとビルドに入る。破棄したうえで、**破棄後は `UdonSharpCompilerV1.CompileSync()` を必ず実行する** (しないと Play 時に "Field for X does not exist" が出る)。
+
+- [ ] **固定 SHA との差分が `docs/` だけであることを確認する**
+
+  ```bash
+  git diff --name-only <固定SHA> HEAD    # docs/ 以外が出たら固定 SHA を見直す
+  ```
+
+  > **固定 SHA は「コード候補」を指す。**文書だけの PR が入って HEAD が進むたびに固定し直すのは無駄なので、**`docs/` だけの差分は許容し、上のコマンドでそれを確認する**運用にしている。`docs/` 以外が出たなら、それはコードが変わったということなので **#68 の固定 SHA を更新し、J-1 の再実施要否も判断する** (→ `playlist-editor-verification.md`)。
+
 - [ ] ワールドをビルド・アップロードする
-- [ ] **blueprint ID を控える** — シーンの `VRCWorld` にある `PipelineManager` の `blueprintId` (`wrld_` で始まる)。SDK のビルドパネルにも出る
+- [ ] **build marker をワールド内に置く** — 固定 SHA の先頭 7 桁とアップロード日時を書いたテキストを、**入室してすぐ見える場所**に出す
 
-> **⚠ 実機からビルドを区別できない。**プレイヤー内の情報ページは「KawaPlayer v1.2.0」固定で、**どのビルドかは画面から分からない**。だから blueprint ID とアップロード日時を**開発者がここで控えて記録シートの先頭に書く**。テスターは「正しいワールドに入っているか」をその ID で確認する。
+- [ ] 記録用に控える
+  - **blueprint ID** — シーンの `VRCWorld` にある `PipelineManager` の `blueprintId` (`wrld_` で始まる)。SDK のビルドパネルにも出る
+  - **アップロード日時**
+  - **固定 SHA**
+
+> **⚠ blueprint ID ではビルドを区別できない。**blueprint ID は**そのワールドの ID**で、アップロードのたびに変わるものではない。旧ビルドと今回の候補は**同じ `wrld_...`** になる。プレイヤー内の情報ページも「KawaPlayer v1.2.0」固定なので、**画面からビルドを見分ける手段が標準では無い**。だから **build marker を自分で置く**。
+>
+> **⚠ 更新前から動いているインスタンスは古いワールドのまま続く。**アップロードしても、既存インスタンスがその場で入れ替わるわけではない。**必ずアップロード完了後に新しく作ったインスタンス**で検証すること。
 
 ### 2. VHub プレイリストを用意する
 
@@ -141,45 +165,113 @@ internal static class Program
 }
 ```
 
-**差し替えと復旧** (`%TEMP%` = `YtdlpResolver.ExecutablePath` の置き場所)
+**差し替えと復旧 (PowerShell)**
 
-```bash
-dotnet build -c Release          # bin/Release/net8.0/ に yt-dlp.exe ほかが出る
+**本物を戻せなくなるのが一番怖い**ので、`try` / `finally` で囲み、中断しても必ず復旧するようにする。`%TEMP%` を使わず **`YtdlpResolver` と同じ `[System.IO.Path]::GetTempPath()` から組み立てる** (両者が一致しない環境がある)。
 
-# 差し替え (本物を退避してから、4 ファイルすべてを置く)
-mv  "$TEMP/yt-dlp.exe" "$TEMP/yt-dlp.real.exe"
-cp bin/Release/net8.0/yt-dlp.{exe,dll,runtimeconfig.json,deps.json} "$TEMP/"
+```powershell
+dotnet --version                     # net8.0 をターゲットにできる SDK が要る (9.0.312 で確認済み)
+dotnet build -c Release              # bin/Release/net8.0/ に yt-dlp.exe ほかが出る
 
-# ... Unity で確認 ...
+$temp   = [System.IO.Path]::GetTempPath()
+$real   = Join-Path $temp 'yt-dlp.exe'
+$backup = Join-Path $temp 'yt-dlp.real.exe'
+"target : $real"
+"backup : $backup"
 
-# 復旧
-rm  "$TEMP"/yt-dlp.{exe,dll,runtimeconfig.json,deps.json}
-mv  "$TEMP/yt-dlp.real.exe" "$TEMP/yt-dlp.exe"
+# 前回の復旧に失敗している状態で上書きしないための門番
+if (Test-Path $backup) { throw "前回のバックアップが残っている。先に復旧すること: $backup" }
+if (-not (Test-Path $real)) { throw "yt-dlp が無い。Playlist Editor でダウンロードしてから実行すること" }
+
+$before = (Get-FileHash $real -Algorithm MD5).Hash
+"original md5 : $before"
+
+$stub = 'bin/Release/net8.0'
+$files = 'yt-dlp.exe','yt-dlp.dll','yt-dlp.runtimeconfig.json','yt-dlp.deps.json'
+try {
+  Move-Item $real $backup
+  foreach ($f in $files) { Copy-Item (Join-Path $stub $f) (Join-Path $temp $f) }
+  Read-Host "Unity 側の確認が終わったら Enter (Ctrl+C で中断しても復旧します)"
+}
+finally {
+  foreach ($f in $files) { Remove-Item (Join-Path $temp $f) -ErrorAction SilentlyContinue }
+  if (Test-Path $backup) { Move-Item $backup $real }
+  $after = (Get-FileHash $real -Algorithm MD5).Hash
+  if ($after -ne $before) { throw "復旧に失敗: $after != $before" }
+  "restored ok : $after"
+}
 ```
 
 > **framework-dependent ビルドなので `.dll` / `.runtimeconfig.json` / `.deps.json` も一緒に置くこと。**`.exe` だけでは起動しない。
 
-**終了コード側の分岐**を出したいときは、Unity のプロセスに環境変数を入れてから実行する (子プロセスが継承する)。
+**終了コード側の分岐**を出したいときは、Unity のプロセスに環境変数を入れてから実行する (子プロセスが継承する)。**確認が終わったら必ず消す** — 残すと以降の取得がすべて partial になる。
 
 ```csharp
+// 設定
 System.Environment.SetEnvironmentVariable("YTSTUB_EMITTED",  "5");
 System.Environment.SetEnvironmentVariable("YTSTUB_NENTRIES", "5");   // 不足なし
 System.Environment.SetEnvironmentVariable("YTSTUB_EXIT",     "1");   // 非 0 終了だけで partial
+
+// 後始末 (忘れない)
+foreach (var k in new[] { "YTSTUB_EMITTED", "YTSTUB_NENTRIES", "YTSTUB_EXIT" })
+  System.Environment.SetEnvironmentVariable(k, null);
 ```
 
-- [ ] **復旧を必ず確認する。**戻したあと、実際のプレイリスト ID で正常に取得できるところまで見ること
+- [ ] **復旧を必ず確認する。**ハッシュが一致することに加えて、**実際のプレイリスト ID で正常に取得できる**ところまで見ること
 
-#### 6-c. ドラッグ&ドロップ取り込み (J-1 の 9 番目)
+#### 6-c. ドラッグ&ドロップ取り込み (J-1 の 9 番目 — Unity 上で実施) — スタブコンポーネント
 
-- [ ] **USharpVideo / IwaSync3 / VizVid / Kinel のいずれか**のプレイリストを持つ Prefab を 1 つ、テストプロジェクトに用意する
+`PlaylistImporter.ImportPlaylists` は **USharpVideo / IwaSync3 / VizVid / Kinel / ProTV** のコンポーネントを持つ GameObject しか受け付けない。**1 つも入っていない環境では実施できない。**
 
-> `PlaylistImporter.ImportPlaylists` はこれらのコンポーネントを持つ GameObject しか受け付けない。**1 つも入っていないと、誰が実施しても不可能。**
+対応パッケージを入れてもよいが、`ImportFromScript` は**型名で振り分けて `tracks` と `playlistUrl` をリフレクションで読むだけ**なので、**同じ名前と同じ 2 フィールドを持つコンポーネント**があれば実経路をそのまま動かせる。
+
+**テストプロジェクト側**に置く (**KawaPlayer には入れない**)。
+
+```csharp
+namespace HoshinoLabs.IwaSync3
+{
+  [System.Serializable]
+  public class Track
+  {
+    public int mode;
+    public string title;
+    public string url;
+  }
+
+  public class Playlist : UnityEngine.MonoBehaviour
+  {
+    public Track[] tracks;
+    public string playlistUrl;
+  }
+}
+```
+
+> **確認が終わったら消すこと。**本物のパッケージが持つ型名を占有するので、後から IwaSync3 を入れると衝突する。
+
+ドロップの手つきは `EditorWindow.SendEvent` で作れる。**`HandleDragEvent` の rect 判定と `DragAndDrop.AcceptDrag()` を含めて本物の経路が動く。**
+
+```csharp
+UnityEditor.DragAndDrop.PrepareStartDrag();
+UnityEditor.DragAndDrop.objectReferences = new UnityEngine.Object[] { fixtureGameObject };
+
+// SendEvent は internal なのでリフレクション経由
+var send = window.GetType().GetMethod("SendEvent", flags, null, new[] { typeof(UnityEngine.Event) }, null);
+send.Invoke(window, new object[] { new UnityEngine.Event {
+  type = UnityEngine.EventType.DragUpdated,
+  mousePosition = new UnityEngine.Vector2(120f, 260f) } });   // 左カラムの内側
+send.Invoke(window, new object[] { new UnityEngine.Event {
+  type = UnityEngine.EventType.DragPerform,
+  mousePosition = new UnityEngine.Vector2(120f, 260f) } });
+```
+
+- [ ] 取り込まれたプレイリストの **mode / title / url が fixture と一致する**ことを確認する
+- [ ] **fixture のスクリプトと GameObject を消す** (シーンは保存せず読み直せば GameObject は消える)
 
 ---
 
 ## テスターフェーズ — セッション 3 本
 
-**J-1 の 19 項目は Unity 側で完了済み**なので、実機で消化するのは **152 項目**。
+**J-1 は Unity 側で完了済み** (**ゲート対象 18 項目すべて合格**。残る 1 項目は macOS / Linux での確認で、任意・ゲート外)。実機で消化するのは **152 項目**。
 
 | セッション | 体制 | セクション | 件数 |
 | --- | --- | --- | --- |
@@ -221,14 +313,23 @@ System.Environment.SetEnvironmentVariable("YTSTUB_EXIT",     "1");   // 非 0 �
 ```text
 実施日            :
 セッション        : S1 / S2 / S3
+開始時刻          :        終了時刻 :
+
+--- ビルドの同一性 (開発者が埋める) ---
 blueprint ID      : wrld_
 アップロード日時  :
 固定 SHA          :
-VRChat クライアント版 :
-プラットフォーム  : PC / Quest
-実施者            : A =        B =        C =
-開始時刻          :        終了時刻 :
+build marker      : (ワールド内の表示と一致したか  はい / いいえ)
+インスタンス      : アップロード後に新規作成したものか  はい / いいえ
+
+--- クライアント (使った分だけ) ---
+      | 名前 | 端末           | VR / Desktop | VRChat 版 |
+  A   |      |                |              |           |
+  B   |      |                |              |           |
+  C   |      |                |              |           |
 ```
+
+> **クライアントごとに VR / Desktop を残すこと。**F はタブ操作を VR とデスクトップの両方で見るなど、**モードによって結果が変わる項目がある**。「PC / Quest」だけでは足りない。
 
 ### 実測値の記録 (項目が「記録する」ことを求めているもの)
 
@@ -280,7 +381,14 @@ VRChat クライアント版 :
 
 - **最新のファイル**を開き、**発生時刻の前後**を貼る
 - `[KawaPlayer]` / `[PlaylistLoader]` / `Udon` を含む行は特に残す
-- **全文は貼らない** (個人情報が混ざる)
+- **全文は貼らない。**抜粋にも次が混ざるので、貼る前に消す
+
+| 消すもの | 見た目 |
+| --- | --- |
+| **インスタンス ID / 招待 URL** | `wrld_...:12345~private(usr_...)` / `vrchat://launch?...` |
+| **ユーザー ID・表示名** | `usr_xxxxxxxx-...` / ログイン名・フレンド名 |
+| **認証情報** | `authToken` / `Cookie` / `apiKey` を含む行 |
+| **非公開のプレイリスト URL** | 公開していない `/r/default/{id}` や `/playlists/{id}` |
 
 ### 3. どこに書くか
 
