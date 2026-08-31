@@ -3,6 +3,7 @@
     "rootNamespace": "",
     "references": [
         "Yamadev.YamaStream.Editor",
+        "Yamadev.YamaStream.Runtime",
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner"
     ],
