@@ -78,7 +78,11 @@ namespace Yamadev.YamaStream.Editor
     public void SelectPlaylist(PlaylistItem targetPlaylist)
     {
       if (_playlists == null || targetPlaylist == null) return;
-      SelectPlaylistAt(_playlists.FindIndex(p => p.originalItem == targetPlaylist));
+      int index = _playlists.FindIndex(p => p.originalItem == targetPlaylist);
+      // A playlist that is not in the list leaves the selection where it is,
+      // rather than clearing it the way an out-of-range index does below.
+      if (index < 0) return;
+      SelectPlaylistAt(index);
     }
 
     // Moves the selection without rebuilding the playlist table. The table
@@ -86,11 +90,42 @@ namespace Yamadev.YamaStream.Editor
     // their own; rebuilding it would reset the index to the last row.
     // Assigning index raises no onSelectCallback, so the detail pane is
     // rebound here explicitly (issue #103).
+    //
+    // Every selection goes through here, so this is also where "nothing is
+    // selected" is expressed: an index outside the list clears the table's
+    // own selection too. ClearSelection is used rather than index = -1,
+    // because assigning -1 leaves selectedIndices holding -1 while the list
+    // reports no selection at all (issue #106).
     private void SelectPlaylistAt(int index)
     {
-      if (_playlistsTable == null || index < 0 || index >= _playlists.Count) return;
+      if (_playlistsTable == null) return;
+      if (_playlists == null || index < 0 || index >= _playlists.Count)
+      {
+        _playlistsTable.ClearSelection();
+        _selectedPlaylist = null;
+        _playlistTracksTable = null;
+        return;
+      }
       _playlistsTable.index = index;
       GeneratePlaylistTracksView(_playlistsTable);
+    }
+
+    // Which row to select once the list has been rebuilt. Saved playlists are
+    // matched by originalItem so a reorder cannot land on a different one; an
+    // unsaved playlist has no original to match, so its old position is used
+    // instead. No previous selection at all means the first row, which is
+    // what opening the window does (issue #106).
+    public static int ResolvePlaylistSelection(
+      List<PlaylistData> playlists, PlaylistItem preferredItem, int fallbackIndex)
+    {
+      if (playlists == null || playlists.Count == 0) return -1;
+      if (preferredItem != null)
+      {
+        int found = playlists.FindIndex(p => p != null && p.originalItem == preferredItem);
+        if (found >= 0) return found;
+      }
+      if (fallbackIndex >= 0) return Mathf.Min(fallbackIndex, playlists.Count - 1);
+      return 0;
     }
 
     private void OnEnable()
@@ -111,23 +146,40 @@ namespace Yamadev.YamaStream.Editor
       base.DiscardChanges();
     }
 
-    private void ReadPlaylists()
+    // preferredItem and fallbackIndex describe what was selected before the
+    // list was thrown away, so a revert can put the selection back where it
+    // was. Opening the window passes neither and lands on the first row.
+    private void ReadPlaylists(PlaylistItem preferredItem = null, int fallbackIndex = -1)
     {
       PlaylistManager container = _player?.GetComponentInChildren<PlaylistManager>();
-      if (container == null) return;
+      if (container == null)
+      {
+        // The player that owned these playlists is gone, so keeping them
+        // would leave the settings pane pointed at data that can no longer
+        // be saved anywhere (issue #106).
+        _playlists = new List<PlaylistData>();
+        IsDirty = false;
+        GeneratePlaylistsView();
+        SelectPlaylistAt(-1);
+        return;
+      }
 
       var originalPlaylists = container.GetPlaylists();
       _playlists = originalPlaylists.Select(item => new PlaylistData(item)).ToList();
-      _selectedPlaylist = null;
-      _playlistTracksTable = null;
       IsDirty = false;
       GeneratePlaylistsView();
+      SelectPlaylistAt(ResolvePlaylistSelection(_playlists, preferredItem, fallbackIndex));
     }
 
     private void RevertChanges()
     {
+      // Read before the list is rebuilt. The index comes from _playlists and
+      // not from the table, because those two can disagree -- which is the
+      // very thing being fixed here (issue #106).
+      PlaylistItem preferredItem = _selectedPlaylist?.originalItem;
+      int fallbackIndex = _playlists == null ? -1 : _playlists.IndexOf(_selectedPlaylist);
       IsDirty = false;
-      ReadPlaylists();
+      ReadPlaylists(preferredItem, fallbackIndex);
     }
 
     private void GeneratePlaylistsView()
@@ -152,8 +204,10 @@ namespace Yamadev.YamaStream.Editor
         {
           if (list.index < 0 || list.index >= _playlists.Count) return;
           _playlists.RemoveAt(list.index);
-          list.index = _playlists.Count > 0 ? _playlists.Count - 1 : 0;
-          GeneratePlaylistTracksView(list);
+          // Through the helper, so emptying the list leaves nothing selected
+          // instead of a stale index that would highlight the next row added
+          // (issue #106).
+          SelectPlaylistAt(_playlists.Count - 1);
           IsDirty = true;
         },
         drawElementCallback = (rect, index, isActive, isFocused) =>
@@ -815,14 +869,23 @@ namespace Yamadev.YamaStream.Editor
         return;
       }
 
+      int firstImported = _playlists.Count;
       var imported = PlaylistExporter.Import();
-      _playlists.AddRange(imported);
+      // Cancelled, or a file with nothing in it: the selection stays put.
+      if (imported.Count == 0) return;
 
-      if (imported.Count > 0)
-      {
-        IsDirty = true;
-        GeneratePlaylistsView();
-      }
+      _playlists.AddRange(imported);
+      IsDirty = true;
+      // The table keeps the collection it was handed, so the new rows appear
+      // without rebuilding it -- the drag and drop path above already relies
+      // on that. Rebuilding would reset the index to the last row and strand
+      // the detail pane on whatever was selected before (issue #106).
+      //
+      // Several playlists can arrive at once, so there is no one obvious
+      // "the imported playlist" to jump to the way a single URL import has:
+      // the work in progress keeps the selection. Only a list with no
+      // selection at all takes the first of the new rows.
+      if (_selectedPlaylist == null) SelectPlaylistAt(firstImported);
     }
 
   }
