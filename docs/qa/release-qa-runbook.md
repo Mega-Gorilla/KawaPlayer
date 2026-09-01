@@ -17,14 +17,29 @@
 
 **HEAD が固定 SHA と一致していても、それだけではビルド内容が一致した証明にならない。**未コミットの差分はそのままアップロードに入る。
 
-- [ ] **作業ツリーが clean であることを確認する**
+- [ ] **ソースに未コミットの変更が無いことを確認する**
 
   ```bash
-  git rev-parse HEAD          # 固定 SHA と突き合わせる
-  git status --short          # 何も出ないこと
+  git rev-parse HEAD                                  # 固定 SHA と突き合わせる
+  git status --short | grep -v '\.asset$'             # 何も出ないこと
   ```
 
-  > **⚠ このリポジトリでは UdonSharp の `.asset` が 30 件以上 churn することがある。**放置するとビルドに入る。破棄したうえで、**破棄後は `UdonSharpCompilerV1.CompileSync()` を必ず実行する** (しないと Play 時に "Field for X does not exist" が出る)。
+  > **⚠ `.asset` の変更は正常。ビルド前に破棄してはいけない。**
+  >
+  > `Modules/` と `Runtime/Internal/` にある UdonSharp の `.asset` は、**利用側プロジェクトでコンパイルされた Udon プログラムを指すよう Unity が書き換える**。パッケージ側に `SerializedUdonPrograms` は無く、プログラムの実体は利用側プロジェクトにあるため、リポジトリにコミットされている GUID は**コミットした人の環境のもの**である。
+  >
+  > 実測 (2026-08-31 / `kawa-player-playlist-testing-chamber`):
+  >
+  > | | |
+  > | --- | --- |
+  > | 変更ファイル | **`.asset` 32 件のみ** (`.cs` / prefab / scene は clean) |
+  > | 変更行 | 6697 行。GUID 差し替えは 78 行だけで、**残りは Udon のシリアライズ済みデータ** (`Name` / `Data` / `Entry`) |
+  > | コミット済みが指す GUID | **このプロジェクトに存在しない** |
+  > | 作業ツリーが指す GUID | `Assets/SerializedUdonPrograms/` に**実体がある** |
+  >
+  > つまり**作業ツリー側が、この環境で正しく解決できる唯一の状態**。**ビルド直前に `git checkout -- .` すると、参照先が存在しない状態でアップロードすることになる。**
+  >
+  > 破棄してよいのは「コミット前に差分を綺麗にしたいとき」だけで、**そのときも直後に `UdonSharpCompilerV1.CompileSync()` が必要**である (しないと Play 時に "Field for X does not exist" が出る)。
 
 - [ ] **固定 SHA との差分が `docs/` だけであることを確認する**
 
