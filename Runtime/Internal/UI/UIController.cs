@@ -218,6 +218,26 @@ namespace Yamadev.YamaStream.UI
         UpdatePlayerSelector();
     }
 
+    // Asks a yes/no question on behalf of a module, which cannot reach the
+    // dialog itself. Returns whether the question was actually put: a UI
+    // placed without a modal shows nothing, and a caller waiting on an
+    // answer that will never arrive would simply stop working. Callers act
+    // on false themselves rather than being left hanging.
+    //
+    // Cancel closes and does nothing. A module that needs to know it was
+    // cancelled should not use this.
+    public bool ShowConfirm(string title, string message, string confirmText,
+        UdonSharpBehaviour target, string confirmEventName)
+    {
+      if (!Utilities.IsValid(_modalDialog)) return false;
+      if (!Utilities.IsValid(target)) return false;
+      if (string.IsNullOrEmpty(confirmEventName)) return false;
+
+      _modalDialog.Show(title, message, GetTranslation("button.cancel"), confirmText,
+          target, "", confirmEventName);
+      return true;
+    }
+
     public void SetUnityPlayer()
     {
       if (_controller.Handler.Type == VideoPlayerType.UnityVideoPlayer) return;

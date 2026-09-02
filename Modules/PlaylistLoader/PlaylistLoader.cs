@@ -388,6 +388,40 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
           playlistName, tracks.Length, failedCount, 0, reusedExistingSlot);
     }
 
+    // How many playlists can be held at once. World-configurable: the slots
+    // are objects under the Controller, and the build process drops any
+    // whose Playlist is inactive.
+    public int UsableSlotCount
+    {
+      get
+      {
+        int count = 0;
+        for (int i = 0; i < _dynamicPlaylists.Length; i++)
+          if (Utilities.IsValid(_dynamicPlaylists[i])) count++;
+        return count;
+      }
+    }
+
+    // The playlist that loading this URL would push out, or "" when nothing
+    // would be lost -- the URL is already held (a refresh) or a slot is
+    // free. Answerable before the download because the slot is matched on
+    // the URL that was typed, not on anything the server sends back.
+    //
+    // Exists so the UI can ask before something disappears (issue #125).
+    public string GetPlaylistToBeReplaced(VRCUrl url)
+    {
+      if (!Utilities.IsValid(url)) return string.Empty;
+
+      var existing = FindSlotBySource(PlaylistUrlUtils.GetSourceKey(url.Get()));
+      if (Utilities.IsValid(existing)) return string.Empty;
+
+      var slot = SelectFreeOrOldestSlot();
+      if (!Utilities.IsValid(slot)) return string.Empty;
+      if (slot.IsEmpty) return string.Empty;
+
+      return slot.PlaylistName;
+    }
+
     // Returns the slot already holding this playlist, or null. Kept apart
     // from picking a fresh slot because the answer is also what tells the
     // user whether the list grew or the playlist they already had was

@@ -34,6 +34,10 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
     // The UI that initiated the load currently in flight; OnLoadResult
     // reports back to it.
     private UIController _resultUi;
+    // Held while the player is being asked whether to replace the oldest
+    // playlist. Cleared by whichever answer arrives; a second question
+    // simply overwrites it, so a cancelled dialog leaves nothing behind.
+    private VRCUrl _pendingLoadUrl;
 
     public void OnUrlSubmitted()
     {
@@ -72,7 +76,55 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
       }
 
       _resultUi = ui;
+
+      // Every slot full means this load costs the player a playlist they
+      // already had. Show which one before it goes (issue #125) rather than
+      // reporting an addition and letting them find out later.
+      string replaced = _loader.GetPlaylistToBeReplaced(interceptUrl);
+      if (!string.IsNullOrEmpty(replaced))
+      {
+        _pendingLoadUrl = interceptUrl;
+        if (AskBeforeReplacing(ui, replaced)) return;
+        // No modal on this UI, so there is no way to ask. Loading anyway is
+        // what happens today, and refusing instead would strand a player
+        // whose panel has no way to delete anything either.
+        _pendingLoadUrl = null;
+      }
+
       _loader.LoadPlaylistFromUrlWithFeedback(interceptUrl, this);
+    }
+
+    private bool AskBeforeReplacing(UIController ui, string replaced)
+    {
+      if (!Utilities.IsValid(ui)) return false;
+
+      string name = string.IsNullOrEmpty(replaced) ? "Playlist" : replaced;
+      return ui.ShowConfirm(
+          ui.GetTranslation("module.playlistLoader.confirmReplaceTitle"),
+          ui.GetTranslation("module.playlistLoader.confirmReplaceMessage")
+              .Replace("{0}", _loader.UsableSlotCount.ToString()).Replace("{1}", name),
+          ui.GetTranslation("button.continue"),
+          this,
+          nameof(ConfirmReplaceOldest));
+    }
+
+    // Answered yes. The dialog was up for as long as the player took to read
+    // it, so nothing about the state that produced the question can be
+    // assumed to still hold.
+    public void ConfirmReplaceOldest()
+    {
+      var url = _pendingLoadUrl;
+      _pendingLoadUrl = null;
+      if (!Utilities.IsValid(_loader) || !Utilities.IsValid(url)) return;
+
+      var ui = Utilities.IsValid(_resultUi) ? _resultUi : _uiController;
+      if (_loader.IsLoading)
+      {
+        ShowError(ui, "errorBusy");
+        return;
+      }
+
+      _loader.LoadPlaylistFromUrlWithFeedback(url, this);
     }
 
     // Refetches a slot from the URL that filled it (issue #91). Deliberately
