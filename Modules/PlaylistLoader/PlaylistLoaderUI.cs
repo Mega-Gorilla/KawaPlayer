@@ -61,11 +61,28 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
       interceptHandled = false;
       if (!Utilities.IsValid(_loader) || !Utilities.IsValid(interceptUrl)) return;
 
+      var ui = Utilities.IsValid(interceptSource) ? interceptSource : _uiController;
+
+      // Before anything that could put a dialog on this panel. A question is
+      // already on its screen, and every way of answering here -- a pool
+      // mismatch, a permission refusal, a busy message, or the video path's
+      // own confirmation for a URL that is not ours at all -- goes through
+      // the same dialog object. Showing any of them replaces the question
+      // and takes its buttons with it, leaving the wait with no way to end
+      // and every later load refused as busy.
+      //
+      // Handled, not passed on: an ordinary video URL would otherwise reach
+      // UIController.PlayUrlField and open a dialog there instead.
+      if (_awaitingConfirm && ui == _pendingUi)
+      {
+        interceptHandled = true;
+        return;
+      }
+
       int kind = _loader.ClassifyUrl(interceptUrl.Get());
       if (kind == PlaylistLoader.UrlKindNotOurs) return;
 
       interceptHandled = true;
-      var ui = Utilities.IsValid(interceptSource) ? interceptSource : _uiController;
 
       if (kind == PlaylistLoader.UrlKindOtherPool)
       {
@@ -92,15 +109,12 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
         return;
       }
 
-      // Someone is already being asked something. Answering that question
-      // has to come first, or their answer would apply to this URL instead.
+      // Another panel, while someone is being asked. Their answer has to
+      // come first, or it would apply to this URL instead. (The panel being
+      // asked was turned away at the top.)
       if (_awaitingConfirm)
       {
-        // Not on the panel holding the dialog. The modal is not full
-        // screen, so its own URL field is still reachable, and answering
-        // with a message there would replace the question -- taking its
-        // buttons with it and leaving the wait with no way to end.
-        if (ui != _pendingUi) ShowError(ui, "errorBusy");
+        ShowError(ui, "errorBusy");
         return;
       }
 
@@ -159,19 +173,21 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
       ClearPendingConfirm();
       if (!Utilities.IsValid(_loader) || !Utilities.IsValid(url)) return;
 
-      // Report to whoever was asked, not to whatever touched the loader
-      // most recently while they were reading.
-      if (Utilities.IsValid(ui)) _resultUi = ui;
-
       if (_loader.IsLoading)
       {
         // Modal.ExecuteAndClose hides the dialog after this returns, taking
         // anything shown from here with it. Say it once the dialog is gone.
+        //
+        // _resultUi is left alone: a load someone else started is still
+        // running, and its result belongs to whoever started it.
         _busyReportUi = ui;
         SendCustomEventDelayedFrames(nameof(ReportBusyAfterConfirm), 1);
         return;
       }
 
+      // Only now, with a load of our own about to start: report to whoever
+      // was asked, not to whatever touched the loader while they read.
+      if (Utilities.IsValid(ui)) _resultUi = ui;
       _loader.LoadPlaylistFromUrlWithFeedback(url, this, replaced, replacedSourceUrl);
     }
 
@@ -203,6 +219,15 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
       if (!Utilities.IsValid(_loader) || !Utilities.IsValid(refreshUrl)) return;
 
       var ui = Utilities.IsValid(refreshSource) ? refreshSource : _uiController;
+
+      // A refresh replaces nothing, but its result would be announced
+      // through the same dialog that is currently asking a question. The
+      // panel being asked is told nothing -- see OnUrlSubmitted.
+      if (_awaitingConfirm)
+      {
+        if (ui != _pendingUi) ShowError(ui, "errorBusy");
+        return;
+      }
 
       if (_loader.ClassifyUrl(refreshUrl.Get()) != PlaylistLoader.UrlKindOwnPlaylist)
       {
