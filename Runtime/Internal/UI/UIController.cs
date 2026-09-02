@@ -186,6 +186,11 @@ namespace Yamadev.YamaStream.UI
     // already waiting on an answer. A caller that falls back to acting
     // without asking has to tell those apart: doing so because a question
     // is on screen would go ahead with something nobody agreed to.
+    // The URL the open play-or-queue question is about, and the field it
+    // came from. Settled when the question goes up; see PlayUrlField.
+    private VRCUrl _pendingPlayUrl;
+    private VRCUrlInputField _pendingPlayUrlField;
+
     public bool HasModalDialog => Utilities.IsValid(_modalDialog);
     public bool IsModalBusy => Utilities.IsValid(_modalDialog) && _modalDialog.IsAwaitingAnswer;
 
@@ -331,10 +336,11 @@ namespace Yamadev.YamaStream.UI
         return;
       }
 
-      // The selector lives inside the dialog, so switching it on before the
-      // dialog is up would leave it showing inside whatever question is
-      // already there. Put it back if this one is refused. The URL stays in
-      // the field, so it can be entered again once the question is answered.
+      // Nothing below may run while another question is up. The selector
+      // lives inside the dialog, so switching it on would change what that
+      // question looks like, and switching it back would hide part of it.
+      if (_modalDialog.IsAwaitingAnswer) return;
+
       ShowVideoPlayerSelector();
       if (!_modalDialog.TryShow(
         GetTranslation("label.playUrl"),
@@ -343,10 +349,30 @@ namespace Yamadev.YamaStream.UI
         GetTranslation("button.confirmAddQueue"),
         GetTranslation("button.confirmPlayUrl"),
         this,
-        nameof(HideVideoPlayerSelector),
+        nameof(CancelPlayUrl),
         urlInputField == _urlInputField ? nameof(AddUrlToQueueEvent) : nameof(AddUrlTopToQueueEvent),
         urlInputField == _urlInputField ? nameof(PlayUrlEvent) : nameof(PlayUrlTopEvent)))
+      {
         HideVideoPlayerSelector();
+        return;
+      }
+
+      // What the question is about, settled now. The buttons used to read
+      // the field when pressed, which was harmless while entering a second
+      // URL replaced the dialog. It no longer does, so the field can hold
+      // something else by the time an answer arrives -- and the answer would
+      // have applied to that instead of to what was asked about.
+      _pendingPlayUrl = urlInputField.GetUrl();
+      _pendingPlayUrlField = urlInputField;
+    }
+
+    // Answered no, or closed. Nothing is played, and the question is let go
+    // of so the next one is about its own URL.
+    public void CancelPlayUrl()
+    {
+      _pendingPlayUrl = null;
+      _pendingPlayUrlField = null;
+      HideVideoPlayerSelector();
     }
 
     public void ShowVideoPlayerSelector()
@@ -385,18 +411,24 @@ namespace Yamadev.YamaStream.UI
       return _controller.Handler.Type;
     }
 
-    public void AddUrlToQueueEvent()
-    {
-      AddUrlToQueueEventInternal(GetVideoPlayerSelectorValue(), _urlInputField.GetUrl());
-      HideVideoPlayerSelector();
-      _urlInputField.SetUrl(VRCUrl.Empty);
-    }
+    // Both answer the same question and act on what it was about, so which
+    // field it came from no longer picks the handler -- the names are kept
+    // because the dialog is told them by name.
+    public void AddUrlToQueueEvent() => AddPendingUrlToQueue();
 
-    public void AddUrlTopToQueueEvent()
+    public void AddUrlTopToQueueEvent() => AddPendingUrlToQueue();
+
+    private void AddPendingUrlToQueue()
     {
-      AddUrlToQueueEventInternal(GetVideoPlayerSelectorValue(), _urlInputFieldTop.GetUrl());
+      var url = _pendingPlayUrl;
+      var field = _pendingPlayUrlField;
+      _pendingPlayUrl = null;
+      _pendingPlayUrlField = null;
       HideVideoPlayerSelector();
-      _urlInputFieldTop.SetUrl(VRCUrl.Empty);
+      if (!Utilities.IsValid(url)) return;
+
+      AddUrlToQueueEventInternal(GetVideoPlayerSelectorValue(), url);
+      if (Utilities.IsValid(field)) field.SetUrl(VRCUrl.Empty);
     }
 
     public void AddUrlToQueueEventInternal(VideoPlayerType playerType, VRCUrl url)
@@ -411,18 +443,21 @@ namespace Yamadev.YamaStream.UI
       _controller.Queue.AddTrack(TrackUtils.NewTrack(playerType, "", url));
     }
 
-    public void PlayUrlEvent()
-    {
-      PlayUrlInternal(GetVideoPlayerSelectorValue(), _urlInputField.GetUrl());
-      HideVideoPlayerSelector();
-      _urlInputField.SetUrl(VRCUrl.Empty);
-    }
+    public void PlayUrlEvent() => PlayPendingUrl();
 
-    public void PlayUrlTopEvent()
+    public void PlayUrlTopEvent() => PlayPendingUrl();
+
+    private void PlayPendingUrl()
     {
-      PlayUrlInternal(GetVideoPlayerSelectorValue(), _urlInputFieldTop.GetUrl());
+      var url = _pendingPlayUrl;
+      var field = _pendingPlayUrlField;
+      _pendingPlayUrl = null;
+      _pendingPlayUrlField = null;
       HideVideoPlayerSelector();
-      _urlInputFieldTop.SetUrl(VRCUrl.Empty);
+      if (!Utilities.IsValid(url)) return;
+
+      PlayUrlInternal(GetVideoPlayerSelectorValue(), url);
+      if (Utilities.IsValid(field)) field.SetUrl(VRCUrl.Empty);
     }
 
     private void PlayUrlInternal(VideoPlayerType playerType, VRCUrl url)
