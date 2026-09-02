@@ -29,6 +29,10 @@ namespace Yamadev.YamaStream.UI
     [SerializeField] private Toggle _playlistsTabToggle;
 
     [Header("Playlist - Actions")]
+    // Back to the playlist list. Wired the way the delete and refresh
+    // buttons beside it are, so the transition has one implementation
+    // instead of one here and one in the prefab's UnityEvent.
+    [SerializeField, RegisterEvent(nameof(Button.onClick), nameof(ReturnToPlaylistList))] private Button _playlistReturnButton;
     // Dynamic playlist slots under this Controller (issue #92), wired at
     // build time by DynamicPlaylistBuildProcess. Lets the header tell a
     // runtime-filled playlist apart from one baked into the world.
@@ -178,14 +182,18 @@ namespace Yamadev.YamaStream.UI
         ReturnToPlaylistList();
     }
 
-    // Does what the return button in the prefab does, minus a call whose
-    // target is missing and whose method does not exist. The button keeps
-    // its own wiring; this is for the case where nobody pressed anything and
-    // the playlist simply went away.
+    // The only way the panel goes from a track list back to the playlist
+    // list. The return button is wired to it and the delete path calls it,
+    // so pressing back and having the playlist taken away cannot end up
+    // doing different things.
+    //
+    // What the button used to do from the prefab, minus a call whose target
+    // was missing and whose method exists in no script.
     //
     // Deliberately about the view only. ClearSelectionIfEmptied has already
     // dropped the selection by the time it calls this, and leaving the index
-    // alone here keeps the method safe to call from anywhere.
+    // alone is also what the button did before -- pressing back has never
+    // cleared the selection.
     public void ReturnToPlaylistList()
     {
       if (!Utilities.IsValid(_playlistListPage)) return;
