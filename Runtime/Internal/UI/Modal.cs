@@ -78,7 +78,12 @@ namespace Yamadev.YamaStream.UI
     {
       if (TryShow(title, message, closeText, executeText, execute2Text, targetUdon, closeEventName, executeEventName, execute2EventName)) return;
       if (!Utilities.IsValid(targetUdon)) return;
-      if (string.IsNullOrEmpty(executeEventName) && string.IsNullOrEmpty(execute2EventName)) return;
+
+      // Nothing to tell only when there is nothing to answer -- the same
+      // thing IsAwaitingAnswer protects, so a close-only dialog counts.
+      if (string.IsNullOrEmpty(closeEventName) &&
+          string.IsNullOrEmpty(executeEventName) &&
+          string.IsNullOrEmpty(execute2EventName)) return;
 
       // Only ever one deep: a close handler that shows something is refused
       // again, and answering that refusal too would not end.

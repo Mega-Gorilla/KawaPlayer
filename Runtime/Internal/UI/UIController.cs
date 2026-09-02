@@ -428,7 +428,7 @@ namespace Yamadev.YamaStream.UI
       if (!Utilities.IsValid(url)) return;
 
       AddUrlToQueueEventInternal(GetVideoPlayerSelectorValue(), url);
-      if (Utilities.IsValid(field)) field.SetUrl(VRCUrl.Empty);
+      ClearFieldIfStillHolding(field, url);
     }
 
     public void AddUrlToQueueEventInternal(VideoPlayerType playerType, VRCUrl url)
@@ -457,7 +457,20 @@ namespace Yamadev.YamaStream.UI
       if (!Utilities.IsValid(url)) return;
 
       PlayUrlInternal(GetVideoPlayerSelectorValue(), url);
-      if (Utilities.IsValid(field)) field.SetUrl(VRCUrl.Empty);
+      ClearFieldIfStillHolding(field, url);
+    }
+
+    // The field is emptied because what it held has just been used. Anything
+    // typed while the question was up is the next URL somebody means to
+    // enter, not the one that was answered, so that stays.
+    private void ClearFieldIfStillHolding(VRCUrlInputField field, VRCUrl used)
+    {
+      if (!Utilities.IsValid(field)) return;
+
+      var current = field.GetUrl();
+      if (Utilities.IsValid(current) && current.Get() != used.Get()) return;
+
+      field.SetUrl(VRCUrl.Empty);
     }
 
     private void PlayUrlInternal(VideoPlayerType playerType, VRCUrl url)
