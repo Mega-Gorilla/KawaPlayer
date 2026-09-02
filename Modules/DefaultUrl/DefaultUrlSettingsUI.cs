@@ -14,14 +14,15 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
     [SerializeField] private OwnerDefaultUrlStorage _storageTemplate;
     [SerializeField] private VRCUrlInputField _urlInput;
     [SerializeField] private Text _currentUrlDisplay;
-    // Hidden for anyone who cannot edit, with _noPermissionText taking their
-    // place (issue #115). What made the old behaviour read as a bug was that
-    // the controls vanished with nothing saying why, not that they vanished.
+    // Everything the owner acts on -- the current value, the input and both
+    // buttons -- lives here and is hidden from anyone who cannot edit (issue
+    // #115). What made the old behaviour read as a bug was that the controls
+    // vanished with nothing saying why, not that they vanished, so the
+    // description is swapped for the reason rather than a line being added.
     // Leaving them visible but disabled was tried and rejected: at VR viewing
     // distance a dimmed field still invites a click, and a click that does
     // nothing reads as broken just as the empty space did.
-    [SerializeField] private GameObject _editControlsSection;
-    [SerializeField] private Text _noPermissionText;
+    [SerializeField] private GameObject _ownerOnlySection;
 
     [SerializeField] private Text _titleText;
     [SerializeField] private Text _descriptionText;
@@ -65,12 +66,6 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
         if (!string.IsNullOrEmpty(t))
           _titleText.text = $"{t}<size=44>(Global)</size>";
       }
-      if (_descriptionText != null)
-      {
-        string t = _uiController.GetTranslation("module.defaultUrl.description");
-        if (!string.IsNullOrEmpty(t))
-          _descriptionText.text = t;
-      }
       if (_saveButtonLabel != null)
       {
         string t = _uiController.GetTranslation("module.defaultUrl.save");
@@ -83,12 +78,7 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
         if (!string.IsNullOrEmpty(t))
           _clearButtonLabel.text = t;
       }
-      if (_noPermissionText != null)
-      {
-        string t = _uiController.GetTranslation("module.defaultUrl.noPermission");
-        if (!string.IsNullOrEmpty(t))
-          _noPermissionText.text = t;
-      }
+      UpdateEditability();
       UpdateDisplay();
     }
 
@@ -114,13 +104,19 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
     {
       bool canEdit = CanEdit();
 
-      if (_editControlsSection != null)
-        _editControlsSection.SetActive(canEdit);
+      if (_ownerOnlySection != null)
+        _ownerOnlySection.SetActive(canEdit);
 
-      // The two are exclusive on purpose: the reason takes the row the
-      // controls would have used, so the panel never shows a gap.
-      if (_noPermissionText != null)
-        _noPermissionText.gameObject.SetActive(!canEdit);
+      // One line, not three. Someone who cannot use the feature has no use
+      // for its description or its current value, and repeating the rule in
+      // both the description and a separate notice states it twice.
+      if (_descriptionText != null && _uiController != null)
+      {
+        string t = _uiController.GetTranslation(
+            canEdit ? "module.defaultUrl.description" : "module.defaultUrl.noPermission");
+        if (!string.IsNullOrEmpty(t))
+          _descriptionText.text = t;
+      }
     }
 
     private void UpdateDisplay()
@@ -129,8 +125,8 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
       if (_controller == null) return;
       var url = _controller.DefaultUrl;
       bool hasUrl = Utilities.IsValid(url) && !string.IsNullOrEmpty(url.Get());
-      string prefix = "現在: ";
-      string notSet = "(デフォルト URL は未設定です)";
+      string prefix = "設定値: ";
+      string notSet = "(未設定)";
       if (_uiController != null)
       {
         string p = _uiController.GetTranslation("module.defaultUrl.currentPrefix");
@@ -138,7 +134,9 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
         string n = _uiController.GetTranslation("module.defaultUrl.notSet");
         if (!string.IsNullOrEmpty(n)) notSet = n;
       }
-      _currentUrlDisplay.text = hasUrl ? prefix + url.Get() : notSet;
+      // Prefixed either way so the line reads the same whether or not a URL
+      // is set, instead of switching between a value and a sentence.
+      _currentUrlDisplay.text = prefix + (hasUrl ? url.Get() : notSet);
     }
 
     private void RefreshInputField()
