@@ -14,6 +14,16 @@ namespace Yamadev.YamaStream.UI
     [SerializeField] private Text _currentPlaylistNameText;
     [SerializeField] private LoopScroll _playlistsListScroll;
     [SerializeField] private LoopScroll _playlistTracksScroll;
+    // The two halves of the panel where one replaces the other. Not the
+    // scrolls themselves: they are the same object as the page on the main
+    // screen but sit inside it on the playlist panel, where hiding the
+    // scroll would leave the header behind.
+    //
+    // Left unwired where both halves are on screen at once -- the playlist
+    // panel puts the list and the tracks side by side, so there is nowhere
+    // to go back to and nothing to switch.
+    [SerializeField] private GameObject _playlistListPage;
+    [SerializeField] private GameObject _playlistTracksPage;
     [SerializeField, RegisterEvent(nameof(Toggle.onValueChanged), nameof(GenerateQueueView))] private Toggle _queueTabToggle;
     [SerializeField, RegisterEvent(nameof(Toggle.onValueChanged), nameof(GenerateHistoryView))] private Toggle _historyTabToggle;
     [SerializeField] private Toggle _playlistsTabToggle;
@@ -157,6 +167,34 @@ namespace Yamadev.YamaStream.UI
       // scroll and are redrawn right after, so leave them alone.
       if (!IsQueuePage && !IsHistoryPage && Utilities.IsValid(_playlistTracksScroll))
         _playlistTracksScroll.SetUp(0, this, nameof(UpdatePlaylistTracksContent));
+
+      // What was being looked at is gone, so leaving the player on a detail
+      // view with no name and no rows shows a playlist that no longer
+      // exists (issue #113). Only when that view is what is on screen: the
+      // queue and history pages borrow the same object, and the list page is
+      // already where this would go.
+      if (!IsQueuePage && !IsHistoryPage &&
+          Utilities.IsValid(_playlistTracksPage) && _playlistTracksPage.activeSelf)
+        ReturnToPlaylistList();
+    }
+
+    // Does what the return button in the prefab does, minus a call whose
+    // target is missing and whose method does not exist. The button keeps
+    // its own wiring; this is for the case where nobody pressed anything and
+    // the playlist simply went away.
+    //
+    // Deliberately about the view only. ClearSelectionIfEmptied has already
+    // dropped the selection by the time it calls this, and leaving the index
+    // alone here keeps the method safe to call from anywhere.
+    public void ReturnToPlaylistList()
+    {
+      if (!Utilities.IsValid(_playlistListPage)) return;
+      if (!Utilities.IsValid(_playlistTracksPage)) return;
+
+      _playlistTracksPage.SetActive(false);
+      _playlistListPage.SetActive(true);
+      // Takes the title bar -- name, delete, refresh -- away with it.
+      if (Utilities.IsValid(_userUIAnimator)) _userUIAnimator.SetTrigger("HidePlaylistTitle");
     }
 
     public void DeletePlaylist()

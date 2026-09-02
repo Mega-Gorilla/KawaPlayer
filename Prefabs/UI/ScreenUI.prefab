@@ -16381,6 +16381,8 @@ MonoBehaviour:
   _currentPlaylistNameText: {fileID: 7857199838503418130}
   _playlistsListScroll: {fileID: 1370324115900902878}
   _playlistTracksScroll: {fileID: 4402039814646195807}
+  _playlistListPage: {fileID: 456880188266557730}
+  _playlistTracksPage: {fileID: 503877907022498782}
   _queueTabToggle: {fileID: 5556352974692738073}
   _historyTabToggle: {fileID: 234930356253501879}
   _playlistsTabToggle: {fileID: 6702931089919395581}
