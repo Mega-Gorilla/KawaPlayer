@@ -12,10 +12,19 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
   {
     [SerializeField] private DefaultUrlController _controller;
     [SerializeField] private OwnerDefaultUrlStorage _storageTemplate;
+    // Dressed as a button -- icon, label, no visible box -- and clicked like
+    // one. Clicking a VRCUrlInputField is what opens VRChat's text entry, so
+    // making the field itself the button gets there in one press without
+    // asking Udon to focus anything. ActivateInputField() was tried and did
+    // not open the entry screen in world.
+    //
+    // The label survives because the field never draws its own text (issue
+    // #121). If that is ever fixed, the typed URL would sit on top of it.
+    //
     // Submitting is saving. A separate save button would look like a chance
-    // to check the URL before committing it, and there is none: the field
-    // draws no text (issue #121), so the value cannot be read back until it
-    // has been saved and shown in the line above.
+    // to check the URL before committing it, and there is none: the value
+    // cannot be read back until it has been saved and shown in the line
+    // above.
     [SerializeField, RegisterEvent(nameof(VRCUrlInputField.onEndEdit), nameof(OnUrlSubmitted))]
     private VRCUrlInputField _urlInput;
     // The saved URL is shown here rather than in the input field. A
@@ -32,10 +41,6 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
     // and a click that does nothing reads as broken just as the empty space
     // did.
     [SerializeField] private GameObject _ownerOnlySection;
-    // Holds the input field. Switched on only while VRChat's text entry is
-    // open, because the field itself has nothing to show: it exists to
-    // receive what the player types, not to display it.
-    [SerializeField] private GameObject _urlEntrySection;
 
     [SerializeField] private Text _titleText;
     [SerializeField] private Text _descriptionText;
@@ -122,11 +127,6 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
       if (_ownerOnlySection != null)
         _ownerOnlySection.SetActive(canEdit);
 
-      // Only ever folds it away. This runs once a second, so forcing it open
-      // would fight whoever is typing.
-      if (!canEdit && _urlEntrySection != null)
-        _urlEntrySection.SetActive(false);
-
       // One block, not three. Someone who cannot use the feature has no use
       // for its description or its current value, and repeating the rule in
       // both the description and a separate notice states it twice.
@@ -174,34 +174,6 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
       _currentUrlDisplay.text = prefix + (hasUrl ? url.Get() : notSet);
     }
 
-    // Opens VRChat's text entry. The field it belongs to is switched on to be
-    // focused but never shows: it has no background and takes no height, so
-    // pressing this button puts the player straight into the entry screen
-    // rather than revealing a box to click.
-    //
-    // Always opens, never toggles. There is nothing on screen to close, so a
-    // toggle would make the press after a cancelled entry do nothing visible.
-    public void OnEnterUrlPressed()
-    {
-      if (!CanEdit()) return;
-      if (_urlEntrySection == null) return;
-
-      _urlEntrySection.SetActive(true);
-      // A Selectable registers itself in OnEnable, so it cannot be focused in
-      // the same frame it is switched on.
-      SendCustomEventDelayedFrames(nameof(FocusUrlInput), 1);
-    }
-
-    public void FocusUrlInput()
-    {
-      if (!CanEdit()) return;
-      if (_urlInput == null) return;
-      if (_urlEntrySection == null || !_urlEntrySection.activeSelf) return;
-
-      _urlInput.Select();
-      _urlInput.ActivateInputField();
-    }
-
     private void RefreshInputField()
     {
       if (_urlInput == null) return;
@@ -223,10 +195,6 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
     // cancelled, or confirmed empty.
     public void OnUrlSubmitted()
     {
-      // Entry is over on every path, so the field is switched off on every
-      // path. Closing it only after a valid URL was how the box came back.
-      if (_urlEntrySection != null) _urlEntrySection.SetActive(false);
-
       if (!CanEdit()) return;
       if (_urlInput == null) return;
 
@@ -286,7 +254,6 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
         if (spawned != null) spawned.ClearSavedUrl();
       }
 
-      if (_urlEntrySection != null) _urlEntrySection.SetActive(false);
       UpdateDisplay();
       RefreshInputField();
     }
