@@ -554,7 +554,7 @@ MonoBehaviour:
     m_SelectOnDown: {fileID: 0}
     m_SelectOnLeft: {fileID: 0}
     m_SelectOnRight: {fileID: 0}
-  m_Transition: 1
+  m_Transition: 0
   m_Colors:
     m_NormalColor: {r: 1, g: 1, b: 1, a: 1}
     m_HighlightedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
@@ -604,9 +604,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_IgnoreLayout: 0
-  m_MinWidth: -1
-  m_MinHeight: -1
-  m_PreferredWidth: -1
+  m_MinWidth: 111
+  m_MinHeight: 40
+  m_PreferredWidth: 111
   m_PreferredHeight: 40
   m_FlexibleWidth: 0
   m_FlexibleHeight: 0
@@ -1860,7 +1860,7 @@ RectTransform:
   m_GameObject: {fileID: 981005410197709380}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 2, y: 2, z: 2}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 2084278431861775894}
@@ -1921,8 +1921,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_IgnoreLayout: 0
-  m_MinWidth: -1
-  m_MinHeight: -1
+  m_MinWidth: 40
+  m_MinHeight: 40
   m_PreferredWidth: 40
   m_PreferredHeight: 40
   m_FlexibleWidth: 0
@@ -6432,15 +6432,15 @@ RectTransform:
   m_GameObject: {fileID: 3672122872301407326}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.5, y: 0.5, z: 1}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 6814436421967369492}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: -30, y: 0}
+  m_AnchoredPosition: {x: 21, y: 0}
+  m_SizeDelta: {x: -58, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &6905402056387832069
 CanvasRenderer:
@@ -6472,7 +6472,7 @@ MonoBehaviour:
       m_Calls: []
   m_FontData:
     m_Font: {fileID: 12800000, guid: 6488e13b806b0524dbadc43e3a9bd5fb, type: 3}
-    m_FontSize: 28
+    m_FontSize: 14
     m_FontStyle: 0
     m_BestFit: 0
     m_MinSize: 10
@@ -6480,8 +6480,8 @@ MonoBehaviour:
     m_Alignment: 3
     m_AlignByGeometry: 0
     m_RichText: 1
-    m_HorizontalOverflow: 1
-    m_VerticalOverflow: 1
+    m_HorizontalOverflow: 0
+    m_VerticalOverflow: 0
     m_LineSpacing: 1
   m_Text: 
 --- !u!114 &7458665227819711012
@@ -8648,7 +8648,7 @@ MonoBehaviour:
     m_SelectOnDown: {fileID: 0}
     m_SelectOnLeft: {fileID: 0}
     m_SelectOnRight: {fileID: 0}
-  m_Transition: 1
+  m_Transition: 0
   m_Colors:
     m_NormalColor: {r: 1, g: 1, b: 1, a: 1}
     m_HighlightedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
@@ -8708,11 +8708,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_IgnoreLayout: 0
-  m_MinWidth: -1
-  m_MinHeight: -1
-  m_PreferredWidth: -1
+  m_MinWidth: 200
+  m_MinHeight: 40
+  m_PreferredWidth: 600
   m_PreferredHeight: 40
-  m_FlexibleWidth: 0
+  m_FlexibleWidth: 1
   m_FlexibleHeight: 0
   m_LayoutPriority: 1
 --- !u!114 &4734826301096637117
@@ -10344,7 +10344,6 @@ GameObject:
   - component: {fileID: 3861009870130864368}
   - component: {fileID: 1204876084172231225}
   - component: {fileID: 2873338480460215035}
-  - component: {fileID: 765164201567804273}
   - component: {fileID: 2496783563046122145}
   m_Layer: 0
   m_Name: Label
@@ -10362,7 +10361,7 @@ RectTransform:
   m_GameObject: {fileID: 5317895258026546698}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.2, y: 0.2, z: 1}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 2084278431861775894}
@@ -10402,7 +10401,7 @@ MonoBehaviour:
       m_Calls: []
   m_FontData:
     m_Font: {fileID: 12800000, guid: 6488e13b806b0524dbadc43e3a9bd5fb, type: 3}
-    m_FontSize: 90
+    m_FontSize: 14
     m_FontStyle: 0
     m_BestFit: 0
     m_MinSize: 10
@@ -10414,20 +10413,6 @@ MonoBehaviour:
     m_VerticalOverflow: 1
     m_LineSpacing: 1
   m_Text: "\u30AF\u30EA\u30A2"
---- !u!114 &765164201567804273
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5317895258026546698}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3245ec927659c4140ac4f8d17403cc18, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_HorizontalFit: 2
-  m_VerticalFit: 2
 --- !u!114 &2496783563046122145
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -10441,12 +10426,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_IgnoreLayout: 0
-  m_MinWidth: -1
-  m_MinHeight: -1
-  m_PreferredWidth: -1
-  m_PreferredHeight: 200
-  m_FlexibleWidth: 1
-  m_FlexibleHeight: 1
+  m_MinWidth: 61
+  m_MinHeight: 40
+  m_PreferredWidth: 61
+  m_PreferredHeight: 40
+  m_FlexibleWidth: 0
+  m_FlexibleHeight: 0
   m_LayoutPriority: 1
 --- !u!1 &5327156158915220136
 GameObject:
@@ -13030,7 +13015,7 @@ MonoBehaviour:
   _ownerOnlySection: {fileID: 4233722186005758019}
   _titleText: {fileID: 3524977813665446290}
   _descriptionText: {fileID: 7467433195813207821}
-  _enterUrlButtonLabel: {fileID: 3891650565627128838}
+  _placeholderLabel: {fileID: 3891650565627128838}
   _clearButtonLabel: {fileID: 2873338480460215035}
 --- !u!114 &546974722492781435
 MonoBehaviour:
@@ -15133,10 +15118,9 @@ GameObject:
   - component: {fileID: 5181016491375094535}
   - component: {fileID: 1256913012721026764}
   - component: {fileID: 3891650565627128838}
-  - component: {fileID: 599393541738886496}
   - component: {fileID: 1866275344509181871}
   m_Layer: 0
-  m_Name: Label
+  m_Name: Placeholder
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -15151,15 +15135,15 @@ RectTransform:
   m_GameObject: {fileID: 8039254768123623109}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.2, y: 0.2, z: 1}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 6814436421967369492}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 20, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: 21, y: 0}
+  m_SizeDelta: {x: -58, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &1256913012721026764
 CanvasRenderer:
@@ -15182,7 +15166,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.867, g: 0.867, b: 0.867, a: 1}
+  m_Color: {r: 0.53333336, g: 0.53333336, b: 0.53333336, a: 1}
   m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -15191,7 +15175,7 @@ MonoBehaviour:
       m_Calls: []
   m_FontData:
     m_Font: {fileID: 12800000, guid: 6488e13b806b0524dbadc43e3a9bd5fb, type: 3}
-    m_FontSize: 90
+    m_FontSize: 14
     m_FontStyle: 0
     m_BestFit: 0
     m_MinSize: 10
@@ -15199,24 +15183,10 @@ MonoBehaviour:
     m_Alignment: 3
     m_AlignByGeometry: 0
     m_RichText: 1
-    m_HorizontalOverflow: 1
-    m_VerticalOverflow: 1
+    m_HorizontalOverflow: 0
+    m_VerticalOverflow: 0
     m_LineSpacing: 1
   m_Text: "URL\u3092\u5165\u529B"
---- !u!114 &599393541738886496
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8039254768123623109}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3245ec927659c4140ac4f8d17403cc18, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_HorizontalFit: 2
-  m_VerticalFit: 2
 --- !u!114 &1866275344509181871
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -15229,7 +15199,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 306cc8c2b49d7114eaa3623786fc2126, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_IgnoreLayout: 0
+  m_IgnoreLayout: 1
   m_MinWidth: -1
   m_MinHeight: -1
   m_PreferredWidth: -1
@@ -15344,7 +15314,7 @@ RectTransform:
   m_GameObject: {fileID: 8323080327195848039}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 2, y: 2, z: 2}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 6814436421967369492}
@@ -15405,8 +15375,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_IgnoreLayout: 0
-  m_MinWidth: -1
-  m_MinHeight: -1
+  m_MinWidth: 40
+  m_MinHeight: 40
   m_PreferredWidth: 40
   m_PreferredHeight: 40
   m_FlexibleWidth: 0

@@ -12,25 +12,24 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
   {
     [SerializeField] private DefaultUrlController _controller;
     [SerializeField] private OwnerDefaultUrlStorage _storageTemplate;
-    // Dressed as a button -- icon, label, no visible box -- and clicked like
+    // Dressed as a button -- icon, text, no visible box -- and clicked like
     // one. Clicking a VRCUrlInputField is what opens VRChat's text entry, so
     // making the field itself the button gets there in one press without
     // asking Udon to focus anything. ActivateInputField() was tried and did
     // not open the entry screen in world.
     //
-    // The label survives because the field never draws its own text (issue
-    // #121). If that is ever fixed, the typed URL would sit on top of it.
+    // The field does draw the URL it holds, so the prompt is its placeholder
+    // rather than a label laid over it: one or the other shows, never both.
+    // Colour transition is off, because ColorTint writes normalColor over the
+    // transparent background every time the field is enabled.
     //
     // Submitting is saving. A separate save button would look like a chance
-    // to check the URL before committing it, and there is none: the value
-    // cannot be read back until it has been saved and shown in the line
-    // above.
+    // to check the URL before committing it, and there is none: text entry
+    // closes onto the saved value either way.
     [SerializeField, RegisterEvent(nameof(VRCUrlInputField.onEndEdit), nameof(OnUrlSubmitted))]
     private VRCUrlInputField _urlInput;
-    // The saved URL is shown here rather than in the input field. A
-    // VRCUrlInputField in this UI is a place to type, not a place to read:
-    // the two older ones on the main screen have their text alpha at zero and
-    // are cleared after every submit, and this one draws nothing either.
+    // Repeats what the field already shows, for the case the field cannot
+    // cover: a URL too long to fit inside it.
     [SerializeField] private Text _currentUrlDisplay;
     // Everything the owner acts on lives here and is hidden from anyone who
     // cannot edit (issue #115). What made the old behaviour read as a bug was
@@ -44,7 +43,9 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
 
     [SerializeField] private Text _titleText;
     [SerializeField] private Text _descriptionText;
-    [SerializeField] private Text _enterUrlButtonLabel;
+    // Shown only while nothing is saved. Not wired to the field's own
+    // placeholder; see UpdateDisplay.
+    [SerializeField] private Text _placeholderLabel;
     [SerializeField] private Text _clearButtonLabel;
 
     private UIController _uiController;
@@ -84,13 +85,13 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
         if (!string.IsNullOrEmpty(t))
           _titleText.text = $"{t}<size=44>(Global)</size>";
       }
-      if (_enterUrlButtonLabel != null)
+      if (_placeholderLabel != null)
       {
         // Reuses the core label rather than adding a ninth translation of the
         // same two words.
         string t = _uiController.GetTranslation("label.inputUrl");
         if (!string.IsNullOrEmpty(t))
-          _enterUrlButtonLabel.text = t;
+          _placeholderLabel.text = t;
       }
       if (_clearButtonLabel != null)
       {
@@ -156,10 +157,20 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
 
     private void UpdateDisplay()
     {
-      if (_currentUrlDisplay == null) return;
       if (_controller == null) return;
       var url = _controller.DefaultUrl;
       bool hasUrl = Utilities.IsValid(url) && !string.IsNullOrEmpty(url.Get());
+
+      // The prompt is shown and hidden here rather than through
+      // VRCUrlInputField.placeholder: that property exists, but the field
+      // leaves the graphic disabled whatever it holds, so relying on it
+      // would mean a field that stays blank until someone guesses to click
+      // it. The field is kept holding the saved URL by RefreshInputField, so
+      // the saved value is what decides this.
+      if (_placeholderLabel != null)
+        _placeholderLabel.gameObject.SetActive(!hasUrl);
+
+      if (_currentUrlDisplay == null) return;
       string prefix = "設定値: ";
       string notSet = "(未設定)";
       if (_uiController != null)
