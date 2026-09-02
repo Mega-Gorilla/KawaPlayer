@@ -603,9 +603,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_IgnoreLayout: 0
-  m_MinWidth: 111
+  m_MinWidth: 121
   m_MinHeight: 40
-  m_PreferredWidth: 111
+  m_PreferredWidth: 121
   m_PreferredHeight: 40
   m_FlexibleWidth: 0
   m_FlexibleHeight: 0
@@ -6447,7 +6447,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.867, g: 0.867, b: 0.867, a: 1}
+  m_Color: {r: 0.867, g: 0.867, b: 0.867, a: 0}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -8691,11 +8691,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_IgnoreLayout: 0
-  m_MinWidth: 200
+  m_MinWidth: 151
   m_MinHeight: 40
-  m_PreferredWidth: 600
+  m_PreferredWidth: 151
   m_PreferredHeight: 40
-  m_FlexibleWidth: 1
+  m_FlexibleWidth: 0
   m_FlexibleHeight: 0
   m_LayoutPriority: 1
 --- !u!114 &4776759611552918229
@@ -10369,7 +10369,7 @@ MonoBehaviour:
       m_Calls: []
   m_FontData:
     m_Font: {fileID: 12800000, guid: 6488e13b806b0524dbadc43e3a9bd5fb, type: 3}
-    m_FontSize: 14
+    m_FontSize: 16
     m_FontStyle: 0
     m_BestFit: 0
     m_MinSize: 10
@@ -10394,9 +10394,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_IgnoreLayout: 0
-  m_MinWidth: 61
+  m_MinWidth: 71
   m_MinHeight: 40
-  m_PreferredWidth: 61
+  m_PreferredWidth: 71
   m_PreferredHeight: 40
   m_FlexibleWidth: 0
   m_FlexibleHeight: 0
@@ -12983,7 +12983,7 @@ MonoBehaviour:
   _ownerOnlySection: {fileID: 4233722186005758019}
   _titleText: {fileID: 3524977813665446290}
   _descriptionText: {fileID: 7467433195813207821}
-  _placeholderLabel: {fileID: 3891650565627128838}
+  _enterUrlButtonLabel: {fileID: 3891650565627128838}
   _clearButtonLabel: {fileID: 2873338480460215035}
 --- !u!114 &546974722492781435
 MonoBehaviour:
@@ -13739,7 +13739,7 @@ MonoBehaviour:
     m_Top: 0
     m_Bottom: 0
   m_ChildAlignment: 3
-  m_Spacing: 24
+  m_Spacing: 40
   m_ChildForceExpandWidth: 0
   m_ChildForceExpandHeight: 0
   m_ChildControlWidth: 1
@@ -15088,7 +15088,7 @@ GameObject:
   - component: {fileID: 3891650565627128838}
   - component: {fileID: 1866275344509181871}
   m_Layer: 0
-  m_Name: Placeholder
+  m_Name: Label
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -15134,7 +15134,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.53333336, g: 0.53333336, b: 0.53333336, a: 1}
+  m_Color: {r: 0.867, g: 0.867, b: 0.867, a: 1}
   m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -15143,7 +15143,7 @@ MonoBehaviour:
       m_Calls: []
   m_FontData:
     m_Font: {fileID: 12800000, guid: 6488e13b806b0524dbadc43e3a9bd5fb, type: 3}
-    m_FontSize: 14
+    m_FontSize: 16
     m_FontStyle: 0
     m_BestFit: 0
     m_MinSize: 10
@@ -15151,8 +15151,8 @@ MonoBehaviour:
     m_Alignment: 3
     m_AlignByGeometry: 0
     m_RichText: 1
-    m_HorizontalOverflow: 0
-    m_VerticalOverflow: 0
+    m_HorizontalOverflow: 1
+    m_VerticalOverflow: 1
     m_LineSpacing: 1
   m_Text: "URL\u3092\u5165\u529B"
 --- !u!114 &1866275344509181871
@@ -15167,13 +15167,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 306cc8c2b49d7114eaa3623786fc2126, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_IgnoreLayout: 1
-  m_MinWidth: -1
-  m_MinHeight: -1
-  m_PreferredWidth: -1
-  m_PreferredHeight: 200
-  m_FlexibleWidth: 1
-  m_FlexibleHeight: 1
+  m_IgnoreLayout: 0
+  m_MinWidth: 101
+  m_MinHeight: 40
+  m_PreferredWidth: 101
+  m_PreferredHeight: 40
+  m_FlexibleWidth: 0
+  m_FlexibleHeight: 0
   m_LayoutPriority: 1
 --- !u!1 &8221257626791952715
 GameObject:
