@@ -1,9 +1,7 @@
 {
   "ja": {
     "module.defaultUrl.title": "デフォルト URL",
-    "module.defaultUrl.description": "ワールド入室時に自動再生されるデフォルト URL を設定する。インスタンスオーナーのみ編集可能、セッション間で永続化される。",
-    "module.defaultUrl.notSet": "(未設定)",
-    "module.defaultUrl.currentPrefix": "設定値: ",
+    "module.defaultUrl.description": "入室時に自動再生する動画・プレイリストを設定する。設定できるのはインスタンスオーナーだけで、次回入室時も残る。",
     "module.defaultUrl.save": "保存",
     "module.defaultUrl.clear": "クリア",
     "module.defaultUrl.unavailable": "本機能は利用できません",
@@ -11,9 +9,7 @@
   },
   "en": {
     "module.defaultUrl.title": "Default URL",
-    "module.defaultUrl.description": "Sets the default URL that auto-plays when entering the world. Editable by Instance Owner only, persisted across sessions.",
-    "module.defaultUrl.notSet": "(not set)",
-    "module.defaultUrl.currentPrefix": "Value: ",
+    "module.defaultUrl.description": "Sets the video or playlist that plays automatically on entering the world. Only the Instance Owner can set it, and it is still there next time.",
     "module.defaultUrl.save": "Save",
     "module.defaultUrl.clear": "Clear",
     "module.defaultUrl.unavailable": "This feature is unavailable",
@@ -21,9 +17,7 @@
   },
   "ko": {
     "module.defaultUrl.title": "기본 URL",
-    "module.defaultUrl.description": "월드 입장 시 자동 재생되는 기본 URL을 설정합니다. Instance Owner만 편집 가능하며 세션 간 영구화됩니다.",
-    "module.defaultUrl.notSet": "(설정되지 않음)",
-    "module.defaultUrl.currentPrefix": "설정값: ",
+    "module.defaultUrl.description": "입장 시 자동 재생할 동영상・플레이리스트를 설정한다. 설정할 수 있는 것은 Instance Owner뿐이며, 다음 입장 시에도 남는다.",
     "module.defaultUrl.save": "저장",
     "module.defaultUrl.clear": "지우기",
     "module.defaultUrl.unavailable": "이 기능을 사용할 수 없습니다",
@@ -31,9 +25,7 @@
   },
   "zh-CN": {
     "module.defaultUrl.title": "默认 URL",
-    "module.defaultUrl.description": "设置进入世界时自动播放的默认 URL。仅 Instance Owner 可编辑，跨会话持久化。",
-    "module.defaultUrl.notSet": "(未设置)",
-    "module.defaultUrl.currentPrefix": "设定值: ",
+    "module.defaultUrl.description": "设置进入世界时自动播放的视频或播放列表。仅 Instance Owner 可以设置，下次进入时依然保留。",
     "module.defaultUrl.save": "保存",
     "module.defaultUrl.clear": "清除",
     "module.defaultUrl.unavailable": "本功能不可用",
@@ -41,9 +33,7 @@
   },
   "zh-HK": {
     "module.defaultUrl.title": "預設 URL",
-    "module.defaultUrl.description": "設定進入世界時自動播放的預設 URL。僅 Instance Owner 可編輯，跨工作階段持久化。",
-    "module.defaultUrl.notSet": "(未設定)",
-    "module.defaultUrl.currentPrefix": "設定值: ",
+    "module.defaultUrl.description": "設定進入世界時自動播放的影片或播放清單。僅 Instance Owner 可以設定，下次進入時仍會保留。",
     "module.defaultUrl.save": "儲存",
     "module.defaultUrl.clear": "清除",
     "module.defaultUrl.unavailable": "本功能無法使用",
@@ -51,9 +41,7 @@
   },
   "es": {
     "module.defaultUrl.title": "URL predeterminada",
-    "module.defaultUrl.description": "Establece la URL predeterminada que se reproduce automáticamente al entrar al mundo. Editable solo por el Instance Owner, persistida entre sesiones.",
-    "module.defaultUrl.notSet": "(sin definir)",
-    "module.defaultUrl.currentPrefix": "Valor: ",
+    "module.defaultUrl.description": "Define el vídeo o la lista que se reproduce al entrar al mundo. Solo el Instance Owner puede definirlo, y sigue ahí la próxima vez.",
     "module.defaultUrl.save": "Guardar",
     "module.defaultUrl.clear": "Borrar",
     "module.defaultUrl.unavailable": "Esta función no está disponible",
@@ -61,9 +49,7 @@
   },
   "it": {
     "module.defaultUrl.title": "URL predefinito",
-    "module.defaultUrl.description": "Imposta l'URL predefinito che si riproduce automaticamente all'ingresso nel mondo. Modificabile solo dall'Instance Owner, persistito tra le sessioni.",
-    "module.defaultUrl.notSet": "(non impostato)",
-    "module.defaultUrl.currentPrefix": "Valore: ",
+    "module.defaultUrl.description": "Imposta il video o la playlist che parte all'ingresso nel mondo. Solo l'Instance Owner può impostarlo e resta anche la volta successiva.",
     "module.defaultUrl.save": "Salva",
     "module.defaultUrl.clear": "Cancella",
     "module.defaultUrl.unavailable": "Questa funzione non è disponibile",
@@ -71,9 +57,7 @@
   },
   "ru": {
     "module.defaultUrl.title": "URL по умолчанию",
-    "module.defaultUrl.description": "Устанавливает URL по умолчанию, который автоматически воспроизводится при входе в мир. Может редактировать только Instance Owner, сохраняется между сессиями.",
-    "module.defaultUrl.notSet": "(не задано)",
-    "module.defaultUrl.currentPrefix": "Значение: ",
+    "module.defaultUrl.description": "Задаёт видео или плейлист, который включается при входе в мир. Задать его может только Instance Owner, и он сохраняется до следующего раза.",
     "module.defaultUrl.save": "Сохранить",
     "module.defaultUrl.clear": "Очистить",
     "module.defaultUrl.unavailable": "Функция недоступна",
@@ -81,9 +65,7 @@
   },
   "uk": {
     "module.defaultUrl.title": "URL за замовчуванням",
-    "module.defaultUrl.description": "Встановлює URL за замовчуванням, який автоматично відтворюється при вході у світ. Може редагувати лише Instance Owner, зберігається між сесіями.",
-    "module.defaultUrl.notSet": "(не задано)",
-    "module.defaultUrl.currentPrefix": "Значення: ",
+    "module.defaultUrl.description": "Задає відео або плейлист, який вмикається при вході у світ. Задати його може лише Instance Owner, і він зберігається до наступного разу.",
     "module.defaultUrl.save": "Зберегти",
     "module.defaultUrl.clear": "Очистити",
     "module.defaultUrl.unavailable": "Функція недоступна",

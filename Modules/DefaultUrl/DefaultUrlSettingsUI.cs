@@ -13,7 +13,6 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
     [SerializeField] private DefaultUrlController _controller;
     [SerializeField] private OwnerDefaultUrlStorage _storageTemplate;
     [SerializeField] private VRCUrlInputField _urlInput;
-    [SerializeField] private Text _currentUrlDisplay;
     // Everything the owner acts on -- the current value, the input and both
     // buttons -- lives here and is hidden from anyone who cannot edit (issue
     // #115). What made the old behaviour read as a bug was that the controls
@@ -38,7 +37,6 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
       if (_uiController != null) _uiController.AddListener(this);
       UpdateTranslation();
       UpdateEditability();
-      UpdateDisplay();
       RefreshInputField();
       SchedulePoll();
     }
@@ -79,13 +77,11 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
           _clearButtonLabel.text = t;
       }
       UpdateEditability();
-      UpdateDisplay();
     }
 
     public void SchedulePoll()
     {
       UpdateEditability();
-      UpdateDisplay();
       RefreshInputField();
       SendCustomEventDelayedSeconds(nameof(SchedulePoll), 1.0f);
     }
@@ -95,7 +91,6 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
       if (player == Networking.LocalPlayer)
       {
         UpdateEditability();
-        UpdateDisplay();
         RefreshInputField();
       }
     }
@@ -134,26 +129,6 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
       }
     }
 
-    private void UpdateDisplay()
-    {
-      if (_currentUrlDisplay == null) return;
-      if (_controller == null) return;
-      var url = _controller.DefaultUrl;
-      bool hasUrl = Utilities.IsValid(url) && !string.IsNullOrEmpty(url.Get());
-      string prefix = "設定値: ";
-      string notSet = "(未設定)";
-      if (_uiController != null)
-      {
-        string p = _uiController.GetTranslation("module.defaultUrl.currentPrefix");
-        if (!string.IsNullOrEmpty(p)) prefix = p;
-        string n = _uiController.GetTranslation("module.defaultUrl.notSet");
-        if (!string.IsNullOrEmpty(n)) notSet = n;
-      }
-      // Prefixed either way so the line reads the same whether or not a URL
-      // is set, instead of switching between a value and a sentence.
-      _currentUrlDisplay.text = prefix + (hasUrl ? url.Get() : notSet);
-    }
-
     private void RefreshInputField()
     {
       if (_urlInput == null) return;
@@ -189,7 +164,6 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
         if (spawned != null) spawned.SaveDefaultUrl(url);
       }
 
-      UpdateDisplay();
       RefreshInputField();
     }
 
@@ -207,7 +181,6 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
         if (spawned != null) spawned.ClearSavedUrl();
       }
 
-      UpdateDisplay();
       RefreshInputField();
     }
 
