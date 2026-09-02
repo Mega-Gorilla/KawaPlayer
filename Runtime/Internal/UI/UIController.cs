@@ -182,15 +182,15 @@ namespace Yamadev.YamaStream.UI
 
     public void CancelCurrentAction() => _actionCancelled = true;
 
-    // Whether this UI can put a dialog up at all, and whether one is
-    // already waiting on an answer. A caller that falls back to acting
-    // without asking has to tell those apart: doing so because a question
-    // is on screen would go ahead with something nobody agreed to.
     // The URL the open play-or-queue question is about, and the field it
     // came from. Settled when the question goes up; see PlayUrlField.
     private VRCUrl _pendingPlayUrl;
     private VRCUrlInputField _pendingPlayUrlField;
 
+    // Whether this UI can put a dialog up at all, and whether one is
+    // already waiting on an answer. A caller that falls back to acting
+    // without asking has to tell those apart: doing so because a question
+    // is on screen would go ahead with something nobody agreed to.
     public bool HasModalDialog => Utilities.IsValid(_modalDialog);
     public bool IsModalBusy => Utilities.IsValid(_modalDialog) && _modalDialog.IsAwaitingAnswer;
 
@@ -198,6 +198,24 @@ namespace Yamadev.YamaStream.UI
     {
       if (!Utilities.IsValid(_modalDialog)) return;
       _modalDialog.Show(title, message, string.IsNullOrEmpty(closeText) ? GetTranslation("button.close") : closeText, "", this, null, null);
+    }
+
+    // Asks before switching away from something that is playing. All three
+    // toggles ask the same thing and differ only in what continuing runs.
+    // Refused while another question is up: the toggle has already moved to
+    // the player that will not be selected after all, so put it back -- the
+    // same thing cancelling does.
+    private void ConfirmChangePlayer(string executeEventName)
+    {
+      if (!_modalDialog.TryShow(
+        GetTranslation("msg.confirmChangePlayer"),
+        GetTranslation("msg.confirmChangePlayerDetail"),
+        GetTranslation("button.cancel"),
+        GetTranslation("button.continue"),
+        this,
+        nameof(UpdatePlayerSelector), // close event
+        executeEventName))
+        UpdatePlayerSelector();
     }
 
     public void SetUnityPlayer()
@@ -208,18 +226,7 @@ namespace Yamadev.YamaStream.UI
         SetUnityPlayerInternal();
         return;
       }
-      // Refused while another question is up. The toggle already moved to
-      // the player that will not be selected after all, so put it back --
-      // the same thing cancelling does.
-      if (!_modalDialog.TryShow(
-        GetTranslation("msg.confirmChangePlayer"),
-        GetTranslation("msg.confirmChangePlayerDetail"),
-        GetTranslation("button.cancel"),
-        GetTranslation("button.continue"),
-        this,
-        nameof(UpdatePlayerSelector), // close event
-        nameof(SetUnityPlayerInternal)))
-        UpdatePlayerSelector();
+      ConfirmChangePlayer(nameof(SetUnityPlayerInternal));
     }
 
     public void SetUnityPlayerInternal()
@@ -241,15 +248,7 @@ namespace Yamadev.YamaStream.UI
         SetAVProPlayerInternal();
         return;
       }
-      if (!_modalDialog.TryShow(
-        GetTranslation("msg.confirmChangePlayer"),
-        GetTranslation("msg.confirmChangePlayerDetail"),
-        GetTranslation("button.cancel"),
-        GetTranslation("button.continue"),
-        this,
-        nameof(UpdatePlayerSelector), // close event
-        nameof(SetAVProPlayerInternal)))
-        UpdatePlayerSelector();
+      ConfirmChangePlayer(nameof(SetAVProPlayerInternal));
     }
 
     public void SetAVProPlayerInternal()
@@ -271,15 +270,7 @@ namespace Yamadev.YamaStream.UI
         SetImageViewerInternal();
         return;
       }
-      if (!_modalDialog.TryShow(
-        GetTranslation("msg.confirmChangePlayer"),
-        GetTranslation("msg.confirmChangePlayerDetail"),
-        GetTranslation("button.cancel"),
-        GetTranslation("button.continue"),
-        this,
-        nameof(UpdatePlayerSelector), // close event
-        nameof(SetImageViewerInternal)))
-        UpdatePlayerSelector();
+      ConfirmChangePlayer(nameof(SetImageViewerInternal));
     }
 
     public void SetImageViewerInternal()
@@ -411,25 +402,13 @@ namespace Yamadev.YamaStream.UI
       return _controller.Handler.Type;
     }
 
-    // The question carries which field it came from, so one handler answers
-    // for both. The Top names are no longer used from here; they stay
-    // because they are public and something outside may still send them.
-    public void AddUrlToQueueEvent() => AddPendingUrlToQueue();
+    // The question carries which field it came from and which button was
+    // pressed, so all four of these names answer through one handler. The
+    // Top ones are no longer used from here; they stay because they are
+    // public and something outside may still send them.
+    public void AddUrlToQueueEvent() => AnswerPendingUrl(false);
 
-    public void AddUrlTopToQueueEvent() => AddPendingUrlToQueue();
-
-    private void AddPendingUrlToQueue()
-    {
-      var url = _pendingPlayUrl;
-      var field = _pendingPlayUrlField;
-      _pendingPlayUrl = null;
-      _pendingPlayUrlField = null;
-      HideVideoPlayerSelector();
-      if (!Utilities.IsValid(url)) return;
-
-      AddUrlToQueueEventInternal(GetVideoPlayerSelectorValue(), url);
-      ClearFieldIfStillHolding(field, url);
-    }
+    public void AddUrlTopToQueueEvent() => AnswerPendingUrl(false);
 
     public void AddUrlToQueueEventInternal(VideoPlayerType playerType, VRCUrl url)
     {
@@ -443,11 +422,14 @@ namespace Yamadev.YamaStream.UI
       _controller.Queue.AddTrack(TrackUtils.NewTrack(playerType, "", url));
     }
 
-    public void PlayUrlEvent() => PlayPendingUrl();
+    public void PlayUrlEvent() => AnswerPendingUrl(true);
 
-    public void PlayUrlTopEvent() => PlayPendingUrl();
+    public void PlayUrlTopEvent() => AnswerPendingUrl(true);
 
-    private void PlayPendingUrl()
+    // Answers with what the question was asked about, not with whatever the
+    // field holds by the time it is answered. Let go of first, so the next
+    // question starts from nothing whichever button was pressed.
+    private void AnswerPendingUrl(bool playNow)
     {
       var url = _pendingPlayUrl;
       var field = _pendingPlayUrlField;
@@ -456,7 +438,10 @@ namespace Yamadev.YamaStream.UI
       HideVideoPlayerSelector();
       if (!Utilities.IsValid(url)) return;
 
-      PlayUrlInternal(GetVideoPlayerSelectorValue(), url);
+      var playerType = GetVideoPlayerSelectorValue();
+      if (playNow) PlayUrlInternal(playerType, url);
+      else AddUrlToQueueEventInternal(playerType, url);
+
       ClearFieldIfStillHolding(field, url);
     }
 
