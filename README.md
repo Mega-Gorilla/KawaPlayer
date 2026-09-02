@@ -62,6 +62,8 @@ KawaPlayer は YamaPlayer の全機能を継承しつつ、**ワールド作成�
 
 ワールドの **「入室時に自動再生される動画 / プレイリスト URL」** を、Instance Owner が VRChat 内から設定できる機能です。
 
+> **⚠ Public インスタンスでは利用できません。**Public インスタンスには Instance Owner が存在しないため、誰も設定できず、保存した URL も復元されません。**Friends / Friends+ / Invite / Invite+ など、自分で作成したインスタンス**でお使いください。
+
 **使い方 (Owner として):**
 1. ワールドに Instance Owner として入室
 2. KawaPlayer UI を開く → **Settings → Playback** タブ
@@ -71,7 +73,7 @@ KawaPlayer は YamaPlayer の全機能を継承しつつ、**ワールド作成�
 
 **機能特性:**
 - **動画 URL / プレイリスト URL の自動判定** — `playlist.vrc-hub.com` を含めばプレイリスト経路、それ以外は動画再生経路
-- **Owner 限定編集** — 他 player には現在の URL のみ表示 (read-only)
+- **Owner 限定編集** — Instance Owner 以外には、設定欄も現在の URL も表示されず、**利用できない旨の案内のみ**が出ます
 - **マルチプレイヤー同期** — Owner の設定は instance 内全 player に同期、後続 joiner も自動再生される
 - **永続化** — Owner の VRChat アカウントに紐づき、次回入室時に自動復元
 
