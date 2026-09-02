@@ -101,6 +101,6 @@
   "error.invalidUrl": "Invalid URL...\nご入力されたURLは有効なURLではありません。",
   "error.playerError": "Player Error...\n動画プレイヤーのエラーが発生しました。",
   "error.rateLimited": "Rate Limited...\nレート制限に達しています、5秒に一回だけ動画再生が可能です。",
-  "error.youtubeHint": "YouTube 動画を再生できませんでした。時間をおいて再試行してください。",
-  "error.youtubeHintInvalidUrl": "動画が存在しないか、YouTube 側の問題で再生できない場合があります。"
+  "error.youtubeHint": "YouTube動画を再生できませんでした。時間をおいて再試行してください。",
+  "error.youtubeHintInvalidUrl": "動画が存在しないか、YouTube側の問題で再生できない場合があります。"
 }
