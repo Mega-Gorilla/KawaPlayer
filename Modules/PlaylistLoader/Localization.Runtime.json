@@ -5,14 +5,14 @@
     "module.playlistLoader.loadedMessage": "『{0}』の {1} 曲を読み込みました。",
     "module.playlistLoader.loadedPartialMessage": "{0} 曲を追加しました ({1} 曲はスキップ)。",
     "module.playlistLoader.errorTitle": "プレイリストを読み込めませんでした",
-    "module.playlistLoader.errorNotFound": "プレイリストが見つかりません。削除されたか、URLが誤っている可能性があります。",
-    "module.playlistLoader.errorDownload": "プレイリストを取得できませんでした。URLを確認するか、時間をおいて再試行してください。",
+    "module.playlistLoader.errorNotFound": "プレイリストが見つかりません。\n削除されたか、URLが誤っている可能性があります。",
+    "module.playlistLoader.errorDownload": "プレイリストを取得できませんでした。\nURLを確認するか、時間をおいて再試行してください。",
     "module.playlistLoader.errorInvalidResponse": "サーバーの応答を解釈できませんでした。",
     "module.playlistLoader.errorEmpty": "追加できるトラックがありません。",
     "module.playlistLoader.errorPoolMismatch": "このワールドのプレイヤーでは使用できないプレイリストです。",
     "module.playlistLoader.errorSharePageUrl": "プレイリストの共有用URLを入力してください。",
     "module.playlistLoader.errorBusy": "別のプレイリストを読み込み中です。しばらくお待ちください。",
-    "module.playlistLoader.errorServer": "サーバーがエラーを返しました。URLを確認するか、時間をおいて再試行してください。",
+    "module.playlistLoader.errorServer": "サーバーがエラーを返しました。\nURLを確認するか、時間をおいて再試行してください。",
     "module.playlistLoader.errorInternal": "プレイヤー内部エラーで読み込み先を確保できませんでした。"
   },
   "en": {
