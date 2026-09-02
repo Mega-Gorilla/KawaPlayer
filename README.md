@@ -62,7 +62,9 @@ KawaPlayer は YamaPlayer の全機能を継承しつつ、**ワールド作成�
 
 ワールドの **「入室時に自動再生される動画 / プレイリスト URL」** を、Instance Owner が VRChat 内から設定できる機能です。
 
-> **⚠ Public インスタンスでは利用できません。**Public インスタンスには Instance Owner が存在しないため、誰も設定できず、保存した URL も復元されません。**Friends / Friends+ / Invite / Invite+ など、自分で作成したインスタンス**でお使いください。
+> **⚠ 利用できるインスタンス種別が限られます。**`isInstanceOwner` は **Invite / Invite+ / Friends / Friends+ で、そのインスタンスを作成した本人にのみ true** を返します。**Public / Group インスタンスと SDK の Build & Test では常に false** です ([VRChat 公式ドキュメント](https://creators.vrchat.com/worlds/udon/networking/network-components/))。
+>
+> したがって **Public / Group では誰も設定できず、保存した URL も復元されません。****自分で作成した Invite / Invite+ / Friends / Friends+ インスタンス**でお使いください。**Build & Test でも Owner 側の動作は確認できません。**
 
 **使い方 (Owner として):**
 1. ワールドに Instance Owner として入室
