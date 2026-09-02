@@ -12,13 +12,56 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
   {
     [SerializeField] private DefaultUrlController _controller;
     [SerializeField] private OwnerDefaultUrlStorage _storageTemplate;
-    [SerializeField] private VRCUrlInputField _urlInput;
+    // Dressed as a button -- icon, label, no visible box -- and clicked like
+    // one. Clicking a VRCUrlInputField is what opens VRChat's text entry, so
+    // making the field itself the button gets there in one press without
+    // asking Udon to focus anything. ActivateInputField() was tried and did
+    // not open the entry screen in world.
+    //
+    // It draws no text of its own: the label has to read as a button, and a
+    // URL appearing in its place turns the button back into a box that only
+    // looks pressable while it happens to be empty. The saved URL is read
+    // from the line above instead. This is how the other two URL fields in
+    // this UI are set up as well. The field is still kept holding the saved
+    // URL so VRChat's entry screen opens on it rather than on nothing.
+    //
+    // Colour transition is off, because ColorTint writes normalColor over the
+    // transparent background every time the field is enabled, and any Outline
+    // has to go too: useGraphicAlpha ignores how transparent the graphic
+    // under it is.
+    //
+    // Submitting is saving. A separate save button would look like a chance
+    // to check the URL before committing it, and there is none: text entry
+    // closes onto the saved value either way.
+    [SerializeField, RegisterEvent(nameof(VRCUrlInputField.onEndEdit), nameof(OnUrlSubmitted))]
+    private VRCUrlInputField _urlInput;
+    // The only place the saved URL can be read. The field it was typed into
+    // does not show it back; see _urlInput.
     [SerializeField] private Text _currentUrlDisplay;
+    // Everything the owner acts on lives here and is hidden from anyone who
+    // cannot edit (issue #115). What made the old behaviour read as a bug was
+    // that the controls vanished with nothing saying why, not that they
+    // vanished, so the description is swapped for the reason rather than a
+    // line being added. Leaving them visible but disabled was tried and
+    // rejected: at VR viewing distance a dimmed field still invites a click,
+    // and a click that does nothing reads as broken just as the empty space
+    // did.
     [SerializeField] private GameObject _ownerOnlySection;
 
     [SerializeField] private Text _titleText;
     [SerializeField] private Text _descriptionText;
-    [SerializeField] private Text _saveButtonLabel;
+    [SerializeField] private Text _enterUrlButtonLabel;
+    // VRCUrlInputField reports the width of the text it holds as a layout
+    // size, the way InputField does, and at the same priority a LayoutElement
+    // uses -- so the wider of the two wins. A saved URL is several times the
+    // label, which is how the button came to be sized for a string it never
+    // draws. The prefab gives the LayoutElement the higher priority; the
+    // width it carries is set from the label below, so the button fits
+    // whichever translation is on screen instead of the longest of the nine.
+    [SerializeField] private LayoutElement _enterUrlButtonLayout;
+    // Everything the button is wide apart from the label: padding either
+    // side, the icon, and the gap after it.
+    [SerializeField] private float _enterUrlButtonChrome = 66f;
     [SerializeField] private Text _clearButtonLabel;
 
     private UIController _uiController;
@@ -29,10 +72,19 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
       _uiController = GetComponentInParent<UIController>();
       if (_uiController != null) _uiController.AddListener(this);
       UpdateTranslation();
-      UpdateOwnerVisibility();
+      UpdateEditability();
       UpdateDisplay();
       RefreshInputField();
       SchedulePoll();
+    }
+
+    // Everything that gates on permission asks the controller, so the button
+    // state and the write guards cannot disagree. A missing controller means
+    // no editing rather than an unguarded write.
+    private bool CanEdit()
+    {
+      if (_controller == null) return false;
+      return _controller.CanEditDefaultUrl();
     }
 
     public void AfterLanguageChanged() => UpdateTranslation();
@@ -49,30 +101,28 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
         if (!string.IsNullOrEmpty(t))
           _titleText.text = $"{t}<size=44>(Global)</size>";
       }
-      if (_descriptionText != null)
+      if (_enterUrlButtonLabel != null)
       {
-        string t = _uiController.GetTranslation("module.defaultUrl.description");
+        // Reuses the core label rather than adding a ninth translation of the
+        // same two words.
+        string t = _uiController.GetTranslation("label.inputUrl");
         if (!string.IsNullOrEmpty(t))
-          _descriptionText.text = t;
+          _enterUrlButtonLabel.text = t;
       }
-      if (_saveButtonLabel != null)
-      {
-        string t = _uiController.GetTranslation("module.defaultUrl.save");
-        if (!string.IsNullOrEmpty(t))
-          _saveButtonLabel.text = t;
-      }
+      ResizeEnterUrlButton();
       if (_clearButtonLabel != null)
       {
         string t = _uiController.GetTranslation("module.defaultUrl.clear");
         if (!string.IsNullOrEmpty(t))
           _clearButtonLabel.text = t;
       }
+      UpdateEditability();
       UpdateDisplay();
     }
 
     public void SchedulePoll()
     {
-      UpdateOwnerVisibility();
+      UpdateEditability();
       UpdateDisplay();
       RefreshInputField();
       SendCustomEventDelayedSeconds(nameof(SchedulePoll), 1.0f);
@@ -82,31 +132,66 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
     {
       if (player == Networking.LocalPlayer)
       {
-        UpdateOwnerVisibility();
+        UpdateEditability();
         UpdateDisplay();
         RefreshInputField();
       }
     }
 
-    private void UpdateOwnerVisibility()
+    private void UpdateEditability()
     {
-      if (_ownerOnlySection == null) return;
-      if (!Utilities.IsValid(Networking.LocalPlayer))
+      bool canEdit = CanEdit();
+
+      if (_ownerOnlySection != null)
+        _ownerOnlySection.SetActive(canEdit);
+
+      // One block, not three. Someone who cannot use the feature has no use
+      // for its description or its current value, and repeating the rule in
+      // both the description and a separate notice states it twice.
+      //
+      // The headline is composed here rather than baked into the translation
+      // so the markup stays out of the language files, matching how the title
+      // appends its "(Global)" suffix above.
+      if (_descriptionText != null && _uiController != null)
       {
-        _ownerOnlySection.SetActive(false);
-        return;
+        if (canEdit)
+        {
+          string t = _uiController.GetTranslation("module.defaultUrl.description");
+          if (!string.IsNullOrEmpty(t))
+            _descriptionText.text = t;
+        }
+        else
+        {
+          string headline = _uiController.GetTranslation("module.defaultUrl.unavailable");
+          string reason = _uiController.GetTranslation("module.defaultUrl.noPermission");
+          if (!string.IsNullOrEmpty(headline))
+            _descriptionText.text = string.IsNullOrEmpty(reason)
+                ? $"<size=48><b>✕ {headline}</b></size>"
+                : $"<size=48><b>✕ {headline}</b></size>\n{reason}";
+        }
       }
-      _ownerOnlySection.SetActive(Networking.LocalPlayer.isInstanceOwner);
+    }
+
+    // The clear button needs no equivalent: nothing on it claims a layout
+    // size, so its own layout group already sizes it from its contents.
+    private void ResizeEnterUrlButton()
+    {
+      if (_enterUrlButtonLayout == null) return;
+      if (_enterUrlButtonLabel == null) return;
+
+      float width = _enterUrlButtonChrome + _enterUrlButtonLabel.preferredWidth;
+      _enterUrlButtonLayout.minWidth = width;
+      _enterUrlButtonLayout.preferredWidth = width;
     }
 
     private void UpdateDisplay()
     {
-      if (_currentUrlDisplay == null) return;
       if (_controller == null) return;
+      if (_currentUrlDisplay == null) return;
       var url = _controller.DefaultUrl;
       bool hasUrl = Utilities.IsValid(url) && !string.IsNullOrEmpty(url.Get());
-      string prefix = "現在: ";
-      string notSet = "(デフォルト URL は未設定です)";
+      string prefix = "設定値: ";
+      string notSet = "(未設定)";
       if (_uiController != null)
       {
         string p = _uiController.GetTranslation("module.defaultUrl.currentPrefix");
@@ -114,15 +199,16 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
         string n = _uiController.GetTranslation("module.defaultUrl.notSet");
         if (!string.IsNullOrEmpty(n)) notSet = n;
       }
-      _currentUrlDisplay.text = hasUrl ? prefix + url.Get() : notSet;
+      // Prefixed either way so the line reads the same whether or not a URL
+      // is set, instead of switching between a value and a sentence.
+      _currentUrlDisplay.text = prefix + (hasUrl ? url.Get() : notSet);
     }
 
     private void RefreshInputField()
     {
       if (_urlInput == null) return;
       if (_controller == null) return;
-      if (!Utilities.IsValid(Networking.LocalPlayer)) return;
-      if (!Networking.LocalPlayer.isInstanceOwner) return;
+      if (!CanEdit()) return;
 
       var url = _controller.DefaultUrl;
       bool hasUrl = Utilities.IsValid(url) && !string.IsNullOrEmpty(url.Get());
@@ -135,14 +221,30 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
       }
     }
 
-    public void OnSavePressed()
+    // Fired when VRChat's text entry closes, however it closed: confirmed,
+    // cancelled, or confirmed empty.
+    public void OnUrlSubmitted()
     {
-      if (!Utilities.IsValid(Networking.LocalPlayer)) return;
-      if (!Networking.LocalPlayer.isInstanceOwner) return;
+      if (!CanEdit()) return;
       if (_urlInput == null) return;
 
+      // A cancelled entry raises this too, with the old text already put
+      // back. Saving here would rewrite and re-sync a value nobody changed.
+      if (_urlInput.wasCanceled)
+      {
+        ResyncInputField();
+        return;
+      }
+
       var url = _urlInput.GetUrl();
-      if (!Utilities.IsValid(url) || string.IsNullOrEmpty(url.Get())) return;
+      if (!Utilities.IsValid(url) || string.IsNullOrEmpty(url.Get()))
+      {
+        // Emptying the box is not how the setting is cleared -- the clear
+        // button is -- so keep what is saved rather than reading the empty
+        // box as an instruction.
+        ResyncInputField();
+        return;
+      }
 
       if (_controller != null)
         _controller.SetDefaultUrl(url);
@@ -158,10 +260,19 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
       RefreshInputField();
     }
 
+    // Puts the saved URL back into the field after an entry that did not save.
+    // RefreshInputField only writes when the saved value differs from what it
+    // last wrote, so the memo has to be cleared or a field left holding
+    // something else would keep it until the saved value happened to change.
+    private void ResyncInputField()
+    {
+      _lastSyncedUrl = null;
+      RefreshInputField();
+    }
+
     public void OnClearPressed()
     {
-      if (!Utilities.IsValid(Networking.LocalPlayer)) return;
-      if (!Networking.LocalPlayer.isInstanceOwner) return;
+      if (!CanEdit()) return;
 
       if (_controller != null)
         _controller.SetDefaultUrl(VRCUrl.Empty);

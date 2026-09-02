@@ -14,10 +14,23 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
 
     public VRCUrl DefaultUrl => _defaultUrl;
 
+    // The single definition of who may change the default URL. The settings
+    // UI and OwnerDefaultUrlStorage both ask here, so the button state, the
+    // write guard and the persistence guard cannot drift apart.
+    //
+    // Instance Owner only, deliberately. The saved URL lives in each player's
+    // own VRCPlayerObject and is restored only for the instance owner, so
+    // letting anyone else persist one would make the world's default depend
+    // on who happens to be in the instance.
+    public bool CanEditDefaultUrl()
+    {
+      if (!Utilities.IsValid(Networking.LocalPlayer)) return false;
+      return Networking.LocalPlayer.isInstanceOwner;
+    }
+
     public void SetDefaultUrl(VRCUrl url)
     {
-      if (!Utilities.IsValid(Networking.LocalPlayer)) return;
-      if (!Networking.LocalPlayer.isInstanceOwner) return;
+      if (!CanEditDefaultUrl()) return;
       if (!Networking.IsOwner(gameObject))
         Networking.SetOwner(Networking.LocalPlayer, gameObject);
       _defaultUrl = url;

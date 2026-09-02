@@ -16,16 +16,28 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
 
     public VRCUrl OwnerSavedUrl => _ownerSavedUrl;
 
+    // Two conditions, not one. This is a VRCPlayerObject, so every player owns
+    // their own copy and IsOwner is always true for the caller -- on its own it
+    // says "this is mine", not "I am allowed to set a default URL". Without the
+    // permission check a visitor could save a URL here and have it applied out
+    // of nowhere in the next instance they create.
+    private bool CanEdit()
+    {
+      if (!Networking.IsOwner(gameObject)) return false;
+      if (_controller == null) return false;
+      return _controller.CanEditDefaultUrl();
+    }
+
     public void SaveDefaultUrl(VRCUrl url)
     {
-      if (!Networking.IsOwner(gameObject)) return;
+      if (!CanEdit()) return;
       _ownerSavedUrl = url;
       RequestSerialization();
     }
 
     public void ClearSavedUrl()
     {
-      if (!Networking.IsOwner(gameObject)) return;
+      if (!CanEdit()) return;
       _ownerSavedUrl = VRCUrl.Empty;
       RequestSerialization();
     }
