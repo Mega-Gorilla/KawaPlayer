@@ -12,7 +12,12 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
   {
     [SerializeField] private DefaultUrlController _controller;
     [SerializeField] private OwnerDefaultUrlStorage _storageTemplate;
-    [SerializeField] private VRCUrlInputField _urlInput;
+    // Submitting is saving. A separate save button would look like a chance
+    // to check the URL before committing it, and there is none: the field
+    // draws no text (issue #121), so the value cannot be read back until it
+    // has been saved and shown in the line above.
+    [SerializeField, RegisterEvent(nameof(VRCUrlInputField.onEndEdit), nameof(OnUrlSubmitted))]
+    private VRCUrlInputField _urlInput;
     // The saved URL is shown here rather than in the input field. A
     // VRCUrlInputField in this UI is a place to type, not a place to read:
     // the two older ones on the main screen have their text alpha at zero and
@@ -27,15 +32,14 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
     // and a click that does nothing reads as broken just as the empty space
     // did.
     [SerializeField] private GameObject _ownerOnlySection;
-    // The input row, folded away until "enter URL" is pressed. An input field
-    // that is always on screen and always looks empty invites the reading
-    // that it is broken.
+    // Holds the input field. Switched on only while VRChat's text entry is
+    // open, because the field itself has nothing to show: it exists to
+    // receive what the player types, not to display it.
     [SerializeField] private GameObject _urlEntrySection;
 
     [SerializeField] private Text _titleText;
     [SerializeField] private Text _descriptionText;
     [SerializeField] private Text _enterUrlButtonLabel;
-    [SerializeField] private Text _saveButtonLabel;
     [SerializeField] private Text _clearButtonLabel;
 
     private UIController _uiController;
@@ -82,12 +86,6 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
         string t = _uiController.GetTranslation("label.inputUrl");
         if (!string.IsNullOrEmpty(t))
           _enterUrlButtonLabel.text = t;
-      }
-      if (_saveButtonLabel != null)
-      {
-        string t = _uiController.GetTranslation("module.defaultUrl.save");
-        if (!string.IsNullOrEmpty(t))
-          _saveButtonLabel.text = t;
       }
       if (_clearButtonLabel != null)
       {
@@ -178,11 +176,34 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
 
     // Folds the input row in and out. The row starts folded, so the panel
     // shows what is set and how to change it, not an empty box.
+    //
+    // Opening it also opens VRChat's own text entry, so one press gets the
+    // keyboard rather than one press to reveal a field and a second to click
+    // it. That matters more here than elsewhere because the field draws no
+    // text of its own (issue #121): VRChat's entry screen is where the URL is
+    // actually read back.
     public void OnEnterUrlPressed()
     {
       if (!CanEdit()) return;
       if (_urlEntrySection == null) return;
-      _urlEntrySection.SetActive(!_urlEntrySection.activeSelf);
+
+      bool opening = !_urlEntrySection.activeSelf;
+      _urlEntrySection.SetActive(opening);
+
+      // A Selectable registers itself in OnEnable, so it cannot be focused in
+      // the same frame it is switched on.
+      if (opening) SendCustomEventDelayedFrames(nameof(FocusUrlInput), 1);
+    }
+
+    public void FocusUrlInput()
+    {
+      if (!CanEdit()) return;
+      if (_urlInput == null) return;
+      // The row can have been folded away again in the frame we waited.
+      if (_urlEntrySection == null || !_urlEntrySection.activeSelf) return;
+
+      _urlInput.Select();
+      _urlInput.ActivateInputField();
     }
 
     private void RefreshInputField()
@@ -202,7 +223,8 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
       }
     }
 
-    public void OnSavePressed()
+    // Fired by the input field when VRChat's text entry is confirmed.
+    public void OnUrlSubmitted()
     {
       if (!CanEdit()) return;
       if (_urlInput == null) return;
