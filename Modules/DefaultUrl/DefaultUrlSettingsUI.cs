@@ -107,15 +107,30 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
       if (_ownerOnlySection != null)
         _ownerOnlySection.SetActive(canEdit);
 
-      // One line, not three. Someone who cannot use the feature has no use
+      // One block, not three. Someone who cannot use the feature has no use
       // for its description or its current value, and repeating the rule in
       // both the description and a separate notice states it twice.
+      //
+      // The headline is composed here rather than baked into the translation
+      // so the markup stays out of the language files, matching how the title
+      // appends its "(Global)" suffix above.
       if (_descriptionText != null && _uiController != null)
       {
-        string t = _uiController.GetTranslation(
-            canEdit ? "module.defaultUrl.description" : "module.defaultUrl.noPermission");
-        if (!string.IsNullOrEmpty(t))
-          _descriptionText.text = t;
+        if (canEdit)
+        {
+          string t = _uiController.GetTranslation("module.defaultUrl.description");
+          if (!string.IsNullOrEmpty(t))
+            _descriptionText.text = t;
+        }
+        else
+        {
+          string headline = _uiController.GetTranslation("module.defaultUrl.unavailable");
+          string reason = _uiController.GetTranslation("module.defaultUrl.noPermission");
+          if (!string.IsNullOrEmpty(headline))
+            _descriptionText.text = string.IsNullOrEmpty(reason)
+                ? $"<size=48><b>✕ {headline}</b></size>"
+                : $"<size=48><b>✕ {headline}</b></size>\n{reason}";
+        }
       }
     }
 
