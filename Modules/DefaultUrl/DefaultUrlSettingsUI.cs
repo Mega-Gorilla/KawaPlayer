@@ -14,11 +14,13 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
     [SerializeField] private OwnerDefaultUrlStorage _storageTemplate;
     [SerializeField] private VRCUrlInputField _urlInput;
     [SerializeField] private Text _currentUrlDisplay;
-    // The edit controls stay visible for everyone and are dimmed and disabled
-    // instead of hidden (issue #115): hiding them left no trace of why the
-    // input was gone, and it was reported as a missing field rather than read
-    // as a permission. One CanvasGroup covers the input and both buttons.
-    [SerializeField] private CanvasGroup _editControlsGroup;
+    // Hidden for anyone who cannot edit, with _noPermissionText taking their
+    // place (issue #115). What made the old behaviour read as a bug was that
+    // the controls vanished with nothing saying why, not that they vanished.
+    // Leaving them visible but disabled was tried and rejected: at VR viewing
+    // distance a dimmed field still invites a click, and a click that does
+    // nothing reads as broken just as the empty space did.
+    [SerializeField] private GameObject _editControlsSection;
     [SerializeField] private Text _noPermissionText;
 
     [SerializeField] private Text _titleText;
@@ -112,16 +114,11 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
     {
       bool canEdit = CanEdit();
 
-      if (_editControlsGroup != null)
-      {
-        _editControlsGroup.interactable = canEdit;
-        // Dimming is not decoration. CanvasGroup.interactable leaves the
-        // controls looking exactly as they do when they work, so without this
-        // they read as clickable but dead. blocksRaycasts stays true so the
-        // clicks stop here instead of falling through to the panel behind.
-        _editControlsGroup.alpha = canEdit ? 1f : 0.5f;
-      }
+      if (_editControlsSection != null)
+        _editControlsSection.SetActive(canEdit);
 
+      // The two are exclusive on purpose: the reason takes the row the
+      // controls would have used, so the panel never shows a gap.
       if (_noPermissionText != null)
         _noPermissionText.gameObject.SetActive(!canEdit);
     }

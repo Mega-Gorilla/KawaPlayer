@@ -5014,7 +5014,6 @@ GameObject:
   - component: {fileID: 6514209032670894719}
   - component: {fileID: 1049079109923855618}
   - component: {fileID: 225472665094298752}
-  - component: {fileID: 321315720873149661}
   m_Layer: 0
   m_Name: EditControls
   m_TagString: Untagged
@@ -5090,18 +5089,6 @@ MonoBehaviour:
   m_FlexibleWidth: 1
   m_FlexibleHeight: 0
   m_LayoutPriority: 1
---- !u!225 &321315720873149661
-CanvasGroup:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2768358823049365496}
-  m_Enabled: 1
-  m_Alpha: 1
-  m_Interactable: 1
-  m_BlocksRaycasts: 1
-  m_IgnoreParentGroups: 0
 --- !u!1 &2838371370100170033
 GameObject:
   m_ObjectHideFlags: 0
@@ -13078,7 +13065,7 @@ MonoBehaviour:
   _storageTemplate: {fileID: 0}
   _urlInput: {fileID: 2721875334348629764}
   _currentUrlDisplay: {fileID: 1354605419755083021}
-  _editControlsGroup: {fileID: 321315720873149661}
+  _editControlsSection: {fileID: 2768358823049365496}
   _noPermissionText: {fileID: 1551301131753650451}
   _titleText: {fileID: 3524977813665446290}
   _descriptionText: {fileID: 7467433195813207821}
