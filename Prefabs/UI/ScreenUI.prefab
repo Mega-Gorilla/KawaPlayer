@@ -603,9 +603,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_IgnoreLayout: 0
-  m_MinWidth: 137
+  m_MinWidth: -1
   m_MinHeight: 40
-  m_PreferredWidth: 137
+  m_PreferredWidth: -1
   m_PreferredHeight: 40
   m_FlexibleWidth: 0
   m_FlexibleHeight: 0
@@ -8697,7 +8697,7 @@ MonoBehaviour:
   m_PreferredHeight: 40
   m_FlexibleWidth: 0
   m_FlexibleHeight: 0
-  m_LayoutPriority: 1
+  m_LayoutPriority: 2
 --- !u!114 &4776759611552918229
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -10394,9 +10394,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_IgnoreLayout: 0
-  m_MinWidth: 71
+  m_MinWidth: -1
   m_MinHeight: 40
-  m_PreferredWidth: 71
+  m_PreferredWidth: -1
   m_PreferredHeight: 40
   m_FlexibleWidth: 0
   m_FlexibleHeight: 0
@@ -12984,6 +12984,8 @@ MonoBehaviour:
   _titleText: {fileID: 3524977813665446290}
   _descriptionText: {fileID: 7467433195813207821}
   _enterUrlButtonLabel: {fileID: 3891650565627128838}
+  _enterUrlButtonLayout: {fileID: 6984247999583428187}
+  _enterUrlButtonChrome: 66
   _clearButtonLabel: {fileID: 2873338480460215035}
 --- !u!114 &546974722492781435
 MonoBehaviour:
@@ -15168,9 +15170,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_IgnoreLayout: 0
-  m_MinWidth: 101
+  m_MinWidth: -1
   m_MinHeight: 40
-  m_PreferredWidth: 101
+  m_PreferredWidth: -1
   m_PreferredHeight: 40
   m_FlexibleWidth: 0
   m_FlexibleHeight: 0

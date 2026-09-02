@@ -51,6 +51,17 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
     [SerializeField] private Text _titleText;
     [SerializeField] private Text _descriptionText;
     [SerializeField] private Text _enterUrlButtonLabel;
+    // VRCUrlInputField reports the width of the text it holds as a layout
+    // size, the way InputField does, and at the same priority a LayoutElement
+    // uses -- so the wider of the two wins. A saved URL is several times the
+    // label, which is how the button came to be sized for a string it never
+    // draws. The prefab gives the LayoutElement the higher priority; the
+    // width it carries is set from the label below, so the button fits
+    // whichever translation is on screen instead of the longest of the nine.
+    [SerializeField] private LayoutElement _enterUrlButtonLayout;
+    // Everything the button is wide apart from the label: padding either
+    // side, the icon, and the gap after it.
+    [SerializeField] private float _enterUrlButtonChrome = 66f;
     [SerializeField] private Text _clearButtonLabel;
 
     private UIController _uiController;
@@ -98,6 +109,7 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
         if (!string.IsNullOrEmpty(t))
           _enterUrlButtonLabel.text = t;
       }
+      ResizeEnterUrlButton();
       if (_clearButtonLabel != null)
       {
         string t = _uiController.GetTranslation("module.defaultUrl.clear");
@@ -158,6 +170,18 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
                 : $"<size=48><b>✕ {headline}</b></size>\n{reason}";
         }
       }
+    }
+
+    // The clear button needs no equivalent: nothing on it claims a layout
+    // size, so its own layout group already sizes it from its contents.
+    private void ResizeEnterUrlButton()
+    {
+      if (_enterUrlButtonLayout == null) return;
+      if (_enterUrlButtonLabel == null) return;
+
+      float width = _enterUrlButtonChrome + _enterUrlButtonLabel.preferredWidth;
+      _enterUrlButtonLayout.minWidth = width;
+      _enterUrlButtonLayout.preferredWidth = width;
     }
 
     private void UpdateDisplay()
