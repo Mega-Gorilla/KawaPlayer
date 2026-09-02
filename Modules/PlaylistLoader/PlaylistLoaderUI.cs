@@ -34,10 +34,20 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
     // The UI that initiated the load currently in flight; OnLoadResult
     // reports back to it.
     private UIController _resultUi;
-    // Held while the player is being asked whether to replace the oldest
-    // playlist. Cleared by whichever answer arrives; a second question
-    // simply overwrites it, so a cancelled dialog leaves nothing behind.
+    // What is being asked about, held from the question to the answer.
+    //
+    // One question at a time. Every panel with a URL field is wired to this
+    // same behaviour (PlaylistLoaderBuildProcess hands them all the same
+    // one), so a second question would overwrite the first and let one
+    // panel's confirm load the other panel's URL.
+    //
+    // The slot and the URL that identified it travel with the request, so
+    // the load can refuse to overwrite anything else -- see
+    // PlaylistLoader.LoadPlaylistFromUrlWithFeedback.
     private VRCUrl _pendingLoadUrl;
+    private DynamicPlaylist _pendingReplaced;
+    private string _pendingReplacedSourceUrl = string.Empty;
+    private bool _awaitingConfirm;
 
     public void OnUrlSubmitted()
     {
@@ -75,56 +85,93 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
         return;
       }
 
-      _resultUi = ui;
-
-      // Every slot full means this load costs the player a playlist they
-      // already had. Show which one before it goes (issue #125) rather than
-      // reporting an addition and letting them find out later.
-      string replaced = _loader.GetPlaylistToBeReplaced(interceptUrl);
-      if (!string.IsNullOrEmpty(replaced))
-      {
-        _pendingLoadUrl = interceptUrl;
-        if (AskBeforeReplacing(ui, replaced)) return;
-        // No modal on this UI, so there is no way to ask. Loading anyway is
-        // what happens today, and refusing instead would strand a player
-        // whose panel has no way to delete anything either.
-        _pendingLoadUrl = null;
-      }
-
-      _loader.LoadPlaylistFromUrlWithFeedback(interceptUrl, this);
-    }
-
-    private bool AskBeforeReplacing(UIController ui, string replaced)
-    {
-      if (!Utilities.IsValid(ui)) return false;
-
-      string name = string.IsNullOrEmpty(replaced) ? "Playlist" : replaced;
-      return ui.ShowConfirm(
-          ui.GetTranslation("module.playlistLoader.confirmReplaceTitle"),
-          ui.GetTranslation("module.playlistLoader.confirmReplaceMessage")
-              .Replace("{0}", _loader.UsableSlotCount.ToString()).Replace("{1}", name),
-          ui.GetTranslation("button.continue"),
-          this,
-          nameof(ConfirmReplaceOldest));
-    }
-
-    // Answered yes. The dialog was up for as long as the player took to read
-    // it, so nothing about the state that produced the question can be
-    // assumed to still hold.
-    public void ConfirmReplaceOldest()
-    {
-      var url = _pendingLoadUrl;
-      _pendingLoadUrl = null;
-      if (!Utilities.IsValid(_loader) || !Utilities.IsValid(url)) return;
-
-      var ui = Utilities.IsValid(_resultUi) ? _resultUi : _uiController;
-      if (_loader.IsLoading)
+      // Someone is already being asked something. Answering that question
+      // has to come first, or their answer would apply to this URL instead.
+      if (_awaitingConfirm)
       {
         ShowError(ui, "errorBusy");
         return;
       }
 
-      _loader.LoadPlaylistFromUrlWithFeedback(url, this);
+      _resultUi = ui;
+
+      // Every slot full means this load costs the player a playlist they
+      // already had. Show which one before it goes (issue #125) rather than
+      // reporting an addition and letting them find out later.
+      var replaced = _loader.GetSlotToBeReplaced(interceptUrl);
+      if (Utilities.IsValid(replaced) && AskBeforeReplacing(ui, interceptUrl, replaced)) return;
+
+      // Either nothing is lost, or there is no modal to ask with. Loading
+      // anyway is what happens today, and refusing instead would strand a
+      // player whose panel has no way to delete anything either.
+      _loader.LoadPlaylistFromUrlWithFeedback(interceptUrl, this, null, string.Empty);
+    }
+
+    private bool AskBeforeReplacing(UIController ui, VRCUrl url, DynamicPlaylist replaced)
+    {
+      if (!Utilities.IsValid(ui)) return false;
+
+      _pendingLoadUrl = url;
+      _pendingReplaced = replaced;
+      // Reading SourceUrl is only safe on a slot that holds something.
+      _pendingReplacedSourceUrl = replaced.CanRefresh ? replaced.SourceUrl.Get() : string.Empty;
+      _awaitingConfirm = true;
+
+      // A playlist the server gave no name for still has to be named in the
+      // question. The same word stands in for it as in OnLoadResult.
+      string name = string.IsNullOrEmpty(replaced.PlaylistName) ? "Playlist" : replaced.PlaylistName;
+      if (ui.ShowConfirm(
+              ui.GetTranslation("module.playlistLoader.confirmReplaceTitle"),
+              ui.GetTranslation("module.playlistLoader.confirmReplaceMessage")
+                  .Replace("{0}", _loader.UsableSlotCount.ToString()).Replace("{1}", name),
+              ui.GetTranslation("button.continue"),
+              this,
+              nameof(ConfirmReplaceOldest),
+              nameof(CancelReplaceOldest)))
+        return true;
+
+      ClearPendingConfirm();
+      return false;
+    }
+
+    // Answered yes. The dialog was up for as long as the player took to read
+    // it, so nothing that produced the question can be assumed to still
+    // hold. What they agreed to lose travels with the load, which refuses to
+    // overwrite anything else.
+    public void ConfirmReplaceOldest()
+    {
+      var url = _pendingLoadUrl;
+      var replaced = _pendingReplaced;
+      string replacedSourceUrl = _pendingReplacedSourceUrl;
+      ClearPendingConfirm();
+      if (!Utilities.IsValid(_loader) || !Utilities.IsValid(url)) return;
+
+      if (_loader.IsLoading)
+      {
+        // Modal.ExecuteAndClose hides the dialog after this returns, taking
+        // anything shown from here with it. Say it once the dialog is gone.
+        SendCustomEventDelayedFrames(nameof(ReportBusyAfterConfirm), 1);
+        return;
+      }
+
+      _loader.LoadPlaylistFromUrlWithFeedback(url, this, replaced, replacedSourceUrl);
+    }
+
+    // Answered no. Nothing happens, but the question has to be let go of or
+    // no one could ask another.
+    public void CancelReplaceOldest() => ClearPendingConfirm();
+
+    public void ReportBusyAfterConfirm()
+    {
+      ShowError(Utilities.IsValid(_resultUi) ? _resultUi : _uiController, "errorBusy");
+    }
+
+    private void ClearPendingConfirm()
+    {
+      _pendingLoadUrl = null;
+      _pendingReplaced = null;
+      _pendingReplacedSourceUrl = string.Empty;
+      _awaitingConfirm = false;
     }
 
     // Refetches a slot from the URL that filled it (issue #91). Deliberately
@@ -151,7 +198,9 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
       // _resultUi is not cleared after a load, so leaving it alone here
       // would report this refresh on whichever panel last submitted a URL.
       _resultUi = ui;
-      _loader.LoadPlaylistFromUrlWithFeedback(refreshUrl, this);
+      // A refresh takes back the slot it already owns, so it never costs
+      // anyone a playlist and makes no promise to check.
+      _loader.LoadPlaylistFromUrlWithFeedback(refreshUrl, this, null, string.Empty);
     }
 
     // Called by PlaylistLoader exactly once per feedback load, on every
@@ -220,6 +269,11 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
       if (resultCode == PlaylistLoader.LoadResultQueueUnavailable)
       {
         ShowError(ui, "errorInternal");
+        return;
+      }
+      if (resultCode == PlaylistLoader.LoadResultReplacementChanged)
+      {
+        ShowError(ui, "errorReplacementChanged");
         return;
       }
       ShowError(ui, "errorInvalidResponse");

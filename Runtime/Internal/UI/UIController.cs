@@ -224,17 +224,17 @@ namespace Yamadev.YamaStream.UI
     // answer that will never arrive would simply stop working. Callers act
     // on false themselves rather than being left hanging.
     //
-    // Cancel closes and does nothing. A module that needs to know it was
-    // cancelled should not use this.
+    // Both answers are reported, because a module holding state while it
+    // waits has to be told to let go of it either way.
     public bool ShowConfirm(string title, string message, string confirmText,
-        UdonSharpBehaviour target, string confirmEventName)
+        UdonSharpBehaviour target, string confirmEventName, string cancelEventName)
     {
       if (!Utilities.IsValid(_modalDialog)) return false;
       if (!Utilities.IsValid(target)) return false;
       if (string.IsNullOrEmpty(confirmEventName)) return false;
 
       _modalDialog.Show(title, message, GetTranslation("button.cancel"), confirmText,
-          target, "", confirmEventName);
+          target, cancelEventName, confirmEventName);
       return true;
     }
 

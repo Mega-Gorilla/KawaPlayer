@@ -29,6 +29,9 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
     // No dynamic playlist slot to load into (issue #88). The numeric value
     // is kept so PlaylistLoaderUI's existing mapping still applies.
     public const int LoadResultQueueUnavailable = 7;
+    // The playlist the player agreed to lose is no longer the one that would
+    // go (issue #125). Nothing is written; they are asked to try again.
+    public const int LoadResultReplacementChanged = 8;
 
     [SerializeField] private VRCUrl[] _redirectPool = new VRCUrl[0];
     [SerializeField] private string _poolId = "default";
@@ -60,6 +63,10 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
     // load on every terminal path, then cleared. Null for DefaultUrl / auto
     // load, which keep the log-only behavior.
     private PlaylistLoaderUI _feedbackUi;
+    // What the player agreed to lose, held from the confirmation until the
+    // slot is written. See LoadPlaylistFromUrlWithFeedback.
+    private DynamicPlaylist _expectedReplaced;
+    private string _expectedReplacedSourceUrl = string.Empty;
 
     public VRCUrl[] RedirectPool => _redirectPool;
     public string PoolId => _poolId;
@@ -125,7 +132,13 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
     // Same as LoadPlaylistFromUrl, but reports the outcome back to the UI
     // (issue #82). The busy case is checked by the caller; guarding here too
     // keeps a stray call from leaking feedback into an unrelated load.
-    public void LoadPlaylistFromUrlWithFeedback(VRCUrl resolveUrl, PlaylistLoaderUI feedbackUi)
+    // expectedReplaced names the playlist the player was shown and agreed to
+    // lose, with the source URL that identified it. Both are re-checked at
+    // the moment the slot is written, because the download sits in the
+    // middle and anyone on any client can refill a slot while it runs. Pass
+    // null when no such promise was made.
+    public void LoadPlaylistFromUrlWithFeedback(VRCUrl resolveUrl, PlaylistLoaderUI feedbackUi,
+        DynamicPlaylist expectedReplaced, string expectedReplacedSourceUrl)
     {
       if (_isLoading)
       {
@@ -133,6 +146,8 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
         return;
       }
       _feedbackUi = feedbackUi;
+      _expectedReplaced = expectedReplaced;
+      _expectedReplacedSourceUrl = expectedReplacedSourceUrl;
       LoadPlaylistFromUrl(resolveUrl);
     }
 
@@ -178,6 +193,8 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
     private void NotifyResult(int resultCode, string playlistName, int added, int skipped,
         int httpErrorCode, bool reusedExistingSlot)
     {
+      _expectedReplaced = null;
+      _expectedReplacedSourceUrl = string.Empty;
       if (_feedbackUi == null) return;
       var ui = _feedbackUi;
       _feedbackUi = null;
@@ -363,6 +380,22 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
         return;
       }
 
+      // A promise was made about what this load would cost. The slot chosen
+      // now can differ from the one shown -- someone else refilling a slot
+      // during the download moves which is oldest -- and writing anyway
+      // would take a playlist nobody agreed to lose. A slot that came back
+      // empty costs nothing, so only an occupied one is checked.
+      if (!reusedExistingSlot && Utilities.IsValid(_expectedReplaced) && !slot.IsEmpty)
+      {
+        string currentSourceUrl = slot.CanRefresh ? slot.SourceUrl.Get() : string.Empty;
+        if (slot != _expectedReplaced || currentSourceUrl != _expectedReplacedSourceUrl)
+        {
+          PrintWarning("The playlist that would be replaced changed while the download was running.");
+          NotifyResult(LoadResultReplacementChanged, playlistName, 0, 0, 0, false);
+          return;
+        }
+      }
+
       _controller.TakeOwnership();
       slot.Fill(_pendingResolveUrl, playlistName, tracks, NextSequence());
 
@@ -402,24 +435,26 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
       }
     }
 
-    // The playlist that loading this URL would push out, or "" when nothing
+    // The slot that loading this URL would push out, or null when nothing
     // would be lost -- the URL is already held (a refresh) or a slot is
-    // free. Answerable before the download because the slot is matched on
-    // the URL that was typed, not on anything the server sends back.
+    // free. Answerable before the download because a slot is matched on the
+    // URL that was typed, not on anything the server sends back.
     //
-    // Exists so the UI can ask before something disappears (issue #125).
-    public string GetPlaylistToBeReplaced(VRCUrl url)
+    // Returns the slot rather than its name: a playlist whose name the
+    // server omitted has an empty one, and a caller reading "" as "nothing
+    // to lose" would replace it without asking (issue #125).
+    public DynamicPlaylist GetSlotToBeReplaced(VRCUrl url)
     {
-      if (!Utilities.IsValid(url)) return string.Empty;
+      if (!Utilities.IsValid(url)) return null;
 
       var existing = FindSlotBySource(PlaylistUrlUtils.GetSourceKey(url.Get()));
-      if (Utilities.IsValid(existing)) return string.Empty;
+      if (Utilities.IsValid(existing)) return null;
 
       var slot = SelectFreeOrOldestSlot();
-      if (!Utilities.IsValid(slot)) return string.Empty;
-      if (slot.IsEmpty) return string.Empty;
+      if (!Utilities.IsValid(slot)) return null;
+      if (slot.IsEmpty) return null;
 
-      return slot.PlaylistName;
+      return slot;
     }
 
     // Returns the slot already holding this playlist, or null. Kept apart
