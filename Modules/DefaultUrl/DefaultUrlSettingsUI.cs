@@ -219,14 +219,34 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
       }
     }
 
-    // Fired by the input field when VRChat's text entry is confirmed.
+    // Fired when VRChat's text entry closes, however it closed: confirmed,
+    // cancelled, or confirmed empty.
     public void OnUrlSubmitted()
     {
+      // Entry is over on every path, so the field is switched off on every
+      // path. Closing it only after a valid URL was how the box came back.
+      if (_urlEntrySection != null) _urlEntrySection.SetActive(false);
+
       if (!CanEdit()) return;
       if (_urlInput == null) return;
 
+      // A cancelled entry raises this too, with the old text already put
+      // back. Saving here would rewrite and re-sync a value nobody changed.
+      if (_urlInput.wasCanceled)
+      {
+        ResyncInputField();
+        return;
+      }
+
       var url = _urlInput.GetUrl();
-      if (!Utilities.IsValid(url) || string.IsNullOrEmpty(url.Get())) return;
+      if (!Utilities.IsValid(url) || string.IsNullOrEmpty(url.Get()))
+      {
+        // Emptying the box is not how the setting is cleared -- the clear
+        // button is -- so keep what is saved rather than reading the empty
+        // box as an instruction.
+        ResyncInputField();
+        return;
+      }
 
       if (_controller != null)
         _controller.SetDefaultUrl(url);
@@ -238,8 +258,17 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
         if (spawned != null) spawned.SaveDefaultUrl(url);
       }
 
-      if (_urlEntrySection != null) _urlEntrySection.SetActive(false);
       UpdateDisplay();
+      RefreshInputField();
+    }
+
+    // Puts the saved URL back into the field after an entry that did not save.
+    // RefreshInputField only writes when the saved value differs from what it
+    // last wrote, so the memo has to be cleared or a field left holding
+    // something else would keep it until the saved value happened to change.
+    private void ResyncInputField()
+    {
+      _lastSyncedUrl = null;
       RefreshInputField();
     }
 
