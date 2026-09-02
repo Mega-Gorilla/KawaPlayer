@@ -14,11 +14,25 @@ namespace Yamadev.YamaStream.UI
     [SerializeField] private Text _currentPlaylistNameText;
     [SerializeField] private LoopScroll _playlistsListScroll;
     [SerializeField] private LoopScroll _playlistTracksScroll;
+    // The two halves of the panel where one replaces the other. Not the
+    // scrolls themselves: they are the same object as the page on the main
+    // screen but sit inside it on the playlist panel, where hiding the
+    // scroll would leave the header behind.
+    //
+    // Left unwired where both halves are on screen at once -- the playlist
+    // panel puts the list and the tracks side by side, so there is nowhere
+    // to go back to and nothing to switch.
+    [SerializeField] private GameObject _playlistListPage;
+    [SerializeField] private GameObject _playlistTracksPage;
     [SerializeField, RegisterEvent(nameof(Toggle.onValueChanged), nameof(GenerateQueueView))] private Toggle _queueTabToggle;
     [SerializeField, RegisterEvent(nameof(Toggle.onValueChanged), nameof(GenerateHistoryView))] private Toggle _historyTabToggle;
     [SerializeField] private Toggle _playlistsTabToggle;
 
     [Header("Playlist - Actions")]
+    // Back to the playlist list. Wired the way the delete and refresh
+    // buttons beside it are, so the transition has one implementation
+    // instead of one here and one in the prefab's UnityEvent.
+    [SerializeField, RegisterEvent(nameof(Button.onClick), nameof(ReturnToPlaylistList))] private Button _playlistReturnButton;
     // Dynamic playlist slots under this Controller (issue #92), wired at
     // build time by DynamicPlaylistBuildProcess. Lets the header tell a
     // runtime-filled playlist apart from one baked into the world.
@@ -157,6 +171,38 @@ namespace Yamadev.YamaStream.UI
       // scroll and are redrawn right after, so leave them alone.
       if (!IsQueuePage && !IsHistoryPage && Utilities.IsValid(_playlistTracksScroll))
         _playlistTracksScroll.SetUp(0, this, nameof(UpdatePlaylistTracksContent));
+
+      // What was being looked at is gone, so leaving the player on a detail
+      // view with no name and no rows shows a playlist that no longer
+      // exists (issue #113). Only when that view is what is on screen: the
+      // queue and history pages borrow the same object, and the list page is
+      // already where this would go.
+      if (!IsQueuePage && !IsHistoryPage &&
+          Utilities.IsValid(_playlistTracksPage) && _playlistTracksPage.activeSelf)
+        ReturnToPlaylistList();
+    }
+
+    // The only way the panel goes from a track list back to the playlist
+    // list. The return button is wired to it and the delete path calls it,
+    // so pressing back and having the playlist taken away cannot end up
+    // doing different things.
+    //
+    // What the button used to do from the prefab, minus a call whose target
+    // was missing and whose method exists in no script.
+    //
+    // Deliberately about the view only. ClearSelectionIfEmptied has already
+    // dropped the selection by the time it calls this, and leaving the index
+    // alone is also what the button did before -- pressing back has never
+    // cleared the selection.
+    public void ReturnToPlaylistList()
+    {
+      if (!Utilities.IsValid(_playlistListPage)) return;
+      if (!Utilities.IsValid(_playlistTracksPage)) return;
+
+      _playlistTracksPage.SetActive(false);
+      _playlistListPage.SetActive(true);
+      // Takes the title bar -- name, delete, refresh -- away with it.
+      if (Utilities.IsValid(_userUIAnimator)) _userUIAnimator.SetTrigger("HidePlaylistTitle");
     }
 
     public void DeletePlaylist()
