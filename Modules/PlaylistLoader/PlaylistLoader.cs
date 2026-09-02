@@ -112,7 +112,7 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
       if (scheme != "https")
       {
         PrintError($"Refusing a playlist URL that is not https: {scheme}");
-        NotifyResult(LoadResultDownloadError, "", 0, 0, 0);
+        NotifyResult(LoadResultDownloadError, "", 0, 0, 0, false);
         return;
       }
 
@@ -146,14 +146,14 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
 
       if (!TryParseResponse(result.Result, out DataList tracks, out string playlistName, out int failCode))
       {
-        NotifyResult(failCode, "", 0, 0, 0);
+        NotifyResult(failCode, "", 0, 0, 0, false);
         return;
       }
 
       var builtTracks = BuildTracks(tracks, out int failedCount);
       if (builtTracks == null)
       {
-        NotifyResult(LoadResultEmpty, playlistName, 0, failedCount, 0);
+        NotifyResult(LoadResultEmpty, playlistName, 0, failedCount, 0, false);
         return;
       }
 
@@ -170,15 +170,19 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
       // Raw server error text stays in the log only; the UI shows a
       // localized message keyed off the HTTP status code.
       PrintError($"Failed to download playlist: {result.Error}");
-      NotifyResult(LoadResultDownloadError, "", 0, 0, result.ErrorCode);
+      NotifyResult(LoadResultDownloadError, "", 0, 0, result.ErrorCode, false);
     }
 
-    private void NotifyResult(int resultCode, string playlistName, int added, int skipped, int httpErrorCode)
+    // reusedExistingSlot is meaningful only on the success paths; every
+    // failure passes false because nothing was loaded anywhere.
+    private void NotifyResult(int resultCode, string playlistName, int added, int skipped,
+        int httpErrorCode, bool reusedExistingSlot)
     {
       if (_feedbackUi == null) return;
       var ui = _feedbackUi;
       _feedbackUi = null;
-      if (Utilities.IsValid(ui)) ui.OnLoadResult(resultCode, playlistName, added, skipped, httpErrorCode);
+      if (Utilities.IsValid(ui))
+        ui.OnLoadResult(resultCode, playlistName, added, skipped, httpErrorCode, reusedExistingSlot);
     }
 
     private bool TryParseResponse(string json, out DataList tracks, out string playlistName, out int failCode)
@@ -344,11 +348,18 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
           ? PlaylistUrlUtils.GetSourceKey(_pendingResolveUrl.Get())
           : string.Empty;
 
-      var slot = SelectSlot(sourceKey);
+      // Reloading the same playlist reuses its slot; anything else takes a
+      // fresh one. Which of the two happened is what the message the user
+      // sees turns on, so it is decided here rather than guessed from which
+      // button was pressed -- re-entering a URL that is already loaded is a
+      // refresh too, and no button says so.
+      var existing = FindSlotBySource(sourceKey);
+      bool reusedExistingSlot = Utilities.IsValid(existing);
+      var slot = reusedExistingSlot ? existing : SelectFreeOrOldestSlot();
       if (!Utilities.IsValid(slot))
       {
         PrintError("No dynamic playlist slot is available.");
-        NotifyResult(LoadResultQueueUnavailable, playlistName, 0, 0, 0);
+        NotifyResult(LoadResultQueueUnavailable, playlistName, 0, 0, 0, false);
         return;
       }
 
@@ -374,39 +385,51 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
           : $"Loaded {tracks.Length} tracks as a playlist";
       PrintLog(message);
       NotifyResult(failedCount > 0 ? LoadResultPartial : LoadResultSuccess,
-          playlistName, tracks.Length, failedCount, 0);
+          playlistName, tracks.Length, failedCount, 0, reusedExistingSlot);
     }
 
-    // Reloading the same playlist reuses its slot; otherwise an empty slot
-    // is taken. When every slot is full the one filled longest ago is
-    // replaced, so loading never dead-ends in a world where nobody can free
-    // a slot. Note this is least-recently-LOADED, not least-recently-played:
+    // Returns the slot already holding this playlist, or null. Kept apart
+    // from picking a fresh slot because the answer is also what tells the
+    // user whether the list grew or the playlist they already had was
+    // refreshed (issue #117).
+    //
+    // Only filled slots are considered: an empty slot's source URL says
+    // nothing about what it holds, and reading it is unsafe in ClientSim
+    // where VRCUrl.Empty resolves to a stale URL from elsewhere in the
+    // session.
+    private DynamicPlaylist FindSlotBySource(string sourceKey)
+    {
+      if (string.IsNullOrEmpty(sourceKey)) return null;
+
+      for (int i = 0; i < _dynamicPlaylists.Length; i++)
+      {
+        var slot = _dynamicPlaylists[i];
+        if (!Utilities.IsValid(slot)) continue;
+        if (!slot.CanRefresh) continue;
+        if (PlaylistUrlUtils.GetSourceKey(slot.SourceUrl.Get()) == sourceKey) return slot;
+      }
+
+      return null;
+    }
+
+    // Takes an empty slot, or when every slot is full the one filled longest
+    // ago, so loading never dead-ends in a world where nobody can free a
+    // slot. Note this is least-recently-LOADED, not least-recently-played:
     // _sequence only moves on a load, so the slot being played right now is
     // still a candidate. Overwriting it leaves the current track playing and
     // the next Forward() wraps to the new contents.
-    private DynamicPlaylist SelectSlot(string sourceKey)
+    private DynamicPlaylist SelectFreeOrOldestSlot()
     {
       DynamicPlaylist empty = null;
       DynamicPlaylist oldest = null;
       int oldestSequence = 0;
-      bool hasSourceKey = !string.IsNullOrEmpty(sourceKey);
 
       for (int i = 0; i < _dynamicPlaylists.Length; i++)
       {
         var slot = _dynamicPlaylists[i];
         if (!Utilities.IsValid(slot)) continue;
 
-        // Empty slots first: their source URL says nothing about what they
-        // hold, and reading it is unsafe in ClientSim where VRCUrl.Empty
-        // resolves to a stale URL from elsewhere in the session.
-        if (!slot.CanRefresh)
-        {
-          if (!Utilities.IsValid(empty) && slot.IsEmpty) empty = slot;
-        }
-        else if (hasSourceKey && PlaylistUrlUtils.GetSourceKey(slot.SourceUrl.Get()) == sourceKey)
-        {
-          return slot;
-        }
+        if (!slot.CanRefresh && !Utilities.IsValid(empty) && slot.IsEmpty) empty = slot;
 
         if (!Utilities.IsValid(oldest) || slot.Sequence < oldestSequence)
         {

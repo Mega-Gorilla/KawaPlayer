@@ -105,7 +105,14 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
     // Called by PlaylistLoader exactly once per feedback load, on every
     // terminal path. Translations are resolved at show time, so no language
     // change listener is needed.
-    public void OnLoadResult(int resultCode, string playlistName, int added, int skipped, int httpErrorCode)
+    //
+    // reusedExistingSlot says the playlist was already in the list and got
+    // refreshed, rather than a new entry appearing (issue #117). It comes
+    // from the loader instead of from which button was pressed, because
+    // re-entering a URL that is already loaded refreshes it too and no
+    // button says so.
+    public void OnLoadResult(int resultCode, string playlistName, int added, int skipped,
+        int httpErrorCode, bool reusedExistingSlot)
     {
       var ui = Utilities.IsValid(_resultUi) ? _resultUi : _uiController;
       if (!Utilities.IsValid(ui)) return;
@@ -114,15 +121,24 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
       {
         string name = string.IsNullOrEmpty(playlistName) ? "Playlist" : playlistName;
         ui.ShowMessage(
-            ui.GetTranslation("module.playlistLoader.loadedTitle"),
-            ui.GetTranslation("module.playlistLoader.loadedMessage")
+            ui.GetTranslation(reusedExistingSlot
+                ? "module.playlistLoader.updatedTitle"
+                : "module.playlistLoader.loadedTitle"),
+            ui.GetTranslation(reusedExistingSlot
+                ? "module.playlistLoader.updatedMessage"
+                : "module.playlistLoader.loadedMessage")
                 .Replace("{0}", name).Replace("{1}", added.ToString()));
         return;
       }
       if (resultCode == PlaylistLoader.LoadResultPartial)
       {
+        // One message for both, worded so it reads either way: the title
+        // already says whether this was an addition or a refresh, and the
+        // counts are what the body is for.
         ui.ShowMessage(
-            ui.GetTranslation("module.playlistLoader.loadedTitle"),
+            ui.GetTranslation(reusedExistingSlot
+                ? "module.playlistLoader.updatedTitle"
+                : "module.playlistLoader.loadedTitle"),
             ui.GetTranslation("module.playlistLoader.loadedPartialMessage")
                 .Replace("{0}", added.ToString()).Replace("{1}", skipped.ToString()));
         return;
