@@ -13,18 +13,28 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
     [SerializeField] private DefaultUrlController _controller;
     [SerializeField] private OwnerDefaultUrlStorage _storageTemplate;
     [SerializeField] private VRCUrlInputField _urlInput;
-    // Everything the owner acts on -- the current value, the input and both
-    // buttons -- lives here and is hidden from anyone who cannot edit (issue
-    // #115). What made the old behaviour read as a bug was that the controls
-    // vanished with nothing saying why, not that they vanished, so the
-    // description is swapped for the reason rather than a line being added.
-    // Leaving them visible but disabled was tried and rejected: at VR viewing
-    // distance a dimmed field still invites a click, and a click that does
-    // nothing reads as broken just as the empty space did.
+    // The saved URL is shown here rather than in the input field. A
+    // VRCUrlInputField in this UI is a place to type, not a place to read:
+    // the two older ones on the main screen have their text alpha at zero and
+    // are cleared after every submit, and this one draws nothing either.
+    [SerializeField] private Text _currentUrlDisplay;
+    // Everything the owner acts on lives here and is hidden from anyone who
+    // cannot edit (issue #115). What made the old behaviour read as a bug was
+    // that the controls vanished with nothing saying why, not that they
+    // vanished, so the description is swapped for the reason rather than a
+    // line being added. Leaving them visible but disabled was tried and
+    // rejected: at VR viewing distance a dimmed field still invites a click,
+    // and a click that does nothing reads as broken just as the empty space
+    // did.
     [SerializeField] private GameObject _ownerOnlySection;
+    // The input row, folded away until "enter URL" is pressed. An input field
+    // that is always on screen and always looks empty invites the reading
+    // that it is broken.
+    [SerializeField] private GameObject _urlEntrySection;
 
     [SerializeField] private Text _titleText;
     [SerializeField] private Text _descriptionText;
+    [SerializeField] private Text _enterUrlButtonLabel;
     [SerializeField] private Text _saveButtonLabel;
     [SerializeField] private Text _clearButtonLabel;
 
@@ -37,6 +47,7 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
       if (_uiController != null) _uiController.AddListener(this);
       UpdateTranslation();
       UpdateEditability();
+      UpdateDisplay();
       RefreshInputField();
       SchedulePoll();
     }
@@ -64,6 +75,14 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
         if (!string.IsNullOrEmpty(t))
           _titleText.text = $"{t}<size=44>(Global)</size>";
       }
+      if (_enterUrlButtonLabel != null)
+      {
+        // Reuses the core label rather than adding a ninth translation of the
+        // same two words.
+        string t = _uiController.GetTranslation("label.inputUrl");
+        if (!string.IsNullOrEmpty(t))
+          _enterUrlButtonLabel.text = t;
+      }
       if (_saveButtonLabel != null)
       {
         string t = _uiController.GetTranslation("module.defaultUrl.save");
@@ -77,11 +96,13 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
           _clearButtonLabel.text = t;
       }
       UpdateEditability();
+      UpdateDisplay();
     }
 
     public void SchedulePoll()
     {
       UpdateEditability();
+      UpdateDisplay();
       RefreshInputField();
       SendCustomEventDelayedSeconds(nameof(SchedulePoll), 1.0f);
     }
@@ -91,6 +112,7 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
       if (player == Networking.LocalPlayer)
       {
         UpdateEditability();
+        UpdateDisplay();
         RefreshInputField();
       }
     }
@@ -101,6 +123,11 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
 
       if (_ownerOnlySection != null)
         _ownerOnlySection.SetActive(canEdit);
+
+      // Only ever folds it away. This runs once a second, so forcing it open
+      // would fight whoever is typing.
+      if (!canEdit && _urlEntrySection != null)
+        _urlEntrySection.SetActive(false);
 
       // One block, not three. Someone who cannot use the feature has no use
       // for its description or its current value, and repeating the rule in
@@ -127,6 +154,35 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
                 : $"<size=48><b>✕ {headline}</b></size>\n{reason}";
         }
       }
+    }
+
+    private void UpdateDisplay()
+    {
+      if (_currentUrlDisplay == null) return;
+      if (_controller == null) return;
+      var url = _controller.DefaultUrl;
+      bool hasUrl = Utilities.IsValid(url) && !string.IsNullOrEmpty(url.Get());
+      string prefix = "設定値: ";
+      string notSet = "(未設定)";
+      if (_uiController != null)
+      {
+        string p = _uiController.GetTranslation("module.defaultUrl.currentPrefix");
+        if (!string.IsNullOrEmpty(p)) prefix = p;
+        string n = _uiController.GetTranslation("module.defaultUrl.notSet");
+        if (!string.IsNullOrEmpty(n)) notSet = n;
+      }
+      // Prefixed either way so the line reads the same whether or not a URL
+      // is set, instead of switching between a value and a sentence.
+      _currentUrlDisplay.text = prefix + (hasUrl ? url.Get() : notSet);
+    }
+
+    // Folds the input row in and out. The row starts folded, so the panel
+    // shows what is set and how to change it, not an empty box.
+    public void OnEnterUrlPressed()
+    {
+      if (!CanEdit()) return;
+      if (_urlEntrySection == null) return;
+      _urlEntrySection.SetActive(!_urlEntrySection.activeSelf);
     }
 
     private void RefreshInputField()
@@ -164,6 +220,8 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
         if (spawned != null) spawned.SaveDefaultUrl(url);
       }
 
+      if (_urlEntrySection != null) _urlEntrySection.SetActive(false);
+      UpdateDisplay();
       RefreshInputField();
     }
 
@@ -181,6 +239,8 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
         if (spawned != null) spawned.ClearSavedUrl();
       }
 
+      if (_urlEntrySection != null) _urlEntrySection.SetActive(false);
+      UpdateDisplay();
       RefreshInputField();
     }
 
