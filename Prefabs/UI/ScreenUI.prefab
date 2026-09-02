@@ -468,7 +468,6 @@ GameObject:
   - component: {fileID: 2145028279206381205}
   - component: {fileID: 2923954238374292851}
   - component: {fileID: 7238930701949961763}
-  - component: {fileID: 95862963840763670}
   m_Layer: 0
   m_Name: ClearButton
   m_TagString: Untagged
@@ -637,21 +636,6 @@ MonoBehaviour:
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 0
---- !u!114 &95862963840763670
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 300534152746776704}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e19747de3f5aca642ab2be37e372fb86, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_EffectColor: {r: 1, g: 1, b: 1, a: 1}
-  m_EffectDistance: {x: 1, y: -1}
-  m_UseGraphicAlpha: 0
 --- !u!1 &313158985831607362
 GameObject:
   m_ObjectHideFlags: 0
@@ -8560,7 +8544,6 @@ GameObject:
   - component: {fileID: 5617637937955036327}
   - component: {fileID: 2721875334348629764}
   - component: {fileID: 6984247999583428187}
-  - component: {fileID: 4734826301096637117}
   - component: {fileID: 4776759611552918229}
   m_Layer: 0
   m_Name: UrlInput
@@ -8715,21 +8698,6 @@ MonoBehaviour:
   m_FlexibleWidth: 1
   m_FlexibleHeight: 0
   m_LayoutPriority: 1
---- !u!114 &4734826301096637117
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4826934742034238346}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e19747de3f5aca642ab2be37e372fb86, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_EffectColor: {r: 1, g: 1, b: 1, a: 1}
-  m_EffectDistance: {x: 1, y: -1}
-  m_UseGraphicAlpha: 0
 --- !u!114 &4776759611552918229
 MonoBehaviour:
   m_ObjectHideFlags: 0
