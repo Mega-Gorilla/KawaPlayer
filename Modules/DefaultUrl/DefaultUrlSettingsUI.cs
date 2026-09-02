@@ -14,7 +14,12 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
     [SerializeField] private OwnerDefaultUrlStorage _storageTemplate;
     [SerializeField] private VRCUrlInputField _urlInput;
     [SerializeField] private Text _currentUrlDisplay;
-    [SerializeField] private GameObject _ownerOnlySection;
+    // The edit controls stay visible for everyone and are dimmed and disabled
+    // instead of hidden (issue #115): hiding them left no trace of why the
+    // input was gone, and it was reported as a missing field rather than read
+    // as a permission. One CanvasGroup covers the input and both buttons.
+    [SerializeField] private CanvasGroup _editControlsGroup;
+    [SerializeField] private Text _noPermissionText;
 
     [SerializeField] private Text _titleText;
     [SerializeField] private Text _descriptionText;
@@ -29,10 +34,19 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
       _uiController = GetComponentInParent<UIController>();
       if (_uiController != null) _uiController.AddListener(this);
       UpdateTranslation();
-      UpdateOwnerVisibility();
+      UpdateEditability();
       UpdateDisplay();
       RefreshInputField();
       SchedulePoll();
+    }
+
+    // Everything that gates on permission asks the controller, so the button
+    // state and the write guards cannot disagree. A missing controller means
+    // no editing rather than an unguarded write.
+    private bool CanEdit()
+    {
+      if (_controller == null) return false;
+      return _controller.CanEditDefaultUrl();
     }
 
     public void AfterLanguageChanged() => UpdateTranslation();
@@ -67,12 +81,18 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
         if (!string.IsNullOrEmpty(t))
           _clearButtonLabel.text = t;
       }
+      if (_noPermissionText != null)
+      {
+        string t = _uiController.GetTranslation("module.defaultUrl.noPermission");
+        if (!string.IsNullOrEmpty(t))
+          _noPermissionText.text = t;
+      }
       UpdateDisplay();
     }
 
     public void SchedulePoll()
     {
-      UpdateOwnerVisibility();
+      UpdateEditability();
       UpdateDisplay();
       RefreshInputField();
       SendCustomEventDelayedSeconds(nameof(SchedulePoll), 1.0f);
@@ -82,21 +102,28 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
     {
       if (player == Networking.LocalPlayer)
       {
-        UpdateOwnerVisibility();
+        UpdateEditability();
         UpdateDisplay();
         RefreshInputField();
       }
     }
 
-    private void UpdateOwnerVisibility()
+    private void UpdateEditability()
     {
-      if (_ownerOnlySection == null) return;
-      if (!Utilities.IsValid(Networking.LocalPlayer))
+      bool canEdit = CanEdit();
+
+      if (_editControlsGroup != null)
       {
-        _ownerOnlySection.SetActive(false);
-        return;
+        _editControlsGroup.interactable = canEdit;
+        // Dimming is not decoration. CanvasGroup.interactable leaves the
+        // controls looking exactly as they do when they work, so without this
+        // they read as clickable but dead. blocksRaycasts stays true so the
+        // clicks stop here instead of falling through to the panel behind.
+        _editControlsGroup.alpha = canEdit ? 1f : 0.5f;
       }
-      _ownerOnlySection.SetActive(Networking.LocalPlayer.isInstanceOwner);
+
+      if (_noPermissionText != null)
+        _noPermissionText.gameObject.SetActive(!canEdit);
     }
 
     private void UpdateDisplay()
@@ -121,8 +148,7 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
     {
       if (_urlInput == null) return;
       if (_controller == null) return;
-      if (!Utilities.IsValid(Networking.LocalPlayer)) return;
-      if (!Networking.LocalPlayer.isInstanceOwner) return;
+      if (!CanEdit()) return;
 
       var url = _controller.DefaultUrl;
       bool hasUrl = Utilities.IsValid(url) && !string.IsNullOrEmpty(url.Get());
@@ -137,8 +163,7 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
 
     public void OnSavePressed()
     {
-      if (!Utilities.IsValid(Networking.LocalPlayer)) return;
-      if (!Networking.LocalPlayer.isInstanceOwner) return;
+      if (!CanEdit()) return;
       if (_urlInput == null) return;
 
       var url = _urlInput.GetUrl();
@@ -160,8 +185,7 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
 
     public void OnClearPressed()
     {
-      if (!Utilities.IsValid(Networking.LocalPlayer)) return;
-      if (!Networking.LocalPlayer.isInstanceOwner) return;
+      if (!CanEdit()) return;
 
       if (_controller != null)
         _controller.SetDefaultUrl(VRCUrl.Empty);

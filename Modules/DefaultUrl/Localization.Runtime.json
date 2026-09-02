@@ -5,7 +5,8 @@
     "module.defaultUrl.notSet": "(デフォルト URL は未設定です)",
     "module.defaultUrl.currentPrefix": "現在: ",
     "module.defaultUrl.save": "保存",
-    "module.defaultUrl.clear": "クリア"
+    "module.defaultUrl.clear": "クリア",
+    "module.defaultUrl.noPermission": "デフォルト URL は、インスタンスオーナーのみ変更できます。"
   },
   "en": {
     "module.defaultUrl.title": "Default URL",
@@ -13,7 +14,8 @@
     "module.defaultUrl.notSet": "(No default URL set)",
     "module.defaultUrl.currentPrefix": "Current: ",
     "module.defaultUrl.save": "Save",
-    "module.defaultUrl.clear": "Clear"
+    "module.defaultUrl.clear": "Clear",
+    "module.defaultUrl.noPermission": "Only the Instance Owner can change the default URL."
   },
   "ko": {
     "module.defaultUrl.title": "기본 URL",
@@ -21,7 +23,8 @@
     "module.defaultUrl.notSet": "(기본 URL이 설정되지 않음)",
     "module.defaultUrl.currentPrefix": "현재: ",
     "module.defaultUrl.save": "저장",
-    "module.defaultUrl.clear": "지우기"
+    "module.defaultUrl.clear": "지우기",
+    "module.defaultUrl.noPermission": "기본 URL은 Instance Owner만 변경할 수 있습니다."
   },
   "zh-CN": {
     "module.defaultUrl.title": "默认 URL",
@@ -29,7 +32,8 @@
     "module.defaultUrl.notSet": "(未设置默认 URL)",
     "module.defaultUrl.currentPrefix": "当前: ",
     "module.defaultUrl.save": "保存",
-    "module.defaultUrl.clear": "清除"
+    "module.defaultUrl.clear": "清除",
+    "module.defaultUrl.noPermission": "仅 Instance Owner 可以修改默认 URL。"
   },
   "zh-HK": {
     "module.defaultUrl.title": "預設 URL",
@@ -37,7 +41,8 @@
     "module.defaultUrl.notSet": "(未設定預設 URL)",
     "module.defaultUrl.currentPrefix": "目前: ",
     "module.defaultUrl.save": "儲存",
-    "module.defaultUrl.clear": "清除"
+    "module.defaultUrl.clear": "清除",
+    "module.defaultUrl.noPermission": "僅 Instance Owner 可以修改預設 URL。"
   },
   "es": {
     "module.defaultUrl.title": "URL predeterminada",
@@ -45,7 +50,8 @@
     "module.defaultUrl.notSet": "(URL predeterminada no establecida)",
     "module.defaultUrl.currentPrefix": "Actual: ",
     "module.defaultUrl.save": "Guardar",
-    "module.defaultUrl.clear": "Borrar"
+    "module.defaultUrl.clear": "Borrar",
+    "module.defaultUrl.noPermission": "Solo el Instance Owner puede cambiar la URL predeterminada."
   },
   "it": {
     "module.defaultUrl.title": "URL predefinito",
@@ -53,7 +59,8 @@
     "module.defaultUrl.notSet": "(URL predefinito non impostato)",
     "module.defaultUrl.currentPrefix": "Attuale: ",
     "module.defaultUrl.save": "Salva",
-    "module.defaultUrl.clear": "Cancella"
+    "module.defaultUrl.clear": "Cancella",
+    "module.defaultUrl.noPermission": "Solo l'Instance Owner può modificare l'URL predefinito."
   },
   "ru": {
     "module.defaultUrl.title": "URL по умолчанию",
@@ -61,7 +68,8 @@
     "module.defaultUrl.notSet": "(URL по умолчанию не установлен)",
     "module.defaultUrl.currentPrefix": "Текущий: ",
     "module.defaultUrl.save": "Сохранить",
-    "module.defaultUrl.clear": "Очистить"
+    "module.defaultUrl.clear": "Очистить",
+    "module.defaultUrl.noPermission": "Изменять URL по умолчанию может только Instance Owner."
   },
   "uk": {
     "module.defaultUrl.title": "URL за замовчуванням",
@@ -69,6 +77,7 @@
     "module.defaultUrl.notSet": "(URL за замовчуванням не встановлено)",
     "module.defaultUrl.currentPrefix": "Поточний: ",
     "module.defaultUrl.save": "Зберегти",
-    "module.defaultUrl.clear": "Очистити"
+    "module.defaultUrl.clear": "Очистити",
+    "module.defaultUrl.noPermission": "Змінювати URL за замовчуванням може лише Instance Owner."
   }
 }
