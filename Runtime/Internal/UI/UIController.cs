@@ -350,8 +350,8 @@ namespace Yamadev.YamaStream.UI
         GetTranslation("button.confirmPlayUrl"),
         this,
         nameof(CancelPlayUrl),
-        urlInputField == _urlInputField ? nameof(AddUrlToQueueEvent) : nameof(AddUrlTopToQueueEvent),
-        urlInputField == _urlInputField ? nameof(PlayUrlEvent) : nameof(PlayUrlTopEvent)))
+        nameof(AddUrlToQueueEvent),
+        nameof(PlayUrlEvent)))
       {
         HideVideoPlayerSelector();
         return;
@@ -411,9 +411,9 @@ namespace Yamadev.YamaStream.UI
       return _controller.Handler.Type;
     }
 
-    // Both answer the same question and act on what it was about, so which
-    // field it came from no longer picks the handler -- the names are kept
-    // because the dialog is told them by name.
+    // The question carries which field it came from, so one handler answers
+    // for both. The Top names are no longer used from here; they stay
+    // because they are public and something outside may still send them.
     public void AddUrlToQueueEvent() => AddPendingUrlToQueue();
 
     public void AddUrlTopToQueueEvent() => AddPendingUrlToQueue();
