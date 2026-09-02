@@ -182,6 +182,13 @@ namespace Yamadev.YamaStream.UI
 
     public void CancelCurrentAction() => _actionCancelled = true;
 
+    // Whether this UI can put a dialog up at all, and whether one is
+    // already waiting on an answer. A caller that falls back to acting
+    // without asking has to tell those apart: doing so because a question
+    // is on screen would go ahead with something nobody agreed to.
+    public bool HasModalDialog => Utilities.IsValid(_modalDialog);
+    public bool IsModalBusy => Utilities.IsValid(_modalDialog) && _modalDialog.IsAwaitingAnswer;
+
     public void ShowMessage(string title, string message, string closeText = null)
     {
       if (!Utilities.IsValid(_modalDialog)) return;
@@ -196,14 +203,18 @@ namespace Yamadev.YamaStream.UI
         SetUnityPlayerInternal();
         return;
       }
-      _modalDialog.Show(
+      // Refused while another question is up. The toggle already moved to
+      // the player that will not be selected after all, so put it back --
+      // the same thing cancelling does.
+      if (!_modalDialog.TryShow(
         GetTranslation("msg.confirmChangePlayer"),
         GetTranslation("msg.confirmChangePlayerDetail"),
         GetTranslation("button.cancel"),
         GetTranslation("button.continue"),
         this,
         nameof(UpdatePlayerSelector), // close event
-        nameof(SetUnityPlayerInternal));
+        nameof(SetUnityPlayerInternal)))
+        UpdatePlayerSelector();
     }
 
     public void SetUnityPlayerInternal()
@@ -225,14 +236,15 @@ namespace Yamadev.YamaStream.UI
         SetAVProPlayerInternal();
         return;
       }
-      _modalDialog.Show(
+      if (!_modalDialog.TryShow(
         GetTranslation("msg.confirmChangePlayer"),
         GetTranslation("msg.confirmChangePlayerDetail"),
         GetTranslation("button.cancel"),
         GetTranslation("button.continue"),
         this,
         nameof(UpdatePlayerSelector), // close event
-        nameof(SetAVProPlayerInternal));
+        nameof(SetAVProPlayerInternal)))
+        UpdatePlayerSelector();
     }
 
     public void SetAVProPlayerInternal()
@@ -254,14 +266,15 @@ namespace Yamadev.YamaStream.UI
         SetImageViewerInternal();
         return;
       }
-      _modalDialog.Show(
+      if (!_modalDialog.TryShow(
         GetTranslation("msg.confirmChangePlayer"),
         GetTranslation("msg.confirmChangePlayerDetail"),
         GetTranslation("button.cancel"),
         GetTranslation("button.continue"),
         this,
         nameof(UpdatePlayerSelector), // close event
-        nameof(SetImageViewerInternal));
+        nameof(SetImageViewerInternal)))
+        UpdatePlayerSelector();
     }
 
     public void SetImageViewerInternal()
@@ -318,8 +331,12 @@ namespace Yamadev.YamaStream.UI
         return;
       }
 
+      // The selector lives inside the dialog, so switching it on before the
+      // dialog is up would leave it showing inside whatever question is
+      // already there. Put it back if this one is refused. The URL stays in
+      // the field, so it can be entered again once the question is answered.
       ShowVideoPlayerSelector();
-      _modalDialog.Show(
+      if (!_modalDialog.TryShow(
         GetTranslation("label.playUrl"),
         GetTranslation("msg.confirmPlayUrlDetail"),
         GetTranslation("button.cancel"),
@@ -328,7 +345,8 @@ namespace Yamadev.YamaStream.UI
         this,
         nameof(HideVideoPlayerSelector),
         urlInputField == _urlInputField ? nameof(AddUrlToQueueEvent) : nameof(AddUrlTopToQueueEvent),
-        urlInputField == _urlInputField ? nameof(PlayUrlEvent) : nameof(PlayUrlTopEvent));
+        urlInputField == _urlInputField ? nameof(PlayUrlEvent) : nameof(PlayUrlTopEvent)))
+        HideVideoPlayerSelector();
     }
 
     public void ShowVideoPlayerSelector()
