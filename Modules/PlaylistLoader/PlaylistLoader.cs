@@ -132,6 +132,13 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
     // Same as LoadPlaylistFromUrl, but reports the outcome back to the UI
     // (issue #82). The busy case is checked by the caller; guarding here too
     // keeps a stray call from leaking feedback into an unrelated load.
+    // Kept for callers outside this package, which cannot have promised
+    // anyone anything about what a load would cost.
+    public void LoadPlaylistFromUrlWithFeedback(VRCUrl resolveUrl, PlaylistLoaderUI feedbackUi)
+    {
+      LoadPlaylistFromUrlWithFeedback(resolveUrl, feedbackUi, null, string.Empty);
+    }
+
     // expectedReplaced names the playlist the player was shown and agreed to
     // lose, with the source URL that identified it. Both are re-checked at
     // the moment the slot is written, because the download sits in the

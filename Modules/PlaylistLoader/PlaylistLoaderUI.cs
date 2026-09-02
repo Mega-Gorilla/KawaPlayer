@@ -48,6 +48,13 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
     private DynamicPlaylist _pendingReplaced;
     private string _pendingReplacedSourceUrl = string.Empty;
     private bool _awaitingConfirm;
+    // Which panel is being asked. _resultUi cannot stand in for it: a
+    // refresh from another panel moves that while the dialog is up, and the
+    // answer would then be reported somewhere the player is not looking.
+    private UIController _pendingUi;
+    // Told about a load that could not start, once the dialog it would have
+    // been hidden behind is gone.
+    private UIController _busyReportUi;
 
     public void OnUrlSubmitted()
     {
@@ -89,7 +96,11 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
       // has to come first, or their answer would apply to this URL instead.
       if (_awaitingConfirm)
       {
-        ShowError(ui, "errorBusy");
+        // Not on the panel holding the dialog. The modal is not full
+        // screen, so its own URL field is still reachable, and answering
+        // with a message there would replace the question -- taking its
+        // buttons with it and leaving the wait with no way to end.
+        if (ui != _pendingUi) ShowError(ui, "errorBusy");
         return;
       }
 
@@ -112,6 +123,7 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
       if (!Utilities.IsValid(ui)) return false;
 
       _pendingLoadUrl = url;
+      _pendingUi = ui;
       _pendingReplaced = replaced;
       // Reading SourceUrl is only safe on a slot that holds something.
       _pendingReplacedSourceUrl = replaced.CanRefresh ? replaced.SourceUrl.Get() : string.Empty;
@@ -141,15 +153,21 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
     public void ConfirmReplaceOldest()
     {
       var url = _pendingLoadUrl;
+      var ui = _pendingUi;
       var replaced = _pendingReplaced;
       string replacedSourceUrl = _pendingReplacedSourceUrl;
       ClearPendingConfirm();
       if (!Utilities.IsValid(_loader) || !Utilities.IsValid(url)) return;
 
+      // Report to whoever was asked, not to whatever touched the loader
+      // most recently while they were reading.
+      if (Utilities.IsValid(ui)) _resultUi = ui;
+
       if (_loader.IsLoading)
       {
         // Modal.ExecuteAndClose hides the dialog after this returns, taking
         // anything shown from here with it. Say it once the dialog is gone.
+        _busyReportUi = ui;
         SendCustomEventDelayedFrames(nameof(ReportBusyAfterConfirm), 1);
         return;
       }
@@ -163,12 +181,15 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
 
     public void ReportBusyAfterConfirm()
     {
-      ShowError(Utilities.IsValid(_resultUi) ? _resultUi : _uiController, "errorBusy");
+      var ui = Utilities.IsValid(_busyReportUi) ? _busyReportUi : _uiController;
+      _busyReportUi = null;
+      ShowError(ui, "errorBusy");
     }
 
     private void ClearPendingConfirm()
     {
       _pendingLoadUrl = null;
+      _pendingUi = null;
       _pendingReplaced = null;
       _pendingReplacedSourceUrl = string.Empty;
       _awaitingConfirm = false;
