@@ -18,6 +18,7 @@ namespace Yamadev.YamaStream.UI
     [SerializeField] private ScrollRect _scrollRect;
     private UdonSharpBehaviour _targetUdon;
     private string _closeEventName, _executeEventName, _execute2EventName;
+    private bool _notifyingRefusal;
     private RectTransform _scrollRectTransform;
 
     private void Start()
@@ -28,19 +29,46 @@ namespace Yamadev.YamaStream.UI
       }
     }
 
+    // True while a dialog is up that someone is waiting on an answer from.
+    // A message has nothing to answer and can be replaced freely; a question
+    // cannot, because replacing it drops the events that would have ended
+    // the wait, and the dialog does not cover the screen -- whatever is
+    // behind it stays clickable while it is open (issue #130).
+    public bool IsAwaitingAnswer =>
+        gameObject.activeSelf && Utilities.IsValid(_targetUdon) &&
+        (!string.IsNullOrEmpty(_closeEventName) ||
+         !string.IsNullOrEmpty(_executeEventName) ||
+         !string.IsNullOrEmpty(_execute2EventName));
+
+    // Closes first, answers second. The other order left a dialog opened
+    // from the callback to be hidden by the line after it -- and once
+    // showing refuses to replace a question, that dialog would have been
+    // refused instead, since this one is still up while its own callback
+    // runs.
     private void ExecuteAndClose(string eventName)
     {
-      if (Utilities.IsValid(_targetUdon) && !string.IsNullOrEmpty(eventName))
-      {
-        _targetUdon.SendCustomEvent(eventName);
-      }
+      var target = _targetUdon;
+      _targetUdon = null;
+      _closeEventName = "";
+      _executeEventName = "";
+      _execute2EventName = "";
       gameObject.SetActive(false);
+
+      if (Utilities.IsValid(target) && !string.IsNullOrEmpty(eventName))
+      {
+        target.SendCustomEvent(eventName);
+      }
     }
 
     public void Close() => ExecuteAndClose(_closeEventName);
     public void Execute() => ExecuteAndClose(_executeEventName);
     public void Execute2() => ExecuteAndClose(_execute2EventName);
 
+    // Compiles against the same signature as before, but no longer always
+    // shows. A caller that cannot see the refusal and is waiting for an
+    // answer is told the same thing cancelling tells it, so it is never left
+    // waiting for one that is not coming. Callers that want to know should
+    // use TryShow.
     public void Show(string title, string message, string closeText, string executeText, UdonSharpBehaviour targetUdon, string closeEventName, string executeEventName)
     {
       Show(title, message, closeText, executeText, "", targetUdon, closeEventName, executeEventName, "");
@@ -48,6 +76,35 @@ namespace Yamadev.YamaStream.UI
 
     public void Show(string title, string message, string closeText, string executeText, string execute2Text, UdonSharpBehaviour targetUdon, string closeEventName, string executeEventName, string execute2EventName)
     {
+      if (TryShow(title, message, closeText, executeText, execute2Text, targetUdon, closeEventName, executeEventName, execute2EventName)) return;
+      if (!Utilities.IsValid(targetUdon)) return;
+
+      // Nothing to tell only when there is nothing to answer -- the same
+      // thing IsAwaitingAnswer protects, so a close-only dialog counts.
+      if (string.IsNullOrEmpty(closeEventName) &&
+          string.IsNullOrEmpty(executeEventName) &&
+          string.IsNullOrEmpty(execute2EventName)) return;
+
+      // Only ever one deep: a close handler that shows something is refused
+      // again, and answering that refusal too would not end.
+      if (_notifyingRefusal) return;
+      _notifyingRefusal = true;
+      if (!string.IsNullOrEmpty(closeEventName)) targetUdon.SendCustomEvent(closeEventName);
+      else Debug.LogWarning($"[Modal] Refused a dialog for {targetUdon.name} while another is waiting for an answer, and it has no close event to be told with.");
+      _notifyingRefusal = false;
+    }
+
+    public bool TryShow(string title, string message, string closeText, string executeText, UdonSharpBehaviour targetUdon, string closeEventName, string executeEventName)
+    {
+      return TryShow(title, message, closeText, executeText, "", targetUdon, closeEventName, executeEventName, "");
+    }
+
+    // Returns whether the dialog was put up. A caller that changed something
+    // in order to show it has to be able to put that back.
+    public bool TryShow(string title, string message, string closeText, string executeText, string execute2Text, UdonSharpBehaviour targetUdon, string closeEventName, string executeEventName, string execute2EventName)
+    {
+      if (IsAwaitingAnswer) return false;
+
       if (Utilities.IsValid(_titleText)) _titleText.text = title;
       if (Utilities.IsValid(_messageText)) _messageText.text = message;
       if (Utilities.IsValid(_closeText)) _closeText.text = closeText;
@@ -63,6 +120,7 @@ namespace Yamadev.YamaStream.UI
 
       gameObject.SetActive(true);
       SendCustomEventDelayedFrames(nameof(AdaptMaxHeight), 3);
+      return true;
     }
 
     public void AdaptMaxHeight()

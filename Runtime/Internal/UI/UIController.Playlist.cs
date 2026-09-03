@@ -216,18 +216,21 @@ namespace Yamadev.YamaStream.UI
       // the button is hidden in that case anyway.
       if (!Utilities.IsValid(_modalDialog)) return;
 
-      _pendingDeletePlaylistIndex = _playlistIndex;
-      _pendingDeleteSlot = slot;
-      _pendingDeleteSourceUrl = slot.CanRefresh ? slot.SourceUrl.Get() : string.Empty;
-
-      _modalDialog.Show(
+      // Recorded only once the question is actually on screen. Refused --
+      // another question is already up -- this would otherwise repoint the
+      // delete at a playlist nobody was asked about.
+      if (!_modalDialog.TryShow(
         GetTranslation("msg.confirmDeletePlaylist"),
         GetTranslation("msg.confirmDeletePlaylistDetail"),
         GetTranslation("button.cancel"),
         GetTranslation("button.remove"),
         this,
         null,
-        nameof(DeletePlaylistInternal));
+        nameof(DeletePlaylistInternal))) return;
+
+      _pendingDeletePlaylistIndex = _playlistIndex;
+      _pendingDeleteSlot = slot;
+      _pendingDeleteSourceUrl = slot.CanRefresh ? slot.SourceUrl.Get() : string.Empty;
     }
 
     public void DeletePlaylistInternal()
