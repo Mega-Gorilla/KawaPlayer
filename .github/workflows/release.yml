@@ -1,7 +1,15 @@
 name: Build Release
 
-on: 
+# Manual only. Without `publish` this is a dry run: the package is built and
+# uploaded as a workflow artifact, and nothing is tagged, released or
+# announced -- so a change to this workflow can be tried without shipping.
+on:
   workflow_dispatch:
+    inputs:
+      publish:
+        description: "Create the GitHub Release and rebuild the VPM listing. Leave unchecked to only build and upload the artifacts (dry run)."
+        type: boolean
+        default: false
 
 env:
   packageName: "com.vhub.kawaplayer"
@@ -13,28 +21,45 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    
+
       - name: Checkout
-        uses: actions/checkout@v3
-    
-      - name: get version
+        uses: actions/checkout@v7
+
+      - name: Get version
         id: version
-        uses: notiz-dev/github-action-json-property@7c8cf5cc36eb85d8d287a8086a39dac59628eb31
-        with: 
-            path: "package.json"
-            prop_path: "version"
-    
+        run: |
+          version=$(jq -r '.version // empty' package.json)
+          if [ -z "$version" ]; then
+            echo "::error::package.json has no \"version\" field"
+            exit 1
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      # A published version must never be replaced (projects under source
+      # control break), and the release checklist builds from develop.
+      - name: Refuse to publish from another branch or over an existing tag
+        if: ${{ inputs.publish }}
+        run: |
+          if [ "$GITHUB_REF" != "refs/heads/develop" ]; then
+            echo "::error::publish only from develop (got $GITHUB_REF)"
+            exit 1
+          fi
+          if git ls-remote --exit-code --tags origin "refs/tags/${{ steps.version.outputs.version }}" >/dev/null; then
+            echo "::error::tag ${{ steps.version.outputs.version }} already exists; bump package.json first"
+            exit 1
+          fi
+
       - name: Set Environment Variables
         run: |
-          echo "zipFile=${{ env.packageName }}-${{ steps.version.outputs.prop }}".zip >> $GITHUB_ENV
-          echo "unityPackage=${{ env.packageName }}-${{ steps.version.outputs.prop }}.unitypackage" >> $GITHUB_ENV\
-      
+          echo "zipFile=${{ env.packageName }}-${{ steps.version.outputs.version }}.zip" >> "$GITHUB_ENV"
+          echo "unityPackage=${{ env.packageName }}-${{ steps.version.outputs.version }}.unitypackage" >> "$GITHUB_ENV"
+
       - name: Make Package Folder
         run: |
           mkdir Packages
           mkdir Packages/${{ env.packageName }}
           ls | grep -v Packages | xargs mv -t Packages/${{ env.packageName }}
-        
+
       - name: Create Zip
         uses: thedoctor0/zip-release@09336613be18a8208dfa66bd57efafd9e2685657
         with:
@@ -42,28 +67,38 @@ jobs:
           directory: "Packages/${{ env.packageName }}/"
           filename: "../../${{env.zipFile}}"
           exclusions: ".git*"
-      
+
       - name: Track Package Meta Files
-        run: find "Packages/${{ env.packageName }}/" -name \*.meta >> metaList
+        run: find "Packages/${{ env.packageName }}/" -name \*.meta | LC_ALL=C sort > metaList
 
       - name: Create UnityPackage
-        uses: pCYSl5EDgo/create-unitypackage@cfcd3cf0391a5ef1306342794866a9897c32af0b
+        run: bash .github/scripts/create-unitypackage.sh "${{ env.unityPackage }}" metaList
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v7
         with:
-          package-path: ${{ env.unityPackage }}
-          include-files: metaList
+          name: ${{ env.packageName }}-${{ steps.version.outputs.version }}
+          path: |
+            ${{ env.zipFile }}
+            ${{ env.unityPackage }}
+            Packages/${{ env.packageName }}/package.json
+          if-no-files-found: error
+          compression-level: 0
 
       - name: Make Release
-        uses: softprops/action-gh-release@v2
+        if: ${{ inputs.publish }}
+        uses: softprops/action-gh-release@v3
         with:
-          tag_name: ${{ steps.version.outputs.prop }}
-          prerelease: ${{ contains(steps.version.outputs.prop, 'beta') }}
+          tag_name: ${{ steps.version.outputs.version }}
+          prerelease: ${{ contains(steps.version.outputs.version, 'beta') }}
           files: |
             ${{ env.zipFile }}
             ${{ env.unityPackage }}
             Packages/${{ env.packageName }}/package.json
 
       - name: Build Listing
-        uses: peter-evans/repository-dispatch@v3
+        if: ${{ inputs.publish }}
+        uses: peter-evans/repository-dispatch@v4
         with:
           token: ${{ secrets.PAT }}
           repository: Mega-Gorilla/vpm-repos
