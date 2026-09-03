@@ -52,9 +52,6 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
     // refresh from another panel moves that while the dialog is up, and the
     // answer would then be reported somewhere the player is not looking.
     private UIController _pendingUi;
-    // Told about a load that could not start, once the dialog it would have
-    // been hidden behind is gone.
-    private UIController _busyReportUi;
 
     public void OnUrlSubmitted()
     {
@@ -124,7 +121,19 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
       // already had. Show which one before it goes (issue #125) rather than
       // reporting an addition and letting them find out later.
       var replaced = _loader.GetSlotToBeReplaced(interceptUrl);
-      if (Utilities.IsValid(replaced) && AskBeforeReplacing(ui, interceptUrl, replaced)) return;
+      if (Utilities.IsValid(replaced))
+      {
+        if (AskBeforeReplacing(ui, interceptUrl, replaced)) return;
+
+        // Asking failed, and why decides what happens next. A panel with a
+        // dialog could have asked and did not only because that dialog is
+        // already holding a question -- one the player is about to answer.
+        // Taking a playlist now would take the one they were being asked
+        // about, without the answer. Nothing is shown: the question already
+        // on their screen is the reason, and a message would be refused by
+        // the same dialog anyway.
+        if (Utilities.IsValid(ui) && ui.HasModalDialog) return;
+      }
 
       // Either nothing is lost, or there is no modal to ask with. Loading
       // anyway is what happens today, and refusing instead would strand a
@@ -175,13 +184,14 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
 
       if (_loader.IsLoading)
       {
-        // Modal.ExecuteAndClose hides the dialog after this returns, taking
-        // anything shown from here with it. Say it once the dialog is gone.
+        // Shown straight away. Modal.ExecuteAndClose closes before it
+        // answers (issue #130), so the dialog is already down by the time
+        // this runs and a message put up here stays up -- it used to be
+        // hidden by the line after the callback and had to wait a frame.
         //
         // _resultUi is left alone: a load someone else started is still
         // running, and its result belongs to whoever started it.
-        _busyReportUi = ui;
-        SendCustomEventDelayedFrames(nameof(ReportBusyAfterConfirm), 1);
+        ShowError(ui, "errorBusy");
         return;
       }
 
@@ -194,13 +204,6 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
     // Answered no. Nothing happens, but the question has to be let go of or
     // no one could ask another.
     public void CancelReplaceOldest() => ClearPendingConfirm();
-
-    public void ReportBusyAfterConfirm()
-    {
-      var ui = Utilities.IsValid(_busyReportUi) ? _busyReportUi : _uiController;
-      _busyReportUi = null;
-      ShowError(ui, "errorBusy");
-    }
 
     private void ClearPendingConfirm()
     {

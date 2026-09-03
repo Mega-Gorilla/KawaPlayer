@@ -219,10 +219,14 @@ namespace Yamadev.YamaStream.UI
     }
 
     // Asks a yes/no question on behalf of a module, which cannot reach the
-    // dialog itself. Returns whether the question was actually put: a UI
-    // placed without a modal shows nothing, and a caller waiting on an
-    // answer that will never arrive would simply stop working. Callers act
-    // on false themselves rather than being left hanging.
+    // dialog itself. Returns whether the question actually went up.
+    //
+    // False says nothing about why, and the two reasons are not alike: a
+    // panel placed without a modal can never ask, while one whose dialog is
+    // already waiting on an answer can, just not yet. A caller that would
+    // otherwise go ahead unasked has to tell them apart -- going ahead
+    // because a question is on screen does the very thing it meant to ask
+    // about. HasModalDialog is the difference (issue #130).
     //
     // Both answers are reported, because a module holding state while it
     // waits has to be told to let go of it either way.
@@ -233,9 +237,11 @@ namespace Yamadev.YamaStream.UI
       if (!Utilities.IsValid(target)) return false;
       if (string.IsNullOrEmpty(confirmEventName)) return false;
 
-      _modalDialog.Show(title, message, GetTranslation("button.cancel"), confirmText,
+      // TryShow, not Show: Show tells a refused caller by firing its cancel
+      // event, which would clear the pending question and then report back
+      // that it had been asked.
+      return _modalDialog.TryShow(title, message, GetTranslation("button.cancel"), confirmText,
           target, cancelEventName, confirmEventName);
-      return true;
     }
 
     public void SetUnityPlayer()
