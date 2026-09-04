@@ -18,7 +18,7 @@ There is no local build command — the project is opened and compiled in the Un
 1. Reads version from `package.json`
 2. Packages into ZIP and UnityPackage formats (the UnityPackage is built by `.github/scripts/create-unitypackage.sh`)
 3. Uploads both plus `package.json` as a workflow artifact — **without `publish` the run stops here (dry run)**
-4. With `publish`: creates a GitHub Release with both artifacts (refused unless run from `develop` and the tag does not exist yet)
+4. With `publish`: creates a GitHub Release with both artifacts **and an empty body** (refused unless run from `develop` and the tag does not exist yet). The release notes are added afterwards — see the checklist
 5. With `publish`: triggers `repository-dispatch` to `Mega-Gorilla/vpm-repos` to rebuild the VPM listing
 
 **VPM distribution** (`Mega-Gorilla/vpm-repos`):
@@ -35,12 +35,19 @@ There is no local build command — the project is opened and compiled in the Un
 - upstream のベースバージョンは `Assets/updatelog.txt` とコミット履歴で追跡する
 - SemVer の pre-release 識別子 (`-beta`, `-kawa` 等) を含むと VCC で「Show Pre-Release Packages」を ON にしないと表示されないため、正式リリースでは使用しない
 
+**Two changelogs, two audiences**:
+- `Assets/updatelog.txt` — **表示されるのはワールドの中**。`ScreenUI.prefab` が `UIController._updateLogTextAsset` として参照し、プレイヤーの Info パネルにそのまま出る UI テキスト。日本語のみ、1 バージョン数行、リンクや issue 番号は書かない
+- `docs/releases/<version>.md` — **GitHub Release の本文**。Releases ページを読む利用者向けの詳細版で、`updatelog.txt` の転記ではなく独立した文章として書く。作法は `docs/releases/1.2.0.md` を前例とする: VRChat のリリースノート風に、目玉を冒頭で説明し、箇条書きは一項目一文で二人称、既知の問題の列挙はせず「困ったら Discord へ」（`https://discord.gg/tkrHek6PvN`）、入手方法は VCC のみ。`vcc://vpm/addRepo?url=...` はコピー用のコードブロックで書く — GitHub の Markdown は `vcc://` の href を落とすので、リンクにしても押せない
+- `docs/**/*.meta` は `.gitignore` 済みなので `.meta` は作らない。`docs/` は zip には入るが `.unitypackage` には入らない
+
 **Release checklist**:
 1. `package.json` の `version` を更新
 2. `Assets/updatelog.txt` の先頭に新バージョンのエントリを追加（主要な変更のみ簡潔に。軽微な修正は省略可）
-3. コミット・push
-4. GitHub Actions の「Build Release」ワークフローを **`publish` にチェックを入れて**手動実行 (develop ブランチ)。チェック無しで実行すると成果物を Artifacts に上げるだけの dry run になる (ワークフロー変更の確認に使う)
-5. GitHub Release 作成 → repository-dispatch → vpm-repos listing 再ビルドを確認
+3. `docs/releases/<version>.md` を書く（上記の作法。レビューは PR で受ける）
+4. コミット・push
+5. GitHub Actions の「Build Release」ワークフローを **`publish` にチェックを入れて**手動実行 (develop ブランチ)。チェック無しで実行すると成果物を Artifacts に上げるだけの dry run になる (ワークフロー変更の確認に使う)
+6. リリースが作られたら本文を入れる: `gh release edit <version> --repo Mega-Gorilla/KawaPlayer --notes-file docs/releases/<version>.md`（ワークフローは本文を付けない。添付資産には触れない）
+7. repository-dispatch → vpm-repos listing 再ビルド（`index.json` に新バージョンが載る）を確認
 
 Published VPM versions must not be deleted (breaks projects using source control).
 
