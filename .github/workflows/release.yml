@@ -17,6 +17,13 @@ env:
 permissions:
   contents: write
 
+# One run at a time, none cancelled. Two publishes of the same version
+# started together would both pass the existing-tag check below before
+# either had made the tag; queued, the second one finds it and stops.
+concurrency:
+  group: build-release
+  cancel-in-progress: false
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -44,10 +51,16 @@ jobs:
             echo "::error::publish only from develop (got $GITHUB_REF)"
             exit 1
           fi
-          if git ls-remote --exit-code --tags origin "refs/tags/${{ steps.version.outputs.version }}" >/dev/null; then
-            echo "::error::tag ${{ steps.version.outputs.version }} already exists; bump package.json first"
-            exit 1
-          fi
+          # --exit-code makes "no such ref" exit 2. Anything else that is not 0
+          # means the remote could not be asked, and not knowing is not the
+          # same as knowing the tag is free -- stop rather than publish blind.
+          tag="refs/tags/${{ steps.version.outputs.version }}"
+          if git ls-remote --exit-code --tags origin "$tag" >/dev/null; then status=0; else status=$?; fi
+          case "$status" in
+            2) echo "tag ${{ steps.version.outputs.version }} does not exist yet" ;;
+            0) echo "::error::tag ${{ steps.version.outputs.version }} already exists; bump package.json first"; exit 1 ;;
+            *) echo "::error::could not check remote tags (git ls-remote exit $status)"; exit 1 ;;
+          esac
 
       - name: Set Environment Variables
         run: |
@@ -91,6 +104,9 @@ jobs:
         with:
           tag_name: ${{ steps.version.outputs.version }}
           prerelease: ${{ contains(steps.version.outputs.version, 'beta') }}
+          # Second line of defence behind the tag check: a release that
+          # already has these files keeps them.
+          overwrite_files: false
           files: |
             ${{ env.zipFile }}
             ${{ env.unityPackage }}
