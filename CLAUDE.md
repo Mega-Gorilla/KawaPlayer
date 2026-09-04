@@ -14,11 +14,12 @@ KawaPlayer is a fork of the VRChat video player [YamaPlayer](https://github.com/
 
 There is no local build command — the project is opened and compiled in the Unity Editor with VRChat SDK installed.
 
-**Release workflow** (`.github/workflows/release.yml`, manual trigger):
+**Release workflow** (`.github/workflows/release.yml`, manual trigger with a `publish` checkbox):
 1. Reads version from `package.json`
-2. Packages into ZIP and UnityPackage formats
-3. Creates a GitHub Release with both artifacts
-4. Triggers `repository-dispatch` to `Mega-Gorilla/vpm-repos` to rebuild the VPM listing
+2. Packages into ZIP and UnityPackage formats (the UnityPackage is built by `.github/scripts/create-unitypackage.sh`)
+3. Uploads both plus `package.json` as a workflow artifact — **without `publish` the run stops here (dry run)**
+4. With `publish`: creates a GitHub Release with both artifacts (refused unless run from `develop` and the tag does not exist yet)
+5. With `publish`: triggers `repository-dispatch` to `Mega-Gorilla/vpm-repos` to rebuild the VPM listing
 
 **VPM distribution** (`Mega-Gorilla/vpm-repos`):
 - Built from VRChat's `template-package-listing` template
@@ -38,7 +39,7 @@ There is no local build command — the project is opened and compiled in the Un
 1. `package.json` の `version` を更新
 2. `Assets/updatelog.txt` の先頭に新バージョンのエントリを追加（主要な変更のみ簡潔に。軽微な修正は省略可）
 3. コミット・push
-4. GitHub Actions の「Build Release」ワークフローを手動実行 (develop ブランチ)
+4. GitHub Actions の「Build Release」ワークフローを **`publish` にチェックを入れて**手動実行 (develop ブランチ)。チェック無しで実行すると成果物を Artifacts に上げるだけの dry run になる (ワークフロー変更の確認に使う)
 5. GitHub Release 作成 → repository-dispatch → vpm-repos listing 再ビルドを確認
 
 Published VPM versions must not be deleted (breaks projects using source control).
