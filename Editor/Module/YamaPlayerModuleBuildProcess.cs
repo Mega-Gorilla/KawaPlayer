@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEditor;
 using System.Collections.Generic;
+using System.Linq;
 using Yamadev.YamaStream.UI;
 using UnityEngine.UI;
 
@@ -12,11 +13,55 @@ namespace Yamadev.YamaStream.Editor
 
     public void Process()
     {
+      ReportDuplicateModules();
       var modules = Object.FindObjectsByType<YamaPlayerModule>(FindObjectsInactive.Include, FindObjectsSortMode.None);
       foreach (var module in modules)
       {
         ProcessModule(module);
       }
+    }
+
+    // allowMultiple = false is only enforced by Module Manager's Add button,
+    // so a copy dragged in by hand is still built: its UI is added a second
+    // time and it runs on its own (issue #55). Say so rather than drop one,
+    // because which copy the creator meant to keep is theirs to decide.
+    private static void ReportDuplicateModules()
+    {
+      var definitions = Object.FindObjectsByType<YamaPlayerModuleDefinition>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+      foreach (var copies in FindDuplicateModules(definitions))
+      {
+        Debug.LogError(
+          $"[KawaPlayer] Module \"{copies[0].moduleName}\" is placed {copies.Count} times on one player, but only one is allowed. " +
+          "Each copy adds its own UI and runs separately. Remove all but one:\n" +
+          string.Join("\n", copies.Select(copy => GetPath(copy.transform))),
+          copies[1].gameObject);
+      }
+    }
+
+    // Grouped per player, as Module Manager counts them: two players in one
+    // scene may each have the same module. Inactive modules are left out
+    // because ProcessModule strips them from the build.
+    internal static List<List<YamaPlayerModuleDefinition>> FindDuplicateModules(IEnumerable<YamaPlayerModuleDefinition> definitions)
+    {
+      return definitions
+        .Where(definition => definition != null && definition.gameObject.activeSelf
+          && !definition.allowMultiple && !string.IsNullOrEmpty(definition.moduleName))
+        .Select(definition => (definition, controller: definition.GetComponentInParent<Controller>(true)))
+        .Where(entry => entry.controller != null)
+        .GroupBy(entry => (entry.controller, entry.definition.moduleName))
+        .Where(group => group.Count() > 1)
+        .Select(group => group.Select(entry => entry.definition).OrderBy(definition => GetPath(definition.transform)).ToList())
+        .ToList();
+    }
+
+    private static string GetPath(Transform transform)
+    {
+      var path = transform.name;
+      for (var parent = transform.parent; parent != null; parent = parent.parent)
+      {
+        path = $"{parent.name}/{path}";
+      }
+      return path;
     }
 
     private static void ProcessModule(YamaPlayerModule module)

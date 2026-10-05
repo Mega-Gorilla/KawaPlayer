@@ -292,6 +292,7 @@
   "module.manager.button.refresh": "새로고침",
   "module.manager.deleteTitle": "모듈 삭제",
   "module.manager.deleteConfirm": "「{0}」을(를) 삭제하시겠습니까?",
+  "module.manager.duplicate": "「{0}」이(가) 이 플레이어에 {1}개 있지만, 하나만 둘 수 있습니다. 각 사본이 자체 UI를 추가하고 따로 동작하므로 하나만 남기고 삭제하세요.",
   "module.manager.title": "모듈 관리",
   "label.modules": "모듈",
   "settings.playback.retryInterval": "재시도 간격 (초)",

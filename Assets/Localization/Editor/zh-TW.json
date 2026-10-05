@@ -292,6 +292,7 @@
   "module.manager.button.refresh": "重新整理",
   "module.manager.deleteTitle": "刪除模組",
   "module.manager.deleteConfirm": "刪除「{0}」？",
+  "module.manager.duplicate": "「{0}」在此播放器上放置了 {1} 個，但只允許放置一個。每個副本都會加入自己的介面並各自運作。請只保留一個，刪除其餘的。",
   "module.manager.title": "模組管理",
   "label.modules": "模組",
   "settings.playback.retryInterval": "重試間隔（秒）",

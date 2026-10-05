@@ -284,6 +284,7 @@
   "module.manager.button.refresh": "Refresh",
   "module.manager.deleteTitle": "Delete Module",
   "module.manager.deleteConfirm": "Delete \"{0}\"?",
+  "module.manager.duplicate": "\"{0}\" is placed {1} times on this player, but only one is allowed. Each copy adds its own UI and runs separately. Remove all but one.",
   "settings.ui.label": "UI Settings",
   "settings.ui.idleScreenSprite": "Idle Screen Sprite",
   "settings.ui.idleScreenSprite.tooltip": "Set the image displayed when no video is playing.",

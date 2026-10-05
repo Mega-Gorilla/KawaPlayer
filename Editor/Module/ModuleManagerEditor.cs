@@ -40,6 +40,8 @@ namespace Yamadev.YamaStream.Editor
       EditorGUILayout.LabelField(EditorLocalization.Get("module.manager.installedModules"), EditorStyles.boldLabel);
       EditorGUILayout.Space(SpaceSmall);
 
+      DrawDuplicateModuleErrors();
+
       var installedModules = GetInstalledModules();
 
       if (installedModules.Count == 0)
@@ -51,6 +53,23 @@ namespace Yamadev.YamaStream.Editor
       for (int i = 0; i < installedModules.Count; i++)
       {
         DrawInstalledModuleRow(installedModules[i], i);
+      }
+    }
+
+    // The Add button keeps a module to one copy, but one dragged in by hand
+    // still gets built (issue #55). Counted over the whole player, as the
+    // build does, so a copy outside this list is caught too.
+    private void DrawDuplicateModuleErrors()
+    {
+      var controller = _moduleManager.GetComponentInParent<Controller>(true);
+      if (controller == null) return;
+
+      var definitions = controller.GetComponentsInChildren<YamaPlayerModuleDefinition>(true);
+      foreach (var copies in YamaPlayerModuleBuildProcess.FindDuplicateModules(definitions))
+      {
+        EditorGUILayout.HelpBox(
+          string.Format(EditorLocalization.Get("module.manager.duplicate"), GetModuleName(copies[0]), copies.Count),
+          MessageType.Error);
       }
     }
 
