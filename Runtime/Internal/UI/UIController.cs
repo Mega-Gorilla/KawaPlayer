@@ -318,6 +318,13 @@ namespace Yamadev.YamaStream.UI
     {
       if (!Utilities.IsValid(urlInputField)) return;
 
+      // onEndEdit also fires when the keyboard is closed with cancel, with the
+      // field put back to what it held before. Treating that as a submit would
+      // send a URL left in the field again -- a playlist load or a question
+      // nobody asked for (issue #133). Checked before the interceptor, which
+      // would otherwise load a VHub URL left there.
+      if (urlInputField.wasCanceled) return;
+
       // Optional URL interceptor (issue #82): a module (PlaylistLoader) can
       // claim the entered URL before the video path sees it. Wired by the
       // module's build process; unassigned means the hook is inert. This is a
@@ -384,9 +391,12 @@ namespace Yamadev.YamaStream.UI
     }
 
     // Answered no, or closed. Nothing is played, and the question is let go
-    // of so the next one is about its own URL.
+    // of so the next one is about its own URL. The field is emptied the same
+    // way an answer empties it (issue #133): what was asked about is gone,
+    // and a URL typed while the question was up stays for the next try.
     public void CancelPlayUrl()
     {
+      ClearFieldIfStillHolding(_pendingPlayUrlField, _pendingPlayUrl);
       _pendingPlayUrl = null;
       _pendingPlayUrlField = null;
       HideVideoPlayerSelector();
@@ -471,12 +481,13 @@ namespace Yamadev.YamaStream.UI
       ClearFieldIfStillHolding(field, url);
     }
 
-    // The field is emptied because what it held has just been used. Anything
-    // typed while the question was up is the next URL somebody means to
-    // enter, not the one that was answered, so that stays.
+    // The field is emptied because what it held has just been dealt with,
+    // answered or cancelled. Anything typed while the question was up is the
+    // next URL somebody means to enter, not the one that was asked about, so
+    // that stays.
     private void ClearFieldIfStillHolding(VRCUrlInputField field, VRCUrl used)
     {
-      if (!Utilities.IsValid(field)) return;
+      if (!Utilities.IsValid(field) || !Utilities.IsValid(used)) return;
 
       var current = field.GetUrl();
       if (Utilities.IsValid(current) && current.Get() != used.Get()) return;
