@@ -39,6 +39,13 @@ namespace Yamadev.YamaStream
     // Fill order, assigned by the caller. 0 means never filled, which makes
     // empty slots sort first when picking the least recently filled one.
     [UdonSynced] private int _sequence = 0;
+    // When the playlist now in the slot was put in the playlist list,
+    // assigned by the caller (issue #128). The list shows dynamic slots in
+    // this order, so a new playlist lands at the bottom even when it fills a
+    // slot freed in the middle. Unlike _sequence it stays put when the same
+    // playlist is fetched again, so refreshing a row does not move it.
+    // 0 means empty.
+    [UdonSynced] private int _addedOrder = 0;
     [UdonSynced] private VideoPlayerType[] _videoPlayerTypes = new VideoPlayerType[0];
     [UdonSynced] private string[] _titles = new string[0];
     [UdonSynced] private VRCUrl[] _urls = new VRCUrl[0];
@@ -72,15 +79,18 @@ namespace Yamadev.YamaStream
 
     public int Sequence => _sequence;
 
+    public int AddedOrder => _addedOrder;
+
     public Playlist Playlist => _playlist;
 
     public int TrackCount => _tracks.Length;
 
     public bool IsEmpty => _tracks.Length == 0;
 
-    // Replaces the slot contents. The caller owns sequencing so that a single
-    // load can compare every slot before deciding which one to overwrite.
-    public void Fill(VRCUrl sourceUrl, string playlistName, object[][] tracks, int sequence)
+    // Replaces the slot contents. The caller owns sequencing and the added
+    // order so that a single load can compare every slot before deciding
+    // which one to overwrite, and whether it is new to the list.
+    public void Fill(VRCUrl sourceUrl, string playlistName, object[][] tracks, int sequence, int addedOrder)
     {
       if (!Utilities.IsValid(_playlist)) return;
 
@@ -89,6 +99,7 @@ namespace Yamadev.YamaStream
       _sourceUrl = Utilities.IsValid(sourceUrl) ? sourceUrl : VRCUrl.Empty;
       _playlistName = playlistName == null ? string.Empty : playlistName;
       _sequence = sequence;
+      _addedOrder = addedOrder;
       _tracks = tracks == null ? new object[0][] : tracks;
 
       if (Networking.IsOwner(_controller.gameObject) && !_controller.IsLocal)
@@ -111,6 +122,7 @@ namespace Yamadev.YamaStream
       _sourceUrl = VRCUrl.Empty;
       _playlistName = string.Empty;
       _sequence = 0;
+      _addedOrder = 0;
       _tracks = new object[0][];
 
       if (Networking.IsOwner(_controller.gameObject) && !_controller.IsLocal)

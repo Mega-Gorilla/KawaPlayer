@@ -1,3 +1,4 @@
+using System;
 using UdonSharp;
 using UnityEngine;
 using UnityEngine.UI;
@@ -77,6 +78,13 @@ namespace Yamadev.YamaStream.UI
       return count;
     }
 
+    // Playlists baked into the world come first, in hierarchy order, then
+    // the dynamic ones in the order they were added (issue #128). Hierarchy
+    // order alone put a new playlist wherever a slot happened to be free --
+    // into the gap a deleted one left -- which read as the deleted playlist
+    // turning into the new one. AddedOrder rather than Sequence: Sequence
+    // moves on every refetch, and a refreshed row would jump to the bottom
+    // under the player's finger.
     private int ToRealPlaylistIndex(int visibleIndex)
     {
       if (visibleIndex < 0) return -1;
@@ -85,10 +93,40 @@ namespace Yamadev.YamaStream.UI
       for (int i = 0; i < playlists.Length; i++)
       {
         if (!Utilities.IsValid(playlists[i]) || playlists[i].TrackCount == 0) continue;
+        if (Utilities.IsValid(FindDynamicPlaylist(i))) continue;
         if (seen == visibleIndex) return i;
         seen++;
       }
+
+      // The slot whose rank in added order matches. Five slots in the stock
+      // prefab, so counting the ones ahead of each beats sorting.
+      int rank = visibleIndex - seen;
+      for (int i = 0; i < _dynamicPlaylists.Length; i++)
+      {
+        int realIndex = ShownSlotIndex(_dynamicPlaylists[i]);
+        if (realIndex < 0) continue;
+
+        int ahead = 0;
+        int order = _dynamicPlaylists[i].AddedOrder;
+        for (int j = 0; j < _dynamicPlaylists.Length; j++)
+        {
+          if (j == i || ShownSlotIndex(_dynamicPlaylists[j]) < 0) continue;
+          int other = _dynamicPlaylists[j].AddedOrder;
+          if (other < order || (other == order && j < i)) ahead++;
+        }
+        if (ahead == rank) return realIndex;
+      }
       return -1;
+    }
+
+    // Index in Controller.Playlists of a dynamic slot the list shows, or -1
+    // when it is empty (or not one of the controller's playlists).
+    private int ShownSlotIndex(DynamicPlaylist slot)
+    {
+      if (!Utilities.IsValid(slot)) return -1;
+      var playlist = slot.Playlist;
+      if (!Utilities.IsValid(playlist) || playlist.TrackCount == 0) return -1;
+      return Array.IndexOf(_controller.Playlists, playlist);
     }
 
     // The dynamic slot backing a playlist, or null when the playlist is a
