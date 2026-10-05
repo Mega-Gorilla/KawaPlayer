@@ -28,6 +28,25 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
       return Networking.LocalPlayer.isInstanceOwner;
     }
 
+    // The playlist that saving url right now would push out of the playlist
+    // list (issue #129), or null when saving replaces nothing: url is not a
+    // VHub playlist, a slot is free, the same playlist is already held and is
+    // refreshed in place, or nothing would load because the player is busy.
+    // The same conditions TryAutoPlay loads under, apart from who runs it:
+    // the load happens on the master, but the question belongs to whoever is
+    // saving, and the slots and player state it reads are synced.
+    public DynamicPlaylist GetSlotReplacedBySaving(VRCUrl url)
+    {
+      if (_controller == null || _playlistLoader == null) return null;
+      if (!Utilities.IsValid(url) || string.IsNullOrEmpty(url.Get())) return null;
+      if (!_controller.Stopped) return null;
+      if (!_playlistLoader.IsOwnPlaylistUrl(url.Get())) return null;
+      if (_playlistLoader.IsLoading) return null;
+      return _playlistLoader.GetSlotToBeReplaced(url);
+    }
+
+    public int PlaylistSlotCount => _playlistLoader == null ? 0 : _playlistLoader.UsableSlotCount;
+
     public void SetDefaultUrl(VRCUrl url)
     {
       if (!CanEditDefaultUrl()) return;
