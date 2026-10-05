@@ -292,6 +292,7 @@
   "module.manager.button.refresh": "Оновити",
   "module.manager.deleteTitle": "Видалити модуль",
   "module.manager.deleteConfirm": "Видалити «{0}»?",
+  "module.manager.duplicate": "«{0}» розміщено на цьому плеєрі {1} раз(и), але дозволено лише один. Кожна копія працює окремо, а якщо модуль має інтерфейс, він з'являється для кожної копії. Видаліть усі, крім однієї.",
   "module.manager.title": "Менеджер модулів",
   "label.modules": "Модулі",
   "settings.playback.retryInterval": "Інтервал повтору (сек)",

@@ -284,6 +284,7 @@
   "module.manager.button.refresh": "Aggiorna",
   "module.manager.deleteTitle": "Elimina Modulo",
   "module.manager.deleteConfirm": "Eliminare '{0}'?",
+  "module.manager.duplicate": "'{0}' è presente {1} volte in questo player, ma ne è consentito solo uno. Ogni copia funziona separatamente e, se il modulo ha un'interfaccia, questa compare una volta per copia. Rimuovile tutte tranne una.",
   "settings.ui.label": "Impostazioni UI",
   "settings.ui.idleScreenSprite": "Immagine di Attesa",
   "settings.ui.idleScreenSprite.tooltip": "Imposta l'immagine mostrata quando nessun video è in riproduzione.",

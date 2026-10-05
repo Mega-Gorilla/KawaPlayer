@@ -284,6 +284,7 @@
   "module.manager.button.refresh": "更新",
   "module.manager.deleteTitle": "モジュール削除",
   "module.manager.deleteConfirm": "「{0}」を削除しますか？",
+  "module.manager.duplicate": "「{0}」がこのプレイヤーに {1} 個あります。このモジュールは 1 個しか置けません。それぞれが別々に動き、UI のあるモジュールは UI も個数分作られるので、1 個だけ残して削除してください。",
   "settings.ui.label": "UI設定",
   "settings.ui.idleScreenSprite": "待ち受け画像",
   "settings.ui.idleScreenSprite.tooltip": "動画が再生されていないときに表示される画像を設定します。",
