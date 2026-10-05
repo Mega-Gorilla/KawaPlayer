@@ -36,7 +36,11 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
     [SerializeField] private VRCUrl[] _redirectPool = new VRCUrl[0];
     [SerializeField] private string _poolId = "default";
     [SerializeField] private string _poolBaseUrl = "https://playlist.vrc-hub.com";
+    // Only PlaylistLoaderEditor reads this, to generate _redirectPool, so
+    // the compiler sees no reader and warns (issue #43).
+#pragma warning disable CS0414
     [SerializeField] private int _poolSize = 100000;
+#pragma warning restore CS0414
     // Instance-lifetime playlist slots this loader may fill (issue #88).
     // Wired at build time by PlaylistLoaderBuildProcess from the Controller
     // hierarchy, so worlds get whatever the prefab ships with.
