@@ -37,6 +37,9 @@ namespace Yamadev.YamaStream.Editor
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     private static void SetupURLResolveCallback()
     {
+#if !AVPRO_DEBUG
+      VRCAVProVideoPlayer.Initialize = avPro => new UnavailableAVProPlayer(avPro);
+#endif
 
       string[] splitPath = Application.persistentDataPath.Split('/', '\\');
       _youtubeDLPath = string.Join("\\", splitPath.Take(splitPath.Length - 2)) + "\\VRChat\\VRChat\\Tools\\yt-dlp.exe";

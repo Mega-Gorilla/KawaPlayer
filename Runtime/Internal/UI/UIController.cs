@@ -406,17 +406,18 @@ namespace Yamadev.YamaStream.UI
     {
       if (!Utilities.IsValid(_modalPlayerSelectorGroup)) return;
 
+      var type = ToOfferedPlayerType(_controller.Handler.Type);
       if (Utilities.IsValid(_modalUnityPlayerToggle))
       {
-        _modalUnityPlayerToggle.isOn = _controller.Handler.Type == VideoPlayerType.UnityVideoPlayer;
+        _modalUnityPlayerToggle.isOn = type == VideoPlayerType.UnityVideoPlayer;
       }
       if (Utilities.IsValid(_modalAVProPlayerToggle))
       {
-        _modalAVProPlayerToggle.isOn = _controller.Handler.Type == VideoPlayerType.AVProVideoPlayer;
+        _modalAVProPlayerToggle.isOn = type == VideoPlayerType.AVProVideoPlayer;
       }
       if (Utilities.IsValid(_modalImageViewerToggle))
       {
-        _modalImageViewerToggle.isOn = _controller.Handler.Type == VideoPlayerType.ImageViewer;
+        _modalImageViewerToggle.isOn = type == VideoPlayerType.ImageViewer;
       }
 
       _modalPlayerSelectorGroup.gameObject.SetActive(true);
@@ -435,7 +436,16 @@ namespace Yamadev.YamaStream.UI
       if (Utilities.IsValid(_modalUnityPlayerToggle) && _modalUnityPlayerToggle.isOn) return VideoPlayerType.UnityVideoPlayer;
       if (Utilities.IsValid(_modalAVProPlayerToggle) && _modalAVProPlayerToggle.isOn) return VideoPlayerType.AVProVideoPlayer;
       if (Utilities.IsValid(_modalImageViewerToggle) && _modalImageViewerToggle.isOn) return VideoPlayerType.ImageViewer;
-      return _controller.Handler.Type;
+      return ToOfferedPlayerType(_controller.Handler.Type);
+    }
+
+    // A URL entered in the world plays on AVPro unless it is an image: Unity
+    // Video Player is no longer offered (issue #139). The active handler can
+    // still be Unity -- after falling back from an AVPro error, or while a
+    // track baked as Unity plays -- and the next URL must not inherit that.
+    private VideoPlayerType ToOfferedPlayerType(VideoPlayerType type)
+    {
+      return type == VideoPlayerType.UnityVideoPlayer ? VideoPlayerType.AVProVideoPlayer : type;
     }
 
     // The question carries which field it came from and which button was

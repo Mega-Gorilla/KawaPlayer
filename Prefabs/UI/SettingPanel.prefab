@@ -10873,6 +10873,10 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3137194938165111944, guid: 3a230ca8b62b6d94da552b2b02022c1c, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3137194938165111944, guid: 3a230ca8b62b6d94da552b2b02022c1c, type: 3}
       propertyPath: m_Name
       value: UnityPlayer
       objectReference: {fileID: 0}

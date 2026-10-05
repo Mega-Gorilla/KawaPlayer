@@ -421,5 +421,52 @@ namespace Yamadev.YamaStream.Editor
     }
     #endregion
   }
+#else
+  // Stands in for AVPro in the editor when AVPRO_DEBUG is not defined (issue
+  // #139). Left uninitialized, the SDK's AVPro player neither plays nor
+  // reports an error, so a URL entered in the world -- always AVPro now --
+  // would sit loading forever. Reporting a player error instead lets the
+  // Controller fall back to Unity Video Player, which the editor can play.
+  public class UnavailableAVProPlayer : IAVProVideoPlayerInternal
+  {
+    private static bool _warned;
+    private readonly VRCAVProVideoPlayer _basePlayer;
+
+    public UnavailableAVProPlayer(VRCAVProVideoPlayer basePlayer)
+    {
+      _basePlayer = basePlayer;
+    }
+
+    public bool Loop { get; set; }
+    public bool IsPlaying => false;
+    public bool IsReady => false;
+    public bool UseLowLatency => false;
+    public int VideoWidth => 0;
+    public int VideoHeight => 0;
+
+    public void LoadURL(VRCUrl url) => ReportUnavailable();
+    public void PlayURL(VRCUrl url) => ReportUnavailable();
+    public void Play() { }
+    public void Pause() { }
+    public void Stop() { }
+    public void SetTime(float value) { }
+    public float GetTime() => 0f;
+    public float GetDuration() => 0f;
+
+    // Deferred so that the error arrives after LoadURL has returned, as it
+    // would from a real player.
+    private void ReportUnavailable()
+    {
+      if (!_warned)
+      {
+        _warned = true;
+        Debug.LogWarning("[KawaPlayer] AVPro Video Player does not run in the editor. Reporting a player error so that the video falls back to Unity Video Player.");
+      }
+      UnityEditor.EditorApplication.delayCall += () =>
+      {
+        if (_basePlayer != null) _basePlayer.OnVideoError(VideoError.PlayerError);
+      };
+    }
+  }
 #endif
 }
