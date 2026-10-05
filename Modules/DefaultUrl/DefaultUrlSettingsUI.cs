@@ -32,7 +32,9 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
     //
     // Submitting is saving. A separate save button would look like a chance
     // to check the URL before committing it, and there is none: text entry
-    // closes onto the saved value either way.
+    // closes onto the saved value either way. The one exception is a save
+    // that would push a playlist out of the playlist list, which asks first
+    // (issue #129; see OnUrlSubmitted).
     [SerializeField, RegisterEvent(nameof(VRCUrlInputField.onEndEdit), nameof(OnUrlSubmitted))]
     private VRCUrlInputField _urlInput;
     // The only place the saved URL can be read. The field it was typed into
@@ -66,6 +68,12 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
 
     private UIController _uiController;
     private string _lastSyncedUrl = null;
+
+    // The save waiting on an answer to "the playlist list is full, replace
+    // the oldest?" (issue #129), and what the question named.
+    private VRCUrl _pendingSaveUrl;
+    private DynamicPlaylist _pendingReplaced;
+    private string _pendingReplacedSourceUrl = string.Empty;
 
     void Start()
     {
@@ -228,6 +236,17 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
       if (!CanEdit()) return;
       if (_urlInput == null) return;
 
+      // The question about an earlier save is still up. Saving now would
+      // either be turned away by the dialog or go through and then be
+      // overwritten when that question is answered, so the answer comes
+      // first, as on the URL field (PlaylistLoaderUI). The entry is dropped
+      // and the field goes back to what is saved.
+      if (IsAwaitingSaveAnswer())
+      {
+        ResyncInputField();
+        return;
+      }
+
       // A cancelled entry raises this too, with the old text already put
       // back. Saving here would rewrite and re-sync a value nobody changed.
       if (_urlInput.wasCanceled)
@@ -246,6 +265,31 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
         return;
       }
 
+      // Saving a VHub playlist while the player is stopped loads it at once,
+      // and with the playlist list full that pushes the oldest one out. The
+      // URL field asks before doing that (issue #125); saving it as the
+      // default URL is the same load and asks the same question (issue #129).
+      var replaced = _controller != null ? _controller.GetSlotReplacedBySaving(url) : null;
+      if (Utilities.IsValid(replaced))
+      {
+        if (AskBeforeReplacing(url, replaced)) return;
+        // Asking failed. A panel with a dialog could have asked and did not
+        // only because another question is up, and saving anyway would take
+        // a playlist nobody agreed to lose -- so nothing is saved, as with
+        // the URL field. With no dialog at all there is no one to ask, and
+        // the save goes ahead as it always has.
+        if (_uiController != null && _uiController.HasModalDialog)
+        {
+          ResyncInputField();
+          return;
+        }
+      }
+
+      Save(url);
+    }
+
+    private void Save(VRCUrl url)
+    {
       if (_controller != null)
         _controller.SetDefaultUrl(url);
 
@@ -258,6 +302,90 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
 
       UpdateDisplay();
       RefreshInputField();
+    }
+
+    // The same question, in the same words, as the URL field asks
+    // (PlaylistLoaderUI.AskBeforeReplacing). Its translations are there
+    // whenever this can be asked: a playlist only gets replaced when the
+    // PlaylistLoader module is present.
+    private bool AskBeforeReplacing(VRCUrl url, DynamicPlaylist replaced)
+    {
+      if (_uiController == null) return false;
+
+      // Reading SourceUrl is only safe on a slot that holds something.
+      string replacedSourceUrl = replaced.CanRefresh ? replaced.SourceUrl.Get() : string.Empty;
+      string name = string.IsNullOrEmpty(replaced.PlaylistName) ? "Playlist" : replaced.PlaylistName;
+      if (!_uiController.ShowConfirm(
+              _uiController.GetTranslation("module.playlistLoader.confirmReplaceTitle"),
+              _uiController.GetTranslation("module.playlistLoader.confirmReplaceMessage")
+                  .Replace("{0}", _controller.PlaylistSlotCount.ToString()).Replace("{1}", name),
+              _uiController.GetTranslation("button.continue"),
+              this,
+              nameof(ConfirmSaveReplacing),
+              nameof(CancelSaveReplacing)))
+        return false;
+
+      // Recorded only once the question is up, so one that was turned away
+      // cannot overwrite or let go of a save still waiting on its answer.
+      _pendingSaveUrl = url;
+      _pendingReplaced = replaced;
+      _pendingReplacedSourceUrl = replacedSourceUrl;
+      return true;
+    }
+
+    // Whether a save is waiting on the question about replacing a playlist.
+    // One whose dialog is no longer waiting on anyone is let go of rather
+    // than kept: nothing would ever answer it, and it would turn every later
+    // save and clear away.
+    private bool IsAwaitingSaveAnswer()
+    {
+      if (!Utilities.IsValid(_pendingSaveUrl)) return false;
+      if (_uiController != null && _uiController.IsModalBusy) return true;
+      ClearPendingSave();
+      return false;
+    }
+
+    // Answered yes. The dialog was up for as long as it took to read, so the
+    // playlist that saving pushes out may no longer be the one named. Rather
+    // than take a different one, ask again about that one.
+    public void ConfirmSaveReplacing()
+    {
+      var url = _pendingSaveUrl;
+      var replaced = _pendingReplaced;
+      string replacedSourceUrl = _pendingReplacedSourceUrl;
+      ClearPendingSave();
+      if (!CanEdit() || !Utilities.IsValid(url))
+      {
+        ResyncInputField();
+        return;
+      }
+
+      var now = _controller.GetSlotReplacedBySaving(url);
+      if (Utilities.IsValid(now))
+      {
+        string nowSourceUrl = now.CanRefresh ? now.SourceUrl.Get() : string.Empty;
+        if (now != replaced || nowSourceUrl != replacedSourceUrl)
+        {
+          if (!AskBeforeReplacing(url, now)) ResyncInputField();
+          return;
+        }
+      }
+
+      Save(url);
+    }
+
+    // Answered no. Nothing is saved, and the field goes back to what is.
+    public void CancelSaveReplacing()
+    {
+      ClearPendingSave();
+      ResyncInputField();
+    }
+
+    private void ClearPendingSave()
+    {
+      _pendingSaveUrl = null;
+      _pendingReplaced = null;
+      _pendingReplacedSourceUrl = string.Empty;
     }
 
     // Puts the saved URL back into the field after an entry that did not save.
@@ -273,6 +401,9 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
     public void OnClearPressed()
     {
       if (!CanEdit()) return;
+      // Answered later, the question would save its URL again over the
+      // clear. It is answered first.
+      if (IsAwaitingSaveAnswer()) return;
 
       if (_controller != null)
         _controller.SetDefaultUrl(VRCUrl.Empty);
