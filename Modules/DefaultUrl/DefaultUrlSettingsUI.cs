@@ -234,6 +234,17 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
       if (!CanEdit()) return;
       if (_urlInput == null) return;
 
+      // The question about an earlier save is still up. Saving now would
+      // either be turned away by the dialog or go through and then be
+      // overwritten when that question is answered, so the answer comes
+      // first, as on the URL field (PlaylistLoaderUI). The entry is dropped
+      // and the field goes back to what is saved.
+      if (IsAwaitingSaveAnswer())
+      {
+        ResyncInputField();
+        return;
+      }
+
       // A cancelled entry raises this too, with the old text already put
       // back. Saving here would rewrite and re-sync a value nobody changed.
       if (_urlInput.wasCanceled)
@@ -299,13 +310,10 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
     {
       if (_uiController == null) return false;
 
-      _pendingSaveUrl = url;
-      _pendingReplaced = replaced;
       // Reading SourceUrl is only safe on a slot that holds something.
-      _pendingReplacedSourceUrl = replaced.CanRefresh ? replaced.SourceUrl.Get() : string.Empty;
-
+      string replacedSourceUrl = replaced.CanRefresh ? replaced.SourceUrl.Get() : string.Empty;
       string name = string.IsNullOrEmpty(replaced.PlaylistName) ? "Playlist" : replaced.PlaylistName;
-      if (_uiController.ShowConfirm(
+      if (!_uiController.ShowConfirm(
               _uiController.GetTranslation("module.playlistLoader.confirmReplaceTitle"),
               _uiController.GetTranslation("module.playlistLoader.confirmReplaceMessage")
                   .Replace("{0}", _controller.PlaylistSlotCount.ToString()).Replace("{1}", name),
@@ -313,8 +321,24 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
               this,
               nameof(ConfirmSaveReplacing),
               nameof(CancelSaveReplacing)))
-        return true;
+        return false;
 
+      // Recorded only once the question is up, so one that was turned away
+      // cannot overwrite or let go of a save still waiting on its answer.
+      _pendingSaveUrl = url;
+      _pendingReplaced = replaced;
+      _pendingReplacedSourceUrl = replacedSourceUrl;
+      return true;
+    }
+
+    // Whether a save is waiting on the question about replacing a playlist.
+    // One whose dialog is no longer waiting on anyone is let go of rather
+    // than kept: nothing would ever answer it, and it would turn every later
+    // save and clear away.
+    private bool IsAwaitingSaveAnswer()
+    {
+      if (!Utilities.IsValid(_pendingSaveUrl)) return false;
+      if (_uiController != null && _uiController.IsModalBusy) return true;
       ClearPendingSave();
       return false;
     }
@@ -375,6 +399,9 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
     public void OnClearPressed()
     {
       if (!CanEdit()) return;
+      // Answered later, the question would save its URL again over the
+      // clear. It is answered first.
+      if (IsAwaitingSaveAnswer()) return;
 
       if (_controller != null)
         _controller.SetDefaultUrl(VRCUrl.Empty);
