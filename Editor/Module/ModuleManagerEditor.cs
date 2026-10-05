@@ -64,7 +64,9 @@ namespace Yamadev.YamaStream.Editor
       var controller = _moduleManager.GetComponentInParent<Controller>(true);
       if (controller == null) return;
 
-      var definitions = controller.GetComponentsInChildren<YamaPlayerModuleDefinition>(true);
+      // A player nested inside this one owns its own modules.
+      var definitions = controller.GetComponentsInChildren<YamaPlayerModuleDefinition>(true)
+        .Where(definition => definition.GetComponentInParent<Controller>(true) == controller);
       foreach (var copies in YamaPlayerModuleBuildProcess.FindDuplicateModules(definitions))
       {
         EditorGUILayout.HelpBox(

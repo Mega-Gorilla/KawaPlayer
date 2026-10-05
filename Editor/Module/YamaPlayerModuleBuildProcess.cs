@@ -38,9 +38,10 @@ namespace Yamadev.YamaStream.Editor
       }
     }
 
-    // Grouped per player, as Module Manager counts them: two players in one
-    // scene may each have the same module. Inactive modules are left out
-    // because ProcessModule strips them from the build.
+    // Grouped by the nearest Controller, so two players in one scene may
+    // each have the same module. A module counts exactly when ProcessModule
+    // builds it: only one whose own GameObject is inactive is left out, and
+    // one under an inactive parent, or with its component disabled, counts.
     internal static List<List<YamaPlayerModuleDefinition>> FindDuplicateModules(IEnumerable<YamaPlayerModuleDefinition> definitions)
     {
       return definitions
