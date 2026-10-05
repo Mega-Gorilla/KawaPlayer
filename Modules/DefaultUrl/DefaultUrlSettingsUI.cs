@@ -32,7 +32,9 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
     //
     // Submitting is saving. A separate save button would look like a chance
     // to check the URL before committing it, and there is none: text entry
-    // closes onto the saved value either way.
+    // closes onto the saved value either way. The one exception is a save
+    // that would push a playlist out of the playlist list, which asks first
+    // (issue #129; see OnUrlSubmitted).
     [SerializeField, RegisterEvent(nameof(VRCUrlInputField.onEndEdit), nameof(OnUrlSubmitted))]
     private VRCUrlInputField _urlInput;
     // The only place the saved URL can be read. The field it was typed into
