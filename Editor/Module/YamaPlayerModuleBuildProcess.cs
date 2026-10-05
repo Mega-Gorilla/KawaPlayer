@@ -22,9 +22,9 @@ namespace Yamadev.YamaStream.Editor
     }
 
     // allowMultiple = false is only enforced by Module Manager's Add button,
-    // so a copy dragged in by hand is still built: its UI is added a second
-    // time and it runs on its own (issue #55). Say so rather than drop one,
-    // because which copy the creator meant to keep is theirs to decide.
+    // so a copy dragged in by hand is still built: it runs on its own, and any
+    // UI the module has is added once per copy (issue #55). Say so rather than
+    // drop one, because which copy the creator meant to keep is theirs to decide.
     private static void ReportDuplicateModules()
     {
       var definitions = Object.FindObjectsByType<YamaPlayerModuleDefinition>(FindObjectsInactive.Include, FindObjectsSortMode.None);
@@ -32,7 +32,7 @@ namespace Yamadev.YamaStream.Editor
       {
         Debug.LogError(
           $"[KawaPlayer] Module \"{copies[0].moduleName}\" is placed {copies.Count} times on one player, but only one is allowed. " +
-          "Each copy adds its own UI and runs separately. Remove all but one:\n" +
+          "Each copy runs separately, and any UI the module has appears once per copy. Remove all but one:\n" +
           string.Join("\n", copies.Select(copy => GetPath(copy.transform))),
           copies[1].gameObject);
       }

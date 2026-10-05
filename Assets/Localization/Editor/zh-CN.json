@@ -292,7 +292,7 @@
   "module.manager.button.refresh": "刷新",
   "module.manager.deleteTitle": "删除模块",
   "module.manager.deleteConfirm": "删除「{0}」？",
-  "module.manager.duplicate": "「{0}」在此播放器上放置了 {1} 个，但只允许放置一个。每个副本都会添加自己的界面并单独运行。请只保留一个，删除其余的。",
+  "module.manager.duplicate": "「{0}」在此播放器上放置了 {1} 个，但只允许放置一个。每个副本都会单独运行，带界面的模块还会按副本数量重复显示界面。请只保留一个，删除其余的。",
   "module.manager.title": "模块管理",
   "label.modules": "模块",
   "settings.playback.retryInterval": "重试间隔（秒）",

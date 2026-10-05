@@ -292,7 +292,7 @@
   "module.manager.button.refresh": "Actualizar",
   "module.manager.deleteTitle": "Eliminar Módulo",
   "module.manager.deleteConfirm": "¿Eliminar «{0}»?",
-  "module.manager.duplicate": "«{0}» está colocado {1} veces en este reproductor, pero solo se permite uno. Cada copia añade su propia interfaz y funciona por separado. Elimina todas menos una.",
+  "module.manager.duplicate": "«{0}» está colocado {1} veces en este reproductor, pero solo se permite uno. Cada copia funciona por separado y, si el módulo tiene interfaz, esta aparece una vez por copia. Elimina todas menos una.",
   "module.manager.title": "Gestor de Módulos",
   "label.modules": "Módulos",
   "settings.playback.retryInterval": "Intervalo de reintento (seg)",
