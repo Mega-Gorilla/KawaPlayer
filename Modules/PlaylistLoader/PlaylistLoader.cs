@@ -403,8 +403,13 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
         }
       }
 
+      // Fetching the same playlist again keeps its place in the playlist
+      // list; anything else is new to the list and goes to the bottom, even
+      // into a slot freed in the middle or taken from the oldest playlist
+      // (issue #128).
+      int addedOrder = reusedExistingSlot && slot.AddedOrder > 0 ? slot.AddedOrder : NextAddedOrder();
       _controller.TakeOwnership();
-      slot.Fill(_pendingResolveUrl, playlistName, tracks, NextSequence());
+      slot.Fill(_pendingResolveUrl, playlistName, tracks, NextSequence(), addedOrder);
 
       // 自動再生仕様:
       // - プレイヤーが停止中 (Stopped) の場合のみ自動再生する
@@ -524,6 +529,17 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
       {
         var slot = _dynamicPlaylists[i];
         if (Utilities.IsValid(slot) && slot.Sequence > max) max = slot.Sequence;
+      }
+      return max + 1;
+    }
+
+    private int NextAddedOrder()
+    {
+      int max = 0;
+      for (int i = 0; i < _dynamicPlaylists.Length; i++)
+      {
+        var slot = _dynamicPlaylists[i];
+        if (Utilities.IsValid(slot) && slot.AddedOrder > max) max = slot.AddedOrder;
       }
       return max + 1;
     }
