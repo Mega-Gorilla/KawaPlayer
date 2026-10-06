@@ -102,5 +102,10 @@
   "error.playerError": "Player Error...\n動画プレイヤーのエラーが発生しました。",
   "error.rateLimited": "Rate Limited...\nレート制限に達しています、5秒に一回だけ動画再生が可能です。",
   "error.youtubeHint": "YouTube動画を再生できませんでした。時間をおいて再試行してください。",
-  "error.youtubeHintInvalidUrl": "動画が存在しないか、YouTube側の問題で再生できない場合があります。"
+  "error.youtubeHintInvalidUrl": "動画が存在しないか、YouTube側の問題で再生できない場合があります。",
+  "tablet.app.version": "バージョン情報",
+  "tablet.dateFormat": "{0}月{1}日 ({2})",
+  "tablet.weekdays": "日,月,火,水,木,金,土",
+  "tablet.months": "1月,2月,3月,4月,5月,6月,7月,8月,9月,10月,11月,12月",
+  "tablet.return": "タブレットを戻す"
 }

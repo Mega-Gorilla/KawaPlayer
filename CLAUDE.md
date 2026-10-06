@@ -94,7 +94,7 @@ Inherited from upstream YamaPlayer:
 
 ### Prefabs
 
-`KawaPlayer.prefab` at the repository root is the main all-in-one prefab that users drop into scenes (also reachable via the **GameObject > KawaPlayer > Main** menu). Additional prefabs (ControlBar, PlaylistPanel, SubScreen, UI parts) live in `Prefabs/`.
+`KawaPlayer.prefab` at the repository root is the main all-in-one prefab that users drop into scenes (also reachable via the **GameObject > KawaPlayer > Main** menu). Additional prefabs (ControlBar, PlaylistPanel, SubScreen, Tablet, UI parts) live in `Prefabs/`. The Tablet's scripts (`TabletPickup`, `TabletScreen`, `TabletReturnButton`) live in `Runtime/Internal/Tablet/`; its model and Blender build script in `Assets/Models/Tablet/`.
 
 ### Editor Tools (`Editor/`)
 

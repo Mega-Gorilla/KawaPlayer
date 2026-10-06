@@ -102,5 +102,10 @@
   "error.playerError": "Errore Player...\nSi è verificato un errore nel video player.",
   "error.rateLimited": "Limitazione tentativi...\nIl limite tentativi è stato raggiunto. Il video sarà caricato in 5 secondi.",
   "error.youtubeHint": "Impossibile riprodurre il video di YouTube. Riprova più tardi.",
-  "error.youtubeHintInvalidUrl": "Il video potrebbe non esistere o YouTube potrebbe avere problemi."
+  "error.youtubeHintInvalidUrl": "Il video potrebbe non esistere o YouTube potrebbe avere problemi.",
+  "tablet.app.version": "Versione",
+  "tablet.dateFormat": "{2} {1} {3}",
+  "tablet.weekdays": "dom,lun,mar,mer,gio,ven,sab",
+  "tablet.months": "gen,feb,mar,apr,mag,giu,lug,ago,set,ott,nov,dic",
+  "tablet.return": "Riporta il tablet"
 }

@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 using VRC.SDK3.Components;
+using Yamadev.YamaStream.Tablet;
 using Yamadev.YamaStream.UI;
 
 namespace Yamadev.YamaStream.Editor
@@ -30,6 +31,11 @@ namespace Yamadev.YamaStream.Editor
     private SerializedObject _vrcPickupSerializedObject;
     private SerializedProperty _pickupable;
     private bool _globalSync;
+
+    private TabletPickup _tabletPickup;
+    private SerializedObject _tabletPickupSerializedObject;
+    private SerializedProperty _idleReturnSeconds;
+    private TabletReturnButton _tabletReturnButton;
 
     private void OnEnable()
     {
@@ -67,6 +73,14 @@ namespace Yamadev.YamaStream.Editor
         _vrcPickupSerializedObject = new SerializedObject(_vrcPickup);
         _pickupable = _vrcPickupSerializedObject.FindProperty("pickupable");
       }
+
+      _tabletPickup = _target.GetComponentInChildren<TabletPickup>(true);
+      if (_tabletPickup != null)
+      {
+        _tabletPickupSerializedObject = new SerializedObject(_tabletPickup);
+        _idleReturnSeconds = _tabletPickupSerializedObject.FindProperty("_idleReturnSeconds");
+      }
+      _tabletReturnButton = _target.GetComponentInChildren<TabletReturnButton>(true);
     }
 
     public override void OnInspectorGUI()
@@ -265,6 +279,30 @@ namespace Yamadev.YamaStream.Editor
             if (!_globalSync && objectSync != null) GameObject.DestroyImmediate(objectSync);
           }
         }
+
+        DrawTabletReturnSettings();
+      }
+    }
+
+    // The tablet's two ways back to where it was placed (issue #108, D1).
+    private void DrawTabletReturnSettings()
+    {
+      if (_idleReturnSeconds != null)
+      {
+        _tabletPickupSerializedObject.Update();
+        EditorGUILayout.PropertyField(_idleReturnSeconds, EditorLocalization.GetLayout("settings.idleReturn.label", "settings.idleReturn.tooltip"));
+      }
+
+      if (_tabletReturnButton == null) return;
+      var buttonObject = _tabletReturnButton.gameObject;
+      using (var check = new EditorGUI.ChangeCheckScope())
+      {
+        bool show = EditorGUILayout.Toggle(EditorLocalization.GetLayout("settings.returnButton.label", "settings.returnButton.tooltip"), buttonObject.activeSelf);
+        if (check.changed)
+        {
+          Undo.RecordObject(buttonObject, "Toggle Tablet Return Button");
+          buttonObject.SetActive(show);
+        }
       }
     }
 
@@ -275,6 +313,7 @@ namespace Yamadev.YamaStream.Editor
       _localizationSerializedObject?.ApplyModifiedProperties();
       _uiControllerSerializedObject?.ApplyModifiedProperties();
       _vrcPickupSerializedObject?.ApplyModifiedProperties();
+      _tabletPickupSerializedObject?.ApplyModifiedProperties();
     }
   }
 }
