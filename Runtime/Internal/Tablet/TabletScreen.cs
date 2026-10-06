@@ -17,6 +17,7 @@ namespace Yamadev.YamaStream.Tablet
     // The synced app numbers. The home screen is not an app.
     private const int Home = -1;
     private const int VersionApp = 0;
+    private const int KawaPlayerApp = 1;
 
     private const float DistanceCheckInterval = 0.5f;
 
@@ -31,6 +32,7 @@ namespace Yamadev.YamaStream.Tablet
     [Header("Buttons")]
     [SerializeField, RegisterEvent(nameof(Button.onClick), nameof(GoHome))] private Button _homeButton;
     [SerializeField, RegisterEvent(nameof(Button.onClick), nameof(OpenVersionApp))] private Button _versionAppButton;
+    [SerializeField, RegisterEvent(nameof(Button.onClick), nameof(OpenKawaPlayerApp))] private Button _kawaPlayerAppButton;
 
     [Header("Home")]
     [SerializeField] private Text _clockText;
@@ -43,9 +45,11 @@ namespace Yamadev.YamaStream.Tablet
     [SerializeField] private TextAsset _updateLogTextAsset;
     [SerializeField] private ScrollRect _updateLogScroll;
 
+    // Every canvas on the tablet: its own, and the player's ScreenUI in the
+    // KawaPlayer app.
     [Header("Interaction")]
-    [SerializeField] private Collider _uiCollider;
-    [SerializeField] private GraphicRaycaster _raycaster;
+    [SerializeField] private Collider[] _uiColliders = new Collider[0];
+    [SerializeField] private GraphicRaycaster[] _raycasters = new GraphicRaycaster[0];
     // Beyond this, the screen stops taking pointer input. Nobody presses it
     // from there, and every canvas a pointer can reach costs a raycast.
     [SerializeField] private float _interactDistance = 5f;
@@ -73,6 +77,8 @@ namespace Yamadev.YamaStream.Tablet
     public void GoHome() => OpenApp(Home);
 
     public void OpenVersionApp() => OpenApp(VersionApp);
+
+    public void OpenKawaPlayerApp() => OpenApp(KawaPlayerApp);
 
     private void OpenApp(int app)
     {
@@ -174,8 +180,14 @@ namespace Yamadev.YamaStream.Tablet
     {
       if (value == _interactable) return;
       _interactable = value;
-      if (Utilities.IsValid(_uiCollider)) _uiCollider.enabled = value;
-      if (Utilities.IsValid(_raycaster)) _raycaster.enabled = value;
+      foreach (var collider in _uiColliders)
+      {
+        if (Utilities.IsValid(collider)) collider.enabled = value;
+      }
+      foreach (var raycaster in _raycasters)
+      {
+        if (Utilities.IsValid(raycaster)) raycaster.enabled = value;
+      }
     }
   }
 }
