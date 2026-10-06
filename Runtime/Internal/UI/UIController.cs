@@ -355,7 +355,7 @@ namespace Yamadev.YamaStream.UI
 
       if (!Utilities.IsValid(_modalDialog) || (_controller.Stopped && !_controller.IsLoading))
       {
-        PlayUrlInternal(_controller.Handler.Type, urlInputField.GetUrl());
+        PlayUrlInternal(ToOfferedPlayerType(_controller.Handler.Type), urlInputField.GetUrl());
         urlInputField.SetUrl(VRCUrl.Empty);
         return;
       }
