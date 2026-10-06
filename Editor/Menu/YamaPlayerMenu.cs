@@ -10,6 +10,7 @@ namespace Yamadev.YamaStream.Editor
     private static readonly string _subScreenPrefabGuid = "1d1c026d8b023d04ea81f85594f05aec";
     private static readonly string _controllerBarPrefabGuid = "ddf7f58d0d20d6843a79711f81f34bf2";
     private static readonly string _playlistPanelPrefabGuid = "32aa1985af9229540a44cf22406ee1a2";
+    private static readonly string _tabletPrefabGuid = "c1b1af815eb4e424f96b1a50c40b8880";
 
     [MenuItem(menuPrefix + "Main", priority = 1)]
     public static void CreateKawaPlayer() =>
@@ -26,6 +27,10 @@ namespace Yamadev.YamaStream.Editor
     [MenuItem(menuPrefix + "Playlist Panel", priority = 103)]
     public static void CreatePlaylistPanel() =>
         CreateGameObject(AssetDatabase.GUIDToAssetPath(_playlistPanelPrefabGuid));
+
+    [MenuItem(menuPrefix + "Tablet", priority = 104)]
+    public static void CreateTablet() =>
+        CreateGameObject(AssetDatabase.GUIDToAssetPath(_tabletPrefabGuid));
 
     static void CreateGameObject(string path)
     {

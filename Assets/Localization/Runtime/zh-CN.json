@@ -102,5 +102,10 @@
   "error.playerError": "Player Error...\n视频播放器发生错误。",
   "error.rateLimited": "Rate Limited...\n达到速率限制，5秒内仅能加载一次视频。",
   "error.youtubeHint": "无法播放YouTube视频，请稍后重试。",
-  "error.youtubeHintInvalidUrl": "视频可能不存在，或因YouTube方面的问题而无法播放。"
+  "error.youtubeHintInvalidUrl": "视频可能不存在，或因YouTube方面的问题而无法播放。",
+  "tablet.app.version": "版本信息",
+  "tablet.dateFormat": "{0}月{1}日 周{2}",
+  "tablet.weekdays": "日,一,二,三,四,五,六",
+  "tablet.months": "1月,2月,3月,4月,5月,6月,7月,8月,9月,10月,11月,12月",
+  "tablet.return": "平板归位"
 }
