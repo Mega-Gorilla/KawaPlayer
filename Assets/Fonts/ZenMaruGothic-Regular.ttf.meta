@@ -6,7 +6,7 @@ TrueTypeFontImporter:
   fontSize: 16
   forceTextureCase: -2
   characterSpacing: 0
-  characterPadding: 1
+  characterPadding: 4
   includeFontData: 1
   fontNames:
   - Zen Maru Gothic
