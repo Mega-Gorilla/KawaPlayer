@@ -107,5 +107,17 @@
   "tablet.dateFormat": "{2}, {1} {3}",
   "tablet.weekdays": "dom,lun,mar,mié,jue,vie,sáb",
   "tablet.months": "ene,feb,mar,abr,may,jun,jul,ago,sept,oct,nov,dic",
-  "tablet.return": "Devolver la tableta"
+  "tablet.return": "Devolver la tableta",
+  "tablet.app.image": "Imagen",
+  "tablet.image.inputHint": "Introduce la URL de una imagen",
+  "tablet.image.empty": "Introduce una URL para mostrar aquí una imagen",
+  "tablet.image.loading": "Cargando imagen...",
+  "tablet.image.failed": "No se pudo cargar la imagen.",
+  "tablet.image.error.untrusted": "El dominio no es de confianza. Activa «Allow\u00a0Untrusted\u00a0URLs» en los ajustes de VRChat o usa una imagen alojada en un servicio de confianza como Imgur.",
+  "tablet.image.error.invalidUrl": "La URL no es válida. Compruébala.",
+  "tablet.image.error.invalidImage": "No se puede leer como imagen. El formato puede no ser compatible o la imagen supera 2048\u00a0×\u00a02048.",
+  "tablet.image.error.download": "La descarga falló. Comprueba que la URL sea correcta y que la imagen sea pública.",
+  "tablet.image.error.busy": "Hay demasiadas imágenes cargándose. Espera un momento y vuelve a intentarlo.",
+  "tablet.image.showDetails": "Detalles del error",
+  "tablet.image.hideDetails": "Ocultar detalles"
 }

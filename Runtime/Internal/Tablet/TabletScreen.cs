@@ -9,8 +9,9 @@ namespace Yamadev.YamaStream.Tablet
 {
   // What the tablet shows: the home screen or one app. The open app is
   // synced, so everyone looking at the tablet sees the same screen, a late
-  // joiner included (issue #108, D6). Whoever presses a button takes the
-  // screen over; what happens inside an app stays with each player.
+  // joiner included (issue #108, D6), and so is the URL of the image app's
+  // picture (D2). Whoever presses a button takes the screen over; what
+  // happens inside an app stays with each player.
   [UdonBehaviourSyncMode(BehaviourSyncMode.Manual)]
   public class TabletScreen : YamaPlayerBehaviour
   {
@@ -18,11 +19,13 @@ namespace Yamadev.YamaStream.Tablet
     private const int Home = -1;
     private const int VersionApp = 0;
     private const int KawaPlayerApp = 1;
+    private const int ImageApp = 2;
 
     private const float DistanceCheckInterval = 0.5f;
 
     [SerializeField] private UIController _uiController;
     [SerializeField] private TabletPickup _tablet;
+    [SerializeField] private TabletImageApp _imageApp;
 
     [Header("Screens")]
     [SerializeField] private GameObject _home;
@@ -33,11 +36,13 @@ namespace Yamadev.YamaStream.Tablet
     [SerializeField, RegisterEvent(nameof(Button.onClick), nameof(GoHome))] private Button _homeButton;
     [SerializeField, RegisterEvent(nameof(Button.onClick), nameof(OpenVersionApp))] private Button _versionAppButton;
     [SerializeField, RegisterEvent(nameof(Button.onClick), nameof(OpenKawaPlayerApp))] private Button _kawaPlayerAppButton;
+    [SerializeField, RegisterEvent(nameof(Button.onClick), nameof(OpenImageApp))] private Button _imageAppButton;
 
     [Header("Home")]
     [SerializeField] private Text _clockText;
     [SerializeField] private Text _dateText;
     [SerializeField] private Text _versionAppLabel;
+    [SerializeField] private Text _imageAppLabel;
 
     [Header("Version App")]
     [SerializeField] private Text _versionAppTitle;
@@ -55,6 +60,7 @@ namespace Yamadev.YamaStream.Tablet
     [SerializeField] private float _interactDistance = 5f;
 
     [UdonSynced] private int _appIndex = Home;
+    [UdonSynced] private VRCUrl _imageUrl = VRCUrl.Empty;
     private int _shownApp = int.MinValue;
     private bool _interactable = true;
 
@@ -80,6 +86,19 @@ namespace Yamadev.YamaStream.Tablet
 
     public void OpenKawaPlayerApp() => OpenApp(KawaPlayerApp);
 
+    public void OpenImageApp() => OpenApp(ImageApp);
+
+    public VRCUrl ImageUrl => _imageUrl;
+
+    public void SetImageUrl(VRCUrl url)
+    {
+      TakeOwnership();
+      _imageUrl = url;
+      RequestSerialization();
+      if (Utilities.IsValid(_tablet)) _tablet.Touch();
+      if (Utilities.IsValid(_imageApp)) _imageApp.ShowUrl();
+    }
+
     private void OpenApp(int app)
     {
       TakeOwnership();
@@ -88,7 +107,11 @@ namespace Yamadev.YamaStream.Tablet
       ShowApp();
     }
 
-    public override void OnDeserialization() => ShowApp();
+    public override void OnDeserialization()
+    {
+      ShowApp();
+      if (Utilities.IsValid(_imageApp)) _imageApp.ShowUrl();
+    }
 
     private void ShowApp()
     {
@@ -112,11 +135,13 @@ namespace Yamadev.YamaStream.Tablet
     {
       UpdateTranslation();
       UpdateClockView();
+      if (Utilities.IsValid(_imageApp)) _imageApp.UpdateTranslation();
     }
 
     private void UpdateTranslation()
     {
       SetTranslatedText(_versionAppLabel, "tablet.app.version");
+      SetTranslatedText(_imageAppLabel, "tablet.app.image");
       SetTranslatedText(_versionAppTitle, "tablet.app.version");
     }
 

@@ -107,5 +107,17 @@
   "tablet.dateFormat": "{0}月{1}日 ({2})",
   "tablet.weekdays": "日,月,火,水,木,金,土",
   "tablet.months": "1月,2月,3月,4月,5月,6月,7月,8月,9月,10月,11月,12月",
-  "tablet.return": "タブレットを戻す"
+  "tablet.return": "タブレットを戻す",
+  "tablet.app.image": "画像",
+  "tablet.image.inputHint": "画像の URL を入力",
+  "tablet.image.empty": "URL を入力すると、ここに画像が表示されます",
+  "tablet.image.loading": "画像を読み込んでいます...",
+  "tablet.image.failed": "画像を読み込めませんでした。",
+  "tablet.image.error.untrusted": "信頼済みのドメインではありません。VRChat の設定で「Allow\u00a0Untrusted\u00a0URLs」をオンにするか、Imgur などの信頼済みのサービスに置いた画像を使ってください。",
+  "tablet.image.error.invalidUrl": "URL の形式が正しくありません。URL を確かめてください。",
+  "tablet.image.error.invalidImage": "画像として読み込めません。対応していない形式か、2048\u00a0×\u00a02048 より大きい画像です。",
+  "tablet.image.error.download": "ダウンロードに失敗しました。URL が正しいか、画像が公開されているかを確かめてください。",
+  "tablet.image.error.busy": "読み込みが混み合っています。少し待ってから、もう一度試してください。",
+  "tablet.image.showDetails": "エラーの詳細",
+  "tablet.image.hideDetails": "詳細を閉じる"
 }

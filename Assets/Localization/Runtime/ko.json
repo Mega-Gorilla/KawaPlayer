@@ -107,5 +107,17 @@
   "tablet.dateFormat": "{0}월 {1}일 ({2})",
   "tablet.weekdays": "일,월,화,수,목,금,토",
   "tablet.months": "1월,2월,3월,4월,5월,6월,7월,8월,9월,10월,11월,12월",
-  "tablet.return": "태블릿 되돌리기"
+  "tablet.return": "태블릿 되돌리기",
+  "tablet.app.image": "이미지",
+  "tablet.image.inputHint": "이미지 URL 입력",
+  "tablet.image.empty": "URL을 입력하면 여기에 이미지가 표시됩니다",
+  "tablet.image.loading": "이미지를 불러오는 중...",
+  "tablet.image.failed": "이미지를 불러올 수 없습니다.",
+  "tablet.image.error.untrusted": "신뢰할 수 있는 도메인이 아닙니다. VRChat 설정에서 \"Allow\u00a0Untrusted\u00a0URLs\"를 켜거나, Imgur 등 신뢰할 수 있는 서비스에 올린 이미지를 사용하세요.",
+  "tablet.image.error.invalidUrl": "URL 형식이 올바르지 않습니다. URL을 확인하세요.",
+  "tablet.image.error.invalidImage": "이미지로 읽을 수 없습니다. 지원하지 않는 형식이거나 2048\u00a0×\u00a02048보다 큰 이미지입니다.",
+  "tablet.image.error.download": "다운로드에 실패했습니다. URL이 올바른지, 이미지가 공개되어 있는지 확인하세요.",
+  "tablet.image.error.busy": "불러오기 요청이 많습니다. 잠시 후 다시 시도하세요.",
+  "tablet.image.showDetails": "오류 상세",
+  "tablet.image.hideDetails": "상세 닫기"
 }
