@@ -6,8 +6,10 @@ Run from the repository root:
 
 Writes KawaTablet.fbx and KawaTablet_Palette.png to the given folder and
 prints the triangle count. Add --blend to also save KawaTablet.blend, and
---render to write preview renders (Cycles, CPU) next to them. This folder
-ends in "~", so Unity does not import the script.
+--render to write preview renders (Cycles, CPU) next to them. Both land in
+the same folder, so give them a folder outside Assets: Unity would import
+the renders, and the .blend too when Blender is installed, into the
+package. This folder ends in "~", so Unity does not import the script.
 
 The tablet is modelled in the XZ plane, front facing -Y: X is width, Z is
 height, Y is thickness. Before export it is turned half a turn about Z, so
