@@ -49,7 +49,7 @@ namespace Yamadev.YamaStream.Tablet
       if (_idleReturnSeconds > 0f) SendCustomEventDelayedSeconds(nameof(_CheckIdle), _idleReturnSeconds);
     }
 
-    public bool IsHeld => Utilities.IsValid(_pickup) && _pickup.IsHeld;
+    private bool IsHeld => Utilities.IsValid(_pickup) && _pickup.IsHeld;
 
     public string GetTranslation(string key) => Utilities.IsValid(_screen) ? _screen.GetTranslation(key) : string.Empty;
 

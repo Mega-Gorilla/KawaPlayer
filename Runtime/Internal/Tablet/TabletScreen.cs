@@ -15,8 +15,8 @@ namespace Yamadev.YamaStream.Tablet
   public class TabletScreen : YamaPlayerBehaviour
   {
     // The synced app numbers. The home screen is not an app.
-    public const int Home = -1;
-    public const int VersionApp = 0;
+    private const int Home = -1;
+    private const int VersionApp = 0;
 
     private const float DistanceCheckInterval = 0.5f;
 
