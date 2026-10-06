@@ -1988,7 +1988,7 @@ MonoBehaviour:
   ThrowVelocityBoostScale: 1
   currentlyHeldBy: {fileID: 0}
   pickupable: 1
-  proximity: 2
+  proximity: 0.03
   version: 1
 --- !u!114 &7838458939732469121
 MonoBehaviour:

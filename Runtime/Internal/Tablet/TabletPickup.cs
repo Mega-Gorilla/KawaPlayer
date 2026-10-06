@@ -22,6 +22,11 @@ namespace Yamadev.YamaStream.Tablet
     // screen reaches the screen first. All of them belong on this object,
     // beside the VRCPickup: VRChat looks for the pickup on the object whose
     // collider was hit, never on its parents.
+    //
+    // The VRCPickup's proximity is 0.03 m, so a VR hand takes the tablet
+    // where it touches it. Grabbed from further away, the tablet is pulled
+    // in along the line from the hand to where it lay, and one lying on the
+    // player's right then hangs outside the right hand.
     [SerializeField] private Collider[] _vrGrabColliders;
     [SerializeField] private Collider[] _desktopGrabColliders;
 
