@@ -19,7 +19,9 @@ namespace Yamadev.YamaStream.Tablet
     // In VR the tablet is grabbed by its side edges only, so pointing at
     // the screen never lifts it. Desktop has no hand to aim with and grabs
     // the whole body, which sits just behind the screen so a click on the
-    // screen reaches the screen first.
+    // screen reaches the screen first. All of them belong on this object,
+    // beside the VRCPickup: VRChat looks for the pickup on the object whose
+    // collider was hit, never on its parents.
     [SerializeField] private Collider[] _vrGrabColliders;
     [SerializeField] private Collider[] _desktopGrabColliders;
 
