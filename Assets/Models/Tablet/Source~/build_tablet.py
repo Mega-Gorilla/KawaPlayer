@@ -31,9 +31,10 @@ RENDER = "--render" in argv
 SAVE_BLEND = "--blend" in argv
 os.makedirs(OUT, exist_ok=True)
 
-# Dimensions in metres.
-WIDTH = 0.230
-HEIGHT = 0.163
+# Dimensions in metres. The screen is 28.0 x 15.75 cm, 16:9 like the
+# player's own UI, so it shows the whole of it (issue #151).
+WIDTH = 0.300
+HEIGHT = 0.1895
 THICKNESS = 0.0075
 CORNER_RADIUS = 0.012
 CORNER_SEGMENTS = 8
