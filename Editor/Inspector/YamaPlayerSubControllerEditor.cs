@@ -111,12 +111,16 @@ namespace Yamadev.YamaStream.Editor
         EditorGUILayout.HelpBox(EditorLocalization.Get("msg.yamaPlayerRequired"), MessageType.Warning);
       }
 
-      DrawAppearanceSettings();
-      DrawLocalizationSettings();
-      DrawUISettings();
-      DrawPickupSettings();
+      using (var check = new EditorGUI.ChangeCheckScope())
+      {
+        DrawAppearanceSettings();
+        DrawLocalizationSettings();
+        DrawUISettings();
+        DrawPickupSettings();
 
-      ApplyModifiedProperties();
+        ApplyModifiedProperties();
+        if (check.changed) CopyToOtherUIs();
+      }
     }
 
     private void ProcessYamaPlayerChange()
@@ -127,10 +131,13 @@ namespace Yamadev.YamaStream.Editor
       var controller = yamaPlayer.GetComponentInChildren<Controller>(true);
       if (controller == null) return;
 
-      if (_uiController != null)
+      // Every UIController under this object follows the same player: the
+      // tablet has its own for the home screen beside the player's ScreenUI.
+      foreach (var uiController in _target.GetComponentsInChildren<UIController>(true))
       {
-        _uiControllerSerializedObject.FindProperty("_controller").objectReferenceValue = controller;
-        _uiControllerSerializedObject.ApplyModifiedProperties();
+        var so = uiController == _uiController ? _uiControllerSerializedObject : new SerializedObject(uiController);
+        so.FindProperty("_controller").objectReferenceValue = controller;
+        so.ApplyModifiedProperties();
       }
 
       var screens = _target.GetComponentsInChildren<YamaPlayerScreen>(true);
@@ -314,6 +321,49 @@ namespace Yamadev.YamaStream.Editor
       _uiControllerSerializedObject?.ApplyModifiedProperties();
       _vrcPickupSerializedObject?.ApplyModifiedProperties();
       _tabletPickupSerializedObject?.ApplyModifiedProperties();
+    }
+
+    // The fields above edit the first UI found. When there are more -- the
+    // tablet's home screen and the player's ScreenUI -- the others take the
+    // same colour set, language and idle image, so the object looks and reads
+    // the same on every screen.
+    private void CopyToOtherUIs()
+    {
+      if (_defaultColorSet != null)
+      {
+        foreach (var settings in _target.GetComponentsInChildren<AppearanceSettings>(true))
+        {
+          if (settings != _appearanceSettings) CopyString(settings, "defaultColorSet", _defaultColorSet.stringValue);
+        }
+      }
+      if (_defaultLanguage != null)
+      {
+        foreach (var settings in _target.GetComponentsInChildren<LocalizationSettings>(true))
+        {
+          if (settings != _localizationSettings) CopyString(settings, "defaultLanguage", _defaultLanguage.stringValue);
+        }
+      }
+      if (_idleScreenSprite != null)
+      {
+        foreach (var uiController in _target.GetComponentsInChildren<UIController>(true))
+        {
+          if (uiController == _uiController) continue;
+          var so = new SerializedObject(uiController);
+          var property = so.FindProperty("_idleScreenSprite");
+          if (property == null || property.objectReferenceValue == _idleScreenSprite.objectReferenceValue) continue;
+          property.objectReferenceValue = _idleScreenSprite.objectReferenceValue;
+          so.ApplyModifiedProperties();
+        }
+      }
+    }
+
+    private static void CopyString(Object target, string propertyName, string value)
+    {
+      var so = new SerializedObject(target);
+      var property = so.FindProperty(propertyName);
+      if (property == null || property.stringValue == value) return;
+      property.stringValue = value;
+      so.ApplyModifiedProperties();
     }
   }
 }
