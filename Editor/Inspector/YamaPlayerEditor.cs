@@ -47,7 +47,6 @@ namespace Yamadev.YamaStream.Editor
     private AppearanceSettings _appearanceSettings;
     private SerializedObject _appearanceSerializedObject;
     private SerializedProperty _defaultColorSet;
-    private SerializedProperty _colorSets;
 
     private LocalizationSettings _localizationSettings;
     private SerializedObject _localizationSerializedObject;
@@ -135,7 +134,6 @@ namespace Yamadev.YamaStream.Editor
       {
         _appearanceSerializedObject = new SerializedObject(_appearanceSettings);
         _defaultColorSet = _appearanceSerializedObject.FindProperty("defaultColorSet");
-        _colorSets = _appearanceSerializedObject.FindProperty("colorSets");
       }
 
       _localizationSettings = _target.GetComponentInChildren<LocalizationSettings>(true);
@@ -195,36 +193,7 @@ namespace Yamadev.YamaStream.Editor
 
       using (new EditorGUILayout.HorizontalScope())
       {
-        if (_colorSets != null && _colorSets.arraySize > 0)
-        {
-          var colorSetNames = new string[_colorSets.arraySize];
-          int selectedIndex = 0;
-
-          for (int i = 0; i < _colorSets.arraySize; i++)
-          {
-            var colorSet = _colorSets.GetArrayElementAtIndex(i);
-            var nameProperty = colorSet.FindPropertyRelative("colorSetName");
-            colorSetNames[i] = nameProperty != null ? nameProperty.stringValue : $"ColorSet {i}";
-
-            if (_defaultColorSet != null && colorSetNames[i] == _defaultColorSet.stringValue)
-            {
-              selectedIndex = i;
-            }
-          }
-
-          using (var check = new EditorGUI.ChangeCheckScope())
-          {
-            int newIndex = EditorGUILayout.Popup(EditorLocalization.Get("appearance.defaultColorSet"), selectedIndex, colorSetNames);
-            if (check.changed && _defaultColorSet != null)
-            {
-              _defaultColorSet.stringValue = colorSetNames[newIndex];
-            }
-          }
-        }
-        else
-        {
-          EditorGUILayout.LabelField(EditorLocalization.Get("appearance.noColorSets"));
-        }
+        AppearanceSettingsEditor.DrawColorSetPopup(_appearanceSettings, _defaultColorSet, EditorLocalization.Get("appearance.defaultColorSet"));
 
         if (GUILayout.Button(EditorLocalization.Get("button.edit"), GUILayout.Width(60)))
         {

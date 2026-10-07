@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 7023532618307085658}
   - component: {fileID: 1821257019443532082}
   - component: {fileID: 4399698718485092002}
+  - component: {fileID: 7567734839578423609}
   m_Layer: 0
   m_Name: Off
   m_TagString: Untagged
@@ -99,11 +100,11 @@ MonoBehaviour:
     m_SelectOnRight: {fileID: 0}
   m_Transition: 1
   m_Colors:
-    m_NormalColor: {r: 0.11, g: 0.115, b: 0.13, a: 1}
-    m_HighlightedColor: {r: 0.15, g: 0.155, b: 0.175, a: 1}
-    m_PressedColor: {r: 0.12, g: 0.125, b: 0.15, a: 1}
-    m_SelectedColor: {r: 0.11, g: 0.115, b: 0.13, a: 1}
-    m_DisabledColor: {r: 0.11, g: 0.115, b: 0.13, a: 1}
+    m_NormalColor: {r: 0.12156863, g: 0.1254902, b: 0.14509805, a: 1}
+    m_HighlightedColor: {r: 0.16156864, g: 0.16549021, b: 0.19009805, a: 1}
+    m_PressedColor: {r: 0.13156863, g: 0.13549021, b: 0.16509806, a: 1}
+    m_SelectedColor: {r: 0.12156863, g: 0.1254902, b: 0.14509805, a: 1}
+    m_DisabledColor: {r: 0.12156863, g: 0.1254902, b: 0.14509805, a: 1}
     m_ColorMultiplier: 1
     m_FadeDuration: 0.1
   m_SpriteState:
@@ -126,6 +127,19 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_IsOn: 1
+--- !u!114 &7567734839578423609
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 203471368577951574}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a40883b1bf6bf5543bb641824e65f870, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  colorType: 6
 --- !u!1 &734693307741715618
 GameObject:
   m_ObjectHideFlags: 0
@@ -137,6 +151,7 @@ GameObject:
   - component: {fileID: 3424281126241185488}
   - component: {fileID: 3979576310715468280}
   - component: {fileID: 6929933476186123196}
+  - component: {fileID: 8546737617201379820}
   m_Layer: 0
   m_Name: Label
   m_TagString: Untagged
@@ -184,7 +199,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.93, g: 0.93, b: 0.95, a: 1}
+  m_Color: {r: 0.89411765, g: 0.8980392, b: 0.91764706, a: 1}
   m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -205,6 +220,19 @@ MonoBehaviour:
     m_VerticalOverflow: 1
     m_LineSpacing: 1.15
   m_Text: "\u7121\u52B9"
+--- !u!114 &8546737617201379820
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 734693307741715618}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a40883b1bf6bf5543bb641824e65f870, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  colorType: 7
 --- !u!1 &1023187397334830439
 GameObject:
   m_ObjectHideFlags: 0
@@ -219,6 +247,7 @@ GameObject:
   - component: {fileID: 8508038962785574804}
   - component: {fileID: 8375114662471708525}
   - component: {fileID: 7654384851370630235}
+  - component: {fileID: 7543654930079327890}
   m_Layer: 0
   m_Name: TabletAudioLink
   m_TagString: Untagged
@@ -268,7 +297,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.17, g: 0.175, b: 0.2, a: 1}
+  m_Color: {r: 0.16470589, g: 0.17254902, b: 0.19607843, a: 1}
   m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -366,6 +395,19 @@ MonoBehaviour:
   - {fileID: 6929933476186123196}
   - {fileID: 256319132775530890}
   publicVariablesSerializationDataFormat: 0
+--- !u!114 &7543654930079327890
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1023187397334830439}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a40883b1bf6bf5543bb641824e65f870, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  colorType: 5
 --- !u!1 &2242168204626537811
 GameObject:
   m_ObjectHideFlags: 0
@@ -377,6 +419,7 @@ GameObject:
   - component: {fileID: 7448462459839031440}
   - component: {fileID: 3505477967393967313}
   - component: {fileID: 7150577509077753220}
+  - component: {fileID: 1277475320006389046}
   m_Layer: 0
   m_Name: Title
   m_TagString: Untagged
@@ -424,7 +467,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.93, g: 0.93, b: 0.95, a: 1}
+  m_Color: {r: 0.89411765, g: 0.8980392, b: 0.91764706, a: 1}
   m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -445,6 +488,19 @@ MonoBehaviour:
     m_VerticalOverflow: 1
     m_LineSpacing: 1.15
   m_Text: "AudioLink \u9023\u643A"
+--- !u!114 &1277475320006389046
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2242168204626537811}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a40883b1bf6bf5543bb641824e65f870, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  colorType: 7
 --- !u!1 &2944083089756170256
 GameObject:
   m_ObjectHideFlags: 0
@@ -504,7 +560,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.938, g: 0.383, b: 0.57, a: 1}
+  m_Color: {r: 0.16015686, g: 0.29035294, b: 0.35874507, a: 1}
   m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -533,7 +589,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a40883b1bf6bf5543bb641824e65f870, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  colorType: 0
+  colorType: 2
 --- !u!1 &3245722955444611937
 GameObject:
   m_ObjectHideFlags: 0
@@ -710,7 +766,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.938, g: 0.383, b: 0.57, a: 1}
+  m_Color: {r: 0.16015686, g: 0.29035294, b: 0.35874507, a: 1}
   m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -739,7 +795,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a40883b1bf6bf5543bb641824e65f870, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  colorType: 0
+  colorType: 2
 --- !u!1 &6389157940590990639
 GameObject:
   m_ObjectHideFlags: 0
@@ -752,6 +808,7 @@ GameObject:
   - component: {fileID: 5657726427274383207}
   - component: {fileID: 6546890492539004223}
   - component: {fileID: 2558687870049879727}
+  - component: {fileID: 5437901932792187921}
   m_Layer: 0
   m_Name: On
   m_TagString: Untagged
@@ -839,11 +896,11 @@ MonoBehaviour:
     m_SelectOnRight: {fileID: 0}
   m_Transition: 1
   m_Colors:
-    m_NormalColor: {r: 0.11, g: 0.115, b: 0.13, a: 1}
-    m_HighlightedColor: {r: 0.15, g: 0.155, b: 0.175, a: 1}
-    m_PressedColor: {r: 0.12, g: 0.125, b: 0.15, a: 1}
-    m_SelectedColor: {r: 0.11, g: 0.115, b: 0.13, a: 1}
-    m_DisabledColor: {r: 0.11, g: 0.115, b: 0.13, a: 1}
+    m_NormalColor: {r: 0.12156863, g: 0.1254902, b: 0.14509805, a: 1}
+    m_HighlightedColor: {r: 0.16156864, g: 0.16549021, b: 0.19009805, a: 1}
+    m_PressedColor: {r: 0.13156863, g: 0.13549021, b: 0.16509806, a: 1}
+    m_SelectedColor: {r: 0.12156863, g: 0.1254902, b: 0.14509805, a: 1}
+    m_DisabledColor: {r: 0.12156863, g: 0.1254902, b: 0.14509805, a: 1}
     m_ColorMultiplier: 1
     m_FadeDuration: 0.1
   m_SpriteState:
@@ -866,6 +923,19 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_IsOn: 0
+--- !u!114 &5437901932792187921
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6389157940590990639}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a40883b1bf6bf5543bb641824e65f870, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  colorType: 6
 --- !u!1 &7127982529692353250
 GameObject:
   m_ObjectHideFlags: 0
@@ -877,6 +947,7 @@ GameObject:
   - component: {fileID: 4132002958540302065}
   - component: {fileID: 6165037093015307027}
   - component: {fileID: 256319132775530890}
+  - component: {fileID: 3824625181353909697}
   m_Layer: 0
   m_Name: Label
   m_TagString: Untagged
@@ -924,7 +995,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.93, g: 0.93, b: 0.95, a: 1}
+  m_Color: {r: 0.89411765, g: 0.8980392, b: 0.91764706, a: 1}
   m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -945,6 +1016,19 @@ MonoBehaviour:
     m_VerticalOverflow: 1
     m_LineSpacing: 1.15
   m_Text: "\u6709\u52B9"
+--- !u!114 &3824625181353909697
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7127982529692353250}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a40883b1bf6bf5543bb641824e65f870, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  colorType: 7
 --- !u!1 &8137412052165243053
 GameObject:
   m_ObjectHideFlags: 0

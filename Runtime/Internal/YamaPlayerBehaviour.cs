@@ -6,7 +6,7 @@ namespace Yamadev.YamaStream
 {
     public abstract class YamaPlayerBehaviour : UdonSharpBehaviour
     {
-        protected const string DebugPrefix = "[<color=#EF6291>YamaStream</color>]";
+        protected const string DebugPrefix = "[<color=#4FC3F7>YamaStream</color>]";
 
         protected bool IsLocalPlayerValid => Utilities.IsValid(Networking.LocalPlayer);
         protected VRCPlayerApi LocalPlayer => IsLocalPlayerValid ? Networking.LocalPlayer : null;

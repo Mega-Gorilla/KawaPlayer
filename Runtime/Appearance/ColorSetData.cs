@@ -9,9 +9,5 @@ namespace Yamadev.YamaStream
     public string colorSetName = "";
     public Color primaryColor;
     public Color secondaryColor;
-    public Color infoColor;
-    public Color successColor;
-    public Color alermColor;
-    public Color errorColor;
   }
 }
