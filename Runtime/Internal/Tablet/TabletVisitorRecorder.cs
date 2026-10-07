@@ -334,6 +334,14 @@ namespace Yamadev.YamaStream.Tablet
       }
     }
 
+    private void NotifyPhotos()
+    {
+      foreach (TabletVisitorsApp app in _apps)
+      {
+        if (Utilities.IsValid(app)) app.OnPhotosChanged();
+      }
+    }
+
     #endregion
 
     #region Photos
@@ -378,10 +386,11 @@ namespace Yamadev.YamaStream.Tablet
       if (_startTicks == 0) return;
 
       int now = Now();
+      VRCPlayerApi[] players = GetPlayers();
       VRCPlayerApi target = null;
       int targetPhoto = -1;
       float oldest = float.MaxValue;
-      foreach (VRCPlayerApi player in GetPlayers())
+      foreach (VRCPlayerApi player in players)
       {
         if (!Utilities.IsValid(player)) continue;
         int visitor = FindVisitor(player.displayName);
@@ -396,14 +405,11 @@ namespace Yamadev.YamaStream.Tablet
       }
       if (!Utilities.IsValid(target)) return;
 
-      if (targetPhoto < 0) targetPhoto = FreePhoto(GetPlayers());
+      if (targetPhoto < 0) targetPhoto = FreePhoto(players);
       TakePhoto(target, targetPhoto);
       _photoNames[targetPhoto] = target.displayName;
       _photoTimes[targetPhoto] = Time.time;
-      foreach (TabletVisitorsApp app in _apps)
-      {
-        if (Utilities.IsValid(app)) app.OnPhotosChanged();
-      }
+      NotifyPhotos();
     }
 
     // A new avatar: retake soon, once it has had a moment to appear.

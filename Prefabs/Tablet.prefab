@@ -19925,7 +19925,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 1
     m_VerticalOverflow: 1
     m_LineSpacing: 1.15
-  m_Text: "13:58 \u304B\u3089\u8A18\u9332"
+  m_Text: 
 --- !u!114 &221959294491969269
 MonoBehaviour:
   m_ObjectHideFlags: 0
