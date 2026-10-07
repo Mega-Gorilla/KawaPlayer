@@ -268,20 +268,15 @@ namespace Yamadev.YamaStream.Tablet
 
     public void UpdateTranslation()
     {
-      SetTranslatedText(_titleText, "tablet.app.image");
-      SetTranslatedText(_hintText, "tablet.image.inputHint");
+      if (Utilities.IsValid(_screen))
+      {
+        _screen.SetTranslatedText(_titleText, "tablet.app.image");
+        _screen.SetTranslatedText(_hintText, "tablet.image.inputHint");
+      }
       UpdateStatusView();
     }
 
     private string GetTranslation(string key) => Utilities.IsValid(_screen) ? _screen.GetTranslation(key) : string.Empty;
-
-    // A missing key leaves the text the prefab was saved with.
-    private void SetTranslatedText(Text text, string key)
-    {
-      if (!Utilities.IsValid(text)) return;
-      string value = GetTranslation(key);
-      if (!string.IsNullOrEmpty(value)) text.text = value;
-    }
 
     // The quarter turn that keeps the picture upright: on the screen, from
     // the tablet's up to the world's.
