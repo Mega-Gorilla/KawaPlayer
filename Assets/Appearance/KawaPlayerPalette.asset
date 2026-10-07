@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: KawaPlayerPalette
   m_EditorClassIdentifier: 
   colorSets:
-  - colorSetName: KawaPlayer
+  - colorSetName: KawaPlayer (Light Blue)
     primaryColor: {r: 0.30980393, g: 0.7647059, b: 0.96862745, a: 1}
     secondaryColor: {r: 0.7019608, g: 0.8980392, b: 0.9882353, a: 0.25}
   - colorSetName: Pink
