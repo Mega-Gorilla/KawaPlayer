@@ -153,8 +153,9 @@ namespace Yamadev.YamaStream.Tablet
       SetTranslatedText(_versionAppTitle, "tablet.app.version");
     }
 
-    // A missing key leaves the text the prefab was saved with.
-    private void SetTranslatedText(Text text, string key)
+    // A missing key leaves the text the prefab was saved with. The apps
+    // use it too.
+    public void SetTranslatedText(Text text, string key)
     {
       if (!Utilities.IsValid(text)) return;
       string value = GetTranslation(key);

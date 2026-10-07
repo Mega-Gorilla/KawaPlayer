@@ -38,23 +38,16 @@ namespace Yamadev.YamaStream.Tablet
 
     public void UpdateTranslation()
     {
-      SetTranslatedText(_titleText, "menu.settings");
-      SetTranslatedText(_videoLabel, "tablet.settings.video");
-      SetTranslatedText(_audioLabel, "tablet.settings.audio");
-      SetTranslatedText(_languageLabel, "label.languageSelect");
-      SetTranslatedText(_playbackLabel, "tab.playback");
+      if (!Utilities.IsValid(_screen)) return;
+      _screen.SetTranslatedText(_titleText, "menu.settings");
+      _screen.SetTranslatedText(_videoLabel, "tablet.settings.video");
+      _screen.SetTranslatedText(_audioLabel, "tablet.settings.audio");
+      _screen.SetTranslatedText(_languageLabel, "label.languageSelect");
+      _screen.SetTranslatedText(_playbackLabel, "tab.playback");
       if (Utilities.IsValid(_notes))
       {
-        for (int i = 0; i < _notes.Length; i++) SetTranslatedText(_notes[i], "tablet.settings.note");
+        for (int i = 0; i < _notes.Length; i++) _screen.SetTranslatedText(_notes[i], "tablet.settings.note");
       }
-    }
-
-    // A missing key leaves the text the prefab was saved with.
-    private void SetTranslatedText(Text text, string key)
-    {
-      if (!Utilities.IsValid(text) || !Utilities.IsValid(_screen)) return;
-      string value = _screen.GetTranslation(key);
-      if (!string.IsNullOrEmpty(value)) text.text = value;
     }
   }
 }
