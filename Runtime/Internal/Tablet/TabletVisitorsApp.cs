@@ -128,7 +128,10 @@ namespace Yamadev.YamaStream.Tablet
       _dirty = false;
       if (!Utilities.IsValid(_recorder)) return;
       if (_listRows.Length == 0) MakeRows();
-      _utcOffsetTicks = (DateTime.Now - DateTime.UtcNow).Ticks / TicksPerMinute * TicksPerMinute;
+      // From one reading of the clock: two readings can fall on either side
+      // of a tick and come out a minute short.
+      DateTime utcNow = DateTime.UtcNow;
+      _utcOffsetTicks = (utcNow.ToLocalTime() - utcNow).Ticks;
 
       if (Utilities.IsValid(_sinceText))
       {
@@ -480,11 +483,11 @@ namespace Yamadev.YamaStream.Tablet
       string platformName = platform == TabletVisitorRecorder.PlatformAndroid ? "Android"
         : platform == TabletVisitorRecorder.PlatformIOS ? "iOS" : "PC";
       int input = (environment >> TabletVisitorRecorder.EnvironmentInputShift) & TabletVisitorRecorder.EnvironmentInputMask;
-      return platformName + " · " + InputName(input, (environment & TabletVisitorRecorder.EnvironmentVR) != 0);
+      return platformName + " · " + InputName(input, (environment & TabletVisitorRecorder.EnvironmentVR) != 0, platform);
     }
 
     // By VRCInputMethod.
-    private string InputName(int input, bool vr)
+    private string InputName(int input, bool vr, int platform)
     {
       switch (input)
       {
@@ -492,7 +495,9 @@ namespace Yamadev.YamaStream.Tablet
         case 1: return Translate("tablet.visitors.input.keyboard");
         case 2: return Translate("tablet.visitors.input.gamepad");
         case 5: return "Vive";
-        case 6: return "Quest";
+        // Meta's controllers: on Android a Quest; on PC a Rift, or a Quest
+        // through Link, which the input does not tell apart.
+        case 6: return platform == TabletVisitorRecorder.PlatformAndroid ? "Quest" : "Oculus";
         case 7: return "Vive XR";
         case 10: return "Index";
         case 11: return "WMR";

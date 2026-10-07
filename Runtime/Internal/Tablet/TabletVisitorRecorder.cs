@@ -52,6 +52,7 @@ namespace Yamadev.YamaStream.Tablet
     // record at once.
     private const float ArrivalDelayMin = 3f;
     private const float ArrivalDelayMax = 5f;
+    private const float ArrivalRetryDelay = 1f;
     // During OnPlayerLeft the leaving player is still listed.
     private const float DepartureCheckDelay = 3f;
     // At most one photo per interval. The first waits for the avatar to load;
@@ -141,6 +142,16 @@ namespace Yamadev.YamaStream.Tablet
     {
       _arrivalScheduled = false;
       if (!IsLocalPlayerValid || IsHere()) return;
+      // Not before this client has the record: an arrival written over an
+      // empty one would take the record and lose everyone who has left. The
+      // delay above does not promise that; a settled network does, every
+      // object's state having arrived by then.
+      if (!Networking.IsNetworkSettled)
+      {
+        _arrivalScheduled = true;
+        SendCustomEventDelayedSeconds(nameof(_Arrive), ArrivalRetryDelay);
+        return;
+      }
       TakeOwnership();
 
       string name = LocalPlayer.displayName;
