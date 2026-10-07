@@ -122,5 +122,21 @@
   "tablet.image.hideDetails": "关闭详情",
   "tablet.settings.video": "视频",
   "tablet.settings.audio": "音频",
-  "tablet.settings.note": "在此更改的设置只对你生效"
+  "tablet.settings.note": "在此更改的设置只对你生效",
+  "tablet.app.visitors": "访客",
+  "tablet.visitors.list": "列表",
+  "tablet.visitors.log": "记录",
+  "tablet.visitors.since": "自 {0} 起记录",
+  "tablet.visitors.present": "当前在场",
+  "tablet.visitors.departed": "已离开",
+  "tablet.visitors.people": "{0} 人",
+  "tablet.visitors.owner": "所有者",
+  "tablet.visitors.visits": "进入 {0} 次",
+  "tablet.visitors.arrival": "进入",
+  "tablet.visitors.departure": "离开",
+  "tablet.visitors.dateTime": "{0}/{1} {2}",
+  "tablet.visitors.input.keyboard": "键盘",
+  "tablet.visitors.input.gamepad": "手柄",
+  "tablet.visitors.input.touch": "触屏",
+  "tablet.visitors.input.questHands": "Quest 手势"
 }

@@ -35,6 +35,8 @@ namespace Yamadev.YamaStream.Editor
     private SerializedObject _tabletPickupSerializedObject;
     private SerializedProperty _idleReturnSeconds;
     private TabletReturnButton _tabletReturnButton;
+    private SerializedObject _visitorRecorderSerializedObject;
+    private SerializedProperty _visitorPhotosEnabled;
 
     private void OnEnable()
     {
@@ -79,6 +81,12 @@ namespace Yamadev.YamaStream.Editor
         _idleReturnSeconds = _tabletPickupSerializedObject.FindProperty("_idleReturnSeconds");
       }
       _tabletReturnButton = _target.GetComponentInChildren<TabletReturnButton>(true);
+      var visitorRecorder = _target.GetComponentInChildren<TabletVisitorRecorder>(true);
+      if (visitorRecorder != null)
+      {
+        _visitorRecorderSerializedObject = new SerializedObject(visitorRecorder);
+        _visitorPhotosEnabled = _visitorRecorderSerializedObject.FindProperty("_photosEnabled");
+      }
     }
 
     public override void OnInspectorGUI()
@@ -115,6 +123,7 @@ namespace Yamadev.YamaStream.Editor
         DrawLocalizationSettings();
         DrawUISettings();
         DrawPickupSettings();
+        DrawVisitorSettings();
 
         ApplyModifiedProperties();
         if (check.changed) CopyToOtherUIs();
@@ -260,6 +269,17 @@ namespace Yamadev.YamaStream.Editor
       }
     }
 
+    // The visitors app's photos (issue #153). The world keeps one record for
+    // all its tablets, so turning them off on any tablet turns them off.
+    private void DrawVisitorSettings()
+    {
+      if (_visitorPhotosEnabled == null) return;
+      EditorGUILayout.Space(SpaceMedium);
+      EditorGUILayout.LabelField(EditorLocalization.Get("settings.visitors.label"), EditorStyles.boldLabel);
+      _visitorRecorderSerializedObject.Update();
+      EditorGUILayout.PropertyField(_visitorPhotosEnabled, EditorLocalization.GetLayout("settings.visitorPhotos.label", "settings.visitorPhotos.tooltip"));
+    }
+
     // The tablet's two ways back to where it was placed (issue #108, D1).
     private void DrawTabletReturnSettings()
     {
@@ -290,6 +310,7 @@ namespace Yamadev.YamaStream.Editor
       _uiControllerSerializedObject?.ApplyModifiedProperties();
       _vrcPickupSerializedObject?.ApplyModifiedProperties();
       _tabletPickupSerializedObject?.ApplyModifiedProperties();
+      _visitorRecorderSerializedObject?.ApplyModifiedProperties();
     }
 
     // The fields above edit the first UI found. When there are more -- the

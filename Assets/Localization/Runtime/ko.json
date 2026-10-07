@@ -122,5 +122,21 @@
   "tablet.image.hideDetails": "상세 닫기",
   "tablet.settings.video": "영상",
   "tablet.settings.audio": "음성",
-  "tablet.settings.note": "여기서 변경한 설정은 본인에게만 적용됩니다"
+  "tablet.settings.note": "여기서 변경한 설정은 본인에게만 적용됩니다",
+  "tablet.app.visitors": "방문자",
+  "tablet.visitors.list": "목록",
+  "tablet.visitors.log": "기록",
+  "tablet.visitors.since": "{0}부터 기록",
+  "tablet.visitors.present": "지금 있는 사람",
+  "tablet.visitors.departed": "퇴장한 사람",
+  "tablet.visitors.people": "{0}명",
+  "tablet.visitors.owner": "소유자",
+  "tablet.visitors.visits": "입장 {0}회",
+  "tablet.visitors.arrival": "입장",
+  "tablet.visitors.departure": "퇴장",
+  "tablet.visitors.dateTime": "{0}/{1} {2}",
+  "tablet.visitors.input.keyboard": "키보드",
+  "tablet.visitors.input.gamepad": "게임패드",
+  "tablet.visitors.input.touch": "터치",
+  "tablet.visitors.input.questHands": "Quest 핸드"
 }

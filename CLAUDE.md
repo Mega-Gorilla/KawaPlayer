@@ -96,7 +96,7 @@ Inherited from upstream YamaPlayer:
 
 ### Prefabs
 
-`KawaPlayer.prefab` at the repository root is the main all-in-one prefab that users drop into scenes (also reachable via the **GameObject > KawaPlayer > Main** menu). Additional prefabs (ControlBar, PlaylistPanel, SubScreen, Tablet, UI parts) live in `Prefabs/`. The Tablet's scripts (`TabletPickup`, `TabletScreen`, `TabletReturnButton`, and one per app: `TabletImageApp`, `TabletSettingsApp`) live in `Runtime/Internal/Tablet/`; its model and Blender build script in `Assets/Models/Tablet/`. The settings app's controls are wired to the tablet's own `UIController`, and modules add their rows to it through `uiSlots` (the AudioLink row, the DefaultUrl card), as they do for the player's settings panel.
+`KawaPlayer.prefab` at the repository root is the main all-in-one prefab that users drop into scenes (also reachable via the **GameObject > KawaPlayer > Main** menu). Additional prefabs (ControlBar, PlaylistPanel, SubScreen, Tablet, UI parts) live in `Prefabs/`. The Tablet's scripts (`TabletPickup`, `TabletScreen`, `TabletReturnButton`, and one per app: `TabletImageApp`, `TabletSettingsApp`, `TabletVisitorsApp`) live in `Runtime/Internal/Tablet/`; its model and Blender build script in `Assets/Models/Tablet/`. The settings app's controls are wired to the tablet's own `UIController`, and modules add their rows to it through `uiSlots` (the AudioLink row, the DefaultUrl card), as they do for the player's settings panel. The visitors app reads a `TabletVisitorRecorder` that keeps one record for the whole world: every tablet carries one, and `TabletVisitorsBuildProcess` keeps the first, moves it to the scene root, switches the others off and points every visitors app at it.
 
 ### Editor Tools (`Editor/`)
 

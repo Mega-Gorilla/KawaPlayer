@@ -122,5 +122,21 @@
   "tablet.image.hideDetails": "詳細を閉じる",
   "tablet.settings.video": "映像",
   "tablet.settings.audio": "音声",
-  "tablet.settings.note": "ここで変えた設定は、あなたにだけ反映されます"
+  "tablet.settings.note": "ここで変えた設定は、あなたにだけ反映されます",
+  "tablet.app.visitors": "訪問者",
+  "tablet.visitors.list": "一覧",
+  "tablet.visitors.log": "ログ",
+  "tablet.visitors.since": "{0} から記録",
+  "tablet.visitors.present": "今いる人",
+  "tablet.visitors.departed": "退室した人",
+  "tablet.visitors.people": "{0} 人",
+  "tablet.visitors.owner": "オーナー",
+  "tablet.visitors.visits": "入室 {0} 回",
+  "tablet.visitors.arrival": "入室",
+  "tablet.visitors.departure": "退室",
+  "tablet.visitors.dateTime": "{0}/{1} {2}",
+  "tablet.visitors.input.keyboard": "キーボード",
+  "tablet.visitors.input.gamepad": "ゲームパッド",
+  "tablet.visitors.input.touch": "タッチ",
+  "tablet.visitors.input.questHands": "Quest ハンド"
 }

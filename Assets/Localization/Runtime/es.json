@@ -122,5 +122,21 @@
   "tablet.image.hideDetails": "Ocultar detalles",
   "tablet.settings.video": "Video",
   "tablet.settings.audio": "Audio",
-  "tablet.settings.note": "Los cambios que hagas aquí solo se aplican a ti"
+  "tablet.settings.note": "Los cambios que hagas aquí solo se aplican a ti",
+  "tablet.app.visitors": "Visitantes",
+  "tablet.visitors.list": "Lista",
+  "tablet.visitors.log": "Registro",
+  "tablet.visitors.since": "Desde {0}",
+  "tablet.visitors.present": "Aquí ahora",
+  "tablet.visitors.departed": "Se fueron",
+  "tablet.visitors.people": "{0}",
+  "tablet.visitors.owner": "Propietario",
+  "tablet.visitors.visits": "{0} visitas",
+  "tablet.visitors.arrival": "Entrada",
+  "tablet.visitors.departure": "Salida",
+  "tablet.visitors.dateTime": "{1}/{0} {2}",
+  "tablet.visitors.input.keyboard": "Teclado",
+  "tablet.visitors.input.gamepad": "Mando",
+  "tablet.visitors.input.touch": "Táctil",
+  "tablet.visitors.input.questHands": "Quest (manos)"
 }

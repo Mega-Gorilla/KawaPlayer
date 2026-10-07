@@ -21,6 +21,7 @@ namespace Yamadev.YamaStream.Tablet
     private const int KawaPlayerApp = 1;
     private const int ImageApp = 2;
     private const int SettingsApp = 3;
+    private const int VisitorsApp = 4;
 
     private const float DistanceCheckInterval = 0.5f;
 
@@ -28,6 +29,7 @@ namespace Yamadev.YamaStream.Tablet
     [SerializeField] private TabletPickup _tablet;
     [SerializeField] private TabletImageApp _imageApp;
     [SerializeField] private TabletSettingsApp _settingsApp;
+    [SerializeField] private TabletVisitorsApp _visitorsApp;
 
     [Header("Screens")]
     [SerializeField] private GameObject _home;
@@ -40,6 +42,7 @@ namespace Yamadev.YamaStream.Tablet
     [SerializeField, RegisterEvent(nameof(Button.onClick), nameof(OpenKawaPlayerApp))] private Button _kawaPlayerAppButton;
     [SerializeField, RegisterEvent(nameof(Button.onClick), nameof(OpenImageApp))] private Button _imageAppButton;
     [SerializeField, RegisterEvent(nameof(Button.onClick), nameof(OpenSettingsApp))] private Button _settingsAppButton;
+    [SerializeField, RegisterEvent(nameof(Button.onClick), nameof(OpenVisitorsApp))] private Button _visitorsAppButton;
 
     [Header("Home")]
     [SerializeField] private Text _clockText;
@@ -47,6 +50,7 @@ namespace Yamadev.YamaStream.Tablet
     [SerializeField] private Text _versionAppLabel;
     [SerializeField] private Text _imageAppLabel;
     [SerializeField] private Text _settingsAppLabel;
+    [SerializeField] private Text _visitorsAppLabel;
 
     [Header("Version App")]
     [SerializeField] private Text _versionAppTitle;
@@ -93,6 +97,8 @@ namespace Yamadev.YamaStream.Tablet
     public void OpenImageApp() => OpenApp(ImageApp);
 
     public void OpenSettingsApp() => OpenApp(SettingsApp);
+
+    public void OpenVisitorsApp() => OpenApp(VisitorsApp);
 
     public VRCUrl ImageUrl => _imageUrl;
 
@@ -143,6 +149,7 @@ namespace Yamadev.YamaStream.Tablet
       UpdateClockView();
       if (Utilities.IsValid(_imageApp)) _imageApp.UpdateTranslation();
       if (Utilities.IsValid(_settingsApp)) _settingsApp.UpdateTranslation();
+      if (Utilities.IsValid(_visitorsApp)) _visitorsApp.UpdateTranslation();
     }
 
     private void UpdateTranslation()
@@ -150,6 +157,7 @@ namespace Yamadev.YamaStream.Tablet
       SetTranslatedText(_versionAppLabel, "tablet.app.version");
       SetTranslatedText(_imageAppLabel, "tablet.app.image");
       SetTranslatedText(_settingsAppLabel, "menu.settings");
+      SetTranslatedText(_visitorsAppLabel, "tablet.app.visitors");
       SetTranslatedText(_versionAppTitle, "tablet.app.version");
     }
 
@@ -188,8 +196,9 @@ namespace Yamadev.YamaStream.Tablet
     }
 
     // Every language orders the date its own way, so the translation holds
-    // the pattern: {0} month, {1} day, {2} weekday name, {3} month name.
-    private string FormatDate(DateTime date)
+    // the pattern: {0} month, {1} day, {2} weekday name, {3} month name. The
+    // visitors app's log uses it too.
+    public string FormatDate(DateTime date)
     {
       string format = GetTranslation("tablet.dateFormat");
       if (string.IsNullOrEmpty(format)) return date.ToString("yyyy-MM-dd");

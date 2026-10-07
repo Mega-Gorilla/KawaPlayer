@@ -122,5 +122,21 @@
   "tablet.image.hideDetails": "Сховати подробиці",
   "tablet.settings.video": "Відео",
   "tablet.settings.audio": "Аудіо",
-  "tablet.settings.note": "Зміни тут діють лише для вас"
+  "tablet.settings.note": "Зміни тут діють лише для вас",
+  "tablet.app.visitors": "Відвідувачі",
+  "tablet.visitors.list": "Список",
+  "tablet.visitors.log": "Журнал",
+  "tablet.visitors.since": "З {0}",
+  "tablet.visitors.present": "Зараз тут",
+  "tablet.visitors.departed": "Пішли",
+  "tablet.visitors.people": "{0}",
+  "tablet.visitors.owner": "Власник",
+  "tablet.visitors.visits": "Візитів: {0}",
+  "tablet.visitors.arrival": "Вхід",
+  "tablet.visitors.departure": "Вихід",
+  "tablet.visitors.dateTime": "{1}.{0} {2}",
+  "tablet.visitors.input.keyboard": "Клавіатура",
+  "tablet.visitors.input.gamepad": "Геймпад",
+  "tablet.visitors.input.touch": "Сенсор",
+  "tablet.visitors.input.questHands": "Quest (руки)"
 }
