@@ -242,7 +242,6 @@
   "appearance.title": "Impostazioni Aspetto",
   "appearance.defaultColorSet": "Set Colori Predefinito",
   "appearance.defaultColorSet.label": "Predefinito",
-  "appearance.defaultColorSet.auto": "Auto (Primo Set Colori)",
   "appearance.colorSetList": "Set Colori Aggiunti",
   "appearance.add": "+ Aggiungi",
   "appearance.noColorSets": "Nessun set colori registrato. Clicca sul pulsante 'Aggiungi' per aggiungere il primo set colori.",

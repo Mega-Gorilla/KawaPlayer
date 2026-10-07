@@ -242,7 +242,6 @@
   "appearance.title": "Appearance Settings",
   "appearance.defaultColorSet": "Default Color Set",
   "appearance.defaultColorSet.label": "Default",
-  "appearance.defaultColorSet.auto": "Auto (First color set)",
   "appearance.colorSetList": "Added Color Sets",
   "appearance.add": "+ Add",
   "appearance.noColorSets": "No color sets registered. Click the \"Add\" button to add the first color set.",

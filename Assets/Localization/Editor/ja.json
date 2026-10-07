@@ -242,7 +242,6 @@
   "appearance.title": "外観設定",
   "appearance.defaultColorSet": "デフォルトカラーセット",
   "appearance.defaultColorSet.label": "初期値",
-  "appearance.defaultColorSet.auto": "Auto (最初のカラーセット)",
   "appearance.colorSetList": "追加のカラーセット",
   "appearance.add": "+ 追加",
   "appearance.noColorSets": "カラーセットが登録されていません。「追加」ボタンをクリックして最初のカラーセットを追加してください。",

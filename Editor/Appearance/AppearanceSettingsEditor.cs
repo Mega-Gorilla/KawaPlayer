@@ -43,21 +43,22 @@ namespace Yamadev.YamaStream.Editor
       DrawApplyNowSection();
     }
 
-    // The default colour set, from every set the UI can take: Auto (an empty
-    // name, the first set), then the palette's sets, then the ones added here.
-    // Also drawn by the player inspectors.
+    // The default colour set, from every set the UI can take: the palette's,
+    // then the ones added here. Also drawn by the player inspectors.
     public static void DrawColorSetPopup(AppearanceSettings settings, SerializedProperty defaultColorSet, string label)
     {
       var names = settings.ColorSetNames;
-      var options = new string[names.Length + 1];
-      options[0] = EditorLocalization.Get("appearance.defaultColorSet.auto");
-      System.Array.Copy(names, 0, options, 1, names.Length);
-      // A name no set has shows as Auto, which is what the build falls back to.
-      int current = System.Array.IndexOf(names, defaultColorSet.stringValue) + 1;
+      if (names.Length == 0)
+      {
+        EditorGUILayout.LabelField(EditorLocalization.Get("appearance.noColorSets"));
+        return;
+      }
+      // A name no set has shows the first set, which is what the build falls back to.
+      int current = Mathf.Max(0, System.Array.IndexOf(names, defaultColorSet.stringValue));
       using (var check = new EditorGUI.ChangeCheckScope())
       {
-        int selected = EditorGUILayout.Popup(label, current, options);
-        if (check.changed) defaultColorSet.stringValue = selected == 0 ? "" : names[selected - 1];
+        int selected = EditorGUILayout.Popup(label, current, names);
+        if (check.changed) defaultColorSet.stringValue = names[selected];
       }
     }
 

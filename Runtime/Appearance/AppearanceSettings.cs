@@ -9,8 +9,8 @@ namespace Yamadev.YamaStream
   {
     // Where the colour sets and the neutral colours come from (issue #161).
     public ColorPalette palette;
-    // Empty is Auto: the first colour set, the KawaPlayer one.
-    public string defaultColorSet = "";
+    // The colour set this UI takes, by name. A name no set has (or none) gets the first set.
+    public string defaultColorSet = "KawaPlayer";
     // Sets a world adds to the palette's. One with a palette set's name takes its place.
     public ColorSetData[] colorSets = new ColorSetData[0];
 

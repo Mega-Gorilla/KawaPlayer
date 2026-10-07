@@ -255,7 +255,6 @@
   "appearance.title": "외관 설정",
   "appearance.defaultColorSet": "기본 색상 세트",
   "appearance.defaultColorSet.label": "기본값",
-  "appearance.defaultColorSet.auto": "Auto (첫 번째 색상 세트)",
   "appearance.colorSetList": "추가한 색상 세트",
   "appearance.add": "+ 추가",
   "appearance.noColorSets": "등록된 색상 세트가 없습니다. \"추가\" 버튼을 클릭하여 첫 번째 색상 세트를 추가하세요.",

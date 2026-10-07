@@ -255,7 +255,6 @@
   "appearance.title": "外观设置",
   "appearance.defaultColorSet": "默认配色方案",
   "appearance.defaultColorSet.label": "默认",
-  "appearance.defaultColorSet.auto": "Auto (第一个配色方案)",
   "appearance.colorSetList": "已添加的配色方案",
   "appearance.add": "+ 添加",
   "appearance.noColorSets": "未注册配色方案。点击\"添加\"按钮添加第一个配色方案。",

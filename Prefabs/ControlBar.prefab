@@ -1534,7 +1534,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   palette: {fileID: 11400000, guid: f049037f601aba04aa080512c1b02349, type: 2}
-  defaultColorSet: 
+  defaultColorSet: KawaPlayer
   colorSets: []
 --- !u!114 &3105922751969644431
 MonoBehaviour:

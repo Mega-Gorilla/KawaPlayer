@@ -255,7 +255,6 @@
   "appearance.title": "Настройки внешнего вида",
   "appearance.defaultColorSet": "Цветовая схема по умолчанию",
   "appearance.defaultColorSet.label": "По умолчанию",
-  "appearance.defaultColorSet.auto": "Авто (первая цветовая схема)",
   "appearance.colorSetList": "Добавленные цветовые схемы",
   "appearance.add": "+ Добавить",
   "appearance.noColorSets": "Цветовые схемы не зарегистрированы. Нажмите \"Добавить\", чтобы добавить первую схему.",

@@ -255,7 +255,6 @@
   "appearance.title": "Configuración de apariencia",
   "appearance.defaultColorSet": "Esquema de colores predeterminado",
   "appearance.defaultColorSet.label": "Predeterminado",
-  "appearance.defaultColorSet.auto": "Auto (primer esquema de colores)",
   "appearance.colorSetList": "Esquemas de colores añadidos",
   "appearance.add": "+ Agregar",
   "appearance.noColorSets": "No hay esquemas de colores registrados. Haga clic en \"Agregar\" para agregar el primero.",

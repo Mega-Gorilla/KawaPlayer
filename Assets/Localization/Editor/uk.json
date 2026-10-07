@@ -255,7 +255,6 @@
   "appearance.title": "Налаштування зовнішнього вигляду",
   "appearance.defaultColorSet": "Кольорова схема за замовчуванням",
   "appearance.defaultColorSet.label": "За замовчуванням",
-  "appearance.defaultColorSet.auto": "Авто (перша кольорова схема)",
   "appearance.colorSetList": "Додані кольорові схеми",
   "appearance.add": "+ Додати",
   "appearance.noColorSets": "Кольорові схеми не зареєстровані. Натисніть \"Додати\", щоб додати першу схему.",
