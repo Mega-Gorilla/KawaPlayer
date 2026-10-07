@@ -69,11 +69,11 @@ namespace Yamadev.YamaStream.Tablet
       ShowUrl();
     }
 
-    // A download still running when the app closes may never report back,
-    // so ask again when it opens.
-    private void OnDisable()
+    // The downloader holds every picture it fetched: let them go with the
+    // tablet, as VRChat's own image loading example does.
+    private void OnDestroy()
     {
-      if (_statusKey == LoadingKey) _requestedUrl = VRCUrl.Empty;
+      if (Utilities.IsValid(_downloader)) _downloader.Dispose();
     }
 
     private void Update()
@@ -104,7 +104,8 @@ namespace Yamadev.YamaStream.Tablet
 
     // Shows what the tablet's URL points at. TabletScreen calls this when the
     // URL changes; opening the app calls it too, since a closed app does not
-    // download.
+    // download. A download already running when the app closes still reports
+    // back while it is closed, so opening it again does not ask twice.
     public void ShowUrl()
     {
       if (!gameObject.activeInHierarchy || !Utilities.IsValid(_screen)) return;
