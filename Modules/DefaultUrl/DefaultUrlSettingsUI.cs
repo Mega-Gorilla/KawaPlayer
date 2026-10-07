@@ -65,6 +65,12 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
     // side, the icon, and the gap after it.
     [SerializeField] private float _enterUrlButtonChrome = 66f;
     [SerializeField] private Text _clearButtonLabel;
+    // The sizes the title's "(Global)" and the headline that says the
+    // feature is unavailable are drawn at. They are in the text's own units,
+    // so a panel whose text is set larger or smaller sets them to match (the
+    // tablet's settings app, issue #159).
+    [SerializeField] private int _globalSuffixSize = 44;
+    [SerializeField] private int _headlineSize = 48;
 
     private UIController _uiController;
     private string _lastSyncedUrl = null;
@@ -107,7 +113,7 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
       {
         string t = _uiController.GetTranslation("module.defaultUrl.title");
         if (!string.IsNullOrEmpty(t))
-          _titleText.text = $"{t}<size=44>(Global)</size>";
+          _titleText.text = $"{t}<size={_globalSuffixSize}>(Global)</size>";
       }
       if (_enterUrlButtonLabel != null)
       {
@@ -174,8 +180,8 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
           string reason = _uiController.GetTranslation("module.defaultUrl.noPermission");
           if (!string.IsNullOrEmpty(headline))
             _descriptionText.text = string.IsNullOrEmpty(reason)
-                ? $"<size=48><b>✕ {headline}</b></size>"
-                : $"<size=48><b>✕ {headline}</b></size>\n{reason}";
+                ? $"<size={_headlineSize}><b>✕ {headline}</b></size>"
+                : $"<size={_headlineSize}><b>✕ {headline}</b></size>\n{reason}";
         }
       }
     }
