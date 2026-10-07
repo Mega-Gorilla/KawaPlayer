@@ -41,8 +41,22 @@ namespace Yamadev.YamaStream
     }
 
     // The neutral roles give a colour but leave the alpha to the graphic, so a
-    // see-through overlay stays see-through.
-    public static bool IsNeutral(ColorType type) => type >= ColorType.Background;
+    // see-through overlay stays see-through. Listed by name: a role added later
+    // takes the next number whichever kind it is.
+    public static bool IsNeutral(ColorType type)
+    {
+      switch (type)
+      {
+        case ColorType.Background:
+        case ColorType.Surface:
+        case ColorType.SurfaceVariant:
+        case ColorType.OnSurface:
+        case ColorType.OnSurfaceVariant:
+          return true;
+        default:
+          return false;
+      }
+    }
 
     // A dark fill in the primary's hue, for what is selected; light text goes on it.
     public Color PrimaryContainer(ColorSetData colorSet)
