@@ -119,5 +119,8 @@
   "tablet.image.error.download": "下载失败。请确认 URL 是否正确、图片是否公开。",
   "tablet.image.error.busy": "加载请求过多，请稍后再试。",
   "tablet.image.showDetails": "错误详情",
-  "tablet.image.hideDetails": "关闭详情"
+  "tablet.image.hideDetails": "关闭详情",
+  "tablet.settings.video": "视频",
+  "tablet.settings.audio": "音频",
+  "tablet.settings.note": "在此更改的设置只对你生效"
 }

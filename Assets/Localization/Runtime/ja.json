@@ -119,5 +119,8 @@
   "tablet.image.error.download": "ダウンロードに失敗しました。URL が正しいか、画像が公開されているかを確かめてください。",
   "tablet.image.error.busy": "読み込みが混み合っています。少し待ってから、もう一度試してください。",
   "tablet.image.showDetails": "エラーの詳細",
-  "tablet.image.hideDetails": "詳細を閉じる"
+  "tablet.image.hideDetails": "詳細を閉じる",
+  "tablet.settings.video": "映像",
+  "tablet.settings.audio": "音声",
+  "tablet.settings.note": "ここで変えた設定は、あなたにだけ反映されます"
 }

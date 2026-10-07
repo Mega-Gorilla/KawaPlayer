@@ -42,6 +42,7 @@ namespace Yamadev.YamaStream
     private int _lastSetTimeFrame = 0;
     private float _lastLoadTime = 0f;
     private bool _checkRepeatRunning = false;
+    private string _uiLanguage = string.Empty;
 
     private const float SAFETY_RETRY_INTERVAL = 5.1f;
 
@@ -104,6 +105,18 @@ namespace Yamadev.YamaStream
       {
         _listeners[i].SendCustomEvent(eventName);
       }
+    }
+
+    // The language the local player last chose on any UI of this player.
+    // Every UI follows it, so the screen and a tablet never show two
+    // languages (issue #159). It is the player's own and is not synced.
+    public string UILanguage => _uiLanguage;
+
+    public void SetUILanguage(string language)
+    {
+      if (string.IsNullOrEmpty(language) || language == _uiLanguage) return;
+      _uiLanguage = language;
+      SendCustomVideoEvent("_OnUILanguageChanged");
     }
 
     public PlayerHandler Handler

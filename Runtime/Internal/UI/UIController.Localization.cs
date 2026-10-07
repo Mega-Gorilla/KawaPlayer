@@ -108,6 +108,13 @@ namespace Yamadev.YamaStream.UI
       }
 
       _currentLanguage = string.IsNullOrEmpty(_defaultLanguage) ? DetectUserLanguage() : _defaultLanguage;
+      // A UI that starts late, such as one inside a tablet app opened for the
+      // first time, takes the language the player already chose elsewhere.
+      string chosen = Utilities.IsValid(_controller) ? _controller.UILanguage : string.Empty;
+      if (!string.IsNullOrEmpty(chosen) && Utilities.IsValid(_translationData) && _translationData.ContainsKey(chosen))
+      {
+        _currentLanguage = chosen;
+      }
       UpdateTranslationToggles();
       UpdateFont(_currentLanguage);
 
@@ -207,6 +214,23 @@ namespace Yamadev.YamaStream.UI
     {
       if (!InvokeBeforeEvent("BeforeUserChangeLanguage")) return;
 
+      ApplyLanguage(language);
+      // The player's other UIs follow (issue #159).
+      if (Utilities.IsValid(_controller)) _controller.SetUILanguage(_currentLanguage);
+    }
+
+    // Another UI of this player changed the language. It was asked about
+    // there, so it is not asked again here.
+    public void _OnUILanguageChanged()
+    {
+      if (!Utilities.IsValid(_controller)) return;
+      string language = _controller.UILanguage;
+      if (string.IsNullOrEmpty(language) || language == _currentLanguage) return;
+      ApplyLanguage(language);
+    }
+
+    private void ApplyLanguage(string language)
+    {
       InitializeTranslation();
       _currentLanguage = string.IsNullOrEmpty(language) ? DetectUserLanguage() : language;
 

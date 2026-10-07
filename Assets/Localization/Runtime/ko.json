@@ -119,5 +119,8 @@
   "tablet.image.error.download": "다운로드에 실패했습니다. URL이 올바른지, 이미지가 공개되어 있는지 확인하세요.",
   "tablet.image.error.busy": "불러오기 요청이 많습니다. 잠시 후 다시 시도하세요.",
   "tablet.image.showDetails": "오류 상세",
-  "tablet.image.hideDetails": "상세 닫기"
+  "tablet.image.hideDetails": "상세 닫기",
+  "tablet.settings.video": "영상",
+  "tablet.settings.audio": "음성",
+  "tablet.settings.note": "여기서 변경한 설정은 본인에게만 적용됩니다"
 }
