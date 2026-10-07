@@ -148,11 +148,7 @@ namespace Yamadev.YamaStream.Editor
         _groupFoldouts[groupName] = true;
 
       var headerRect = EditorGUILayout.GetControlRect(false, GroupHeaderHeight);
-      var headerColor = EditorGUIUtility.isProSkin
-        ? new Color(0.22f, 0.22f, 0.22f)
-        : new Color(0.76f, 0.76f, 0.76f);
-
-      EditorGUI.DrawRect(headerRect, headerColor);
+      EditorGUI.DrawRect(headerRect, EditorBase.RowEvenColor);
 
       var foldoutRect = new Rect(headerRect.x + 4, headerRect.y + 2, 20, GroupHeaderHeight - 4);
       var labelText = $"{groupName} ({keys.Count})";

@@ -59,7 +59,7 @@ namespace Yamadev.YamaStream
     }
 
     // A dark fill in the primary's hue, for what is selected; light text goes on it.
-    public Color PrimaryContainer(ColorSetData colorSet)
+    private Color PrimaryContainer(ColorSetData colorSet)
     {
       var color = Color.Lerp(colorSet.primaryColor, background, ContainerDepth);
       color.a = 1f;
@@ -67,7 +67,7 @@ namespace Yamadev.YamaStream
     }
 
     // Dark text on a light primary, light text on a dark one: whichever reads better.
-    public Color OnPrimary(ColorSetData colorSet)
+    private Color OnPrimary(ColorSetData colorSet)
     {
       var dark = Color.Lerp(colorSet.primaryColor, Color.black, OnPrimaryDepth);
       dark.a = 1f;

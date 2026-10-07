@@ -1,3 +1,4 @@
+using System.Linq;
 using UnityEngine;
 using Yamadev.YamaStream.Editor;
 using Yamadev.YamaStream.UI;
@@ -5,7 +6,7 @@ using VRC.SDK3.Components;
 
 namespace Yamadev.YamaStream.Modules.PlaylistLoader.Editor
 {
-  // Wires two independent things. Runs at scene build and on play-mode entry
+  // Wires three independent things. Runs at scene build and on play-mode entry
   // (IProcessSceneWithReport), after YamaPlayerModuleBuildProcess (-3000) has
   // tagged inactive modules EditorOnly.
   //
@@ -19,9 +20,9 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader.Editor
     public void Process()
     {
       // Slots are wired off the loader itself, not off the UI: DefaultUrl
-      // (DefaultUrlController.cs:62) and Auto Load call LoadPlaylistFromUrl
-      // directly, so a world can run PlaylistLoader with no
-      // PlaylistLoaderUI at all and still needs somewhere to load into.
+      // (DefaultUrlController.TryAutoPlay) and Auto Load call
+      // LoadPlaylistFromUrl directly, so a world can run PlaylistLoader with
+      // no PlaylistLoaderUI at all and still needs somewhere to load into.
       var loaders = Object.FindObjectsByType<PlaylistLoader>(FindObjectsInactive.Include, FindObjectsSortMode.None);
       foreach (var loader in loaders)
       {
@@ -31,8 +32,9 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader.Editor
       var loaderUis = Object.FindObjectsByType<PlaylistLoaderUI>(FindObjectsInactive.Include, FindObjectsSortMode.None);
       foreach (var loaderUi in loaderUis)
       {
-        ProcessInterceptor(loaderUi);
-        ProcessRefreshHandler(loaderUi);
+        var uiControllers = FindPlayerUIControllers(loaderUi);
+        ProcessInterceptor(loaderUi, uiControllers);
+        ProcessRefreshHandler(loaderUi, uiControllers);
       }
     }
 
@@ -40,18 +42,10 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader.Editor
     // on panels that have no URL input at all -- PlaylistPanel is one. So this
     // deliberately does NOT reuse the interceptor's "owns the main URL input"
     // filter, or the button would never work there.
-    private static void ProcessRefreshHandler(PlaylistLoaderUI loaderUi)
+    private static void ProcessRefreshHandler(PlaylistLoaderUI loaderUi, UIController[] uiControllers)
     {
-      if (loaderUi == null || !loaderUi.gameObject.activeInHierarchy) return;
-      var loader = loaderUi.GetProgramVariable("_loader") as PlaylistLoader;
-      if (loader == null) return;
-      var controller = ResolveController(loader);
-      if (controller == null) return;
-
-      var uiControllers = Object.FindObjectsByType<UIController>(FindObjectsInactive.Include, FindObjectsSortMode.None);
       foreach (var uiController in uiControllers)
       {
-        if (uiController == null || uiController.GetProgramVariable("_controller") as Controller != controller) continue;
         uiController.SetProgramVariable("_playlistRefreshHandler", loaderUi);
       }
     }
@@ -78,18 +72,25 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader.Editor
       return controller;
     }
 
-    private static void ProcessInterceptor(PlaylistLoaderUI loaderUi)
+    // The UIControllers of the player whose loader this UI uses: none when
+    // the UI is inactive, or has no loader, or the loader no player.
+    private static UIController[] FindPlayerUIControllers(PlaylistLoaderUI loaderUi)
     {
-      if (loaderUi == null || !loaderUi.gameObject.activeInHierarchy) return;
+      if (loaderUi == null || !loaderUi.gameObject.activeInHierarchy) return new UIController[0];
       var loader = loaderUi.GetProgramVariable("_loader") as PlaylistLoader;
-      if (loader == null) return;
+      if (loader == null) return new UIController[0];
       var controller = ResolveController(loader);
-      if (controller == null) return;
+      if (controller == null) return new UIController[0];
 
-      var uiControllers = Object.FindObjectsByType<UIController>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+      return Object.FindObjectsByType<UIController>(FindObjectsInactive.Include, FindObjectsSortMode.None)
+        .Where(uiController => uiController != null && uiController.GetProgramVariable("_controller") as Controller == controller)
+        .ToArray();
+    }
+
+    private static void ProcessInterceptor(PlaylistLoaderUI loaderUi, UIController[] uiControllers)
+    {
       foreach (var uiController in uiControllers)
       {
-        if (uiController == null || uiController.GetProgramVariable("_controller") as Controller != controller) continue;
         // Only the UIController that owns the main URL inputs participates;
         // panels without inputs (PlaylistPanel etc.) never reach PlayUrlField.
         var mainInput = uiController.GetProgramVariable("_urlInputField") as VRCUrlInputField;

@@ -121,12 +121,8 @@ namespace Yamadev.YamaStream.Modules.LTCGIAdaptor.Editor
     {
       var info = _targetScreens[index];
 
-      var rowBgColor = index % 2 == 0
-        ? (EditorGUIUtility.isProSkin ? new Color(0.22f, 0.22f, 0.22f) : new Color(0.76f, 0.76f, 0.76f))
-        : (EditorGUIUtility.isProSkin ? new Color(0.25f, 0.25f, 0.25f) : new Color(0.8f, 0.8f, 0.8f));
-
       var rowRect = EditorGUILayout.BeginVertical();
-      EditorGUI.DrawRect(rowRect, rowBgColor);
+      EditorGUI.DrawRect(rowRect, RowColor(index));
 
       var statusBarRect = new Rect(rowRect.x, rowRect.y, 3, rowRect.height);
       EditorGUI.DrawRect(statusBarRect, info.IsEnabled ? ActiveColor : InactiveColor);

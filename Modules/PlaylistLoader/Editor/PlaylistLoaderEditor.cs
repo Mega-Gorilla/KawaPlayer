@@ -202,6 +202,15 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader.Editor
       EditorUtility.DisplayDialog("Success", $"Generated {poolSize} VRCUrl entries.", "OK");
     }
 
+    // サーバーは知らない Pool ID に "Unknown pool" と答える。そのときはダイアログで知らせて true を返す
+    private static bool ReportUnknownPool(string body, string baseUrl, string poolId)
+    {
+      if (!body.Contains("Unknown pool")) return false;
+      EditorUtility.DisplayDialog("Error",
+        $"Pool ID \"{poolId}\" はサーバーに存在しません。\n\nサーバー: {baseUrl}\nPool ID を確認してください。", "OK");
+      return true;
+    }
+
     private bool ValidatePoolIdWithServer(string baseUrl, string poolId)
     {
       try
@@ -214,31 +223,17 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader.Editor
           using (var response = request.GetResponse() as System.Net.HttpWebResponse)
           using (var reader = new System.IO.StreamReader(response.GetResponseStream()))
           {
-            string body = reader.ReadToEnd();
-            if (body.Contains("Unknown pool"))
-            {
-              EditorUtility.DisplayDialog("Error",
-                $"Pool ID \"{poolId}\" はサーバーに存在しません。\n\nサーバー: {baseUrl}\nPool ID を確認してください。", "OK");
-              return false;
-            }
-            return true;
+            return !ReportUnknownPool(reader.ReadToEnd(), baseUrl, poolId);
           }
         }
         catch (System.Net.WebException ex) when (ex.Response is System.Net.HttpWebResponse httpRes)
         {
-          // HTTP エラーレスポンス (404 等) — サーバーには接続できている
+          // HTTP エラーレスポンス (404 等) — サーバーには接続できている。
+          // Playlist not found 等なら Pool ID は有効
           using (var reader = new System.IO.StreamReader(httpRes.GetResponseStream()))
           {
-            string body = reader.ReadToEnd();
-            if (body.Contains("Unknown pool"))
-            {
-              EditorUtility.DisplayDialog("Error",
-                $"Pool ID \"{poolId}\" はサーバーに存在しません。\n\nサーバー: {baseUrl}\nPool ID を確認してください。", "OK");
-              return false;
-            }
+            return !ReportUnknownPool(reader.ReadToEnd(), baseUrl, poolId);
           }
-          // Playlist not found 等 → Pool ID は有効
-          return true;
         }
       }
       catch (System.Net.WebException)

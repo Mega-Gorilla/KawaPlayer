@@ -26,8 +26,7 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
       string host = UrlUtils.GetHostFromUrl(url);
       if (string.IsNullOrEmpty(host) || host != UrlUtils.GetHostFromUrl(poolBaseUrl)) return KindNotOurs;
 
-      string path = UrlUtils.GetPathFromUrl(url);
-      while (path.EndsWith("/") && path.Length > 1) path = path.Substring(0, path.Length - 1);
+      string path = GetTrimmedPath(url);
 
       if (path.StartsWith("/playlists/")) return KindWebPage;
       if (path == "/r") return KindMalformed;
@@ -51,8 +50,7 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
     {
       if (string.IsNullOrEmpty(url)) return string.Empty;
 
-      string path = UrlUtils.GetPathFromUrl(url);
-      while (path.EndsWith("/") && path.Length > 1) path = path.Substring(0, path.Length - 1);
+      string path = GetTrimmedPath(url);
 
       if (!path.StartsWith("/r/")) return path.Length > 1 ? path : url;
 
@@ -60,6 +58,14 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
       int slashIndex = rest.IndexOf('/');
       if (slashIndex <= 0 || slashIndex == rest.Length - 1) return path;
       return rest;
+    }
+
+    // The URL's path without its trailing slashes, but never shorter than "/".
+    private static string GetTrimmedPath(string url)
+    {
+      string path = UrlUtils.GetPathFromUrl(url);
+      while (path.EndsWith("/") && path.Length > 1) path = path.Substring(0, path.Length - 1);
+      return path;
     }
   }
 }

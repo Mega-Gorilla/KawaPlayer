@@ -26,16 +26,22 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
     public const int LoadResultServerError = 4;
     public const int LoadResultEmpty = 5;
     public const int LoadResultPoolMismatch = 6;
-    // No dynamic playlist slot to load into (issue #88). The numeric value
-    // is kept so PlaylistLoaderUI's existing mapping still applies.
+    // No dynamic playlist slot to load into (issue #88). The name and value
+    // are from when this meant the queue was unavailable; both stay, as the
+    // constant is public and PlaylistLoaderUI's mapping uses the value.
     public const int LoadResultQueueUnavailable = 7;
     // The playlist the player agreed to lose is no longer the one that would
     // go (issue #125). Nothing is written; they are asked to try again.
     public const int LoadResultReplacementChanged = 8;
 
+    // What a playlist the server gave no name for is called, wherever it has
+    // to be named: in OnLoadResult's message and in the question before one
+    // is replaced (here and in DefaultUrl).
+    public const string UnnamedPlaylistName = "Playlist";
+
     [SerializeField] private VRCUrl[] _redirectPool = new VRCUrl[0];
     [SerializeField] private string _poolId = "default";
-    [SerializeField] private string _poolBaseUrl = "https://playlist.vrc-hub.com";
+    [SerializeField] private string _poolBaseUrl = PlaylistUrlUtils.DefaultPoolBaseUrl;
     // Only PlaylistLoaderEditor reads this, to generate _redirectPool, so
     // the compiler sees no reader and warns (issue #43).
 #pragma warning disable CS0414
@@ -421,8 +427,8 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
       // - 既に再生中・一時停止中の場合は読み込むのみ
       // Queue には触れないため、ユーザーが手動で積んだキューの挙動は変わらない。
       // ただし Queue に曲がある間は Forward() が Queue を優先し、
-      // PlayTrack(object[]) が ClearPlaylistIndexes() を呼ぶ (Controller.cs:452)
-      // ため、Queue 消化後にプレイリストへは自動復帰しない (上流と同じ挙動)。
+      // Controller.PlayTrack(object[]) が ClearPlaylistIndexes() を呼ぶため、
+      // Queue 消化後にプレイリストへは自動復帰しない (上流と同じ挙動)。
       if (_controller.Stopped)
       {
         if (_controller.ShufflePlay) _controller.PlayRandomTrack(slot.Playlist);

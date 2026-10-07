@@ -14,8 +14,6 @@ namespace Yamadev.YamaStream.Editor
     private Vector2 _installedScrollPos;
     private Vector2 _availableScrollPos;
 
-    private static Color RowEvenColor => EditorGUIUtility.isProSkin ? new Color(0.22f, 0.22f, 0.22f) : new Color(0.76f, 0.76f, 0.76f);
-    private static Color RowOddColor => EditorGUIUtility.isProSkin ? new Color(0.25f, 0.25f, 0.25f) : new Color(0.8f, 0.8f, 0.8f);
     private static readonly Color ActiveColor = new Color(0.4f, 0.8f, 0.4f);
     private static Color SubTextColor => EditorGUIUtility.isProSkin ? new Color(0.55f, 0.55f, 0.55f) : new Color(0.45f, 0.45f, 0.45f);
 
@@ -75,7 +73,9 @@ namespace Yamadev.YamaStream.Editor
       }
     }
 
-    private string GetModuleName(YamaPlayerModuleDefinition module)
+    // The module's translated name, or its own name without a translation.
+    // Also used by the player inspector's module list.
+    internal static string GetModuleName(YamaPlayerModuleDefinition module)
     {
       if (!string.IsNullOrEmpty(module.moduleNameTranslationKey))
       {
@@ -100,9 +100,8 @@ namespace Yamadev.YamaStream.Editor
     private void DrawInstalledModuleRow(YamaPlayerModuleDefinition module, int index)
     {
       bool isActive = module.gameObject.activeSelf;
-      var rowColor = index % 2 == 0 ? RowEvenColor : RowOddColor;
       var rowRect = EditorGUILayout.GetControlRect(false, RowHeight);
-      EditorGUI.DrawRect(rowRect, rowColor);
+      EditorGUI.DrawRect(rowRect, RowColor(index));
 
       var statusBarRect = new Rect(rowRect.x, rowRect.y, 3, rowRect.height);
       EditorGUI.DrawRect(statusBarRect, isActive ? ActiveColor : SubTextColor);
@@ -213,9 +212,8 @@ namespace Yamadev.YamaStream.Editor
       bool isInstalled = installedModules.Any(m => m.moduleName == definition.moduleName);
       bool canAdd = definition.allowMultiple || !isInstalled;
 
-      var rowColor = index % 2 == 0 ? RowEvenColor : RowOddColor;
       var rowRect = EditorGUILayout.GetControlRect(false, RowHeight);
-      EditorGUI.DrawRect(rowRect, rowColor);
+      EditorGUI.DrawRect(rowRect, RowColor(index));
 
       var installedBarRect = new Rect(rowRect.x, rowRect.y, 3, rowRect.height);
       EditorGUI.DrawRect(installedBarRect, isInstalled ? ActiveColor : Color.white);

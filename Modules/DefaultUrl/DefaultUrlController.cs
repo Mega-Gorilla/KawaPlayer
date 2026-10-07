@@ -1,13 +1,15 @@
 using UdonSharp;
 using UnityEngine;
 using VRC.SDKBase;
+using Yamadev.YamaStream.Modules.PlaylistLoader;
 
 namespace Yamadev.YamaStream.Modules.DefaultUrl
 {
   [UdonBehaviourSyncMode(BehaviourSyncMode.Manual)]
   public class DefaultUrlController : YamaPlayerModule
   {
-    [SerializeField] private Yamadev.YamaStream.Modules.PlaylistLoader.PlaylistLoader _playlistLoader;
+    // Here PlaylistLoader alone names the module's namespace, not its class.
+    [SerializeField] private PlaylistLoader.PlaylistLoader _playlistLoader;
     [SerializeField] private VideoPlayerType _videoPlayerType = VideoPlayerType.AVProVideoPlayer;
 
     [UdonSynced] private VRCUrl _defaultUrl = VRCUrl.Empty;
@@ -83,10 +85,7 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
       // hosts fall through to the video path as ordinary video URLs.
       if (_playlistLoader == null)
       {
-        if (Yamadev.YamaStream.Modules.PlaylistLoader.PlaylistUrlUtils.Classify(
-                _defaultUrl.Get(),
-                Yamadev.YamaStream.Modules.PlaylistLoader.PlaylistUrlUtils.DefaultPoolBaseUrl,
-                "") != Yamadev.YamaStream.Modules.PlaylistLoader.PlaylistUrlUtils.KindNotOurs)
+        if (PlaylistUrlUtils.Classify(_defaultUrl.Get(), PlaylistUrlUtils.DefaultPoolBaseUrl, "") != PlaylistUrlUtils.KindNotOurs)
           return;
         _controller.TakeOwnership();
         _controller.PlayTrack(TrackUtils.NewTrack(_videoPlayerType, "", _defaultUrl));
@@ -105,13 +104,7 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
       }
     }
 
-    // OnValidate warning was removed (#56 review feedback): the warning was a false positive when
-    // viewing Modules/DefaultUrl/DefaultUrl.prefab standalone in Project view, since the canonical
-    // path wires _playlistLoader via KawaPlayer.prefab override. The built-in nested instance is
-    // pre-wired, and standalone scene placements rely on TryAutoPlay's defensive null guard
-    // (silent no-op for playlist URLs when _playlistLoader is null) — no crash.
-    // UdonSharp does not expose UnityEditor.PrefabUtility or Scene.IsValid() for in-Udon detection
-    // of prefab-asset context, so we cannot conditionally suppress; removing OnValidate is cleaner
-    // and matches existing modules (PermissionManagement etc.) which do not use OnValidate validation.
+    // No OnValidate warning about a missing _playlistLoader (PR #56): only KawaPlayer.prefab
+    // wires it, and without it TryAutoPlay leaves playlist URLs alone instead of failing.
   }
 }

@@ -4,7 +4,6 @@ using UnityEngine.UI;
 using Yamadev.YamaStream.UI;
 
 namespace Yamadev.YamaStream.Editor
-
 {
   public class AppearanceBuildProcess : IYamaPlayerBuildProcess
   {

@@ -137,12 +137,8 @@ namespace Yamadev.YamaStream.Editor
       var primaryColor = colorSetProp.FindPropertyRelative("primaryColor");
       var secondaryColor = colorSetProp.FindPropertyRelative("secondaryColor");
 
-      var rowBgColor = index % 2 == 0
-        ? (EditorGUIUtility.isProSkin ? new Color(0.22f, 0.22f, 0.22f) : new Color(0.76f, 0.76f, 0.76f))
-        : (EditorGUIUtility.isProSkin ? new Color(0.25f, 0.25f, 0.25f) : new Color(0.8f, 0.8f, 0.8f));
-
       var rowRect = EditorGUILayout.BeginVertical();
-      EditorGUI.DrawRect(rowRect, rowBgColor);
+      EditorGUI.DrawRect(rowRect, RowColor(index));
 
       using (new EditorGUILayout.HorizontalScope(GUILayout.Height(22)))
       {
@@ -158,7 +154,7 @@ namespace Yamadev.YamaStream.Editor
 
         var displayName = string.IsNullOrEmpty(colorSetName.stringValue) ? $"ColorSet {index + 1}" : colorSetName.stringValue;
         float headerLabelWidth = EditorGUIUtility.labelWidth - 20;
-        EditorGUILayout.LabelField(displayName, LanguageCodeStyle, GUILayout.Width(headerLabelWidth));
+        EditorGUILayout.LabelField(displayName, RowNameStyle, GUILayout.Width(headerLabelWidth));
 
         var previewRect = GUILayoutUtility.GetRect(40, 16, GUILayout.Width(40));
         EditorGUI.DrawRect(new Rect(previewRect.x, previewRect.y, 20, 16), primaryColor.colorValue);
@@ -170,7 +166,7 @@ namespace Yamadev.YamaStream.Editor
         {
           var defaultStyle = new GUIStyle(EditorStyles.miniLabel)
           {
-            normal = { textColor = new Color(0.3f, 0.7f, 0.4f, 1f) },
+            normal = { textColor = DefaultMarkColor },
             alignment = TextAnchor.MiddleRight
           };
           GUILayout.Label(EditorLocalization.Get("appearance.default"), defaultStyle, GUILayout.Width(70), GUILayout.Height(22));
@@ -200,12 +196,8 @@ namespace Yamadev.YamaStream.Editor
 
     private void DrawColorSetDetails(SerializedProperty colorSetName, SerializedProperty primaryColor, SerializedProperty secondaryColor)
     {
-      var detailBgColor = EditorGUIUtility.isProSkin
-        ? new Color(0.18f, 0.18f, 0.18f)
-        : new Color(0.7f, 0.7f, 0.7f);
-
       var detailRect = EditorGUILayout.BeginVertical();
-      EditorGUI.DrawRect(detailRect, detailBgColor);
+      EditorGUI.DrawRect(detailRect, DetailColor);
 
       GUILayout.Space(SpaceSmall);
       using (new EditorGUILayout.HorizontalScope())
