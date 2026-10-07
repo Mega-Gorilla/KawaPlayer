@@ -45,6 +45,12 @@ namespace Yamadev.YamaStream.Tablet
     private VRCImageDownloader _downloader;
     private TextureInfo _textureInfo;
     private IVRCImageDownload _shown;
+    // The download asked for last. Any other still running is let go when it
+    // finishes, even one for the same URL.
+    private IVRCImageDownload _pending;
+    // Set while DownloadImage runs: a URL it cannot fetch is reported from
+    // inside the call, before the download is handed back.
+    private bool _starting;
     private VRCUrl _requestedUrl = VRCUrl.Empty;
     // What the status line says, kept as translation keys so a change of
     // language can say it again. An empty status key shows the picture.
@@ -107,10 +113,21 @@ namespace Yamadev.YamaStream.Tablet
       if (url.Equals(_requestedUrl)) return;
 
       _requestedUrl = url;
-      if (!Utilities.IsValid(_downloader)) _downloader = new VRCImageDownloader();
-      _downloader.DownloadImage(url, null, (IUdonEventReceiver)this, GetTextureInfo());
+      _pending = null;
+      // Before the download starts, so an error reported while it starts is
+      // not covered over.
       SetStatus(LoadingKey, "", "");
+      if (!Utilities.IsValid(_downloader)) _downloader = new VRCImageDownloader();
+      _starting = true;
+      IVRCImageDownload download = _downloader.DownloadImage(url, null, (IUdonEventReceiver)this, GetTextureInfo());
+      _starting = false;
+      // Unless it has failed already, this is the download to wait for.
+      if (_statusKey == LoadingKey) _pending = download;
     }
+
+    // During DownloadImage, the only result that can come is the one it is
+    // starting.
+    private bool IsCurrent(IVRCImageDownload result) => _starting || result == _pending;
 
     // Shown small on a UI: mipmaps keep it from shimmering, and clamping
     // keeps one edge from bleeding into the other.
@@ -129,11 +146,12 @@ namespace Yamadev.YamaStream.Tablet
     public override void OnImageLoadSuccess(IVRCImageDownload result)
     {
       // A picture asked for before the current one: let it go.
-      if (!result.Url.Equals(_requestedUrl))
+      if (!IsCurrent(result))
       {
         result.Dispose();
         return;
       }
+      _pending = null;
       // Only one picture is ever kept: each can take up to 16 MB.
       if (Utilities.IsValid(_shown) && _shown != result) _shown.Dispose();
       _shown = result;
@@ -144,7 +162,8 @@ namespace Yamadev.YamaStream.Tablet
 
     public override void OnImageLoadError(IVRCImageDownload result)
     {
-      if (!result.Url.Equals(_requestedUrl)) return;
+      if (!IsCurrent(result)) return;
+      _pending = null;
 
       // Nothing is shown for this URL now. Free the last picture, and let the
       // same URL be tried again.
