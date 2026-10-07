@@ -7,6 +7,7 @@ namespace Yamadev.YamaStream.Editor
   [CustomEditor(typeof(AppearanceSettings))]
   public class AppearanceSettingsEditor : EditorBase
   {
+    private SerializedProperty _palette;
     private SerializedProperty _defaultColorSet;
     private SerializedProperty _colorSets;
 
@@ -16,6 +17,7 @@ namespace Yamadev.YamaStream.Editor
     private void OnEnable()
     {
       Title = EditorLocalization.Get("appearance.title");
+      _palette = serializedObject.FindProperty("palette");
       _defaultColorSet = serializedObject.FindProperty("defaultColorSet");
       _colorSets = serializedObject.FindProperty("colorSets");
     }
@@ -27,6 +29,9 @@ namespace Yamadev.YamaStream.Editor
       Title = EditorLocalization.Get("appearance.title");
       serializedObject.Update();
 
+      EditorGUILayout.PropertyField(_palette, new GUIContent(EditorLocalization.Get("appearance.palette")));
+      EditorGUILayout.Space(SpaceMedium);
+
       DrawDefaultColorSetSection();
       EditorGUILayout.Space(SpaceLarge);
 
@@ -34,38 +39,41 @@ namespace Yamadev.YamaStream.Editor
       EditorGUILayout.Space(SpaceMedium);
 
       serializedObject.ApplyModifiedProperties();
+
+      DrawApplyNowSection();
+    }
+
+    // The default colour set, from every set the UI can take: Auto (an empty
+    // name, the first set), then the palette's sets, then the ones added here.
+    // Also drawn by the player inspectors.
+    public static void DrawColorSetPopup(AppearanceSettings settings, SerializedProperty defaultColorSet, string label)
+    {
+      var names = settings.ColorSetNames;
+      var options = new string[names.Length + 1];
+      options[0] = EditorLocalization.Get("appearance.defaultColorSet.auto");
+      System.Array.Copy(names, 0, options, 1, names.Length);
+      // A name no set has shows as Auto, which is what the build falls back to.
+      int current = System.Array.IndexOf(names, defaultColorSet.stringValue) + 1;
+      using (var check = new EditorGUI.ChangeCheckScope())
+      {
+        int selected = EditorGUILayout.Popup(label, current, options);
+        if (check.changed) defaultColorSet.stringValue = selected == 0 ? "" : names[selected - 1];
+      }
+    }
+
+    private void DrawApplyNowSection()
+    {
+      EditorGUILayout.HelpBox(EditorLocalization.Get("appearance.applyNow.help"), MessageType.Info);
+      if (GUILayout.Button(EditorLocalization.Get("appearance.applyNow")))
+      {
+        foreach (var t in targets) AppearanceBuildProcess.ApplyNow((AppearanceSettings)t);
+      }
     }
 
     private void DrawDefaultColorSetSection()
     {
       EditorGUILayout.LabelField(EditorLocalization.Get("appearance.defaultColorSet"), EditorStyles.boldLabel);
-
-      var optionNames = new List<string> { "" };
-      var optionDisplayNames = new List<string> { EditorLocalization.Get("appearance.defaultColorSet.auto") };
-
-      for (int i = 0; i < _colorSets.arraySize; i++)
-      {
-        var colorSet = _colorSets.GetArrayElementAtIndex(i);
-        var name = colorSet.FindPropertyRelative("colorSetName").stringValue;
-        optionNames.Add(name);
-        optionDisplayNames.Add(string.IsNullOrEmpty(name) ? $"ColorSet {i + 1}" : name);
-      }
-
-      int currentIndex = 0;
-      if (!string.IsNullOrEmpty(_defaultColorSet.stringValue))
-      {
-        currentIndex = optionNames.IndexOf(_defaultColorSet.stringValue);
-        if (currentIndex < 0) currentIndex = 0;
-      }
-
-      int newIndex = EditorGUILayout.Popup(
-        EditorLocalization.Get("appearance.defaultColorSet.label"),
-        currentIndex,
-        optionDisplayNames.ToArray());
-      if (newIndex >= 0 && newIndex < optionNames.Count)
-      {
-        _defaultColorSet.stringValue = optionNames[newIndex];
-      }
+      DrawColorSetPopup((AppearanceSettings)target, _defaultColorSet, EditorLocalization.Get("appearance.defaultColorSet.label"));
     }
 
     private void DrawColorSetListSection()
@@ -87,7 +95,7 @@ namespace Yamadev.YamaStream.Editor
 
       if (_colorSets.arraySize == 0)
       {
-        EditorGUILayout.HelpBox(EditorLocalization.Get("appearance.noColorSets"), MessageType.Info);
+        if (_palette.objectReferenceValue == null) EditorGUILayout.HelpBox(EditorLocalization.Get("appearance.noColorSets"), MessageType.Info);
       }
       else
       {
@@ -127,10 +135,6 @@ namespace Yamadev.YamaStream.Editor
       var colorSetName = colorSetProp.FindPropertyRelative("colorSetName");
       var primaryColor = colorSetProp.FindPropertyRelative("primaryColor");
       var secondaryColor = colorSetProp.FindPropertyRelative("secondaryColor");
-      // var infoColor = colorSetProp.FindPropertyRelative("infoColor");
-      // var successColor = colorSetProp.FindPropertyRelative("successColor");
-      // var alermColor = colorSetProp.FindPropertyRelative("alermColor");
-      // var errorColor = colorSetProp.FindPropertyRelative("errorColor");
 
       var rowBgColor = index % 2 == 0
         ? (EditorGUIUtility.isProSkin ? new Color(0.22f, 0.22f, 0.22f) : new Color(0.76f, 0.76f, 0.76f))
@@ -187,13 +191,13 @@ namespace Yamadev.YamaStream.Editor
 
       if (_foldouts[index])
       {
-        DrawColorSetDetails(colorSetName, primaryColor, secondaryColor/*, infoColor, successColor, alermColor, errorColor*/);
+        DrawColorSetDetails(colorSetName, primaryColor, secondaryColor);
       }
 
       EditorGUILayout.EndVertical();
     }
 
-    private void DrawColorSetDetails(SerializedProperty colorSetName, SerializedProperty primaryColor, SerializedProperty secondaryColor/*, SerializedProperty infoColor, SerializedProperty successColor, SerializedProperty alermColor, SerializedProperty errorColor*/)
+    private void DrawColorSetDetails(SerializedProperty colorSetName, SerializedProperty primaryColor, SerializedProperty secondaryColor)
     {
       var detailBgColor = EditorGUIUtility.isProSkin
         ? new Color(0.18f, 0.18f, 0.18f)
@@ -217,10 +221,6 @@ namespace Yamadev.YamaStream.Editor
 
           EditorGUILayout.PropertyField(primaryColor, new GUIContent(EditorLocalization.Get("appearance.primaryColor")));
           EditorGUILayout.PropertyField(secondaryColor, new GUIContent(EditorLocalization.Get("appearance.secondaryColor")));
-          // EditorGUILayout.PropertyField(infoColor, new GUIContent(EditorLocalization.Get("appearance.infoColor")));
-          // EditorGUILayout.PropertyField(successColor, new GUIContent(EditorLocalization.Get("appearance.successColor")));
-          // EditorGUILayout.PropertyField(alermColor, new GUIContent(EditorLocalization.Get("appearance.alermColor")));
-          // EditorGUILayout.PropertyField(errorColor, new GUIContent(EditorLocalization.Get("appearance.errorColor")));
 
           EditorGUIUtility.labelWidth = originalLabelWidth;
         }
@@ -236,13 +236,11 @@ namespace Yamadev.YamaStream.Editor
       _colorSets.InsertArrayElementAtIndex(_colorSets.arraySize);
       var newColorSet = _colorSets.GetArrayElementAtIndex(_colorSets.arraySize - 1);
 
+      // A new set starts from the colours the UI has now.
+      var current = ((AppearanceSettings)target).DefaultColorSet;
       newColorSet.FindPropertyRelative("colorSetName").stringValue = "";
-      newColorSet.FindPropertyRelative("primaryColor").colorValue = new Color(240f / 256f, 98f / 256f, 146f / 256f, 1.0f);
-      newColorSet.FindPropertyRelative("secondaryColor").colorValue = new Color(248f / 256f, 187f / 256f, 208f / 256f, 31f / 256f);
-      // newColorSet.FindPropertyRelative("infoColor").colorValue = Color.cyan;
-      // newColorSet.FindPropertyRelative("successColor").colorValue = Color.green;
-      // newColorSet.FindPropertyRelative("alermColor").colorValue = Color.yellow;
-      // newColorSet.FindPropertyRelative("errorColor").colorValue = Color.red;
+      newColorSet.FindPropertyRelative("primaryColor").colorValue = current != null ? current.primaryColor : Color.white;
+      newColorSet.FindPropertyRelative("secondaryColor").colorValue = current != null ? current.secondaryColor : Color.white;
 
       _foldouts[_colorSets.arraySize - 1] = true;
     }
