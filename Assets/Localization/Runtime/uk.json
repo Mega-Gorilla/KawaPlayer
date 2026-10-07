@@ -107,5 +107,17 @@
   "tablet.dateFormat": "{2}, {1} {3}",
   "tablet.weekdays": "нд,пн,вт,ср,чт,пт,сб",
   "tablet.months": "січня,лютого,березня,квітня,травня,червня,липня,серпня,вересня,жовтня,листопада,грудня",
-  "tablet.return": "Повернути планшет"
+  "tablet.return": "Повернути планшет",
+  "tablet.app.image": "Зображення",
+  "tablet.image.inputHint": "Введіть URL зображення",
+  "tablet.image.empty": "Введіть URL, щоб показати тут зображення",
+  "tablet.image.loading": "Завантаження зображення...",
+  "tablet.image.failed": "Не вдалося завантажити зображення.",
+  "tablet.image.error.untrusted": "Домен не є довіреним. Увімкніть «Allow\u00a0Untrusted\u00a0URLs» у налаштуваннях VRChat або використайте зображення з довіреного сервісу, наприклад Imgur.",
+  "tablet.image.error.invalidUrl": "Неправильний формат URL. Перевірте його.",
+  "tablet.image.error.invalidImage": "Не вдається прочитати як зображення. Формат може не підтримуватися або зображення більше за 2048\u00a0×\u00a02048.",
+  "tablet.image.error.download": "Не вдалося завантажити. Перевірте, чи правильний URL і чи зображення загальнодоступне.",
+  "tablet.image.error.busy": "Забагато запитів на завантаження. Зачекайте трохи й спробуйте ще раз.",
+  "tablet.image.showDetails": "Подробиці помилки",
+  "tablet.image.hideDetails": "Сховати подробиці"
 }

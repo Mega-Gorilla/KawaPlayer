@@ -107,5 +107,17 @@
   "tablet.dateFormat": "{0}月{1}日 星期{2}",
   "tablet.weekdays": "日,一,二,三,四,五,六",
   "tablet.months": "1月,2月,3月,4月,5月,6月,7月,8月,9月,10月,11月,12月",
-  "tablet.return": "平板歸位"
+  "tablet.return": "平板歸位",
+  "tablet.app.image": "圖片",
+  "tablet.image.inputHint": "輸入圖片 URL",
+  "tablet.image.empty": "輸入 URL 後，圖片會顯示在這裡",
+  "tablet.image.loading": "正在載入圖片...",
+  "tablet.image.failed": "無法載入圖片。",
+  "tablet.image.error.untrusted": "此網域未受信任。請在 VRChat 設定中開啟「Allow\u00a0Untrusted\u00a0URLs」，或使用 Imgur 等受信任服務上的圖片。",
+  "tablet.image.error.invalidUrl": "URL 格式不正確，請檢查。",
+  "tablet.image.error.invalidImage": "無法作為圖片讀取。可能是不支援的格式，或圖片大於 2048\u00a0×\u00a02048。",
+  "tablet.image.error.download": "下載失敗。請確認 URL 是否正確、圖片是否公開。",
+  "tablet.image.error.busy": "載入請求過多，請稍後再試。",
+  "tablet.image.showDetails": "錯誤詳情",
+  "tablet.image.hideDetails": "關閉詳情"
 }
