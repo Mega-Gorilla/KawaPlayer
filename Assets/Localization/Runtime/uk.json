@@ -119,5 +119,8 @@
   "tablet.image.error.download": "Не вдалося завантажити. Перевірте, чи правильний URL і чи зображення загальнодоступне.",
   "tablet.image.error.busy": "Забагато запитів на завантаження. Зачекайте трохи й спробуйте ще раз.",
   "tablet.image.showDetails": "Подробиці помилки",
-  "tablet.image.hideDetails": "Сховати подробиці"
+  "tablet.image.hideDetails": "Сховати подробиці",
+  "tablet.settings.video": "Відео",
+  "tablet.settings.audio": "Аудіо",
+  "tablet.settings.note": "Зміни тут діють лише для вас"
 }

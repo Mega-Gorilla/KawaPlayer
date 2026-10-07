@@ -119,5 +119,8 @@
   "tablet.image.error.download": "The download failed. Check that the URL is correct and the image is public.",
   "tablet.image.error.busy": "Too many images are loading. Wait a moment and try again.",
   "tablet.image.showDetails": "Error details",
-  "tablet.image.hideDetails": "Hide details"
+  "tablet.image.hideDetails": "Hide details",
+  "tablet.settings.video": "Video",
+  "tablet.settings.audio": "Audio",
+  "tablet.settings.note": "Changes made here apply only to you"
 }

@@ -20,12 +20,14 @@ namespace Yamadev.YamaStream.Tablet
     private const int VersionApp = 0;
     private const int KawaPlayerApp = 1;
     private const int ImageApp = 2;
+    private const int SettingsApp = 3;
 
     private const float DistanceCheckInterval = 0.5f;
 
     [SerializeField] private UIController _uiController;
     [SerializeField] private TabletPickup _tablet;
     [SerializeField] private TabletImageApp _imageApp;
+    [SerializeField] private TabletSettingsApp _settingsApp;
 
     [Header("Screens")]
     [SerializeField] private GameObject _home;
@@ -37,12 +39,14 @@ namespace Yamadev.YamaStream.Tablet
     [SerializeField, RegisterEvent(nameof(Button.onClick), nameof(OpenVersionApp))] private Button _versionAppButton;
     [SerializeField, RegisterEvent(nameof(Button.onClick), nameof(OpenKawaPlayerApp))] private Button _kawaPlayerAppButton;
     [SerializeField, RegisterEvent(nameof(Button.onClick), nameof(OpenImageApp))] private Button _imageAppButton;
+    [SerializeField, RegisterEvent(nameof(Button.onClick), nameof(OpenSettingsApp))] private Button _settingsAppButton;
 
     [Header("Home")]
     [SerializeField] private Text _clockText;
     [SerializeField] private Text _dateText;
     [SerializeField] private Text _versionAppLabel;
     [SerializeField] private Text _imageAppLabel;
+    [SerializeField] private Text _settingsAppLabel;
 
     [Header("Version App")]
     [SerializeField] private Text _versionAppTitle;
@@ -87,6 +91,8 @@ namespace Yamadev.YamaStream.Tablet
     public void OpenKawaPlayerApp() => OpenApp(KawaPlayerApp);
 
     public void OpenImageApp() => OpenApp(ImageApp);
+
+    public void OpenSettingsApp() => OpenApp(SettingsApp);
 
     public VRCUrl ImageUrl => _imageUrl;
 
@@ -136,12 +142,14 @@ namespace Yamadev.YamaStream.Tablet
       UpdateTranslation();
       UpdateClockView();
       if (Utilities.IsValid(_imageApp)) _imageApp.UpdateTranslation();
+      if (Utilities.IsValid(_settingsApp)) _settingsApp.UpdateTranslation();
     }
 
     private void UpdateTranslation()
     {
       SetTranslatedText(_versionAppLabel, "tablet.app.version");
       SetTranslatedText(_imageAppLabel, "tablet.app.image");
+      SetTranslatedText(_settingsAppLabel, "menu.settings");
       SetTranslatedText(_versionAppTitle, "tablet.app.version");
     }
 

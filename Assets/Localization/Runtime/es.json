@@ -119,5 +119,8 @@
   "tablet.image.error.download": "La descarga falló. Comprueba que la URL sea correcta y que la imagen sea pública.",
   "tablet.image.error.busy": "Hay demasiadas imágenes cargándose. Espera un momento y vuelve a intentarlo.",
   "tablet.image.showDetails": "Detalles del error",
-  "tablet.image.hideDetails": "Ocultar detalles"
+  "tablet.image.hideDetails": "Ocultar detalles",
+  "tablet.settings.video": "Video",
+  "tablet.settings.audio": "Audio",
+  "tablet.settings.note": "Los cambios que hagas aquí solo se aplican a ti"
 }
