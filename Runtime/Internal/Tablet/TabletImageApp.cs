@@ -153,8 +153,9 @@ namespace Yamadev.YamaStream.Tablet
         return;
       }
       _pending = null;
-      // Only one picture is ever kept: each can take up to 16 MB.
-      if (Utilities.IsValid(_shown) && _shown != result) _shown.Dispose();
+      // Only one picture is ever kept: at 2048 x 2048, one takes about 21 MB
+      // with its mipmaps.
+      if (Utilities.IsValid(_shown)) _shown.Dispose();
       _shown = result;
       _picture.texture = result.Result;
       SetStatus("", "", "");
