@@ -39,8 +39,9 @@ namespace Yamadev.YamaStream.UI
     }
 
     // In the order a screenshot needs it: the dialog scrolls past its height,
-    // so where to send it and the latest error come first, and the earlier
-    // errors and the log's place last.
+    // so the request to send it and the latest error come first, and the
+    // earlier errors and the log's place last. Where to send it is in the
+    // copy field, outside the text.
     private string BuildErrorDetails()
     {
       int max = _controller.MaxErrorRetry;

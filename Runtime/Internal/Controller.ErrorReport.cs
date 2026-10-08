@@ -18,7 +18,7 @@ namespace Yamadev.YamaStream
   // then refuses to build that world.
   public partial class Controller
   {
-    public const int ErrorLogCapacity = 5;
+    private const int ErrorLogCapacity = 5;
 
     // Every error since this player joined is numbered, so the details and
     // the log line of one error carry the same number.
