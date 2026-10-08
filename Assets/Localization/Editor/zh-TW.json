@@ -282,6 +282,8 @@
   "module.definition.version": "版本",
   "module.definition.allowMultiple": "允許多次安裝",
   "module.definition.noNeedSetUp": "無需設定",
+  "module.definition.moduleRoot": "模組根",
+  "module.definition.moduleRoot.tooltip": "與此模組一起停用、刪除的物件。在模組的元件並列放置時指定（例如 DefaultUrl 的 Modules/DefaultUrl）。必須包含此物件。留空則僅為此物件。",
   "module.definition.uiSlots": "UI插槽",
   "module.definition.moduleNameTranslationKey": "模組名稱翻譯鍵",
   "module.definition.moduleDescriptionTranslationKey": "模組描述翻譯鍵",

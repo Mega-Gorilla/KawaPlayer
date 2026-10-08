@@ -115,24 +115,21 @@ namespace Yamadev.YamaStream.Editor
       return path;
     }
 
-    // The object a module is switched off and deleted by: the largest one
-    // under the player's Modules that holds this module and no other. That is
-    // the module's own object, or the one it keeps its other parts in --
-    // DefaultUrl's definition is on Modules/DefaultUrl/Controller, beside the
-    // storage in Modules/DefaultUrl/OwnerStorage -- but never a folder the
-    // creator sorts several modules into, which would take the others with
-    // it. A module outside a Modules is its own root.
+    // The object a module is switched off and deleted by: its own object, or
+    // the root its definition names (moduleRoot) -- DefaultUrl names
+    // Modules/DefaultUrl, which holds its controller and its storage. The
+    // root is never worked out from what else shares a folder: a folder may
+    // hold anything, and one module in it says nothing about the rest. A
+    // named root that does not hold the module, or is not inside the
+    // player's Modules, is ignored.
     internal static GameObject GetModuleRoot(Component module)
     {
+      var definition = module.GetComponent<YamaPlayerModuleDefinition>();
+      var root = definition != null ? definition.moduleRoot : null;
+      if (root == null || !module.transform.IsChildOf(root.transform)) return module.gameObject;
       var manager = module.GetComponentInParent<ModuleManager>(true);
-      if (manager == null) return module.gameObject;
-      var root = module.transform;
-      for (var parent = root.parent; parent != null && parent != manager.transform; parent = parent.parent)
-      {
-        if (parent.GetComponentsInChildren<YamaPlayerModuleDefinition>(true).Length > 1) break;
-        root = parent;
-      }
-      return root.gameObject;
+      if (manager != null && (root.transform == manager.transform || !root.transform.IsChildOf(manager.transform))) return module.gameObject;
+      return root;
     }
 
     // Whether ProcessModule builds the module: both its own object and its

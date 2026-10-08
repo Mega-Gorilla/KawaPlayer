@@ -282,6 +282,8 @@
   "module.definition.version": "버전",
   "module.definition.allowMultiple": "복수 설치 가능",
   "module.definition.noNeedSetUp": "설정 불필요",
+  "module.definition.moduleRoot": "모듈 루트",
+  "module.definition.moduleRoot.tooltip": "이 모듈과 함께 비활성화·삭제할 오브젝트입니다. 모듈의 부품이 옆에 나란히 있을 때 지정합니다(예: DefaultUrl의 Modules/DefaultUrl). 이 오브젝트를 포함해야 합니다. 비어 있으면 이 오브젝트만 해당합니다.",
   "module.definition.uiSlots": "UI 슬롯",
   "module.definition.moduleNameTranslationKey": "모듈 이름 번역 키",
   "module.definition.moduleDescriptionTranslationKey": "모듈 설명 번역 키",

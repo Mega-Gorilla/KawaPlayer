@@ -273,6 +273,8 @@
   "module.definition.version": "Version",
   "module.definition.allowMultiple": "Allow Multiple",
   "module.definition.noNeedSetUp": "No Setup Required",
+  "module.definition.moduleRoot": "Module Root",
+  "module.definition.moduleRoot.tooltip": "The object disabled and deleted together with this module, for a module whose parts sit beside it (e.g. DefaultUrl's Modules/DefaultUrl). It must contain this object. Empty means this object alone.",
   "module.definition.uiSlots": "UI Slots",
   "module.definition.moduleNameTranslationKey": "Module Name Translation Key",
   "module.definition.moduleDescriptionTranslationKey": "Module Description Translation Key",

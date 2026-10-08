@@ -282,6 +282,8 @@
   "module.definition.version": "Версия",
   "module.definition.allowMultiple": "Разрешить множественную установку",
   "module.definition.noNeedSetUp": "Настройка не требуется",
+  "module.definition.moduleRoot": "Корень модуля",
+  "module.definition.moduleRoot.tooltip": "Объект, который отключается и удаляется вместе с этим модулем, если части модуля лежат рядом с ним (например, Modules/DefaultUrl у DefaultUrl). Он должен содержать этот объект. Пусто — только этот объект.",
   "module.definition.uiSlots": "UI слоты",
   "module.definition.moduleNameTranslationKey": "Ключ перевода названия модуля",
   "module.definition.moduleDescriptionTranslationKey": "Ключ перевода описания модуля",

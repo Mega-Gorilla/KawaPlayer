@@ -273,6 +273,8 @@
   "module.definition.version": "Versione",
   "module.definition.allowMultiple": "Consenti Installazioni Multiple",
   "module.definition.noNeedSetUp": "Nessuna Configurazione Richiesta",
+  "module.definition.moduleRoot": "Radice del modulo",
+  "module.definition.moduleRoot.tooltip": "L'oggetto disattivato ed eliminato insieme a questo modulo, per un modulo le cui parti stanno accanto a esso (ad es. Modules/DefaultUrl di DefaultUrl). Deve contenere questo oggetto. Vuoto significa solo questo oggetto.",
   "module.definition.uiSlots": "Slot UI",
   "module.definition.moduleNameTranslationKey": "Chiave Traduzione Nome Modulo",
   "module.definition.moduleDescriptionTranslationKey": "Chiave Traduzione Descrizione Modulo",

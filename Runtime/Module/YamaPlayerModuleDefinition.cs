@@ -18,6 +18,12 @@ namespace Yamadev.YamaStream
 
     public TextAsset editorTranslationFile;
     public TextAsset playerTranslationFile;
+
+    // The object switched off and deleted with the module, for a module whose
+    // other parts sit beside it rather than under it: DefaultUrl names
+    // Modules/DefaultUrl, which holds its controller and its storage. It must
+    // hold this object; empty means this object alone.
+    public GameObject moduleRoot;
   }
 
   [Serializable]

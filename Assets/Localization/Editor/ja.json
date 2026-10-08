@@ -273,6 +273,8 @@
   "module.definition.version": "バージョン",
   "module.definition.allowMultiple": "複数インストール可",
   "module.definition.noNeedSetUp": "設定不要",
+  "module.definition.moduleRoot": "モジュールの根",
+  "module.definition.moduleRoot.tooltip": "このモジュールと一緒に無効化・削除するオブジェクト。モジュールの部品が横に並んでいるときに指定する（例: DefaultUrl の Modules/DefaultUrl）。このオブジェクトを含んでいる必要がある。空ならこのオブジェクトだけ。",
   "module.definition.uiSlots": "UIスロット",
   "module.definition.moduleNameTranslationKey": "モジュール名翻訳キー",
   "module.definition.moduleDescriptionTranslationKey": "モジュール説明翻訳キー",

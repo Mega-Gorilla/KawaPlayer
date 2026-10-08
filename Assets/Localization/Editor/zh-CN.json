@@ -282,6 +282,8 @@
   "module.definition.version": "版本",
   "module.definition.allowMultiple": "允许多次安装",
   "module.definition.noNeedSetUp": "无需设置",
+  "module.definition.moduleRoot": "模块根",
+  "module.definition.moduleRoot.tooltip": "与此模块一起禁用、删除的对象。在模块的组件并列放置时指定（例如 DefaultUrl 的 Modules/DefaultUrl）。必须包含此对象。留空则仅为此对象。",
   "module.definition.uiSlots": "UI插槽",
   "module.definition.moduleNameTranslationKey": "模块名称翻译键",
   "module.definition.moduleDescriptionTranslationKey": "模块描述翻译键",
