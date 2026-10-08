@@ -14,6 +14,7 @@ namespace Yamadev.YamaStream
     private bool _loop;
     private bool _playImmediately;
     private bool _isError;
+    private string _errorDetail = string.Empty;
     private VRCImageDownloader _imageDownloader;
 
     private void Start()
@@ -37,6 +38,10 @@ namespace Yamadev.YamaStream
     public override bool IsStopped => !_isReady && !_loading;
 
     public override bool IsError => _isError;
+
+    // The downloader's own error and message: the VideoError it maps to
+    // folds several of them together (InvalidImage becomes Unknown).
+    public override string ErrorDetail => _errorDetail;
 
     public VRCImageDownloader ImageDownloader
     {
@@ -85,6 +90,7 @@ namespace Yamadev.YamaStream
       _playImmediately = true;
       _loading = true;
       _isError = false;
+      _errorDetail = string.Empty;
     }
 
     public override void LoadUrl(VRCUrl url)
@@ -94,6 +100,7 @@ namespace Yamadev.YamaStream
       _playImmediately = false;
       _loading = true;
       _isError = false;
+      _errorDetail = string.Empty;
     }
 
     public override void Play()
@@ -151,6 +158,7 @@ namespace Yamadev.YamaStream
 
       _loading = false;
       _isError = true;
+      _errorDetail = result.Error.ToString() + ": " + result.ErrorMessage;
       VideoError videoError;
       switch (result.Error)
       {

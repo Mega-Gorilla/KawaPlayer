@@ -289,6 +289,7 @@ namespace Yamadev.YamaStream.UI
 
     private void UpdateTranslation()
     {
+      UpdateErrorDetailsTranslation();
       if (Utilities.IsValid(_returnToMainLabel)) _returnToMainLabel.text = GetTranslation("button.returnToMain");
       if (Utilities.IsValid(_tabPlaybackLabel)) _tabPlaybackLabel.text = GetTranslation("tab.playback");
       if (Utilities.IsValid(_tabVideoAndAudioLabel)) _tabVideoAndAudioLabel.text = GetTranslation("tab.videoAndAudio");

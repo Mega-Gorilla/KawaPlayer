@@ -50,6 +50,10 @@ namespace Yamadev.YamaStream
 
     public virtual bool IsError { get; }
 
+    // What the last error was, beyond its VideoError, for the error details
+    // a viewer can send in (issue #168). Empty when the backend says no more.
+    public virtual string ErrorDetail => string.Empty;
+
     public virtual bool Loop { get; set; }
 
     public virtual float Speed { get; set; }

@@ -1048,6 +1048,7 @@ namespace Yamadev.YamaStream.UI
         if (!string.IsNullOrEmpty(hint)) message = $"{message}\n{hint}";
       }
       _statusMessageText.text = message;
+      SetErrorDetailsButtonShown(true);
     }
 
     private bool ShouldShowYouTubeHint(VideoError videoError)
@@ -1081,6 +1082,7 @@ namespace Yamadev.YamaStream.UI
       if (Utilities.IsValid(_loadingIndicator)) _loadingIndicator.SetActive(_controller.IsLoading);
       if (Utilities.IsValid(_userUIAnimator)) _userUIAnimator.SetBool("Loading", _controller.IsLoading);
       if (Utilities.IsValid(_statusMessageText)) _statusMessageText.text = GetTranslation("msg.videoLoading");
+      SetErrorDetailsButtonShown(false);
     }
 
     private void GenerateVersionView()

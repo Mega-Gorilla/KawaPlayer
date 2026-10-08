@@ -67,6 +67,8 @@ Published VPM versions must not be deleted (breaks projects using source control
 
 **UI System** (`UI/UIController.cs`) — Manages all interactive controls (play, pause, seek, volume, speed, playlists, modals). Heavy use of serialized fields for Unity inspector binding.
 
+**Playback error details** — When a video fails, the screen's error message has a "Details" button that opens the last errors in the dialog, with the Discord link to send a screenshot to. `PlaybackErrorLog` (beside the `Controller`) keeps the last five, per viewer and unsynced; `Controller.ErrorReport.cs` records each failed try before the retry logic switches handlers, and numbers the matching log line; `UI/UIController.ErrorDetails.cs` builds the text. A handler can say more than its `VideoError` through `PlayerHandler.ErrorDetail` (the image viewer gives the downloader's error).
+
 **Appearance** (`Runtime/Appearance/`, `Editor/Appearance/`) — KawaPlayer's colours are kept in one asset, `Assets/Appearance/KawaPlayerPalette.asset` (`ColorPalette`): the colour sets (KawaPlayer's first, then YamaPlayer's five) and the neutral colours. Each UI's `AppearanceSettings` points at it and picks a set by name (KawaPlayer's by default; a name no set has gets the first). Graphics carry a role (`ColorDefinition`) instead of a colour, and `AppearanceBuildProcess` colours them when the world is built; a button whose colour comes from its tint has the tint moved instead. To change a colour, edit the palette; "Apply Colors Now" on an `AppearanceSettings` also updates the colours saved in a prefab. Give new UI a role rather than a literal colour.
 
 **Playlist System** (`Playlist/`) — `PlaylistManager` coordinates `Playlist`, `QueueList`, and `HistoryList` components.

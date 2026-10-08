@@ -156,7 +156,7 @@ namespace Yamadev.YamaStream
 
     public override void AfterVideoErrorOccurred(VideoError videoError)
     {
-      PrintLog($"{_handler.Type.GetString()}: Video error {videoError}.");
+      RecordError(videoError);
 
       HandleErrorRetry(videoError);
       int len = _listeners.Length;
