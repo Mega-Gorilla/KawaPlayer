@@ -299,15 +299,20 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
       if (_controller != null)
         _controller.SetDefaultUrl(url);
 
-      if (_storageTemplate != null)
-      {
-        var spawned = (OwnerDefaultUrlStorage)Networking.FindComponentInPlayerObjects(
-          Networking.LocalPlayer, _storageTemplate);
-        if (spawned != null) spawned.SaveDefaultUrl(url);
-      }
+      var storage = FindOwnStorage();
+      if (storage != null) storage.SaveDefaultUrl(url);
 
       UpdateDisplay();
       RefreshInputField();
+    }
+
+    // This player's own copy of the storage, spawned from the template into
+    // their player objects. Null without a template, or before the copy is
+    // spawned.
+    private OwnerDefaultUrlStorage FindOwnStorage()
+    {
+      if (_storageTemplate == null) return null;
+      return (OwnerDefaultUrlStorage)Networking.FindComponentInPlayerObjects(Networking.LocalPlayer, _storageTemplate);
     }
 
     // The same question, in the same words, as the URL field asks
@@ -320,7 +325,8 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
 
       // Reading SourceUrl is only safe on a slot that holds something.
       string replacedSourceUrl = replaced.CanRefresh ? replaced.SourceUrl.Get() : string.Empty;
-      string name = string.IsNullOrEmpty(replaced.PlaylistName) ? "Playlist" : replaced.PlaylistName;
+      // PlaylistLoader alone names the module's namespace here, not its class.
+      string name = string.IsNullOrEmpty(replaced.PlaylistName) ? PlaylistLoader.PlaylistLoader.UnnamedPlaylistName : replaced.PlaylistName;
       if (!_uiController.ShowConfirm(
               _uiController.GetTranslation("module.playlistLoader.confirmReplaceTitle"),
               _uiController.GetTranslation("module.playlistLoader.confirmReplaceMessage")
@@ -414,22 +420,14 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
       if (_controller != null)
         _controller.SetDefaultUrl(VRCUrl.Empty);
 
-      if (_storageTemplate != null)
-      {
-        var spawned = (OwnerDefaultUrlStorage)Networking.FindComponentInPlayerObjects(
-          Networking.LocalPlayer, _storageTemplate);
-        if (spawned != null) spawned.ClearSavedUrl();
-      }
+      var storage = FindOwnStorage();
+      if (storage != null) storage.ClearSavedUrl();
 
       UpdateDisplay();
       RefreshInputField();
     }
 
-    // OnValidate warning was removed (#59): _controller / _storageTemplate are intentionally null
-    // at ScreenUI.prefab asset level (this script lives in ScreenUI.prefab/.../DefaultUrlSetting/).
-    // Cross-prefab override in KawaPlayer.prefab wires them at runtime instance level.
-    // Same approach as DefaultUrlController.OnValidate removal in PR #58 (UdonSharp does not expose
-    // UnityEditor.PrefabUtility/Scene.IsValid() for in-Udon detection of prefab-asset context, so
-    // we cannot conditionally suppress; removing OnValidate is cleaner and matches existing modules).
+    // No OnValidate warning about a missing _controller or _storageTemplate (#59): they are
+    // empty in ScreenUI.prefab itself and wired by KawaPlayer.prefab's override.
   }
 }

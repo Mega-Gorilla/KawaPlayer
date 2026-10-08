@@ -43,33 +43,30 @@ namespace Yamadev.YamaStream.Editor
     {
       EditorGUILayout.LabelField(EditorLocalization.Get("localization.defaultLanguage"), EditorStyles.boldLabel);
 
+      _defaultLanguage.stringValue = DefaultLanguagePopup(_languages, _defaultLanguage.stringValue, EditorLocalization.Get("localization.defaultLanguage.label"));
+    }
+
+    // The default language: "auto", then each language as "code - name".
+    // Returns the code picked, "" for auto; a code no language has shows
+    // as auto. Also drawn by the player inspectors.
+    public static string DefaultLanguagePopup(SerializedProperty languages, string currentCode, string label)
+    {
       var optionCodes = new List<string> { "" };
       var optionNames = new List<string> { EditorLocalization.Get("localization.defaultLanguage.auto") };
 
-      for (int i = 0; i < _languages.arraySize; i++)
+      for (int i = 0; i < languages.arraySize; i++)
       {
-        var lang = _languages.GetArrayElementAtIndex(i);
-        var code = lang.FindPropertyRelative("languageCode").stringValue;
-        var displayName = lang.FindPropertyRelative("displayName").stringValue;
+        var language = languages.GetArrayElementAtIndex(i);
+        var codeProperty = language.FindPropertyRelative("languageCode");
+        var displayNameProperty = language.FindPropertyRelative("displayName");
+        var code = codeProperty != null ? codeProperty.stringValue : "";
+        var displayName = displayNameProperty != null ? displayNameProperty.stringValue : $"Language {i}";
         optionCodes.Add(code);
         optionNames.Add($"{code} - {displayName}");
       }
 
-      int currentIndex = 0;
-      if (!string.IsNullOrEmpty(_defaultLanguage.stringValue))
-      {
-        currentIndex = optionCodes.IndexOf(_defaultLanguage.stringValue);
-        if (currentIndex < 0) currentIndex = 0;
-      }
-
-      int newIndex = EditorGUILayout.Popup(
-        EditorLocalization.Get("localization.defaultLanguage.label"),
-        currentIndex,
-        optionNames.ToArray());
-      if (newIndex >= 0 && newIndex < optionCodes.Count)
-      {
-        _defaultLanguage.stringValue = optionCodes[newIndex];
-      }
+      int current = string.IsNullOrEmpty(currentCode) ? 0 : Mathf.Max(0, optionCodes.IndexOf(currentCode));
+      return optionCodes[EditorGUILayout.Popup(label, current, optionNames.ToArray())];
     }
 
     private void DrawLanguageListSection()
@@ -134,12 +131,8 @@ namespace Yamadev.YamaStream.Editor
       var translationFile = langProp.FindPropertyRelative("translationFile");
       var font = langProp.FindPropertyRelative("font");
 
-      var rowBgColor = index % 2 == 0
-        ? (EditorGUIUtility.isProSkin ? new Color(0.22f, 0.22f, 0.22f) : new Color(0.76f, 0.76f, 0.76f))
-        : (EditorGUIUtility.isProSkin ? new Color(0.25f, 0.25f, 0.25f) : new Color(0.8f, 0.8f, 0.8f));
-
       var rowRect = EditorGUILayout.BeginVertical();
-      EditorGUI.DrawRect(rowRect, rowBgColor);
+      EditorGUI.DrawRect(rowRect, RowColor(index));
 
       using (new EditorGUILayout.HorizontalScope(GUILayout.Height(22)))
       {
@@ -153,7 +146,7 @@ namespace Yamadev.YamaStream.Editor
           _foldouts[index] = !_foldouts[index];
         }
 
-        EditorGUILayout.LabelField(languageCode.stringValue, LanguageCodeStyle, GUILayout.Width(50));
+        EditorGUILayout.LabelField(languageCode.stringValue, RowNameStyle, GUILayout.Width(50));
         EditorGUILayout.LabelField($"({displayName.stringValue})", DisplayNameStyle, GUILayout.MinWidth(80));
 
         GUILayout.FlexibleSpace();
@@ -162,7 +155,7 @@ namespace Yamadev.YamaStream.Editor
         {
           var defaultStyle = new GUIStyle(EditorStyles.miniLabel)
           {
-            normal = { textColor = new Color(0.3f, 0.7f, 0.4f, 1f) },
+            normal = { textColor = DefaultMarkColor },
             alignment = TextAnchor.MiddleRight
           };
           GUILayout.Label(EditorLocalization.Get("localization.default"), defaultStyle, GUILayout.Width(70), GUILayout.Height(22));
@@ -192,12 +185,8 @@ namespace Yamadev.YamaStream.Editor
 
     private void DrawLanguageDetails(int index, SerializedProperty languageCode, SerializedProperty displayName, SerializedProperty translationFile, SerializedProperty font)
     {
-      var detailBgColor = EditorGUIUtility.isProSkin
-        ? new Color(0.18f, 0.18f, 0.18f)
-        : new Color(0.7f, 0.7f, 0.7f);
-
       var detailRect = EditorGUILayout.BeginVertical();
-      EditorGUI.DrawRect(detailRect, detailBgColor);
+      EditorGUI.DrawRect(detailRect, DetailColor);
 
       GUILayout.Space(SpaceSmall);
       using (new EditorGUILayout.HorizontalScope())

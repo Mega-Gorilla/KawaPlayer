@@ -111,12 +111,8 @@ namespace Yamadev.YamaStream.Editor
       var titleProp = trackProp.FindPropertyRelative("title");
       var urlProp = trackProp.FindPropertyRelative("url");
 
-      var rowBgColor = index % 2 == 0
-          ? (EditorGUIUtility.isProSkin ? new Color(0.22f, 0.22f, 0.22f) : new Color(0.76f, 0.76f, 0.76f))
-          : (EditorGUIUtility.isProSkin ? new Color(0.25f, 0.25f, 0.25f) : new Color(0.8f, 0.8f, 0.8f));
-
       var rowRect = EditorGUILayout.GetControlRect(false, 36);
-      EditorGUI.DrawRect(rowRect, rowBgColor);
+      EditorGUI.DrawRect(rowRect, RowColor(index));
 
       var numberStyle = new GUIStyle(EditorStyles.boldLabel)
       {

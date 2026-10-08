@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 using VRC.SDK3.Components;
@@ -189,34 +188,10 @@ namespace Yamadev.YamaStream.Editor
       {
         if (_languages != null && _languages.arraySize > 0)
         {
-          var optionCodes = new List<string> { "" };
-          var optionNames = new List<string> { EditorLocalization.Get("localization.defaultLanguage.auto") };
-
-          for (int i = 0; i < _languages.arraySize; i++)
-          {
-            var language = _languages.GetArrayElementAtIndex(i);
-            var displayNameProperty = language.FindPropertyRelative("displayName");
-            var codeProperty = language.FindPropertyRelative("languageCode");
-            var code = codeProperty != null ? codeProperty.stringValue : "";
-            var displayName = displayNameProperty != null ? displayNameProperty.stringValue : $"Language {i}";
-            optionCodes.Add(code);
-            optionNames.Add($"{code} - {displayName}");
-          }
-
-          int selectedIndex = 0;
-          if (!string.IsNullOrEmpty(_defaultLanguage?.stringValue))
-          {
-            selectedIndex = optionCodes.IndexOf(_defaultLanguage.stringValue);
-            if (selectedIndex < 0) selectedIndex = 0;
-          }
-
           using (var check = new EditorGUI.ChangeCheckScope())
           {
-            int newIndex = EditorGUILayout.Popup(EditorLocalization.Get("localization.defaultLanguage"), selectedIndex, optionNames.ToArray());
-            if (check.changed && _defaultLanguage != null && newIndex >= 0 && newIndex < optionCodes.Count)
-            {
-              _defaultLanguage.stringValue = optionCodes[newIndex];
-            }
+            var code = LocalizationSettingsEditor.DefaultLanguagePopup(_languages, _defaultLanguage?.stringValue, EditorLocalization.Get("localization.defaultLanguage"));
+            if (check.changed && _defaultLanguage != null) _defaultLanguage.stringValue = code;
           }
         }
         else

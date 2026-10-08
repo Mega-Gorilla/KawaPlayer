@@ -28,7 +28,6 @@ namespace Yamadev.YamaStream.Editor
     private SerializedProperty _loop;
     private SerializedProperty _shuffle;
     private SerializedProperty _videoPlayerHandlers;
-    // private SerializedProperty _retryAfterSeconds;
     private SerializedProperty _maxErrorRetry;
     private SerializedProperty _useFallbackAfterErrors;
     private SerializedProperty _forwardInterval;
@@ -82,7 +81,6 @@ namespace Yamadev.YamaStream.Editor
         _loop = _controllerSerializedObject.FindProperty("_loop");
         _shuffle = _controllerSerializedObject.FindProperty("_shuffle");
         _videoPlayerHandlers = _controllerSerializedObject.FindProperty("_videoPlayerHandlers");
-        // _retryAfterSeconds = _controllerSerializedObject.FindProperty("_retryAfterSeconds");
         _maxErrorRetry = _controllerSerializedObject.FindProperty("_maxErrorRetry");
         _useFallbackAfterErrors = _controllerSerializedObject.FindProperty("_useFallbackAfterErrors");
         _forwardInterval = _controllerSerializedObject.FindProperty("_forwardInterval");
@@ -166,8 +164,8 @@ namespace Yamadev.YamaStream.Editor
       }
 
       DrawAppearanceSettings();
-      DrawLocalizationSettings(false);
-      DrawUISettings(false);
+      DrawLocalizationSettings();
+      DrawUISettings();
       EditorGUILayout.Space(SpaceMedium);
 
       DrawVideoPlayerSettings();
@@ -202,47 +200,18 @@ namespace Yamadev.YamaStream.Editor
       }
     }
 
-    private void DrawLocalizationSettings(bool showLabel = true)
+    private void DrawLocalizationSettings()
     {
       if (_localizationSettings == null) return;
-
-      if (showLabel)
-      {
-        EditorGUILayout.LabelField(EditorLocalization.Get("localization.title"), EditorStyles.boldLabel);
-      }
 
       using (new EditorGUILayout.HorizontalScope())
       {
         if (_languages != null && _languages.arraySize > 0)
         {
-          var optionCodes = new List<string> { "" };
-          var optionNames = new List<string> { EditorLocalization.Get("localization.defaultLanguage.auto") };
-
-          for (int i = 0; i < _languages.arraySize; i++)
-          {
-            var language = _languages.GetArrayElementAtIndex(i);
-            var displayNameProperty = language.FindPropertyRelative("displayName");
-            var codeProperty = language.FindPropertyRelative("languageCode");
-            var code = codeProperty != null ? codeProperty.stringValue : "";
-            var displayName = displayNameProperty != null ? displayNameProperty.stringValue : $"Language {i}";
-            optionCodes.Add(code);
-            optionNames.Add($"{code} - {displayName}");
-          }
-
-          int selectedIndex = 0;
-          if (!string.IsNullOrEmpty(_defaultLanguage?.stringValue))
-          {
-            selectedIndex = optionCodes.IndexOf(_defaultLanguage.stringValue);
-            if (selectedIndex < 0) selectedIndex = 0;
-          }
-
           using (var check = new EditorGUI.ChangeCheckScope())
           {
-            int newIndex = EditorGUILayout.Popup(EditorLocalization.Get("localization.defaultLanguage"), selectedIndex, optionNames.ToArray());
-            if (check.changed && _defaultLanguage != null && newIndex >= 0 && newIndex < optionCodes.Count)
-            {
-              _defaultLanguage.stringValue = optionCodes[newIndex];
-            }
+            var code = LocalizationSettingsEditor.DefaultLanguagePopup(_languages, _defaultLanguage?.stringValue, EditorLocalization.Get("localization.defaultLanguage"));
+            if (check.changed && _defaultLanguage != null) _defaultLanguage.stringValue = code;
           }
         }
         else
@@ -257,14 +226,9 @@ namespace Yamadev.YamaStream.Editor
       }
     }
 
-    private void DrawUISettings(bool showLabel = true)
+    private void DrawUISettings()
     {
       if (_uiController == null) return;
-
-      if (showLabel)
-      {
-        EditorGUILayout.LabelField(EditorLocalization.Get("settings.ui.label"), EditorStyles.boldLabel);
-      }
 
       if (_idleScreenSprite != null)
       {
@@ -323,7 +287,6 @@ namespace Yamadev.YamaStream.Editor
       EditorGUILayout.PropertyField(_brightness, EditorLocalization.GetLayout("settings.video.brightness", "settings.video.brightness.tooltip"));
       EditorGUILayout.PropertyField(_mute, EditorLocalization.GetLayout("settings.audio.mute", "settings.audio.mute.tooltip"));
       EditorGUILayout.PropertyField(_volume, EditorLocalization.GetLayout("settings.audio.volume", "settings.audio.volume.tooltip"));
-      // EditorGUILayout.PropertyField(_retryAfterSeconds, EditorLocalization.GetLayout("settings.playback.retryInterval", "settings.playback.retryInterval.tooltip"));
       EditorGUILayout.PropertyField(_maxErrorRetry, EditorLocalization.GetLayout("settings.playback.maxRetry", "settings.playback.maxRetry.tooltip"));
       EditorGUILayout.PropertyField(_useFallbackAfterErrors, EditorLocalization.GetLayout("settings.playback.fallbackAfterErrors", "settings.playback.fallbackAfterErrors.tooltip"));
       EditorGUILayout.PropertyField(_useLowLatency, EditorLocalization.GetLayout("settings.playback.lowLatency", "settings.playback.lowLatency.tooltip"));
@@ -421,12 +384,8 @@ namespace Yamadev.YamaStream.Editor
 
     private void DrawModuleRow(YamaPlayerModuleDefinition module, int index)
     {
-      var rowBgColor = index % 2 == 0
-        ? (EditorGUIUtility.isProSkin ? new Color(0.22f, 0.22f, 0.22f) : new Color(0.76f, 0.76f, 0.76f))
-        : (EditorGUIUtility.isProSkin ? new Color(0.25f, 0.25f, 0.25f) : new Color(0.8f, 0.8f, 0.8f));
-
       var rowRect = EditorGUILayout.BeginHorizontal(GUILayout.Height(22));
-      EditorGUI.DrawRect(rowRect, rowBgColor);
+      EditorGUI.DrawRect(rowRect, RowColor(index));
 
       bool isActive = module.gameObject.activeSelf;
       var statusColor = isActive ? new Color(0.4f, 0.8f, 0.4f) : new Color(0.55f, 0.55f, 0.55f);
@@ -435,7 +394,7 @@ namespace Yamadev.YamaStream.Editor
 
       GUILayout.Space(10);
 
-      string moduleName = GetModuleName(module);
+      string moduleName = ModuleManagerEditor.GetModuleName(module);
       EditorGUILayout.LabelField(moduleName, GUILayout.ExpandWidth(true));
 
       if (!module.noNeedSetUp)
@@ -469,17 +428,6 @@ namespace Yamadev.YamaStream.Editor
       GUILayout.Space(4);
 
       EditorGUILayout.EndHorizontal();
-    }
-
-    private string GetModuleName(YamaPlayerModuleDefinition module)
-    {
-      if (!string.IsNullOrEmpty(module.moduleNameTranslationKey))
-      {
-        var translated = EditorLocalization.Get(module.moduleNameTranslationKey);
-        if (!string.IsNullOrEmpty(translated))
-          return translated;
-      }
-      return module.moduleName;
     }
 
     private void DrawVersionSettings()

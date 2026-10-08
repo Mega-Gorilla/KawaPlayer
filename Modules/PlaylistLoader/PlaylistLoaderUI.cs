@@ -153,8 +153,8 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
       _awaitingConfirm = true;
 
       // A playlist the server gave no name for still has to be named in the
-      // question. The same word stands in for it as in OnLoadResult.
-      string name = string.IsNullOrEmpty(replaced.PlaylistName) ? "Playlist" : replaced.PlaylistName;
+      // question.
+      string name = string.IsNullOrEmpty(replaced.PlaylistName) ? PlaylistLoader.UnnamedPlaylistName : replaced.PlaylistName;
       if (ui.ShowConfirm(
               ui.GetTranslation("module.playlistLoader.confirmReplaceTitle"),
               ui.GetTranslation("module.playlistLoader.confirmReplaceMessage")
@@ -269,7 +269,7 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
 
       if (resultCode == PlaylistLoader.LoadResultSuccess)
       {
-        string name = string.IsNullOrEmpty(playlistName) ? "Playlist" : playlistName;
+        string name = string.IsNullOrEmpty(playlistName) ? PlaylistLoader.UnnamedPlaylistName : playlistName;
         ui.ShowMessage(
             ui.GetTranslation(reusedExistingSlot
                 ? "module.playlistLoader.updatedTitle"
