@@ -16,22 +16,12 @@ namespace Yamadev.YamaStream.UI
 
     [SerializeField, RegisterEvent(nameof(Button.onClick), nameof(ShowErrorDetails))] private Button _errorDetailsButton;
     [SerializeField] private Text _errorDetailsButtonLabel;
-    private PlaybackErrorLog _errorLog;
 
-    private PlaybackErrorLog ErrorLog
-    {
-      get
-      {
-        if (!Utilities.IsValid(_errorLog) && Utilities.IsValid(_controller)) _errorLog = _controller.GetComponent<PlaybackErrorLog>();
-        return _errorLog;
-      }
-    }
-
-    // Not gated on the log having an entry: the log may hear of this error
-    // after the UI does.
+    // The Controller takes the error down before it tells the UI, so the
+    // error this button is shown for is already in its log.
     private void SetErrorDetailsButtonShown(bool shown)
     {
-      if (Utilities.IsValid(_errorDetailsButton)) _errorDetailsButton.gameObject.SetActive(shown && Utilities.IsValid(ErrorLog));
+      if (Utilities.IsValid(_errorDetailsButton)) _errorDetailsButton.gameObject.SetActive(shown);
     }
 
     private void UpdateErrorDetailsTranslation()
@@ -41,33 +31,32 @@ namespace Yamadev.YamaStream.UI
 
     public void ShowErrorDetails()
     {
-      var log = ErrorLog;
-      if (!Utilities.IsValid(log) || log.EntryCount == 0) return;
-      ShowMessage(GetTranslation("errorDetails.title"), BuildErrorDetails(log));
+      if (_controller.ErrorLogCount == 0) return;
+      ShowMessage(GetTranslation("errorDetails.title"), BuildErrorDetails());
     }
 
     // In the order a screenshot needs it: the dialog scrolls past its height,
     // so where to send it and the latest error come first, and the earlier
     // errors and the log's place last.
-    private string BuildErrorDetails(PlaybackErrorLog log)
+    private string BuildErrorDetails()
     {
-      int max = log.MaxRetry;
+      int max = _controller.MaxErrorRetry;
       string text = GetTranslation("errorDetails.contact") + "\n" + ErrorContactUrl;
 
-      text += $"\n\n#{log.GetNumber(0)} · {log.GetTime(0)} · {log.GetError(0)}"
-        + $"\nPlayer: {PlayerLabel(log.GetPlayer(0))}, {AttemptLabel(log.GetAttempt(0), max)} → "
-        + (log.WillRetry(0) ? $"next: {PlayerLabel(log.GetNextPlayer(0))}, retry {log.GetAttempt(0) + 1}/{max}" : "no more retries");
-      string title = log.GetTitle(0);
+      text += $"\n\n#{_controller.GetErrorNumber(0)} · {_controller.GetErrorTime(0)} · {_controller.GetVideoError(0)}"
+        + $"\nPlayer: {PlayerLabel(_controller.GetErrorPlayer(0))}, {AttemptLabel(_controller.GetErrorAttempt(0), max)} → "
+        + (_controller.GetErrorWillRetry(0) ? $"next: {PlayerLabel(_controller.GetErrorNextPlayer(0))}, retry {_controller.GetErrorAttempt(0) + 1}/{max}" : "no more retries");
+      string title = _controller.GetErrorTitle(0);
       if (!string.IsNullOrEmpty(title)) text += $"\nTrack: {title}";
-      if (log.GetTrackNumber(0) > 0) text += $"\nPlaylist: {log.GetPlaylist(0)} #{log.GetTrackNumber(0)}";
-      text += $"\nURL: {log.GetUrl(0)}";
-      string detail = log.GetDetail(0);
+      if (_controller.GetErrorTrackNumber(0) > 0) text += $"\nPlaylist: {_controller.GetErrorPlaylist(0)} #{_controller.GetErrorTrackNumber(0)}";
+      text += $"\nURL: {_controller.GetErrorUrl(0)}";
+      string detail = _controller.GetErrorDetail(0);
       if (!string.IsNullOrEmpty(detail)) text += $"\nDetail: {detail}";
-      text += "\n" + BuildErrorReportLine(log, max);
+      text += "\n" + BuildErrorReportLine(max);
 
-      for (int i = 1; i < log.EntryCount; i++)
+      for (int i = 1; i < _controller.ErrorLogCount; i++)
       {
-        text += (i == 1 ? "\n\n" : "\n") + $"#{log.GetNumber(i)} · {log.GetTime(i)} · {log.GetError(i)} · {PlayerLabel(log.GetPlayer(i))}, {AttemptLabel(log.GetAttempt(i), max)}";
+        text += (i == 1 ? "\n\n" : "\n") + $"#{_controller.GetErrorNumber(i)} · {_controller.GetErrorTime(i)} · {_controller.GetVideoError(i)} · {PlayerLabel(_controller.GetErrorPlayer(i))}, {AttemptLabel(_controller.GetErrorAttempt(i), max)}";
       }
 #if !UNITY_ANDROID && !UNITY_IOS
       text += "\n\n" + GetTranslation("errorDetails.log").Replace("{0}", VRChatLogPath);
@@ -77,12 +66,12 @@ namespace Yamadev.YamaStream.UI
 
     // One line to quote when writing in, and to find the error in the log by
     // its number.
-    private string BuildErrorReportLine(PlaybackErrorLog log, int max)
+    private string BuildErrorReportLine(int max)
     {
-      string players = PlayerLabel(log.GetPlayer(0));
-      if (log.WillRetry(0) && log.GetNextPlayer(0) != log.GetPlayer(0)) players += "→" + PlayerLabel(log.GetNextPlayer(0));
-      string host = UrlUtils.GetHostFromUrl(log.GetUrl(0));
-      return $"KawaPlayer {_controller.Version} | #{log.GetNumber(0)} {log.GetError(0)} | {players} | retry {log.GetAttempt(0)}/{max} | {(string.IsNullOrEmpty(host) ? "-" : host)} | {PlatformLabel()} | {_controller.MaxResolution}p";
+      string players = PlayerLabel(_controller.GetErrorPlayer(0));
+      if (_controller.GetErrorWillRetry(0) && _controller.GetErrorNextPlayer(0) != _controller.GetErrorPlayer(0)) players += "→" + PlayerLabel(_controller.GetErrorNextPlayer(0));
+      string host = UrlUtils.GetHostFromUrl(_controller.GetErrorUrl(0));
+      return $"KawaPlayer {_controller.Version} | #{_controller.GetErrorNumber(0)} {_controller.GetVideoError(0)} | {players} | retry {_controller.GetErrorAttempt(0)}/{max} | {(string.IsNullOrEmpty(host) ? "-" : host)} | {PlatformLabel()} | {_controller.MaxResolution}p";
     }
 
     private string AttemptLabel(int attempt, int max) => attempt == 0 ? "first try" : $"retry {attempt}/{max}";

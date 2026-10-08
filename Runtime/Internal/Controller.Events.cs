@@ -159,6 +159,7 @@ namespace Yamadev.YamaStream
       RecordError(videoError);
 
       HandleErrorRetry(videoError);
+      RecordErrorRetry();
       int len = _listeners.Length;
       for (int i = 0; i < len; i++)
       {
