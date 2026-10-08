@@ -60,8 +60,8 @@ namespace Yamadev.YamaStream.Editor
     // them: AutoPlay usually runs first, and the owner's default URL then
     // finds the player busy and is not played. Reported rather than refused,
     // like a duplicate: which one to keep is the creator's to decide.
-    internal const string OwnerAutoplayModuleName = "DefaultUrl";
-    internal const string WorldAutoplayModuleName = "AutoPlay";
+    private const string OwnerAutoplayModuleName = "DefaultUrl";
+    private const string WorldAutoplayModuleName = "AutoPlay";
 
     private static void ReportAutoplayConflicts()
     {
@@ -98,8 +98,11 @@ namespace Yamadev.YamaStream.Editor
     {
       var module = worldAutoplay.GetComponent<YamaPlayerModule>();
       if (module == null) return false;
-      var mode = new SerializedObject(module).FindProperty("_autoPlayMode");
-      return mode == null || mode.intValue != 0;
+      using (var serialized = new SerializedObject(module))
+      {
+        var mode = serialized.FindProperty("_autoPlayMode");
+        return mode == null || mode.intValue != 0;
+      }
     }
 
     private static string GetPath(Transform transform)
