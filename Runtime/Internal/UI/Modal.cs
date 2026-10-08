@@ -16,7 +16,13 @@ namespace Yamadev.YamaStream.UI
     [SerializeField] private Text _closeText, _executeText, _execute2Text;
     [SerializeField] private float _maxHeight = 400f;
     [SerializeField] private ScrollRect _scrollRect;
+    // A field under the message that holds a text to copy, such as where to
+    // write to. A world cannot open a link in VRChat, but the viewer can copy
+    // what an InputField holds. Shown only for the dialog that asks for it.
+    [SerializeField, RegisterEvent(nameof(InputField.onValueChanged), nameof(RestoreCopyText))] private InputField _copyField;
+    [SerializeField] private Text _copyLabel;
     private UdonSharpBehaviour _targetUdon;
+    private string _copyText = "";
     private string _closeEventName, _executeEventName, _execute2EventName;
     private bool _notifyingRefusal;
     private RectTransform _scrollRectTransform;
@@ -105,6 +111,7 @@ namespace Yamadev.YamaStream.UI
     {
       if (IsAwaitingAnswer) return false;
 
+      if (Utilities.IsValid(_copyField)) _copyField.gameObject.SetActive(false);
       if (Utilities.IsValid(_titleText)) _titleText.text = title;
       if (Utilities.IsValid(_messageText)) _messageText.text = message;
       if (Utilities.IsValid(_closeText)) _closeText.text = closeText;
@@ -121,6 +128,23 @@ namespace Yamadev.YamaStream.UI
       gameObject.SetActive(true);
       SendCustomEventDelayedFrames(nameof(AdaptMaxHeight), 3);
       return true;
+    }
+
+    // For the dialog just put up by TryShow.
+    public void ShowCopyField(string text, string label)
+    {
+      if (!Utilities.IsValid(_copyField)) return;
+      _copyText = text;
+      _copyField.text = text;
+      if (Utilities.IsValid(_copyLabel)) _copyLabel.text = label;
+      _copyField.gameObject.SetActive(true);
+    }
+
+    // The field is not read-only, so that VRChat treats it as any other
+    // field; what the viewer types in is undone.
+    public void RestoreCopyText()
+    {
+      if (Utilities.IsValid(_copyField) && _copyField.text != _copyText) _copyField.text = _copyText;
     }
 
     public void AdaptMaxHeight()

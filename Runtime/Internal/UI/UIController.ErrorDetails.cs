@@ -29,10 +29,13 @@ namespace Yamadev.YamaStream.UI
       if (Utilities.IsValid(_errorDetailsButtonLabel)) _errorDetailsButtonLabel.text = GetTranslation("errorDetails.button");
     }
 
+    // The contact address goes in the dialog's copy field, which stays in
+    // view below the details however far they scroll.
     public void ShowErrorDetails()
     {
-      if (_controller.ErrorLogCount == 0) return;
-      ShowMessage(GetTranslation("errorDetails.title"), BuildErrorDetails());
+      if (!Utilities.IsValid(_modalDialog) || _controller.ErrorLogCount == 0) return;
+      if (!_modalDialog.TryShow(GetTranslation("errorDetails.title"), BuildErrorDetails(), GetTranslation("button.close"), "", this, null, null)) return;
+      _modalDialog.ShowCopyField(ErrorContactUrl, GetTranslation("button.copyUrl"));
     }
 
     // In the order a screenshot needs it: the dialog scrolls past its height,
@@ -41,7 +44,7 @@ namespace Yamadev.YamaStream.UI
     private string BuildErrorDetails()
     {
       int max = _controller.MaxErrorRetry;
-      string text = GetTranslation("errorDetails.contact") + "\n" + ErrorContactUrl;
+      string text = GetTranslation("errorDetails.contact");
 
       text += $"\n\n#{_controller.GetErrorNumber(0)} · {_controller.GetErrorTime(0)} · {_controller.GetVideoError(0)}"
         + $"\nPlayer: {PlayerLabel(_controller.GetErrorPlayer(0))}, {AttemptLabel(_controller.GetErrorAttempt(0), max)} → "

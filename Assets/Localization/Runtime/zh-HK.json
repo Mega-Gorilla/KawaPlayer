@@ -105,7 +105,7 @@
   "error.youtubeHintInvalidUrl": "影片可能不存在，或因YouTube方面的問題而無法播放。",
   "errorDetails.button": "詳情",
   "errorDetails.title": "播放錯誤詳情",
-  "errorDetails.contact": "如果影片無法播放，請附上此畫面的截圖，到以下 Discord 聯絡我們（截圖中也會顯示 URL）。",
+  "errorDetails.contact": "如果影片無法播放，請附上此畫面的截圖，到 Discord 聯絡我們。Discord 的 URL 可以從下方的欄位複製。",
   "errorDetails.log": "如果使用 PC，附上 VRChat 記錄檔（{0}）有助我們找出原因。",
   "tablet.app.version": "版本資訊",
   "tablet.dateFormat": "{0}月{1}日 星期{2}",

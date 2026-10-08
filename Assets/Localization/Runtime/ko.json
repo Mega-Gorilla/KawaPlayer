@@ -105,7 +105,7 @@
   "error.youtubeHintInvalidUrl": "동영상이 존재하지 않거나 YouTube 측 문제로 재생할 수 없는 경우가 있습니다.",
   "errorDetails.button": "자세히",
   "errorDetails.title": "재생 오류 상세",
-  "errorDetails.contact": "동영상이 재생되지 않으면 이 화면의 스크린샷을 첨부하여 아래 Discord로 문의해 주세요(URL도 함께 찍힙니다).",
+  "errorDetails.contact": "동영상이 재생되지 않으면 이 화면의 스크린샷을 첨부하여 Discord로 문의해 주세요. Discord URL은 아래 칸에서 복사할 수 있습니다.",
   "errorDetails.log": "PC에서는 VRChat 로그({0})도 첨부해 주시면 원인을 찾는 데 도움이 됩니다.",
   "tablet.app.version": "버전 정보",
   "tablet.dateFormat": "{0}월 {1}일 ({2})",

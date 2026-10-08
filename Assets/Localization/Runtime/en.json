@@ -105,7 +105,7 @@
   "error.youtubeHintInvalidUrl": "The video may not exist, or YouTube may be having issues.",
   "errorDetails.button": "Details",
   "errorDetails.title": "Playback error details",
-  "errorDetails.contact": "If a video will not play, please send a screenshot of this screen to us on Discord (the URL shows in it too):",
+  "errorDetails.contact": "If a video will not play, please send a screenshot of this screen to us on Discord. You can copy the Discord URL from the field below.",
   "errorDetails.log": "On PC, attaching your VRChat log ({0}) helps us find the cause.",
   "tablet.app.version": "Version Info",
   "tablet.dateFormat": "{2}, {3} {1}",

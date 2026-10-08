@@ -105,7 +105,7 @@
   "error.youtubeHintInvalidUrl": "Il video potrebbe non esistere o YouTube potrebbe avere problemi.",
   "errorDetails.button": "Dettagli",
   "errorDetails.title": "Dettagli dell'errore di riproduzione",
-  "errorDetails.contact": "Se un video non si riproduce, inviaci uno screenshot di questa schermata su Discord (mostra anche l'URL):",
+  "errorDetails.contact": "Se un video non si riproduce, inviaci uno screenshot di questa schermata su Discord. Puoi copiare l'URL di Discord dal campo qui sotto.",
   "errorDetails.log": "Su PC, allegare il registro di VRChat ({0}) ci aiuta a trovare la causa.",
   "tablet.app.version": "Versione",
   "tablet.dateFormat": "{2} {1} {3}",

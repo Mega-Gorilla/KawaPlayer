@@ -105,7 +105,7 @@
   "error.youtubeHintInvalidUrl": "Відео може не існувати, або у YouTube виникли проблеми.",
   "errorDetails.button": "Докладніше",
   "errorDetails.title": "Подробиці помилки відтворення",
-  "errorDetails.contact": "Якщо відео не відтворюється, надішліть нам знімок цього екрана в Discord (на ньому видно й URL):",
+  "errorDetails.contact": "Якщо відео не відтворюється, надішліть нам знімок цього екрана в Discord. Адресу Discord можна скопіювати з поля нижче.",
   "errorDetails.log": "На ПК додайте журнал VRChat ({0}) — це допоможе знайти причину.",
   "tablet.app.version": "Версія",
   "tablet.dateFormat": "{2}, {1} {3}",
