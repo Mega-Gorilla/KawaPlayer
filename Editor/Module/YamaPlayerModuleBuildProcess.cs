@@ -14,6 +14,7 @@ namespace Yamadev.YamaStream.Editor
     public void Process()
     {
       ReportDuplicateModules();
+      ReportAutoplayConflicts();
       var modules = Object.FindObjectsByType<YamaPlayerModule>(FindObjectsInactive.Include, FindObjectsSortMode.None);
       foreach (var module in modules)
       {
@@ -40,12 +41,11 @@ namespace Yamadev.YamaStream.Editor
 
     // Grouped by the nearest Controller, so two players in one scene may
     // each have the same module. A module counts exactly when ProcessModule
-    // builds it: only one whose own GameObject is inactive is left out, and
-    // one under an inactive parent, or with its component disabled, counts.
+    // builds it (IsModuleEnabled).
     internal static List<List<YamaPlayerModuleDefinition>> FindDuplicateModules(IEnumerable<YamaPlayerModuleDefinition> definitions)
     {
       return definitions
-        .Where(definition => definition != null && definition.gameObject.activeSelf
+        .Where(definition => definition != null && IsModuleEnabled(definition)
           && !definition.allowMultiple && !string.IsNullOrEmpty(definition.moduleName))
         .Select(definition => (definition, controller: definition.GetComponentInParent<Controller>(true)))
         .Where(entry => entry.controller != null)
@@ -53,6 +53,56 @@ namespace Yamadev.YamaStream.Editor
         .Where(group => group.Count() > 1)
         .Select(group => group.Select(entry => entry.definition).OrderBy(definition => GetPath(definition.transform)).ToList())
         .ToList();
+    }
+
+    // DefaultUrl (the instance owner's autoplay) and AutoPlay (the world's)
+    // both start a video when someone joins, and nothing decides between
+    // them: AutoPlay usually runs first, and the owner's default URL then
+    // finds the player busy and is not played. Reported rather than refused,
+    // like a duplicate: which one to keep is the creator's to decide.
+    private const string OwnerAutoplayModuleName = "DefaultUrl";
+    private const string WorldAutoplayModuleName = "AutoPlay";
+
+    private static void ReportAutoplayConflicts()
+    {
+      var definitions = Object.FindObjectsByType<YamaPlayerModuleDefinition>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+      foreach (var (owner, world) in FindAutoplayConflicts(definitions))
+      {
+        Debug.LogError(
+          "[KawaPlayer] DefaultUrl and AutoPlay are both enabled on one player. Both start a video when someone joins and nothing decides between them, " +
+          "so the instance owner's default URL may not play. Disable one of them:\n" +
+          GetPath(owner.transform) + "\n" + GetPath(world.transform),
+          world.gameObject);
+      }
+    }
+
+    // Per Controller, counted as the build counts modules (IsModuleEnabled).
+    internal static List<(YamaPlayerModuleDefinition owner, YamaPlayerModuleDefinition world)> FindAutoplayConflicts(IEnumerable<YamaPlayerModuleDefinition> definitions)
+    {
+      return definitions
+        .Where(definition => definition != null && IsModuleEnabled(definition))
+        .Select(definition => (definition, controller: definition.GetComponentInParent<Controller>(true)))
+        .Where(entry => entry.controller != null)
+        .GroupBy(entry => entry.controller)
+        .Select(group => (
+          owner: group.Select(entry => entry.definition).FirstOrDefault(definition => definition.moduleName == OwnerAutoplayModuleName),
+          world: group.Select(entry => entry.definition).FirstOrDefault(definition => definition.moduleName == WorldAutoplayModuleName && PlaysOnJoin(definition))))
+        .Where(pair => pair.owner != null && pair.world != null)
+        .ToList();
+    }
+
+    // An AutoPlay set to Off plays nothing. Its mode is read by its
+    // serialized name, as this assembly does not reference the module's;
+    // 0 is AutoPlayMode.Off.
+    private static bool PlaysOnJoin(YamaPlayerModuleDefinition worldAutoplay)
+    {
+      var module = worldAutoplay.GetComponent<YamaPlayerModule>();
+      if (module == null) return false;
+      using (var serialized = new SerializedObject(module))
+      {
+        var mode = serialized.FindProperty("_autoPlayMode");
+        return mode == null || mode.intValue != 0;
+      }
     }
 
     private static string GetPath(Transform transform)
@@ -65,9 +115,42 @@ namespace Yamadev.YamaStream.Editor
       return path;
     }
 
+    // The object a module is switched off and deleted by: its own object, or
+    // the root its definition names (moduleRoot) -- DefaultUrl names
+    // Modules/DefaultUrl, which holds its controller and its storage. The
+    // root is never worked out from what else shares a folder: a folder may
+    // hold anything, and one module in it says nothing about the rest. A
+    // named root that does not hold the module, or is not inside the
+    // player's Modules, is ignored.
+    internal static GameObject GetModuleRoot(Component module)
+    {
+      var definition = module.GetComponent<YamaPlayerModuleDefinition>();
+      var root = definition != null ? definition.moduleRoot : null;
+      if (root == null || !module.transform.IsChildOf(root.transform)) return module.gameObject;
+      var manager = module.GetComponentInParent<ModuleManager>(true);
+      if (manager != null && (root.transform == manager.transform || !root.transform.IsChildOf(manager.transform))) return module.gameObject;
+      return root;
+    }
+
+    // Whether ProcessModule builds the module: both its own object and its
+    // root are on. Another parent being off, or its component being disabled,
+    // does not leave it out.
+    internal static bool IsModuleEnabled(Component module)
+    {
+      return module.gameObject.activeSelf && GetModuleRoot(module).activeSelf;
+    }
+
+    // The root is checked first, so a module switched off at both is still
+    // left out with all its parts, not just its own object.
     private static void ProcessModule(YamaPlayerModule module)
     {
       if (module == null) return;
+      var root = GetModuleRoot(module);
+      if (!root.activeSelf)
+      {
+        root.tag = "EditorOnly";
+        return;
+      }
       if (!module.gameObject.activeSelf)
       {
         module.gameObject.tag = "EditorOnly";

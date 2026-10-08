@@ -339,7 +339,9 @@ namespace Yamadev.YamaStream.Editor
 
       EditorGUILayout.LabelField(EditorLocalization.Get("label.modules"), EditorStyles.boldLabel);
 
-      var installedModules = GetInstalledModules();
+      ModuleManagerEditor.DrawModuleErrors(_moduleManager);
+
+      var installedModules = ModuleManagerEditor.GetInstalledModules(_moduleManager);
 
       if (installedModules.Count == 0)
       {
@@ -358,22 +360,6 @@ namespace Yamadev.YamaStream.Editor
       }
     }
 
-    private List<YamaPlayerModuleDefinition> GetInstalledModules()
-    {
-      var modules = new List<YamaPlayerModuleDefinition>();
-      if (_moduleManager == null) return modules;
-
-      foreach (Transform child in _moduleManager.transform)
-      {
-        var moduleDef = child.GetComponent<YamaPlayerModuleDefinition>();
-        if (moduleDef != null)
-        {
-          modules.Add(moduleDef);
-        }
-      }
-      return modules;
-    }
-
     private void DrawInstalledModulesList(List<YamaPlayerModuleDefinition> modules)
     {
       for (int i = 0; i < modules.Count; i++)
@@ -387,7 +373,7 @@ namespace Yamadev.YamaStream.Editor
       var rowRect = EditorGUILayout.BeginHorizontal(GUILayout.Height(22));
       EditorGUI.DrawRect(rowRect, RowColor(index));
 
-      bool isActive = module.gameObject.activeSelf;
+      bool isActive = YamaPlayerModuleBuildProcess.IsModuleEnabled(module);
       var statusColor = isActive ? new Color(0.4f, 0.8f, 0.4f) : new Color(0.55f, 0.55f, 0.55f);
       var statusBarRect = new Rect(rowRect.x, rowRect.y, 3, rowRect.height);
       EditorGUI.DrawRect(statusBarRect, statusColor);
@@ -420,9 +406,7 @@ namespace Yamadev.YamaStream.Editor
         : EditorLocalization.Get("module.manager.button.enable");
       if (GUILayout.Button(toggleLabel, GUILayout.Width(56)))
       {
-        Undo.RecordObject(module.gameObject, isActive ? "Disable Module" : "Enable Module");
-        module.gameObject.SetActive(!isActive);
-        EditorUtility.SetDirty(module.gameObject);
+        ModuleManagerEditor.SetModuleEnabled(module, !isActive);
       }
 
       GUILayout.Space(4);

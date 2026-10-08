@@ -12,6 +12,10 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
   {
     [SerializeField] private DefaultUrlController _controller;
     [SerializeField] private OwnerDefaultUrlStorage _storageTemplate;
+    // What to hide when there is no DefaultUrl to set: the whole card, which
+    // in the screen's settings panel is this object's parent. Empty means
+    // this object.
+    [SerializeField] private GameObject _card;
     // Dressed as a button -- icon, label, no visible box -- and clicked like
     // one. Clicking a VRCUrlInputField is what opens VRChat's text entry, so
     // making the field itself the button gets there in one press without
@@ -83,6 +87,18 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
 
     void Start()
     {
+      // A player without the module, or with it switched off in Module
+      // Manager (left out of the build, or inactive in the editor's Play),
+      // has nothing to set here, so the card goes rather than saying the
+      // feature is unavailable -- that is for a viewer who is not the
+      // instance owner, while the module is there.
+      if (!Utilities.IsValid(_controller) || !_controller.gameObject.activeInHierarchy)
+      {
+        GameObject card = Utilities.IsValid(_card) ? _card : gameObject;
+        card.SetActive(false);
+        return;
+      }
+
       _uiController = GetComponentInParent<UIController>();
       if (_uiController != null) _uiController.AddListener(this);
       UpdateTranslation();

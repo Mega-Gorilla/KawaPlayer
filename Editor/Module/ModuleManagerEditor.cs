@@ -38,9 +38,9 @@ namespace Yamadev.YamaStream.Editor
       EditorGUILayout.LabelField(EditorLocalization.Get("module.manager.installedModules"), EditorStyles.boldLabel);
       EditorGUILayout.Space(SpaceSmall);
 
-      DrawDuplicateModuleErrors();
+      DrawModuleErrors(_moduleManager);
 
-      var installedModules = GetInstalledModules();
+      var installedModules = GetInstalledModules(_moduleManager);
 
       if (installedModules.Count == 0)
       {
@@ -54,23 +54,42 @@ namespace Yamadev.YamaStream.Editor
       }
     }
 
-    // The Add button keeps a module to one copy, but one dragged in by hand
-    // still gets built (issue #55). Counted over the whole player, as the
-    // build does, so a copy outside this list is caught too.
-    private void DrawDuplicateModuleErrors()
+    // What the build reports about these modules, shown before it is built.
+    // Counted over the whole player, as the build does, so a module outside
+    // this list is caught too. Also used by the player inspector.
+    internal static void DrawModuleErrors(ModuleManager moduleManager)
     {
-      var controller = _moduleManager.GetComponentInParent<Controller>(true);
+      var controller = moduleManager == null ? null : moduleManager.GetComponentInParent<Controller>(true);
       if (controller == null) return;
 
       // A player nested inside this one owns its own modules.
       var definitions = controller.GetComponentsInChildren<YamaPlayerModuleDefinition>(true)
-        .Where(definition => definition.GetComponentInParent<Controller>(true) == controller);
+        .Where(definition => definition.GetComponentInParent<Controller>(true) == controller)
+        .ToList();
+
+      // The Add button keeps a module to one copy, but one dragged in by hand
+      // still gets built (issue #55).
       foreach (var copies in YamaPlayerModuleBuildProcess.FindDuplicateModules(definitions))
       {
         EditorGUILayout.HelpBox(
-          string.Format(EditorLocalization.Get("module.manager.duplicate"), GetModuleName(copies[0]), copies.Count),
+          string.Format(EditorLocalization.Get("module.manager.duplicate"), MessageName(copies[0]), copies.Count),
           MessageType.Error);
       }
+
+      foreach (var (owner, world) in YamaPlayerModuleBuildProcess.FindAutoplayConflicts(definitions))
+      {
+        EditorGUILayout.HelpBox(
+          string.Format(EditorLocalization.Get("module.manager.autoplayConflict"), MessageName(owner), MessageName(world)),
+          MessageType.Error);
+      }
+    }
+
+    // A help box wraps at the first space it can, even in Japanese, so a
+    // name such as "デフォルト URL" was split across lines; within a name
+    // the space does not break.
+    private static string MessageName(YamaPlayerModuleDefinition module)
+    {
+      return GetModuleName(module).Replace(' ', '\u00A0');
     }
 
     // The module's translated name, or its own name without a translation.
@@ -99,7 +118,7 @@ namespace Yamadev.YamaStream.Editor
 
     private void DrawInstalledModuleRow(YamaPlayerModuleDefinition module, int index)
     {
-      bool isActive = module.gameObject.activeSelf;
+      bool isActive = YamaPlayerModuleBuildProcess.IsModuleEnabled(module);
       var rowRect = EditorGUILayout.GetControlRect(false, RowHeight);
       EditorGUI.DrawRect(rowRect, RowColor(index));
 
@@ -157,23 +176,40 @@ namespace Yamadev.YamaStream.Editor
       var toggleRect = new Rect(buttonsStartX + buttonWidth + 4, buttonY, buttonWidth + 6, buttonHeight);
       if (GUI.Button(toggleRect, isActive ? EditorLocalization.Get("module.manager.button.disable") : EditorLocalization.Get("module.manager.button.enable")))
       {
-        Undo.RecordObject(module.gameObject, isActive ? "Disable Module" : "Enable Module");
-        module.gameObject.SetActive(!isActive);
-        EditorUtility.SetDirty(module.gameObject);
+        SetModuleEnabled(module, !isActive);
       }
 
+      var root = YamaPlayerModuleBuildProcess.GetModuleRoot(module);
+      bool canDelete = CanDeleteModule(root);
       var deleteRect = new Rect(buttonsStartX + buttonWidth * 2 + 14, buttonY, buttonWidth, buttonHeight);
-      if (GUI.Button(deleteRect, EditorLocalization.Get("module.manager.button.delete")))
+      var deleteContent = new GUIContent(EditorLocalization.Get("module.manager.button.delete"), canDelete ? "" : EditorLocalization.Get("module.manager.deleteInPrefab"));
+      using (new EditorGUI.DisabledScope(!canDelete))
       {
-        if (EditorUtility.DisplayDialog(
-          EditorLocalization.Get("module.manager.deleteTitle"),
-          string.Format(EditorLocalization.Get("module.manager.deleteConfirm"), module.moduleName),
-          EditorLocalization.Get("module.manager.button.delete"),
-          EditorLocalization.Get("button.cancel")))
+        if (GUI.Button(deleteRect, deleteContent))
         {
-          Undo.DestroyObjectImmediate(module.gameObject);
+          if (EditorUtility.DisplayDialog(
+            EditorLocalization.Get("module.manager.deleteTitle"),
+            string.Format(EditorLocalization.Get("module.manager.deleteConfirm"), GetModuleName(module)),
+            EditorLocalization.Get("module.manager.button.delete"),
+            EditorLocalization.Get("button.cancel")))
+          {
+            Undo.DestroyObjectImmediate(root);
+          }
         }
       }
+    }
+
+    // A module the prefab brings with it, such as KawaPlayer.prefab's own
+    // PlaylistLoader and DefaultUrl, is only switched off here. Deleting it
+    // would leave a removal override on the instance, and it could not be
+    // added back from Available Modules, which lists standalone module
+    // prefabs only. An instance's root, and a module added to an instance,
+    // can go.
+    private static bool CanDeleteModule(GameObject root)
+    {
+      return !PrefabUtility.IsPartOfPrefabInstance(root)
+        || PrefabUtility.IsOutermostPrefabInstanceRoot(root)
+        || PrefabUtility.IsAddedGameObjectOverride(root);
     }
 
     private void DrawAvailableModulesSection()
@@ -190,7 +226,7 @@ namespace Yamadev.YamaStream.Editor
 
       EditorGUILayout.Space(SpaceSmall);
 
-      var installedModules = GetInstalledModules();
+      var installedModules = GetInstalledModules(_moduleManager);
       var definitions = ModuleManager.ModuleDefinitions
         .Where(d => d.Key.allowMultiple || !installedModules.Any(m => m.moduleName == d.Key.moduleName))
         .ToList();
@@ -269,20 +305,32 @@ namespace Yamadev.YamaStream.Editor
       EditorUtility.SetDirty(_moduleManager);
     }
 
-    private List<YamaPlayerModuleDefinition> GetInstalledModules()
+    // Every module under these Modules however deep it is kept (DefaultUrl's
+    // definition is on Modules/DefaultUrl/Controller), except those of a
+    // player nested inside, which has Modules of its own. Also used by the
+    // player inspector's module list.
+    internal static List<YamaPlayerModuleDefinition> GetInstalledModules(ModuleManager moduleManager)
     {
-      var modules = new List<YamaPlayerModuleDefinition>();
-      if (_moduleManager == null) return modules;
+      if (moduleManager == null) return new List<YamaPlayerModuleDefinition>();
+      return moduleManager.GetComponentsInChildren<YamaPlayerModuleDefinition>(true)
+        .Where(definition => definition.GetComponentInParent<ModuleManager>(true) == moduleManager)
+        .ToList();
+    }
 
-      foreach (Transform child in _moduleManager.transform)
+    // Switches the module's root (YamaPlayerModuleBuildProcess.GetModuleRoot)
+    // so the module's other parts go with it. Switching on also switches on
+    // the module's own object, in case it was switched off by hand. Also used
+    // by the player inspector's module list.
+    internal static void SetModuleEnabled(YamaPlayerModuleDefinition module, bool enabled)
+    {
+      var root = YamaPlayerModuleBuildProcess.GetModuleRoot(module);
+      var objects = enabled ? new[] { root, module.gameObject }.Distinct().ToArray() : new[] { root };
+      Undo.RecordObjects(objects, enabled ? "Enable Module" : "Disable Module");
+      foreach (var moduleObject in objects)
       {
-        var moduleDef = child.GetComponent<YamaPlayerModuleDefinition>();
-        if (moduleDef != null)
-        {
-          modules.Add(moduleDef);
-        }
+        moduleObject.SetActive(enabled);
+        EditorUtility.SetDirty(moduleObject);
       }
-      return modules;
     }
 
     public static void FindYamaPlayerModules()

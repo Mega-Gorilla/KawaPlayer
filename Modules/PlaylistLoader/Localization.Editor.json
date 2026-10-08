@@ -1,5 +1,7 @@
 {
   "ja": {
+    "module.playlistLoader.name": "外部プレイリスト読込",
+    "module.playlistLoader.description": "VHub（playlist.vrc-hub.com）のプレイリストを、VRChat の中で URL 欄から読み込みます",
     "module.playlistLoader.import.title": "VHub プレイリスト",
     "module.playlistLoader.import.hint": "VHub の共有 URL を貼り付けると、その内容を静的プレイリストとして取り込みます。曲名と並び順はビルドに焼き込まれ、実行時にプレイリストを取得し直しません。ただし各曲の URL は VHub のリダイレクトのままなので、再生には VHub が必要です。",
     "module.playlistLoader.import.errorNoPlayer": "KawaPlayer を選択してください。",
@@ -18,6 +20,8 @@
     "module.playlistLoader.import.resultPartial": "『{0}』の {1} 曲を取り込みました ({2} 曲はスキップ)。"
   },
   "en": {
+    "module.playlistLoader.name": "Playlist Loader",
+    "module.playlistLoader.description": "Loads VHub (playlist.vrc-hub.com) playlists from the URL field inside VRChat",
     "module.playlistLoader.import.title": "VHub playlist",
     "module.playlistLoader.import.hint": "Paste a VHub share URL to import its contents as a static playlist. Titles and order are baked into the build, so the playlist is never re-fetched at runtime. Each track URL stays a VHub redirect, so playback still needs VHub.",
     "module.playlistLoader.import.errorNoPlayer": "Select a KawaPlayer first.",
@@ -36,6 +40,8 @@
     "module.playlistLoader.import.resultPartial": "Imported {1} tracks from \"{0}\" ({2} skipped)."
   },
   "ko": {
+    "module.playlistLoader.name": "플레이리스트 로더",
+    "module.playlistLoader.description": "VRChat 안에서 URL 칸에 입력한 VHub(playlist.vrc-hub.com) 플레이리스트를 불러옵니다",
     "module.playlistLoader.import.title": "VHub 재생목록",
     "module.playlistLoader.import.hint": "VHub 공유 URL을 붙여넣으면 그 내용을 정적 재생목록으로 가져옵니다. 제목과 순서는 빌드에 구워지므로 실행 중에 재생목록을 다시 가져오지 않습니다. 다만 각 곡의 URL은 VHub 리디렉션 그대로이므로 재생에는 VHub가 필요합니다.",
     "module.playlistLoader.import.errorNoPlayer": "먼저 KawaPlayer를 선택하세요.",
@@ -54,6 +60,8 @@
     "module.playlistLoader.import.resultPartial": "『{0}』의 {1}곡을 가져왔습니다 ({2}곡 건너뜀)."
   },
   "zh-CN": {
+    "module.playlistLoader.name": "播放列表加载",
+    "module.playlistLoader.description": "在 VRChat 内通过 URL 栏加载 VHub（playlist.vrc-hub.com）的播放列表",
     "module.playlistLoader.import.title": "VHub 播放列表",
     "module.playlistLoader.import.hint": "粘贴 VHub 分享 URL，即可将其内容导入为静态播放列表。标题和顺序会烘焙进构建，运行时不会重新获取播放列表。但每首曲目的 URL 仍是 VHub 重定向，因此播放仍需要 VHub。",
     "module.playlistLoader.import.errorNoPlayer": "请先选择 KawaPlayer。",
@@ -72,6 +80,8 @@
     "module.playlistLoader.import.resultPartial": "已从《{0}》导入 {1} 首曲目（跳过 {2} 首）。"
   },
   "zh-TW": {
+    "module.playlistLoader.name": "播放清單載入",
+    "module.playlistLoader.description": "在 VRChat 內透過 URL 欄位載入 VHub（playlist.vrc-hub.com）的播放清單",
     "module.playlistLoader.import.title": "VHub 播放清單",
     "module.playlistLoader.import.hint": "貼上 VHub 分享 URL，即可將其內容匯入為靜態播放清單。標題與順序會烘焙進建置，執行時不會重新取得播放清單。但每首曲目的 URL 仍是 VHub 轉址，因此播放仍需要 VHub。",
     "module.playlistLoader.import.errorNoPlayer": "請先選擇 KawaPlayer。",
@@ -90,6 +100,8 @@
     "module.playlistLoader.import.resultPartial": "已從《{0}》匯入 {1} 首曲目（略過 {2} 首）。"
   },
   "es": {
+    "module.playlistLoader.name": "Cargador de listas de reproducción",
+    "module.playlistLoader.description": "Carga listas de reproducción de VHub (playlist.vrc-hub.com) desde el campo de URL dentro de VRChat",
     "module.playlistLoader.import.title": "Lista de VHub",
     "module.playlistLoader.import.hint": "Pega una URL compartida de VHub para importar su contenido como lista estática. Los títulos y el orden se integran en la compilación, así que la lista nunca se vuelve a descargar en tiempo de ejecución. Pero la URL de cada pista sigue siendo una redirección de VHub, así que la reproducción sigue necesitando VHub.",
     "module.playlistLoader.import.errorNoPlayer": "Selecciona primero un KawaPlayer.",
@@ -108,6 +120,8 @@
     "module.playlistLoader.import.resultPartial": "Se importaron {1} pistas de «{0}» ({2} omitidas)."
   },
   "it": {
+    "module.playlistLoader.name": "Caricatore di playlist",
+    "module.playlistLoader.description": "Carica le playlist di VHub (playlist.vrc-hub.com) dal campo URL dentro VRChat",
     "module.playlistLoader.import.title": "Playlist VHub",
     "module.playlistLoader.import.hint": "Incolla un URL condiviso di VHub per importarne il contenuto come playlist statica. Titoli e ordine vengono inclusi nella build, quindi la playlist non viene mai riscaricata in fase di esecuzione. Ma l'URL di ogni traccia resta un redirect VHub, quindi la riproduzione richiede ancora VHub.",
     "module.playlistLoader.import.errorNoPlayer": "Seleziona prima un KawaPlayer.",
@@ -126,6 +140,8 @@
     "module.playlistLoader.import.resultPartial": "Importate {1} tracce da \"{0}\" ({2} ignorate)."
   },
   "ru": {
+    "module.playlistLoader.name": "Загрузчик плейлистов",
+    "module.playlistLoader.description": "Загружает плейлисты VHub (playlist.vrc-hub.com) из поля URL внутри VRChat",
     "module.playlistLoader.import.title": "Плейлист VHub",
     "module.playlistLoader.import.hint": "Вставьте ссылку VHub, чтобы импортировать её содержимое как статический плейлист. Названия и порядок встраиваются в сборку, поэтому плейлист не загружается заново во время выполнения. Но URL каждого трека остаётся редиректом VHub, поэтому для воспроизведения VHub всё равно нужен.",
     "module.playlistLoader.import.errorNoPlayer": "Сначала выберите KawaPlayer.",
@@ -144,6 +160,8 @@
     "module.playlistLoader.import.resultPartial": "Импортировано {1} треков из «{0}» ({2} пропущено)."
   },
   "uk": {
+    "module.playlistLoader.name": "Завантажувач плейлистів",
+    "module.playlistLoader.description": "Завантажує плейлисти VHub (playlist.vrc-hub.com) з поля URL у VRChat",
     "module.playlistLoader.import.title": "Плейлист VHub",
     "module.playlistLoader.import.hint": "Вставте посилання VHub, щоб імпортувати його вміст як статичний плейлист. Назви та порядок вбудовуються у збірку, тож плейлист не завантажується повторно під час виконання. Але URL кожного треку залишається редиректом VHub, тож для відтворення VHub усе одно потрібен.",
     "module.playlistLoader.import.errorNoPlayer": "Спочатку виберіть KawaPlayer.",

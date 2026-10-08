@@ -13052,6 +13052,7 @@ MonoBehaviour:
   _udonSharpBackingUdonBehaviour: {fileID: 546974722492781435}
   _controller: {fileID: 0}
   _storageTemplate: {fileID: 0}
+  _card: {fileID: 4934198035813242674}
   _urlInput: {fileID: 2721875334348629764}
   _currentUrlDisplay: {fileID: 250329149645830770}
   _ownerOnlySection: {fileID: 4233722186005758019}

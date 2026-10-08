@@ -17,6 +17,7 @@ namespace Yamadev.YamaStream.Editor
     private SerializedProperty _moduleDescriptionTranslationKey;
     private SerializedProperty _editorTranslationFile;
     private SerializedProperty _playerTranslationFile;
+    private SerializedProperty _moduleRoot;
 
     private bool _developerFoldout;
     private ReorderableList _uiSlotsList;
@@ -39,6 +40,7 @@ namespace Yamadev.YamaStream.Editor
       _moduleDescriptionTranslationKey = serializedObject.FindProperty("moduleDescriptionTranslationKey");
       _editorTranslationFile = serializedObject.FindProperty("editorTranslationFile");
       _playerTranslationFile = serializedObject.FindProperty("playerTranslationFile");
+      _moduleRoot = serializedObject.FindProperty("moduleRoot");
 
       InitializeUISlotsList();
     }
@@ -184,6 +186,7 @@ namespace Yamadev.YamaStream.Editor
       EditorGUILayout.PropertyField(_version, new GUIContent(EditorLocalization.Get("module.definition.version")));
       EditorGUILayout.PropertyField(_allowMultiple, new GUIContent(EditorLocalization.Get("module.definition.allowMultiple")));
       EditorGUILayout.PropertyField(_noNeedSetUp, new GUIContent(EditorLocalization.Get("module.definition.noNeedSetUp")));
+      EditorGUILayout.PropertyField(_moduleRoot, EditorLocalization.GetLayout("module.definition.moduleRoot", "module.definition.moduleRoot.tooltip"));
 
       EditorGUILayout.Space(SpaceSmall);
 
