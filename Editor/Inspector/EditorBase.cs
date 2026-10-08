@@ -18,12 +18,13 @@ namespace Yamadev.YamaStream.Editor
     protected const float SpaceSmall = 4f;
 
     // The lists in the inspectors: rows striped by index, the details opened
-    // under a row, and the mark on the entry that is the default.
+    // under a row, and the mark on the entry that is the default. The even
+    // row's colour is public for the translation window's group headers.
     public static Color RowEvenColor => EditorGUIUtility.isProSkin ? new Color(0.22f, 0.22f, 0.22f) : new Color(0.76f, 0.76f, 0.76f);
-    public static Color RowOddColor => EditorGUIUtility.isProSkin ? new Color(0.25f, 0.25f, 0.25f) : new Color(0.8f, 0.8f, 0.8f);
-    public static Color RowColor(int index) => index % 2 == 0 ? RowEvenColor : RowOddColor;
-    public static Color DetailColor => EditorGUIUtility.isProSkin ? new Color(0.18f, 0.18f, 0.18f) : new Color(0.7f, 0.7f, 0.7f);
-    public static readonly Color DefaultMarkColor = new Color(0.3f, 0.7f, 0.4f, 1f);
+    private static Color RowOddColor => EditorGUIUtility.isProSkin ? new Color(0.25f, 0.25f, 0.25f) : new Color(0.8f, 0.8f, 0.8f);
+    protected static Color RowColor(int index) => index % 2 == 0 ? RowEvenColor : RowOddColor;
+    protected static Color DetailColor => EditorGUIUtility.isProSkin ? new Color(0.18f, 0.18f, 0.18f) : new Color(0.7f, 0.7f, 0.7f);
+    protected static readonly Color DefaultMarkColor = new Color(0.3f, 0.7f, 0.4f, 1f);
 
     private static GUIStyle _titleStyle;
     private static GUIStyle _rowNameStyle;

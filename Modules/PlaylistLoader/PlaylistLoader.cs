@@ -35,8 +35,8 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
     public const int LoadResultReplacementChanged = 8;
 
     // What a playlist the server gave no name for is called, wherever it has
-    // to be named: in OnLoadResult's message and in the question before one
-    // is replaced (here and in DefaultUrl).
+    // to be named: in PlaylistLoaderUI's load message, and in the question
+    // before one is replaced (PlaylistLoaderUI's and DefaultUrlSettingsUI's).
     public const string UnnamedPlaylistName = "Playlist";
 
     [SerializeField] private VRCUrl[] _redirectPool = new VRCUrl[0];

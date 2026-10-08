@@ -307,7 +307,8 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
     }
 
     // This player's own copy of the storage, spawned from the template into
-    // their player objects. Null without a template.
+    // their player objects. Null without a template, or before the copy is
+    // spawned.
     private OwnerDefaultUrlStorage FindOwnStorage()
     {
       if (_storageTemplate == null) return null;
