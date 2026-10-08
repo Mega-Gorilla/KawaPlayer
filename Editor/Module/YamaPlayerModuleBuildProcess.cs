@@ -14,6 +14,7 @@ namespace Yamadev.YamaStream.Editor
     public void Process()
     {
       ReportDuplicateModules();
+      ReportAutoplayConflicts();
       var modules = Object.FindObjectsByType<YamaPlayerModule>(FindObjectsInactive.Include, FindObjectsSortMode.None);
       foreach (var module in modules)
       {
@@ -54,6 +55,53 @@ namespace Yamadev.YamaStream.Editor
         .ToList();
     }
 
+    // DefaultUrl (the instance owner's autoplay) and AutoPlay (the world's)
+    // both start a video when someone joins, and nothing decides between
+    // them: AutoPlay usually runs first, and the owner's default URL then
+    // finds the player busy and is not played. Reported rather than refused,
+    // like a duplicate: which one to keep is the creator's to decide.
+    internal const string OwnerAutoplayModuleName = "DefaultUrl";
+    internal const string WorldAutoplayModuleName = "AutoPlay";
+
+    private static void ReportAutoplayConflicts()
+    {
+      var definitions = Object.FindObjectsByType<YamaPlayerModuleDefinition>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+      foreach (var (owner, world) in FindAutoplayConflicts(definitions))
+      {
+        Debug.LogError(
+          "[KawaPlayer] DefaultUrl and AutoPlay are both enabled on one player. Both start a video when someone joins and nothing decides between them, " +
+          "so the instance owner's default URL may not play. Disable one of them:\n" +
+          GetPath(owner.transform) + "\n" + GetPath(world.transform),
+          world.gameObject);
+      }
+    }
+
+    // Per Controller, counted as the build counts modules (IsModuleEnabled).
+    internal static List<(YamaPlayerModuleDefinition owner, YamaPlayerModuleDefinition world)> FindAutoplayConflicts(IEnumerable<YamaPlayerModuleDefinition> definitions)
+    {
+      return definitions
+        .Where(definition => definition != null && IsModuleEnabled(definition))
+        .Select(definition => (definition, controller: definition.GetComponentInParent<Controller>(true)))
+        .Where(entry => entry.controller != null)
+        .GroupBy(entry => entry.controller)
+        .Select(group => (
+          owner: group.Select(entry => entry.definition).FirstOrDefault(definition => definition.moduleName == OwnerAutoplayModuleName),
+          world: group.Select(entry => entry.definition).FirstOrDefault(definition => definition.moduleName == WorldAutoplayModuleName && PlaysOnJoin(definition))))
+        .Where(pair => pair.owner != null && pair.world != null)
+        .ToList();
+    }
+
+    // An AutoPlay set to Off plays nothing. Its mode is read by its
+    // serialized name, as this assembly does not reference the module's;
+    // 0 is AutoPlayMode.Off.
+    private static bool PlaysOnJoin(YamaPlayerModuleDefinition worldAutoplay)
+    {
+      var module = worldAutoplay.GetComponent<YamaPlayerModule>();
+      if (module == null) return false;
+      var mode = new SerializedObject(module).FindProperty("_autoPlayMode");
+      return mode == null || mode.intValue != 0;
+    }
+
     private static string GetPath(Transform transform)
     {
       var path = transform.name;
@@ -64,19 +112,24 @@ namespace Yamadev.YamaStream.Editor
       return path;
     }
 
-    // The object directly under the player's Modules that holds a module: the
-    // module's own object, or the one it shares with its other parts --
+    // The object a module is switched off and deleted by: the largest one
+    // under the player's Modules that holds this module and no other. That is
+    // the module's own object, or the one it keeps its other parts in --
     // DefaultUrl's definition is on Modules/DefaultUrl/Controller, beside the
-    // storage in Modules/DefaultUrl/OwnerStorage. Switching a module off
-    // switches this off, so its other parts go with it. A module outside a
-    // Modules is its own root.
+    // storage in Modules/DefaultUrl/OwnerStorage -- but never a folder the
+    // creator sorts several modules into, which would take the others with
+    // it. A module outside a Modules is its own root.
     internal static GameObject GetModuleRoot(Component module)
     {
       var manager = module.GetComponentInParent<ModuleManager>(true);
       if (manager == null) return module.gameObject;
-      var transform = module.transform;
-      while (transform.parent != null && transform.parent != manager.transform) transform = transform.parent;
-      return transform.parent == manager.transform ? transform.gameObject : module.gameObject;
+      var root = module.transform;
+      for (var parent = root.parent; parent != null && parent != manager.transform; parent = parent.parent)
+      {
+        if (parent.GetComponentsInChildren<YamaPlayerModuleDefinition>(true).Length > 1) break;
+        root = parent;
+      }
+      return root.gameObject;
     }
 
     // Whether ProcessModule builds the module: both its own object and its
@@ -87,18 +140,20 @@ namespace Yamadev.YamaStream.Editor
       return module.gameObject.activeSelf && GetModuleRoot(module).activeSelf;
     }
 
+    // The root is checked first, so a module switched off at both is still
+    // left out with all its parts, not just its own object.
     private static void ProcessModule(YamaPlayerModule module)
     {
       if (module == null) return;
-      if (!module.gameObject.activeSelf)
-      {
-        module.gameObject.tag = "EditorOnly";
-        return;
-      }
       var root = GetModuleRoot(module);
       if (!root.activeSelf)
       {
         root.tag = "EditorOnly";
+        return;
+      }
+      if (!module.gameObject.activeSelf)
+      {
+        module.gameObject.tag = "EditorOnly";
         return;
       }
       var definition = module.GetComponent<YamaPlayerModuleDefinition>();

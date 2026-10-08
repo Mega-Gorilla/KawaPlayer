@@ -339,6 +339,8 @@ namespace Yamadev.YamaStream.Editor
 
       EditorGUILayout.LabelField(EditorLocalization.Get("label.modules"), EditorStyles.boldLabel);
 
+      ModuleManagerEditor.DrawModuleErrors(_moduleManager);
+
       var installedModules = ModuleManagerEditor.GetInstalledModules(_moduleManager);
 
       if (installedModules.Count == 0)

@@ -303,6 +303,7 @@
   "module.manager.deleteConfirm": "刪除「{0}」？",
   "module.manager.deleteInPrefab": "預製物件自帶的模組刪除後無法重新新增，因此不能在這裡刪除。不使用時請將其停用。",
   "module.manager.duplicate": "「{0}」在此播放器上放置了 {1} 個，但只允許放置一個。每個副本都會各自運作，有介面的模組還會依副本數量重複顯示介面。請只保留一個，刪除其餘的。",
+  "module.manager.autoplayConflict": "「{0}」和「{1}」都已啟用。兩者都會在進入時開始播放，播放哪一個取決於進入的時機，「{0}」的設定可能不會播放。請停用其中一個。",
   "module.manager.title": "模組管理",
   "label.modules": "模組",
   "settings.playback.retryInterval": "重試間隔（秒）",

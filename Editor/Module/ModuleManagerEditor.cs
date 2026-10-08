@@ -38,7 +38,7 @@ namespace Yamadev.YamaStream.Editor
       EditorGUILayout.LabelField(EditorLocalization.Get("module.manager.installedModules"), EditorStyles.boldLabel);
       EditorGUILayout.Space(SpaceSmall);
 
-      DrawDuplicateModuleErrors();
+      DrawModuleErrors(_moduleManager);
 
       var installedModules = GetInstalledModules(_moduleManager);
 
@@ -54,23 +54,42 @@ namespace Yamadev.YamaStream.Editor
       }
     }
 
-    // The Add button keeps a module to one copy, but one dragged in by hand
-    // still gets built (issue #55). Counted over the whole player, as the
-    // build does, so a copy outside this list is caught too.
-    private void DrawDuplicateModuleErrors()
+    // What the build reports about these modules, shown before it is built.
+    // Counted over the whole player, as the build does, so a module outside
+    // this list is caught too. Also used by the player inspector.
+    internal static void DrawModuleErrors(ModuleManager moduleManager)
     {
-      var controller = _moduleManager.GetComponentInParent<Controller>(true);
+      var controller = moduleManager == null ? null : moduleManager.GetComponentInParent<Controller>(true);
       if (controller == null) return;
 
       // A player nested inside this one owns its own modules.
       var definitions = controller.GetComponentsInChildren<YamaPlayerModuleDefinition>(true)
-        .Where(definition => definition.GetComponentInParent<Controller>(true) == controller);
+        .Where(definition => definition.GetComponentInParent<Controller>(true) == controller)
+        .ToList();
+
+      // The Add button keeps a module to one copy, but one dragged in by hand
+      // still gets built (issue #55).
       foreach (var copies in YamaPlayerModuleBuildProcess.FindDuplicateModules(definitions))
       {
         EditorGUILayout.HelpBox(
-          string.Format(EditorLocalization.Get("module.manager.duplicate"), GetModuleName(copies[0]), copies.Count),
+          string.Format(EditorLocalization.Get("module.manager.duplicate"), MessageName(copies[0]), copies.Count),
           MessageType.Error);
       }
+
+      foreach (var (owner, world) in YamaPlayerModuleBuildProcess.FindAutoplayConflicts(definitions))
+      {
+        EditorGUILayout.HelpBox(
+          string.Format(EditorLocalization.Get("module.manager.autoplayConflict"), MessageName(owner), MessageName(world)),
+          MessageType.Error);
+      }
+    }
+
+    // A help box wraps at the first space it can, even in Japanese, so a
+    // name such as "デフォルト URL" was split across lines; within a name
+    // the space does not break.
+    private static string MessageName(YamaPlayerModuleDefinition module)
+    {
+      return GetModuleName(module).Replace(' ', '\u00A0');
     }
 
     // The module's translated name, or its own name without a translation.

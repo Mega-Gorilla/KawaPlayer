@@ -303,6 +303,7 @@
   "module.manager.deleteConfirm": "¿Eliminar «{0}»?",
   "module.manager.deleteInPrefab": "Un módulo que viene con el prefab no se puede eliminar aquí, porque no se podría volver a añadir. Desactívalo si no lo usas.",
   "module.manager.duplicate": "«{0}» está colocado {1} veces en este reproductor, pero solo se permite uno. Cada copia funciona por separado y, si el módulo tiene interfaz, esta aparece una vez por copia. Elimina todas menos una.",
+  "module.manager.autoplayConflict": "«{0}» y «{1}» están activados a la vez. Ambos empiezan a reproducir al entrar, así que cuál se reproduce depende del momento, y puede que «{0}» no se reproduzca. Desactiva uno de los dos.",
   "module.manager.title": "Gestor de Módulos",
   "label.modules": "Módulos",
   "settings.playback.retryInterval": "Intervalo de reintento (seg)",
