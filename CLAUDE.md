@@ -67,6 +67,8 @@ Published VPM versions must not be deleted (breaks projects using source control
 
 **UI System** (`UI/UIController.cs`) — Manages all interactive controls (play, pause, seek, volume, speed, playlists, modals). Heavy use of serialized fields for Unity inspector binding.
 
+**Playback error details** — When a video fails, the screen's error message has a "Details" button that opens the last errors in the dialog, and asks for a screenshot on Discord. A world cannot open a link in VRChat, so the Discord address is in the dialog's copy field (`Modal.ShowCopyField`, an InputField the viewer can copy from). `Controller.ErrorReport.cs` keeps the last five, per viewer and unsynced: it records each failed try before the retry logic switches handlers, and numbers the matching log line; `UI/UIController.ErrorDetails.cs` builds the text. A handler can say more than its `VideoError` through `PlayerHandler.ErrorDetail` (the image viewer gives the downloader's error).
+
 **Appearance** (`Runtime/Appearance/`, `Editor/Appearance/`) — KawaPlayer's colours are kept in one asset, `Assets/Appearance/KawaPlayerPalette.asset` (`ColorPalette`): the colour sets (KawaPlayer's first, then YamaPlayer's five) and the neutral colours. Each UI's `AppearanceSettings` points at it and picks a set by name (KawaPlayer's by default; a name no set has gets the first). Graphics carry a role (`ColorDefinition`) instead of a colour, and `AppearanceBuildProcess` colours them when the world is built; a button whose colour comes from its tint has the tint moved instead. To change a colour, edit the palette; "Apply Colors Now" on an `AppearanceSettings` also updates the colours saved in a prefab. Give new UI a role rather than a literal colour.
 
 **Playlist System** (`Playlist/`) — `PlaylistManager` coordinates `Playlist`, `QueueList`, and `HistoryList` components.
@@ -136,6 +138,7 @@ Japanese-language docs explaining the playlist/URL-loading architecture. Read th
 - All runtime scripts must be valid UdonSharp (subset of C#). Many standard C# features are unavailable (no generics on UdonSharpBehaviour, limited reflection, no async/await, etc.).
 - **`string → VRCUrl` conversion is impossible at runtime** (`new VRCUrl(string)` is editor-only). Any feature needing dynamic URLs must use the Pre-baked URL Pool pattern: a large `VRCUrl[]` of redirect-server slot URLs is baked into serialized fields at build time, and the server maps slots to real URLs via HTTP 302. See `docs/design/url-pool-playlist-loader.md`.
 - Network sync uses `[UdonSynced]` fields with manual sync (`UdonBehaviourSyncMode.Manual`). Only the owner can modify synced variables.
+- **Never add an UdonBehaviour to, or remove one from, an object that already has one in a shipped prefab** (e.g. a second U# component beside the `Controller`). A world records the network components of each object when it is built; after the update the SDK reports "Network Components Changed" and refuses to build the world (`Failed to assign network IDs`) until its creator fixes it in the Network ID Utility. Put the new behaviour on a new child object, or into the existing one. ClientSim repairs this on Play, so only a world build shows it.
 - The project is primarily documented in Japanese. README and UI localization files contain Japanese as the primary language.
 
 ## Coding Style & Commits
