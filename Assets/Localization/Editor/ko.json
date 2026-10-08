@@ -301,6 +301,7 @@
   "module.manager.button.refresh": "새로고침",
   "module.manager.deleteTitle": "모듈 삭제",
   "module.manager.deleteConfirm": "「{0}」을(를) 삭제하시겠습니까?",
+  "module.manager.deleteInPrefab": "프리팹에 포함된 모듈은 삭제하면 다시 추가할 수 없으므로 여기서는 삭제할 수 없습니다. 사용하지 않을 때는 비활성화하세요.",
   "module.manager.duplicate": "「{0}」이(가) 이 플레이어에 {1}개 있지만, 하나만 둘 수 있습니다. 각 사본이 따로 동작하고, UI가 있는 모듈은 사본 수만큼 UI가 만들어지므로 하나만 남기고 삭제하세요.",
   "module.manager.title": "모듈 관리",
   "label.modules": "모듈",

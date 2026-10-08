@@ -87,6 +87,8 @@ Entry point components that world creators place in their scenes:
 
 Each module is an independent assembly with its own `.asmdef`. Modules extend the player via the listener pattern and are optional dependencies.
 
+A module's `YamaPlayerModuleDefinition` may sit deeper than directly under the player's `Modules` (DefaultUrl's is on `Modules/DefaultUrl/Controller`, beside its storage). Module Manager and the player inspector list every module under `Modules`; switching one off switches off its root, the object directly under `Modules`, so its other parts go with it. The build leaves out a module whose own object or root is off (`YamaPlayerModuleBuildProcess.IsModuleEnabled`), and the duplicate warning and module translations follow the same rule. A module that comes with the prefab (KawaPlayer's own PlaylistLoader and DefaultUrl) cannot be deleted from the list, only switched off: there is no standalone prefab to add it back from.
+
 KawaPlayer-specific modules (the reason this fork exists):
 - **PlaylistLoader** — loads playlists from `playlist.vrc-hub.com` at runtime using the Pre-baked URL Pool pattern (see Key Constraints below). Design docs: `docs/design/url-pool-*.md`
 - **DefaultUrl** — lets the Instance Owner set the world's auto-play video/playlist URL from inside VRChat, synced to all players and persisted across visits

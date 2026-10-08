@@ -293,6 +293,7 @@
   "module.manager.button.refresh": "Refresh",
   "module.manager.deleteTitle": "Delete Module",
   "module.manager.deleteConfirm": "Delete \"{0}\"?",
+  "module.manager.deleteInPrefab": "A module that comes with the prefab cannot be deleted here, because it could not be added back. Disable it if you do not use it.",
   "module.manager.duplicate": "\"{0}\" is placed {1} times on this player, but only one is allowed. Each copy runs separately, and any UI the module has appears once per copy. Remove all but one.",
   "settings.ui.label": "UI Settings",
   "settings.ui.idleScreenSprite": "Idle Screen Sprite",

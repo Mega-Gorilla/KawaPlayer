@@ -313,14 +313,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ac3782ea093cef64b8372feaa782ca4f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moduleName: 
-  moduleDescription: 
+  moduleName: PlaylistLoader
+  moduleDescription: Loads VHub playlists from the URL field at runtime
   version: 
   allowMultiple: 0
   noNeedSetUp: 0
   uiSlots: []
-  moduleNameTranslationKey: 
-  moduleDescriptionTranslationKey: 
+  moduleNameTranslationKey: module.playlistLoader.name
+  moduleDescriptionTranslationKey: module.playlistLoader.description
   editorTranslationFile: {fileID: 4900000, guid: 7c41b0d2e5ba48f4a9d1c6f0b3e28471,
     type: 3}
   playerTranslationFile: {fileID: 4900000, guid: 61ed3ab176f14330931a8801d5041782,

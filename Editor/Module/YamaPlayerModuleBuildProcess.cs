@@ -40,12 +40,11 @@ namespace Yamadev.YamaStream.Editor
 
     // Grouped by the nearest Controller, so two players in one scene may
     // each have the same module. A module counts exactly when ProcessModule
-    // builds it: only one whose own GameObject is inactive is left out, and
-    // one under an inactive parent, or with its component disabled, counts.
+    // builds it (IsModuleEnabled).
     internal static List<List<YamaPlayerModuleDefinition>> FindDuplicateModules(IEnumerable<YamaPlayerModuleDefinition> definitions)
     {
       return definitions
-        .Where(definition => definition != null && definition.gameObject.activeSelf
+        .Where(definition => definition != null && IsModuleEnabled(definition)
           && !definition.allowMultiple && !string.IsNullOrEmpty(definition.moduleName))
         .Select(definition => (definition, controller: definition.GetComponentInParent<Controller>(true)))
         .Where(entry => entry.controller != null)
@@ -65,12 +64,41 @@ namespace Yamadev.YamaStream.Editor
       return path;
     }
 
+    // The object directly under the player's Modules that holds a module: the
+    // module's own object, or the one it shares with its other parts --
+    // DefaultUrl's definition is on Modules/DefaultUrl/Controller, beside the
+    // storage in Modules/DefaultUrl/OwnerStorage. Switching a module off
+    // switches this off, so its other parts go with it. A module outside a
+    // Modules is its own root.
+    internal static GameObject GetModuleRoot(Component module)
+    {
+      var manager = module.GetComponentInParent<ModuleManager>(true);
+      if (manager == null) return module.gameObject;
+      var transform = module.transform;
+      while (transform.parent != null && transform.parent != manager.transform) transform = transform.parent;
+      return transform.parent == manager.transform ? transform.gameObject : module.gameObject;
+    }
+
+    // Whether ProcessModule builds the module: both its own object and its
+    // root are on. Another parent being off, or its component being disabled,
+    // does not leave it out.
+    internal static bool IsModuleEnabled(Component module)
+    {
+      return module.gameObject.activeSelf && GetModuleRoot(module).activeSelf;
+    }
+
     private static void ProcessModule(YamaPlayerModule module)
     {
       if (module == null) return;
       if (!module.gameObject.activeSelf)
       {
         module.gameObject.tag = "EditorOnly";
+        return;
+      }
+      var root = GetModuleRoot(module);
+      if (!root.activeSelf)
+      {
+        root.tag = "EditorOnly";
         return;
       }
       var definition = module.GetComponent<YamaPlayerModuleDefinition>();
