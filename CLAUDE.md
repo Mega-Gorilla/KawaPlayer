@@ -91,7 +91,7 @@ A module's `YamaPlayerModuleDefinition` may sit deeper than directly under the p
 
 KawaPlayer-specific modules (the reason this fork exists):
 - **PlaylistLoader** — loads playlists from `playlist.vrc-hub.com` at runtime using the Pre-baked URL Pool pattern (see Key Constraints below). Design docs: `docs/design/url-pool-*.md`
-- **DefaultUrl** — lets the Instance Owner set the world's auto-play video/playlist URL from inside VRChat, synced to all players and persisted across visits
+- **DefaultUrl** — lets the Instance Owner set the world's auto-play video/playlist URL from inside VRChat, synced to all players and persisted across visits. Users never see "DefaultUrl" or "default URL" (issue #173): the in-world settings card is titled 自動再生 (Autoplay), without "(Global)", and Module Manager lists it as 自動再生(Owner), beside AutoPlay's 自動再生(World). Only these display names changed; the class, folder, object and translation-key names (`module.defaultUrl.*`, `module.autoPlay.*`) and the saved storage stay as they are, so worlds and saved URLs carry over
 
 Inherited from upstream YamaPlayer:
 - AudioLinkAdaptor, AutoPlay, LTCGIAdaptor, LightVolumeAdaptor

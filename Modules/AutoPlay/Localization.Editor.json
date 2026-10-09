@@ -1,8 +1,8 @@
 {
   "ja": {
-    "module.autoPlay.name": "自動再生",
-    "module.autoPlay.description": "ワールド参加時に自動で動画を再生します",
-    "module.autoPlay.title": "自動再生",
+    "module.autoPlay.name": "自動再生(World)",
+    "module.autoPlay.description": "ワールド制作者がエディタで決めた動画・プレイリストを、入室時に自動再生します",
+    "module.autoPlay.title": "自動再生(World)",
     "module.autoPlay.settings": "基本設定",
     "module.autoPlay.mode": "自動再生モード",
     "module.autoPlay.delay": "開始遅延（秒）",
@@ -19,9 +19,9 @@
     "module.autoPlay.refresh": "更新"
   },
   "en": {
-    "module.autoPlay.name": "Auto Play",
-    "module.autoPlay.description": "Automatically plays video when joining the world",
-    "module.autoPlay.title": "Auto Play",
+    "module.autoPlay.name": "Autoplay (World)",
+    "module.autoPlay.description": "Plays the video or playlist the world creator set in the editor when someone enters the world",
+    "module.autoPlay.title": "Autoplay (World)",
     "module.autoPlay.settings": "Basic Settings",
     "module.autoPlay.mode": "Auto Play Mode",
     "module.autoPlay.delay": "Start Delay (sec)",
@@ -38,9 +38,9 @@
     "module.autoPlay.refresh": "Refresh"
   },
   "ko": {
-    "module.autoPlay.name": "자동 재생",
-    "module.autoPlay.description": "월드 참가 시 자동으로 비디오를 재생합니다",
-    "module.autoPlay.title": "자동 재생",
+    "module.autoPlay.name": "자동 재생(World)",
+    "module.autoPlay.description": "월드 제작자가 에디터에서 정한 동영상·플레이리스트를 입장 시 자동 재생합니다",
+    "module.autoPlay.title": "자동 재생(World)",
     "module.autoPlay.settings": "기본 설정",
     "module.autoPlay.mode": "자동 재생 모드",
     "module.autoPlay.delay": "시작 지연(초)",
@@ -57,9 +57,9 @@
     "module.autoPlay.refresh": "새로고침"
   },
   "zh-CN": {
-    "module.autoPlay.name": "自动播放",
-    "module.autoPlay.description": "加入世界时自动播放视频",
-    "module.autoPlay.title": "自动播放",
+    "module.autoPlay.name": "自动播放(World)",
+    "module.autoPlay.description": "进入世界时自动播放世界创作者在编辑器中设置的视频或播放列表",
+    "module.autoPlay.title": "自动播放(World)",
     "module.autoPlay.settings": "基本设置",
     "module.autoPlay.mode": "自动播放模式",
     "module.autoPlay.delay": "启动延迟（秒）",
@@ -76,9 +76,9 @@
     "module.autoPlay.refresh": "刷新"
   },
   "zh-TW": {
-    "module.autoPlay.name": "自動播放",
-    "module.autoPlay.description": "加入世界時自動播放影片",
-    "module.autoPlay.title": "自動播放",
+    "module.autoPlay.name": "自動播放(World)",
+    "module.autoPlay.description": "進入世界時自動播放世界創作者在編輯器中設定的影片或播放清單",
+    "module.autoPlay.title": "自動播放(World)",
     "module.autoPlay.settings": "基本設定",
     "module.autoPlay.mode": "自動播放模式",
     "module.autoPlay.delay": "啟動延遲（秒）",
@@ -95,9 +95,9 @@
     "module.autoPlay.refresh": "重新整理"
   },
   "es": {
-    "module.autoPlay.name": "Reproducción Automática",
-    "module.autoPlay.description": "Reproduce video automáticamente al unirse al mundo",
-    "module.autoPlay.title": "Reproducción Automática",
+    "module.autoPlay.name": "Reproducción automática (World)",
+    "module.autoPlay.description": "Reproduce al entrar el vídeo o la lista que el creador del mundo configuró en el editor",
+    "module.autoPlay.title": "Reproducción automática (World)",
     "module.autoPlay.settings": "Configuración Básica",
     "module.autoPlay.mode": "Modo de Reproducción Automática",
     "module.autoPlay.delay": "Retraso de Inicio (seg)",
@@ -114,9 +114,9 @@
     "module.autoPlay.refresh": "Actualizar"
   },
   "ru": {
-    "module.autoPlay.name": "Автовоспроизведение",
-    "module.autoPlay.description": "Автоматически воспроизводит видео при входе в мир",
-    "module.autoPlay.title": "Автовоспроизведение",
+    "module.autoPlay.name": "Автовоспроизведение (World)",
+    "module.autoPlay.description": "При входе в мир воспроизводит видео или плейлист, заданные создателем мира в редакторе",
+    "module.autoPlay.title": "Автовоспроизведение (World)",
     "module.autoPlay.settings": "Основные настройки",
     "module.autoPlay.mode": "Режим автовоспроизведения",
     "module.autoPlay.delay": "Задержка запуска (сек)",
@@ -133,9 +133,9 @@
     "module.autoPlay.refresh": "Обновить"
   },
   "uk": {
-    "module.autoPlay.name": "Автовідтворення",
-    "module.autoPlay.description": "Автоматично відтворює відео при вході у світ",
-    "module.autoPlay.title": "Автовідтворення",
+    "module.autoPlay.name": "Автовідтворення (World)",
+    "module.autoPlay.description": "Під час входу у світ відтворює відео або плейлист, задані творцем світу в редакторі",
+    "module.autoPlay.title": "Автовідтворення (World)",
     "module.autoPlay.settings": "Основні налаштування",
     "module.autoPlay.mode": "Режим автовідтворення",
     "module.autoPlay.delay": "Затримка запуску (сек)",
@@ -152,9 +152,9 @@
     "module.autoPlay.refresh": "Оновити"
   },
   "it": {
-    "module.autoPlay.name": "Riproduzione Automatica",
-    "module.autoPlay.description": "Riproduce automaticamente il video quando si entra nel mondo",
-    "module.autoPlay.title": "Riproduzione Automatica",
+    "module.autoPlay.name": "Riproduzione automatica (World)",
+    "module.autoPlay.description": "Riproduce all'ingresso il video o la playlist che il creatore del mondo ha impostato nell'editor",
+    "module.autoPlay.title": "Riproduzione automatica (World)",
     "module.autoPlay.settings": "Impostazioni Base",
     "module.autoPlay.mode": "Modalità Riproduzione Automatica",
     "module.autoPlay.delay": "Ritardo Avvio (sec)",

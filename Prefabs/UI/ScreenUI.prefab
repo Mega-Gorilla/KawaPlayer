@@ -2107,7 +2107,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: "\u30C7\u30D5\u30A9\u30EB\u30C8 URL<size=44>(Global)</size>"
+  m_Text: "\u81EA\u52D5\u518D\u751F"
 --- !u!114 &3834517869065598045
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -13062,7 +13062,6 @@ MonoBehaviour:
   _enterUrlButtonLayout: {fileID: 6984247999583428187}
   _enterUrlButtonChrome: 66
   _clearButtonLabel: {fileID: 2873338480460215035}
-  _globalSuffixSize: 44
   _headlineSize: 48
 --- !u!114 &546974722492781435
 MonoBehaviour:

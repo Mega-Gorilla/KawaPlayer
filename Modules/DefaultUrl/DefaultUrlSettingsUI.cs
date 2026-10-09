@@ -69,11 +69,9 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
     // side, the icon, and the gap after it.
     [SerializeField] private float _enterUrlButtonChrome = 66f;
     [SerializeField] private Text _clearButtonLabel;
-    // The sizes the title's "(Global)" and the headline that says the
-    // feature is unavailable are drawn at. They are in the text's own units,
-    // so a panel whose text is set larger or smaller sets them to match (the
-    // tablet's settings app, issue #159).
-    [SerializeField] private int _globalSuffixSize = 44;
+    // The size the headline that says the feature is unavailable is drawn
+    // at. It is in the text's own units, so a panel whose text is set larger
+    // or smaller sets it to match (the tablet's settings app, issue #159).
     [SerializeField] private int _headlineSize = 48;
 
     private UIController _uiController;
@@ -125,11 +123,15 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
       // Skip writes when GetTranslation returns "" so a missing key (e.g. before
       // LocalizationBuildProcess has merged module translations) does not wipe
       // out the prefab-baked Japanese fallback text.
+      //
+      // The title is the plain name, without the "(Global)" the settings that
+      // apply to everyone carry (issue #173): only the instance owner can set
+      // it, and the description says it plays for everyone on entering.
       if (_titleText != null)
       {
         string t = _uiController.GetTranslation("module.defaultUrl.title");
         if (!string.IsNullOrEmpty(t))
-          _titleText.text = $"{t}<size={_globalSuffixSize}>(Global)</size>";
+          _titleText.text = t;
       }
       if (_enterUrlButtonLabel != null)
       {
@@ -180,8 +182,7 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
       // both the description and a separate notice states it twice.
       //
       // The headline is composed here rather than baked into the translation
-      // so the markup stays out of the language files, matching how the title
-      // appends its "(Global)" suffix above.
+      // so the markup stays out of the language files.
       if (_descriptionText != null && _uiController != null)
       {
         if (canEdit)
