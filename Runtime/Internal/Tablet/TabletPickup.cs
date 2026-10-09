@@ -16,25 +16,19 @@ namespace Yamadev.YamaStream.Tablet
   {
     [SerializeField] private TabletScreen _screen;
 
-    // In VR the tablet is grabbed by its side edges only, so pointing at
-    // the screen never lifts it. Desktop has no hand to aim with and grabs
-    // the whole body, which sits just behind the screen so a click on the
-    // screen reaches the screen first. All of them belong on this object,
-    // beside the VRCPickup: VRChat looks for the pickup on the object whose
-    // collider was hit, never on its parents.
+    // The tablet is grabbed by one collider covering the whole body, in VR
+    // and on desktop alike. It sits just behind the screen, so a click or a
+    // laser on the screen reaches the screen first, and it belongs on this
+    // object, beside the VRCPickup: VRChat looks for the pickup on the object
+    // whose collider was hit, never on its parents.
     //
-    // The first collider on this object is none of these: one covering the
-    // whole tablet, edges included, that is never enabled. VRChat appears to
-    // place a VR hand's hold by the object's first collider, not by the one
-    // the hand touched: with the left edge first, a right hand taking the
-    // right edge ended up holding the left edge, the tablet hanging outside
-    // it (issue #167). Keep it first, and keep it disabled, or pointing at
-    // the screen would lift the tablet again.
-    //
-    // The VRCPickup's proximity is 0.03 m, so a VR hand takes the tablet only
-    // where it touches an edge (issue #157).
-    [SerializeField] private Collider[] _vrGrabColliders;
-    [SerializeField] private Collider[] _desktopGrabColliders;
+    // Keep it the only one. VRChat places a VR hand's hold by the object's
+    // first collider, not by the one the hand touched: with a collider for
+    // each side edge, the left one first, a right hand taking the right edge
+    // ended up holding the left edge (issue #167, confirmed in VR by swapping
+    // the two). The VRCPickup's proximity is 0.03 m, so a VR hand takes the
+    // tablet only where it touches it, and pointing at the screen from away
+    // lifts nothing (issues #150, #157).
 
     // Seconds the tablet may lie untouched before it goes back. 0 never
     // returns it. Falling out of the world is left to the Respawn Height.
@@ -53,9 +47,6 @@ namespace Yamadev.YamaStream.Tablet
       _spawnPosition = transform.position;
       _spawnRotation = transform.rotation;
       _lastTouchTime = Time.time;
-
-      SetCollidersEnabled(_vrGrabColliders, IsInVR);
-      SetCollidersEnabled(_desktopGrabColliders, !IsInVR);
 
       if (_idleReturnSeconds > 0f) SendCustomEventDelayedSeconds(nameof(_CheckIdle), _idleReturnSeconds);
     }
@@ -111,15 +102,6 @@ namespace Yamadev.YamaStream.Tablet
     {
       return (transform.position - _spawnPosition).sqrMagnitude > 0.0001f
         || Quaternion.Angle(transform.rotation, _spawnRotation) > 1f;
-    }
-
-    private void SetCollidersEnabled(Collider[] colliders, bool value)
-    {
-      if (!Utilities.IsValid(colliders)) return;
-      foreach (var collider in colliders)
-      {
-        if (Utilities.IsValid(collider)) collider.enabled = value;
-      }
     }
   }
 }
