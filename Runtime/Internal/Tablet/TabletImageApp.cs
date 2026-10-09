@@ -12,13 +12,27 @@ namespace Yamadev.YamaStream.Tablet
   // The image app: the picture at a URL, shown to everyone looking at the
   // tablet (issue #108, D2). TabletScreen syncs the URL; each player
   // downloads the picture themselves, and only while the app is open, so a
-  // closed app takes nothing from the world's shared image rate limit.
+  // closed app takes nothing from the world's shared image rate limit. A
+  // player whose download fails is told why and what to do next, and can
+  // try again on their own when that may help (issue #178).
   [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
   public class TabletImageApp : YamaPlayerBehaviour
   {
     private const string EmptyKey = "tablet.image.empty";
     private const string LoadingKey = "tablet.image.loading";
     private const string FailedKey = "tablet.image.failed";
+
+    // Why a download failed, each telling the player what to do next.
+    private const string UntrustedKey = "tablet.image.error.untrusted";
+    private const string InvalidUrlKey = "tablet.image.error.invalidUrl";
+    private const string InvalidImageKey = "tablet.image.error.invalidImage";
+    private const string RedirectKey = "tablet.image.error.redirect";
+    private const string RefusedKey = "tablet.image.error.refused";
+    private const string NotFoundKey = "tablet.image.error.notFound";
+    private const string ServerKey = "tablet.image.error.server";
+    private const string DownloadKey = "tablet.image.error.download";
+    private const string BusyKey = "tablet.image.error.busy";
+    private const string UnknownKey = "tablet.image.error.unknown";
 
     private const float OrientationCheckInterval = 0.2f;
     // Degrees a second the picture turns when the tablet does.
@@ -32,6 +46,7 @@ namespace Yamadev.YamaStream.Tablet
     [SerializeField] private TabletScreen _screen;
     [SerializeField, RegisterEvent(nameof(VRCUrlInputField.onEndEdit), nameof(SubmitUrl))] private VRCUrlInputField _urlInput;
     [SerializeField, RegisterEvent(nameof(Button.onClick), nameof(ToggleDetails))] private Button _detailsButton;
+    [SerializeField, RegisterEvent(nameof(Button.onClick), nameof(Retry))] private Button _retryButton;
     [SerializeField] private Text _titleText;
     [SerializeField] private Text _hintText;
     // The fixed frame, and the part inside it that turns with the tablet.
@@ -40,6 +55,7 @@ namespace Yamadev.YamaStream.Tablet
     [SerializeField] private RawImage _picture;
     [SerializeField] private Text _statusText;
     [SerializeField] private Text _detailsButtonText;
+    [SerializeField] private Text _retryButtonText;
     [SerializeField] private Text _detailsText;
 
     private VRCImageDownloader _downloader;
@@ -177,43 +193,73 @@ namespace Yamadev.YamaStream.Tablet
       _picture.texture = null;
       _requestedUrl = VRCUrl.Empty;
 
-      string reason;
-      string error;
-      switch (result.Error)
+      SetStatus(FailedKey, GetReason(result.Error, result.ErrorMessage), BuildDetails(result));
+    }
+
+    // What went wrong, as what the player can do about it. VRChat's message
+    // adds what its error leaves out: a download error carries the site's
+    // HTTP status, and the message names an untrusted domain or a redirect.
+    private string GetReason(VRCImageDownloadError error, string message)
+    {
+      string lower = string.IsNullOrEmpty(message) ? "" : message.ToLower();
+      // Turned away by the allow list: the domain is not trusted and the
+      // player has not allowed untrusted URLs.
+      if (error == VRCImageDownloadError.AccessDenied || lower.Contains("untrusted")) return UntrustedKey;
+      // Image loading never follows a redirect.
+      if (lower.Contains("redirect")) return RedirectKey;
+      switch (error)
       {
-        case VRCImageDownloadError.AccessDenied:
-          // Turned away by the allow list: the domain is not trusted and the
-          // player has not allowed untrusted URLs.
-          reason = "tablet.image.error.untrusted";
-          error = "AccessDenied";
-          break;
         case VRCImageDownloadError.InvalidURL:
-          reason = "tablet.image.error.invalidUrl";
-          error = "InvalidURL";
-          break;
+          return InvalidUrlKey;
         case VRCImageDownloadError.InvalidImage:
-          reason = "tablet.image.error.invalidImage";
-          error = "InvalidImage";
-          break;
-        case VRCImageDownloadError.DownloadError:
-          reason = "tablet.image.error.download";
-          error = "DownloadError";
-          break;
+          return InvalidImageKey;
         case VRCImageDownloadError.TooManyRequests:
-          reason = "tablet.image.error.busy";
-          error = "TooManyRequests";
-          break;
+          return BusyKey;
+        case VRCImageDownloadError.DownloadError:
+          int status = GetHttpStatus(message);
+          // Many sites turn away whatever is not a browser, so a picture a
+          // browser shows can still be refused here.
+          if (status == 401 || status == 403) return RefusedKey;
+          if (status == 404 || status == 410) return NotFoundKey;
+          if (status == 429 || (status >= 500 && status < 600)) return ServerKey;
+          return DownloadKey;
         default:
-          reason = "";
-          error = "Unknown";
-          break;
+          return UnknownKey;
       }
-      SetStatus(FailedKey, reason, BuildDetails(error, result));
+    }
+
+    // The status in a message such as "HTTP/1.1 403 Forbidden", or 0.
+    private int GetHttpStatus(string message)
+    {
+      if (string.IsNullOrEmpty(message)) return 0;
+      int at = message.IndexOf("HTTP/");
+      if (at < 0) return 0;
+      int space = message.IndexOf(' ', at);
+      if (space < 0 || space + 4 > message.Length) return 0;
+      int status;
+      return int.TryParse(message.Substring(space + 1, 3), out status) ? status : 0;
+    }
+
+    // Whether the same URL may load when tried again: once the player allows
+    // untrusted URLs, or once a busy or unreachable site is back. A wrong URL,
+    // something that is not a picture, or a site that refuses stays as it is.
+    private bool CanRetry(string reasonKey)
+    {
+      return reasonKey == UntrustedKey || reasonKey == ServerKey || reasonKey == DownloadKey
+        || reasonKey == BusyKey || reasonKey == UnknownKey;
+    }
+
+    // Loads the tablet's URL again for this player only: whether a picture
+    // loads depends on each player's own settings.
+    public void Retry()
+    {
+      if (_statusKey != FailedKey) return;
+      ShowUrl();
     }
 
     // For the developer a player sends a screenshot to: what VRChat reported,
     // left untranslated.
-    private string BuildDetails(string error, IVRCImageDownload result)
+    private string BuildDetails(IVRCImageDownload result)
     {
       string platform;
 #if UNITY_ANDROID
@@ -223,7 +269,7 @@ namespace Yamadev.YamaStream.Tablet
 #else
       platform = "PC";
 #endif
-      return "Error: " + error
+      return "Error: " + result.Error.ToString()
         + "\nMessage: " + result.ErrorMessage
         + "\nURL: " + result.Url.Get()
         + "\nPlatform: " + platform
@@ -257,6 +303,8 @@ namespace Yamadev.YamaStream.Tablet
         _statusText.text = text;
       }
       bool hasDetails = !showingPicture && !string.IsNullOrEmpty(_details);
+      if (Utilities.IsValid(_retryButton)) _retryButton.gameObject.SetActive(_statusKey == FailedKey && CanRetry(_reasonKey));
+      if (Utilities.IsValid(_retryButtonText)) _retryButtonText.text = GetTranslation("tablet.image.retry");
       if (Utilities.IsValid(_detailsButton)) _detailsButton.gameObject.SetActive(hasDetails);
       if (Utilities.IsValid(_detailsButtonText)) _detailsButtonText.text = GetTranslation(_detailsOpen ? "tablet.image.hideDetails" : "tablet.image.showDetails");
       if (Utilities.IsValid(_detailsText))
