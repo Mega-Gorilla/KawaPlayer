@@ -16426,7 +16426,7 @@ MonoBehaviour:
   _primaryColor: {r: 0.30980393, g: 0.7647059, b: 0.96862745, a: 1}
   _secondaryColor: {r: 0.7019608, g: 0.8980392, b: 0.9882353, a: 0.25}
   _idleScreenImage: {fileID: 5062945342081120817}
-  _idleScreenSprite: {fileID: 0}
+  _idleScreenSprite: {fileID: 21300000, guid: e381112012fe85247b6c30195e15af1b, type: 3}
   _userUIAnimator: {fileID: 2385889450029982110}
   _systemUIAnimator: {fileID: 4229276798645665398}
   _modalDialog: {fileID: 7936794003783194453}
