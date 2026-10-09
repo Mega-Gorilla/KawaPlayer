@@ -1,6 +1,6 @@
 # KawaPlayer
 
-VRChat の動画プレイヤー [YamaPlayer](https://github.com/koorimizuw/YamaPlayer) のフォーク。**ワールド作成者が VRChat 内から直接プレイリストやデフォルト動画URL を設定できる**機能を追加しています。
+VRChat の動画プレイヤー [YamaPlayer](https://github.com/koorimizuw/YamaPlayer) のフォーク。**ワールド作成者が VRChat 内から直接プレイリストや自動再生する動画 URL を設定できる**機能を追加しています。
 
 > **YamaPlayer を置き換えて使用するパッケージです。** 同時インストール不可。既存 YamaPlayer ユーザは [移行手順](#yamaplayer-からの移行) を参照してください。
 
@@ -15,8 +15,8 @@ VRChat の動画プレイヤー [YamaPlayer](https://github.com/koorimizuw/YamaP
 | AudioLink / LTCGI / Light Volume 連携 | ✓ | ✓ (継承) |
 | 多言語対応 (9 言語) | ✓ | ✓ (継承) |
 | **外部プレイリスト URL の読込** (`playlist.vrc-hub.com`) | — | ✅ NEW |
-| **ワールドのデフォルト動画URL を VRChat 内から設定** | — | ✅ NEW |
-| **デフォルト動画URL の永続化** (再 join で自動復元) | — | ✅ NEW |
+| **入室時に自動再生する動画 URL を VRChat 内から設定** (自動再生 (Owner)) | — | ✅ NEW |
+| **自動再生する URL の永続化** (再 join で自動復元) | — | ✅ NEW |
 
 KawaPlayer は YamaPlayer の全機能を継承しつつ、**ワールド作成者が VRChat 内で動画/プレイリストを直接管理できる**機能を追加しています。
 
@@ -62,9 +62,11 @@ KawaPlayer は YamaPlayer の全機能を継承しつつ、**ワールド作成�
 
 外部プレイリストを世界の事前ビルドに焼き込む必要なく、**VRChat に居ながら好みのプレイリストを切替できます**。
 
-### デフォルト動画URL 機能 (DefaultUrl)
+### 自動再生 (Owner)（DefaultUrl）
 
-**Instance Owner が、自分のインスタンスで自動再生する動画 / プレイリスト URL** を VRChat 内から設定できる機能です。
+**Instance Owner が、自分のインスタンスで自動再生する動画 / プレイリスト URL** を VRChat 内から設定できる機能です。ワールドの中の設定では「**自動再生**」、エディタのモジュール管理では「**自動再生(Owner)**」と表示されます (以前の名前は「デフォルト URL」)。
+
+> YamaPlayer から引き継いだ **自動再生(World)** (AutoPlay モジュール) は、ワールド制作者が**エディタで決めた**動画 / プレイリストを、どのインスタンスでも再生します。自動再生(Owner) は、**Instance Owner が VRChat の中で決めた**ものを、その人のインスタンスで再生します。両方を同じプレイヤーで有効にすると、どちらが再生されるかが入室のタイミングで決まるため、モジュール管理とビルドのログにエラーが出ます。どちらか一方を使ってください。
 
 > **⚠ 利用できるインスタンス種別が限られます。**`isInstanceOwner` は **Invite / Invite+ / Friends / Friends+ で、そのインスタンスを作成した本人にのみ true** を返します。**Public / Group インスタンスと SDK の Build & Test では常に false** です ([VRChat 公式ドキュメント](https://creators.vrchat.com/worlds/udon/networking/network-components/))。
 >
@@ -73,7 +75,7 @@ KawaPlayer は YamaPlayer の全機能を継承しつつ、**ワールド作成�
 **使い方 (Owner として):**
 1. ワールドに Instance Owner として入室
 2. KawaPlayer UI を開く → **Settings → Playback** タブ
-3. 末尾の **Default URL** セクションで **「URLを入力」** を押す → **VRChat の入力画面**が開くので URL を入力して確定する
+3. 末尾の **自動再生** セクションで **「URLを入力」** を押す → **VRChat の入力画面**が開くので URL を入力して確定する
 4. 確定した時点で保存され、**「設定値:」の行**に反映されます (保存ボタンはありません)
 5. プレイヤーが停止中であれば即時再生開始 (再生中の場合は中断しません。そのときは再生されず、次に自分のインスタンスへ入室したときに再生されます)
 6. 保存した URL は、**次に自分で作ったインスタンスへ入室したとき**にも自動で復元され、停止中なら再生が始まります

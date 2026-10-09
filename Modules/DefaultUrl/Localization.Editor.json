@@ -1,38 +1,38 @@
 {
   "ja": {
-    "module.defaultUrl.name": "デフォルト URL",
-    "module.defaultUrl.description": "ワールド入室時に自動再生されるデフォルト URL を Instance Owner が VRChat 内 UI から設定可能にし、セッション間で永続化する。 Public / Group インスタンスと SDK の Build & Test では Instance Owner が存在しないため利用できない。"
+    "module.defaultUrl.name": "自動再生(Owner)",
+    "module.defaultUrl.description": "Instance Owner が VRChat の中で決めた動画・プレイリストを、入室時に自動再生する。決めた URL は Owner のアカウントに残り、次に自分で作ったインスタンスでも使われる。Public / Group インスタンスと SDK の Build & Test では Instance Owner がいないため使えない。"
   },
   "en": {
-    "module.defaultUrl.name": "Default URL",
-    "module.defaultUrl.description": "Lets the Instance Owner configure a default URL via the in-VRChat UI that auto-plays when entering the world, persisted across sessions. There is no Instance Owner in Public or Group instances, or in the SDK's Build & Test, so the feature is unavailable there."
+    "module.defaultUrl.name": "Autoplay (Owner)",
+    "module.defaultUrl.description": "Plays the video or playlist the Instance Owner set inside VRChat when someone enters. The URL stays with the owner's account and is used again in the next instance they create. There is no Instance Owner in Public or Group instances, or in the SDK's Build & Test, so it does not work there."
   },
   "ko": {
-    "module.defaultUrl.name": "기본 URL",
-    "module.defaultUrl.description": "Instance Owner가 VRChat 내 UI에서 월드 입장 시 자동 재생되는 기본 URL을 설정할 수 있게 하고 세션 간 영구화합니다. Public / Group 인스턴스와 SDK의 Build & Test에는 Instance Owner가 없으므로 사용할 수 없습니다."
+    "module.defaultUrl.name": "자동 재생(Owner)",
+    "module.defaultUrl.description": "Instance Owner가 VRChat 안에서 정한 동영상·플레이리스트를 입장 시 자동 재생합니다. 정한 URL은 Owner의 계정에 남아, 다음에 직접 만든 인스턴스에서도 사용됩니다. Public / Group 인스턴스와 SDK의 Build & Test에는 Instance Owner가 없으므로 사용할 수 없습니다."
   },
   "zh-CN": {
-    "module.defaultUrl.name": "默认 URL",
-    "module.defaultUrl.description": "允许 Instance Owner 通过 VRChat 内 UI 配置进入世界时自动播放的默认 URL，跨会话持久化。 Public / Group 实例以及 SDK 的 Build & Test 中没有 Instance Owner，因此无法使用。"
+    "module.defaultUrl.name": "自动播放(Owner)",
+    "module.defaultUrl.description": "进入时自动播放 Instance Owner 在 VRChat 内设置的视频或播放列表。设置的 URL 保存在 Owner 的账户中，在其下次创建的实例中也会使用。Public / Group 实例以及 SDK 的 Build & Test 中没有 Instance Owner，因此无法使用。"
   },
   "zh-TW": {
-    "module.defaultUrl.name": "預設 URL",
-    "module.defaultUrl.description": "允許 Instance Owner 透過 VRChat 內 UI 設定進入世界時自動播放的預設 URL，跨工作階段持久化。 Public / Group 執行個體以及 SDK 的 Build & Test 中沒有 Instance Owner，因此無法使用。"
+    "module.defaultUrl.name": "自動播放(Owner)",
+    "module.defaultUrl.description": "進入時自動播放 Instance Owner 在 VRChat 內設定的影片或播放清單。設定的 URL 保存在 Owner 的帳號中，在其下次建立的執行個體中也會使用。Public / Group 執行個體以及 SDK 的 Build & Test 中沒有 Instance Owner，因此無法使用。"
   },
   "es": {
-    "module.defaultUrl.name": "URL predeterminada",
-    "module.defaultUrl.description": "Permite al Instance Owner configurar una URL predeterminada desde la UI de VRChat que se reproduce automáticamente al entrar al mundo, persistida entre sesiones. No hay Instance Owner en las instancias Public ni Group, ni en el Build & Test del SDK, por lo que la función no está disponible."
+    "module.defaultUrl.name": "Reproducción automática (Owner)",
+    "module.defaultUrl.description": "Reproduce al entrar el vídeo o la lista que el Instance Owner configuró dentro de VRChat. La URL queda en la cuenta del propietario y se vuelve a usar en la siguiente instancia que cree. No hay Instance Owner en las instancias Public ni Group, ni en el Build & Test del SDK, así que ahí no funciona."
   },
   "it": {
-    "module.defaultUrl.name": "URL predefinito",
-    "module.defaultUrl.description": "Consente all'Instance Owner di configurare un URL predefinito tramite la UI di VRChat che si riproduce automaticamente all'ingresso nel mondo, persistito tra le sessioni. Non esiste un Instance Owner nelle istanze Public o Group, né nel Build & Test dell'SDK, quindi la funzione non è disponibile."
+    "module.defaultUrl.name": "Riproduzione automatica (Owner)",
+    "module.defaultUrl.description": "Riproduce all'ingresso il video o la playlist che l'Instance Owner ha impostato dentro VRChat. L'URL resta nell'account del proprietario e viene riutilizzato nella prossima istanza che crea. Non c'è un Instance Owner nelle istanze Public o Group, né nel Build & Test dell'SDK, quindi lì non funziona."
   },
   "ru": {
-    "module.defaultUrl.name": "URL по умолчанию",
-    "module.defaultUrl.description": "Позволяет Instance Owner настроить URL по умолчанию через UI VRChat, который автоматически воспроизводится при входе в мир и сохраняется между сессиями. В Public- и Group-инстансах, а также в Build & Test из SDK, владельца инстанса нет, поэтому функция недоступна."
+    "module.defaultUrl.name": "Автовоспроизведение (Owner)",
+    "module.defaultUrl.description": "При входе воспроизводит видео или плейлист, заданные Instance Owner внутри VRChat. URL сохраняется в аккаунте владельца и используется снова в следующем созданном им инстансе. В Public- и Group-инстансах, а также в Build & Test из SDK владельца инстанса нет, поэтому там это не работает."
   },
   "uk": {
-    "module.defaultUrl.name": "URL за замовчуванням",
-    "module.defaultUrl.description": "Дозволяє Instance Owner налаштувати URL за замовчуванням через UI VRChat, який автоматично відтворюється при вході у світ і зберігається між сесіями. У Public- та Group-інстансах, а також у Build & Test із SDK, власника інстансу немає, тому функція недоступна."
+    "module.defaultUrl.name": "Автовідтворення (Owner)",
+    "module.defaultUrl.description": "Під час входу відтворює відео або плейлист, задані Instance Owner у VRChat. URL зберігається в акаунті власника й використовується знову в наступному створеному ним інстансі. У Public- та Group-інстансах, а також у Build & Test із SDK власника інстансу немає, тому там це не працює."
   }
 }

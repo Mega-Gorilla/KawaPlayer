@@ -1,6 +1,6 @@
 {
   "ja": {
-    "module.defaultUrl.title": "デフォルト URL",
+    "module.defaultUrl.title": "自動再生",
     "module.defaultUrl.description": "入室時に自動再生する動画・プレイリストを設定する。設定できるのはインスタンスオーナーだけで、次回入室時も残る。",
     "module.defaultUrl.currentPrefix": "設定値: ",
     "module.defaultUrl.notSet": "(未設定)",
@@ -9,7 +9,7 @@
     "module.defaultUrl.noPermission": "この機能はインスタンスオーナーのみ利用できます。Public / Group インスタンスでは利用できません。"
   },
   "en": {
-    "module.defaultUrl.title": "Default URL",
+    "module.defaultUrl.title": "Autoplay",
     "module.defaultUrl.description": "Sets the video or playlist that plays automatically on entering the world. Only the Instance Owner can set it, and it is still there next time.",
     "module.defaultUrl.currentPrefix": "Value: ",
     "module.defaultUrl.notSet": "(not set)",
@@ -18,7 +18,7 @@
     "module.defaultUrl.noPermission": "This feature is available to the Instance Owner only. It cannot be used in Public or Group instances."
   },
   "ko": {
-    "module.defaultUrl.title": "기본 URL",
+    "module.defaultUrl.title": "자동 재생",
     "module.defaultUrl.description": "입장 시 자동 재생할 동영상・플레이리스트를 설정한다. 설정할 수 있는 것은 Instance Owner뿐이며, 다음 입장 시에도 남는다.",
     "module.defaultUrl.currentPrefix": "설정값: ",
     "module.defaultUrl.notSet": "(설정되지 않음)",
@@ -27,7 +27,7 @@
     "module.defaultUrl.noPermission": "이 기능은 Instance Owner만 사용할 수 있습니다. Public 및 Group 인스턴스에서는 사용할 수 없습니다."
   },
   "zh-CN": {
-    "module.defaultUrl.title": "默认 URL",
+    "module.defaultUrl.title": "自动播放",
     "module.defaultUrl.description": "设置进入世界时自动播放的视频或播放列表。仅 Instance Owner 可以设置，下次进入时依然保留。",
     "module.defaultUrl.currentPrefix": "设定值: ",
     "module.defaultUrl.notSet": "(未设置)",
@@ -36,7 +36,7 @@
     "module.defaultUrl.noPermission": "此功能仅 Instance Owner 可以使用。Public 和 Group 实例中无法使用。"
   },
   "zh-HK": {
-    "module.defaultUrl.title": "預設 URL",
+    "module.defaultUrl.title": "自動播放",
     "module.defaultUrl.description": "設定進入世界時自動播放的影片或播放清單。僅 Instance Owner 可以設定，下次進入時仍會保留。",
     "module.defaultUrl.currentPrefix": "設定值: ",
     "module.defaultUrl.notSet": "(未設定)",
@@ -45,7 +45,7 @@
     "module.defaultUrl.noPermission": "此功能僅 Instance Owner 可以使用。Public 和 Group 執行個體中無法使用。"
   },
   "es": {
-    "module.defaultUrl.title": "URL predeterminada",
+    "module.defaultUrl.title": "Reproducción automática",
     "module.defaultUrl.description": "Define el vídeo o la lista que se reproduce al entrar al mundo. Solo el Instance Owner puede definirlo, y sigue ahí la próxima vez.",
     "module.defaultUrl.currentPrefix": "Valor: ",
     "module.defaultUrl.notSet": "(sin definir)",
@@ -54,7 +54,7 @@
     "module.defaultUrl.noPermission": "Esta función solo está disponible para el Instance Owner. No se puede usar en instancias Public ni Group."
   },
   "it": {
-    "module.defaultUrl.title": "URL predefinito",
+    "module.defaultUrl.title": "Riproduzione automatica",
     "module.defaultUrl.description": "Imposta il video o la playlist che parte all'ingresso nel mondo. Solo l'Instance Owner può impostarlo e resta anche la volta successiva.",
     "module.defaultUrl.currentPrefix": "Valore: ",
     "module.defaultUrl.notSet": "(non impostato)",
@@ -63,7 +63,7 @@
     "module.defaultUrl.noPermission": "Questa funzione è disponibile solo per l'Instance Owner. Non è utilizzabile nelle istanze Public o Group."
   },
   "ru": {
-    "module.defaultUrl.title": "URL по умолчанию",
+    "module.defaultUrl.title": "Автовоспроизведение",
     "module.defaultUrl.description": "Задаёт видео или плейлист, который включается при входе в мир. Задать его может только Instance Owner, и он сохраняется до следующего раза.",
     "module.defaultUrl.currentPrefix": "Значение: ",
     "module.defaultUrl.notSet": "(не задано)",
@@ -72,7 +72,7 @@
     "module.defaultUrl.noPermission": "Эта функция доступна только для Instance Owner. В Public- и Group-инстансах она недоступна."
   },
   "uk": {
-    "module.defaultUrl.title": "URL за замовчуванням",
+    "module.defaultUrl.title": "Автовідтворення",
     "module.defaultUrl.description": "Задає відео або плейлист, який вмикається при вході у світ. Задати його може лише Instance Owner, і він зберігається до наступного разу.",
     "module.defaultUrl.currentPrefix": "Значення: ",
     "module.defaultUrl.notSet": "(не задано)",
