@@ -23,10 +23,16 @@ namespace Yamadev.YamaStream.Tablet
     // beside the VRCPickup: VRChat looks for the pickup on the object whose
     // collider was hit, never on its parents.
     //
-    // The VRCPickup's proximity is 0.03 m, so a VR hand takes the tablet
-    // where it touches it. Grabbed from further away, the tablet is pulled
-    // in along the line from the hand to where it lay, and one lying on the
-    // player's right then hangs outside the right hand.
+    // The first collider on this object is none of these: one covering the
+    // whole tablet, edges included, that is never enabled. VRChat appears to
+    // place a VR hand's hold by the object's first collider, not by the one
+    // the hand touched: with the left edge first, a right hand taking the
+    // right edge ended up holding the left edge, the tablet hanging outside
+    // it (issue #167). Keep it first, and keep it disabled, or pointing at
+    // the screen would lift the tablet again.
+    //
+    // The VRCPickup's proximity is 0.03 m, so a VR hand takes the tablet only
+    // where it touches an edge (issue #157).
     [SerializeField] private Collider[] _vrGrabColliders;
     [SerializeField] private Collider[] _desktopGrabColliders;
 

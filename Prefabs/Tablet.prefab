@@ -14757,6 +14757,7 @@ GameObject:
   - component: {fileID: 7838458939732469121}
   - component: {fileID: 7681889713288593711}
   - component: {fileID: 4519679481986685937}
+  - component: {fileID: 8569661671549208566}
   - component: {fileID: 1867897972705753349}
   - component: {fileID: 7504453898145546519}
   - component: {fileID: 1841295170590072406}
@@ -14918,6 +14919,27 @@ MonoBehaviour:
   - {fileID: 7504453898145546519}
   - {fileID: 1841295170590072406}
   publicVariablesSerializationDataFormat: 0
+--- !u!65 &8569661671549208566
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5852408347994244545}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 0
+  serializedVersion: 3
+  m_Size: {x: 0.34, y: 0.1965, z: 0.03}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!65 &1867897972705753349
 BoxCollider:
   m_ObjectHideFlags: 0
