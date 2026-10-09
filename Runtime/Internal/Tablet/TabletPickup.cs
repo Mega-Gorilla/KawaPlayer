@@ -11,24 +11,23 @@ namespace Yamadev.YamaStream.Tablet
   // its own state on TabletScreen, on another object, so that pressing a
   // button on someone's tablet takes over the screen, never the tablet in
   // their hand.
+  //
+  // The tablet is grabbed by one collider covering the whole body, in VR and
+  // on desktop alike. It sits just behind the screen, so a click or a laser
+  // on the screen reaches the screen first, and it belongs on this object,
+  // beside the VRCPickup: VRChat looks for the pickup on the object whose
+  // collider was hit, never on its parents. Keep it the only one. VRChat
+  // places a VR hand's hold by the object's first collider, not by the one
+  // the hand touched: with a collider for each side edge, the left one
+  // first, a right hand taking the right edge ended up holding the left edge
+  // (issue #167, confirmed in VR by swapping the two). The VRCPickup's
+  // proximity is 0.03 m, so a VR hand takes the tablet only where it touches
+  // it, and pointing at the screen from away lifts nothing (issues #150,
+  // #157).
   [UdonBehaviourSyncMode(BehaviourSyncMode.NoVariableSync)]
   public class TabletPickup : YamaPlayerBehaviour
   {
     [SerializeField] private TabletScreen _screen;
-
-    // The tablet is grabbed by one collider covering the whole body, in VR
-    // and on desktop alike. It sits just behind the screen, so a click or a
-    // laser on the screen reaches the screen first, and it belongs on this
-    // object, beside the VRCPickup: VRChat looks for the pickup on the object
-    // whose collider was hit, never on its parents.
-    //
-    // Keep it the only one. VRChat places a VR hand's hold by the object's
-    // first collider, not by the one the hand touched: with a collider for
-    // each side edge, the left one first, a right hand taking the right edge
-    // ended up holding the left edge (issue #167, confirmed in VR by swapping
-    // the two). The VRCPickup's proximity is 0.03 m, so a VR hand takes the
-    // tablet only where it touches it, and pointing at the screen from away
-    // lifts nothing (issues #150, #157).
 
     // Seconds the tablet may lie untouched before it goes back. 0 never
     // returns it. Falling out of the world is left to the Respawn Height.
