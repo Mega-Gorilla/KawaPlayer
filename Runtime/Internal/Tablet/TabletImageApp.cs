@@ -43,14 +43,8 @@ namespace Yamadev.YamaStream.Tablet
     private const string BusyKey = "tablet.image.error.busy";
     private const string UnknownKey = "tablet.image.error.unknown";
 
-    private const float OrientationCheckInterval = 0.2f;
-    // Degrees a second the picture turns when the tablet does.
-    private const float TurnSpeed = 540f;
-    // How far past the last quarter turn the tablet must go before the
-    // picture follows, so it does not flip back and forth around 45 degrees.
-    private const float TurnThreshold = 55f;
-    // Lying flatter than this, which way is up says nothing.
-    private const float FlatLimit = 0.8f;
+    // How often to see whether a RenderTexture has lost what was drawn in it.
+    private const float TextureCheckInterval = 0.5f;
 
     // The longest side a picture is kept at. A Quest has less memory to
     // spare; at most this halves a 2048 picture, which a plain copy can do
@@ -97,7 +91,8 @@ namespace Yamadev.YamaStream.Tablet
     [SerializeField] private Text _backButtonText;
     [SerializeField, RegisterEvent(nameof(Button.onClick), nameof(ToggleDetails))] private Button _detailsButton;
     [SerializeField, RegisterEvent(nameof(Button.onClick), nameof(Retry))] private Button _retryButton;
-    // The fixed frame, and the part inside it that turns with the tablet.
+    // The frame, and the part inside it the picture and the messages sit in.
+    // The whole screen turns with the tablet (TabletScreen, issue #183).
     [SerializeField] private RectTransform _area;
     [SerializeField] private RectTransform _content;
     [SerializeField] private RawImage _picture;
@@ -131,13 +126,11 @@ namespace Yamadev.YamaStream.Tablet
     private bool _viewing;
     private bool _controlsOpen;
     private float _controlsUntil;
-    private float _targetAngle;
-    private float _shownAngle;
-    private float _nextOrientationCheck;
+    private float _nextTextureCheck;
 
     private void OnEnable()
     {
-      CheckOrientation(true);
+      Layout();
       UpdateTranslation();
       ShowImageState();
     }
@@ -160,17 +153,17 @@ namespace Yamadev.YamaStream.Tablet
 
     private void Update()
     {
-      if (Time.time >= _nextOrientationCheck)
-      {
-        _nextOrientationCheck = Time.time + OrientationCheckInterval;
-        CheckOrientation(false);
-        CheckLostTextures();
-      }
-      if (_shownAngle != _targetAngle)
-      {
-        _shownAngle = Mathf.MoveTowardsAngle(_shownAngle, _targetAngle, TurnSpeed * Time.deltaTime);
-        Layout();
-      }
+      if (Time.time < _nextTextureCheck) return;
+      _nextTextureCheck = Time.time + TextureCheckInterval;
+      CheckLostTextures();
+    }
+
+    // The screen turned between landscape and portrait: the frames have new
+    // sizes, so fit the picture and the thumbnails to them again.
+    public void OnLayoutChanged()
+    {
+      Layout();
+      if (gameObject.activeInHierarchy) UpdateList();
     }
 
     public void SubmitUrl()
@@ -658,39 +651,13 @@ namespace Yamadev.YamaStream.Tablet
 
     private string GetTranslation(string key) => Utilities.IsValid(_screen) ? _screen.GetTranslation(key) : string.Empty;
 
-    // The quarter turn that keeps the picture upright: on the screen, from
-    // the tablet's up to the world's.
-    private void CheckOrientation(bool immediate)
-    {
-      Vector3 normal = transform.forward;
-      float facing = Vector3.Dot(normal, Vector3.up);
-      if (Mathf.Abs(facing) <= FlatLimit)
-      {
-        Vector3 up = Vector3.up - normal * facing;
-        float angle = Vector3.SignedAngle(transform.up, up, normal);
-        if (immediate || Mathf.Abs(Mathf.DeltaAngle(_targetAngle, angle)) >= TurnThreshold)
-        {
-          _targetAngle = Mathf.Round(angle / 90f) * 90f;
-        }
-      }
-      if (immediate)
-      {
-        _shownAngle = _targetAngle;
-        Layout();
-      }
-    }
-
-    // Turned a quarter, the picture lies along the frame's other side and is
-    // fitted to that instead; in between, the box blends from one to the
-    // other as it turns.
+    // The picture as large as the frame allows, keeping its shape.
     private void Layout()
     {
       if (!Utilities.IsValid(_area) || !Utilities.IsValid(_content)) return;
-      Vector2 area = _area.rect.size;
-      float turned = Mathf.Abs(Mathf.Sin(_shownAngle * Mathf.Deg2Rad));
-      Vector2 box = Vector2.Lerp(area, new Vector2(area.y, area.x), turned);
+      Vector2 box = _area.rect.size;
       _content.sizeDelta = box;
-      _content.localEulerAngles = new Vector3(0f, 0f, _shownAngle);
+      _content.localEulerAngles = Vector3.zero;
 
       if (!Utilities.IsValid(_picture)) return;
       Texture texture = _picture.texture;
