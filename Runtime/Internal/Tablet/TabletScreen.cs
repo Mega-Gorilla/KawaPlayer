@@ -38,6 +38,8 @@ namespace Yamadev.YamaStream.Tablet
 
     [Header("Buttons")]
     [SerializeField, RegisterEvent(nameof(Button.onClick), nameof(GoHome))] private Button _homeButton;
+    // The LED around the home button.
+    [SerializeField] private GameObject _homeButtonLight;
     [SerializeField, RegisterEvent(nameof(Button.onClick), nameof(OpenVersionApp))] private Button _versionAppButton;
     [SerializeField, RegisterEvent(nameof(Button.onClick), nameof(OpenKawaPlayerApp))] private Button _kawaPlayerAppButton;
     [SerializeField, RegisterEvent(nameof(Button.onClick), nameof(OpenImageApp))] private Button _imageAppButton;
@@ -140,6 +142,11 @@ namespace Yamadev.YamaStream.Tablet
       {
         if (Utilities.IsValid(_apps[i])) _apps[i].SetActive(i == app);
       }
+      // The home button's LED is lit while there is an app to leave (issue
+      // #180). On the home screen it is off and the button takes no press:
+      // one would only take the screen over and sync it for nothing.
+      if (Utilities.IsValid(_homeButtonLight)) _homeButtonLight.SetActive(app != Home);
+      if (Utilities.IsValid(_homeButton)) _homeButton.interactable = app != Home;
       if (app == VersionApp && Utilities.IsValid(_updateLogScroll)) _updateLogScroll.verticalNormalizedPosition = 1f;
     }
 
