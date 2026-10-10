@@ -337,9 +337,10 @@ namespace Yamadev.YamaStream.Tablet
     }
 
     // Only the player who entered a picture puts it in the list, once it has
-    // loaded for them, and only while the tablet still shows it and they
-    // still own the screen: a success that comes after someone else changed
-    // the picture must not write over what they did.
+    // loaded for them, and only while it is still the tablet's picture and
+    // they still own the screen: a success that comes after someone else
+    // changed the picture must not write over what they did. Having gone back
+    // to the list since does not matter; the list stays up.
     private void AddToList(VRCUrl url)
     {
       if (!Utilities.IsValid(_screen) || !Networking.IsOwner(_screen.gameObject)) return;
