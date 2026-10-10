@@ -24,6 +24,8 @@ namespace Yamadev.YamaStream.Tablet
     private const int VisitorsApp = 4;
 
     private const float DistanceCheckInterval = 0.5f;
+    // How many pictures the image app's list holds (issue #181).
+    private const int ImageListSize = 5;
 
     [SerializeField] private UIController _uiController;
     [SerializeField] private TabletPickup _tablet;
@@ -71,6 +73,11 @@ namespace Yamadev.YamaStream.Tablet
 
     [UdonSynced] private int _appIndex = Home;
     [UdonSynced] private VRCUrl _imageUrl = VRCUrl.Empty;
+    // The image app's list, newest first, and whether the app shows the
+    // picture full size or the list. A URL cannot be made from text, so the
+    // list lasts only as long as the instance.
+    [UdonSynced] private VRCUrl[] _imageList = new VRCUrl[0];
+    [UdonSynced] private bool _imageViewing;
     private int _shownApp = int.MinValue;
     private bool _interactable = true;
 
@@ -104,13 +111,57 @@ namespace Yamadev.YamaStream.Tablet
 
     public VRCUrl ImageUrl => _imageUrl;
 
+    public VRCUrl[] ImageList => _imageList;
+
+    public bool ImageViewing => _imageViewing;
+
+    // Shows a picture full size: one just entered, or one picked from the
+    // list.
     public void SetImageUrl(VRCUrl url)
     {
       TakeOwnership();
       _imageUrl = url;
+      _imageViewing = true;
       RequestSerialization();
       if (Utilities.IsValid(_tablet)) _tablet.Touch();
-      if (Utilities.IsValid(_imageApp)) _imageApp.ShowUrl();
+      if (Utilities.IsValid(_imageApp)) _imageApp.ShowImageState();
+    }
+
+    public void ShowImageList()
+    {
+      TakeOwnership();
+      _imageViewing = false;
+      RequestSerialization();
+      if (Utilities.IsValid(_tablet)) _tablet.Touch();
+      if (Utilities.IsValid(_imageApp)) _imageApp.ShowImageState();
+    }
+
+    // Puts a picture first in the list, or moves it there. The image app
+    // calls this once the picture has loaded for the player who entered it,
+    // so a URL that does not load never takes a place. Past the last place,
+    // the oldest picture leaves.
+    //
+    // Only the owner may: a player who has lost the screen to someone else
+    // since entering the picture would send back the state they had, over
+    // the newer one.
+    public void AddToImageList(VRCUrl url)
+    {
+      if (!Utilities.IsValid(url) || string.IsNullOrEmpty(url.Get())) return;
+      if (!IsObjectOwner) return;
+      string key = url.Get();
+      VRCUrl[] list = new VRCUrl[ImageListSize];
+      list[0] = url;
+      int count = 1;
+      foreach (VRCUrl item in _imageList)
+      {
+        if (count >= ImageListSize) break;
+        if (!Utilities.IsValid(item) || item.Get() == key) continue;
+        list[count++] = item;
+      }
+      _imageList = new VRCUrl[count];
+      for (int i = 0; i < count; i++) _imageList[i] = list[i];
+      RequestSerialization();
+      if (Utilities.IsValid(_imageApp)) _imageApp.ShowImageState();
     }
 
     private void OpenApp(int app)
@@ -124,7 +175,7 @@ namespace Yamadev.YamaStream.Tablet
     public override void OnDeserialization()
     {
       ShowApp();
-      if (Utilities.IsValid(_imageApp)) _imageApp.ShowUrl();
+      if (Utilities.IsValid(_imageApp)) _imageApp.ShowImageState();
     }
 
     private void ShowApp()

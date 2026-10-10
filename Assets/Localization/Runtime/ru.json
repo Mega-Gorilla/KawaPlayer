@@ -130,6 +130,8 @@
   "tablet.image.showDetails": "Подробности ошибки",
   "tablet.image.hideDetails": "Скрыть подробности",
   "tablet.image.retry": "Повторить",
+  "tablet.image.back": "Назад",
+  "tablet.image.listEmpty": "Введите URL, и показанные изображения появятся здесь",
   "tablet.settings.video": "Видео",
   "tablet.settings.audio": "Аудио",
   "tablet.settings.note": "Изменения здесь действуют только для вас",
