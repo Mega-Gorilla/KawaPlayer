@@ -657,7 +657,6 @@ namespace Yamadev.YamaStream.Tablet
       if (!Utilities.IsValid(_area) || !Utilities.IsValid(_content)) return;
       Vector2 box = _area.rect.size;
       _content.sizeDelta = box;
-      _content.localEulerAngles = Vector3.zero;
 
       if (!Utilities.IsValid(_picture)) return;
       Texture texture = _picture.texture;

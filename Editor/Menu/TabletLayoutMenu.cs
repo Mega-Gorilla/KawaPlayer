@@ -1,6 +1,5 @@
 using UnityEditor;
 using UnityEngine;
-using UnityEngine.UI;
 using Yamadev.YamaStream.Tablet;
 
 namespace Yamadev.YamaStream.Editor
@@ -57,14 +56,6 @@ namespace Yamadev.YamaStream.Editor
         anchors.GetArrayElementAtIndex(i).vector4Value = new Vector4(part.anchorMin.x, part.anchorMin.y, part.anchorMax.x, part.anchorMax.y);
         rects.GetArrayElementAtIndex(i).vector4Value = new Vector4(part.anchoredPosition.x, part.anchoredPosition.y, part.sizeDelta.x, part.sizeDelta.y);
       }
-      SerializedProperty texts = so.FindProperty("_layoutTexts");
-      SerializedProperty sizes = so.FindProperty(portrait ? "_portraitFontSizes" : "_landscapeFontSizes");
-      sizes.arraySize = texts.arraySize;
-      for (int i = 0; i < texts.arraySize; i++)
-      {
-        Text text = texts.GetArrayElementAtIndex(i).objectReferenceValue as Text;
-        if (text != null) sizes.GetArrayElementAtIndex(i).intValue = text.fontSize;
-      }
       so.ApplyModifiedProperties();
     }
 
@@ -101,15 +92,6 @@ namespace Yamadev.YamaStream.Editor
         part.anchorMax = new Vector2(a.z, a.w);
         part.anchoredPosition = new Vector2(r.x, r.y);
         part.sizeDelta = new Vector2(r.z, r.w);
-      }
-      SerializedProperty texts = so.FindProperty("_layoutTexts");
-      SerializedProperty sizes = so.FindProperty(portrait ? "_portraitFontSizes" : "_landscapeFontSizes");
-      for (int i = 0; i < Mathf.Min(texts.arraySize, sizes.arraySize); i++)
-      {
-        Text text = texts.GetArrayElementAtIndex(i).objectReferenceValue as Text;
-        if (text == null) continue;
-        Undo.RecordObject(text, "Tablet Layout");
-        text.fontSize = sizes.GetArrayElementAtIndex(i).intValue;
       }
       if (!portrait) SetLayoutsEnabled(layouts, true);
     }

@@ -93,10 +93,6 @@ namespace Yamadev.YamaStream.Tablet
     [SerializeField] private Vector4[] _landscapeRects = new Vector4[0];
     [SerializeField] private Vector4[] _portraitAnchors = new Vector4[0];
     [SerializeField] private Vector4[] _portraitRects = new Vector4[0];
-    // Texts whose size differs between the layouts.
-    [SerializeField] private Text[] _layoutTexts = new Text[0];
-    [SerializeField] private int[] _landscapeFontSizes = new int[0];
-    [SerializeField] private int[] _portraitFontSizes = new int[0];
     // Layout groups that place their children in landscape only; in portrait
     // the parts above say where each child goes.
     [SerializeField] private Behaviour[] _landscapeLayouts = new Behaviour[0];
@@ -396,12 +392,6 @@ namespace Yamadev.YamaStream.Tablet
         part.anchorMax = new Vector2(a.z, a.w);
         part.anchoredPosition = new Vector2(r.x, r.y);
         part.sizeDelta = new Vector2(r.z, r.w);
-      }
-      int[] sizes = portrait ? _portraitFontSizes : _landscapeFontSizes;
-      int texts = Mathf.Min(_layoutTexts.Length, sizes.Length);
-      for (int i = 0; i < texts; i++)
-      {
-        if (Utilities.IsValid(_layoutTexts[i])) _layoutTexts[i].fontSize = sizes[i];
       }
       if (!portrait) SetLayoutsEnabled(true);
 

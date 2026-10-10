@@ -4139,9 +4139,6 @@ MonoBehaviour:
   - {x: 322.5, y: 0, z: 205, w: 110}
   - {x: -62, y: 0, z: 48, w: 48}
   - {x: 30, y: 0, z: 128, w: 56}
-  _layoutTexts: []
-  _landscapeFontSizes: 
-  _portraitFontSizes: 
   _landscapeLayouts:
   - {fileID: 4474761265287176692}
   - {fileID: 5207533654192886671}
