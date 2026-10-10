@@ -53,7 +53,6 @@ namespace Yamadev.YamaStream.UI
     [Header("Localization - Playback Settings")]
     [SerializeField] private Text _videoPlayerTitleLabel;
     [SerializeField] private Text _videoPlayerDescLabel;
-    [SerializeField] private Text _unityVideoPlayerLabel; // 現在使用してない
     [SerializeField] private Text _avproVideoPlayerLabel; // 現在使用してない
     [SerializeField] private Text _imageViewerLabel;
     [SerializeField] private Text _playbackSpeedTitleLabel;
@@ -84,7 +83,6 @@ namespace Yamadev.YamaStream.UI
     [SerializeField] private Text _unlockUiMessageLabel;
 
     [Header("Localization - Modal Dialog")]
-    [SerializeField] private Text _modalUnityVideoPlayerLabel; // 現在使用してない
     [SerializeField] private Text _modalAVProVideoPlayerLabel; // 現在使用してない
     [SerializeField] private Text _modalImageViewerLabel;
 

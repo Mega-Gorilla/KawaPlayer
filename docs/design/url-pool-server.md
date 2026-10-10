@@ -131,7 +131,7 @@ ORDER BY pt.position
 | id | uuid | PK |
 | url | text | 動画 URL (unique) |
 | title | text | タイトル |
-| mode | int | VideoPlayerType (0=Unity, 1=AVPro, 2=ImageViewer) |
+| mode | int | VideoPlayerType (0=Unity, 1=AVPro, 2=ImageViewer)。KawaPlayer は 0 を AVPro として再生する（#166） |
 | thumbnail_url | text | サムネイル URL (nullable) |
 | registered_by | uuid | FK → users |
 | created_at | timestamptz | |

@@ -32,7 +32,6 @@
   "settings.disableUIDistance.label": "UI operation distance",
   "settings.disableUIDistance.desc": "When the beam exceeds a certain distance, it will not be emitted.",
   "settings.videoPlayerType.label": "Player",
-  "settings.videoPlayerType.tooltip": "Select the video player engine to use by default.",
   "settings.defaultPlaylistOpen.label": "Open playlist",
   "settings.defaultPlaylistOpen.desc": "Show playlist when started.",
   "settings.idleImage.label": "Idle Image",

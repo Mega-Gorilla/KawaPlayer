@@ -31,7 +31,6 @@
   "settings.disableUIDistance.label": "UI 조작 거리",
   "settings.disableUIDistance.desc": "빔이 일정 거리를 초과하면 발사되지 않습니다.",
   "settings.videoPlayerType.label": "플레이어",
-  "settings.videoPlayerType.tooltip": "기본으로 사용할 비디오 플레이어 엔진을 선택합니다.",
   "settings.defaultPlaylistOpen.label": "재생목록 열기",
   "settings.defaultPlaylistOpen.desc": "시작 시 재생목록을 표시합니다.",
   "settings.idleImage.label": "대기 화면",

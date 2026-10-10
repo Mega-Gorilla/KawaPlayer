@@ -166,7 +166,7 @@ Resolve API が返す index 付きレスポンスをパースする。1回のリ
 パース手順:
   1. "ok" が true であることを確認
   2. "tracks" 配列を取得
-  3. 各要素から index, title, mode を取得
+  3. 各要素から index, title, mode を取得（mode が 0 またはないときは AVPro の 1 にする。#166）
   4. _redirectPool[index] で VRCUrl に変換
 ```
 
@@ -175,6 +175,8 @@ Resolve API が返す index 付きレスポンスをパースする。1回のリ
 ```csharp
 // index から pre-baked VRCUrl を取得し Track を構築
 var redirectUrl = _redirectPool[index];
+// Unity（0）の曲は AVPro で再生する（#166）
+if (mode == (int)VideoPlayerType.UnityVideoPlayer) mode = (int)VideoPlayerType.AVProVideoPlayer;
 var track = TrackUtils.NewTrack((VideoPlayerType)mode, title, redirectUrl);
 ```
 

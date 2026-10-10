@@ -312,7 +312,12 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
           continue;
         }
 
-        int mode = TryGetInt(dict, "mode", 0);
+        // VHub names Unity Video Player (mode 0, or no mode at all) for its
+        // tracks, YouTube included, but a URL in the world plays on AVPro:
+        // Unity cannot play HLS and gets YouTube at 360p (issues #139, #166).
+        // An image (2) stays an image.
+        int mode = TryGetInt(dict, "mode", (int)VideoPlayerType.AVProVideoPlayer);
+        if (mode == (int)VideoPlayerType.UnityVideoPlayer) mode = (int)VideoPlayerType.AVProVideoPlayer;
         string title = "";
         if (dict.TryGetValue("title", out DataToken t)
             && t.TokenType == TokenType.String)

@@ -31,7 +31,6 @@
   "settings.disableUIDistance.label": "Відстань дії UI",
   "settings.disableUIDistance.desc": "Коли промінь перевищує певну відстань, він не буде випромінюватися.",
   "settings.videoPlayerType.label": "Плеєр",
-  "settings.videoPlayerType.tooltip": "Оберіть відеоплеєр для використання за замовчуванням.",
   "settings.defaultPlaylistOpen.label": "Відкрити плейлист",
   "settings.defaultPlaylistOpen.desc": "Показувати плейлист при запуску.",
   "settings.idleImage.label": "Зображення очікування",

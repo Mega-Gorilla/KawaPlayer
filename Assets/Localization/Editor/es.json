@@ -31,7 +31,6 @@
   "settings.disableUIDistance.label": "Distancia de operación de UI",
   "settings.disableUIDistance.desc": "Cuando el rayo excede una cierta distancia, no se emitirá.",
   "settings.videoPlayerType.label": "Reproductor",
-  "settings.videoPlayerType.tooltip": "Selecciona el motor de reproductor de video a usar por defecto.",
   "settings.defaultPlaylistOpen.label": "Abrir lista de reproducción",
   "settings.defaultPlaylistOpen.desc": "Muestra la lista de reproducción al iniciar.",
   "settings.idleImage.label": "Imagen de espera",
