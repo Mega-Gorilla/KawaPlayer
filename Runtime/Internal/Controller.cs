@@ -32,6 +32,12 @@ namespace Yamadev.YamaStream
     [UdonSynced] private string _title = string.Empty;
     [UdonSynced] private VRCUrl _url = VRCUrl.Empty;
     [UdonSynced] private byte[] _trackExtension = new byte[0];
+    // Whether the player in use was switched to by a track -- a picture from
+    // the tablet, or a track from a playlist or the queue -- rather than
+    // chosen in the settings (issue #182). A URL entered next does not keep
+    // the image viewer a picture left behind.
+    [UdonSynced] private bool _handlerFromTrack;
+    private bool _appliedHandlerFromTrack;
     private object[] _track;
     private PlayerHandler _handler;
     private bool _useFallback;
@@ -135,13 +141,22 @@ namespace Yamadev.YamaStream
         _handler = value;
         _handlerIndex = Array.IndexOf(_videoPlayerHandlers, value);
         if (Networking.IsOwner(gameObject) && !_isLocal) RequestSerialization();
-        int len = _listeners.Length;
-        for (int i = 0; i < len; i++)
-        {
-          var listener = _listeners[i];
-          if (Utilities.IsValid(listener)) listener.AfterPlayerHandlerChanged(_handler.Type);
-        }
+        NotifyPlayerHandlerChanged();
         PrintLog($"Player handler changed to {_handler.Type.GetString()}.");
+      }
+    }
+
+    public bool HandlerFromTrack => _handlerFromTrack;
+
+    // Also told when the same player stops or starts counting as switched to
+    // by a track: which player a UI offers for the next URL follows that too.
+    private void NotifyPlayerHandlerChanged()
+    {
+      int len = _listeners.Length;
+      for (int i = 0; i < len; i++)
+      {
+        var listener = _listeners[i];
+        if (Utilities.IsValid(listener)) listener.AfterPlayerHandlerChanged(_handler.Type);
       }
     }
 
@@ -199,17 +214,48 @@ namespace Yamadev.YamaStream
       set => _allowAutoSwitchHandler = value;
     }
 
+    // Both choose the player rather than switch to it for a track: it stays
+    // for the URLs entered next, even when a track had switched to it
+    // already.
     public void SetPlayerType(VideoPlayerType playerType)
     {
-      if (Utilities.IsValid(Handler) && Handler.Type == playerType) return;
+      if (Utilities.IsValid(Handler) && Handler.Type == playerType)
+      {
+        KeepHandler();
+        return;
+      }
       Stop();
-      SwitchToHandlerIndex(FindHandlerIndexByType(playerType));
+      SwitchToChosenHandler(FindHandlerIndexByType(playerType));
     }
 
     public void SetPlayerHandler(int index)
     {
-      if (index >= 0 && index < _videoPlayerHandlers.Length && _videoPlayerHandlers[index] == Handler) return;
+      if (index >= 0 && index < _videoPlayerHandlers.Length && _videoPlayerHandlers[index] == Handler)
+      {
+        KeepHandler();
+        return;
+      }
       Stop();
+      SwitchToChosenHandler(index);
+    }
+
+    private void KeepHandler()
+    {
+      if (!_handlerFromTrack) return;
+      _handlerFromTrack = false;
+      _appliedHandlerFromTrack = false;
+      if (Networking.IsOwner(gameObject) && !_isLocal) RequestSerialization();
+      NotifyPlayerHandlerChanged();
+    }
+
+    // Cleared before switching, so the listeners told of the switch see it.
+    private void SwitchToChosenHandler(int index)
+    {
+      if (index >= 0 && index < _videoPlayerHandlers.Length && Utilities.IsValid(_videoPlayerHandlers[index]))
+      {
+        _handlerFromTrack = false;
+        _appliedHandlerFromTrack = false;
+      }
       SwitchToHandlerIndex(index);
     }
 
@@ -473,7 +519,16 @@ namespace Yamadev.YamaStream
       _reloading = isReload;
 
       int index = ResolveHandlerIndexForTrack(track);
-      if (index >= 0) SwitchToHandlerIndex(index);
+      if (index >= 0)
+      {
+        // Only a switch counts: a track on the player chosen leaves it chosen.
+        if (_videoPlayerHandlers[index] != Handler)
+        {
+          _handlerFromTrack = true;
+          _appliedHandlerFromTrack = true;
+        }
+        SwitchToHandlerIndex(index);
+      }
 
       LoadTrackLocal(track, isReload);
 

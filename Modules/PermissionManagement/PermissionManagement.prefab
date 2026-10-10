@@ -1370,6 +1370,9 @@ MonoBehaviour:
   - targetPath: Canvas/User/Main/Pages/Settings/PageView
     content: {fileID: 7104998376335983347}
     siblingIndex: -1
+  - targetPath: Canvas/Display
+    content: {fileID: 82390485142766930}
+    siblingIndex: -1
   moduleNameTranslationKey: module.permissionManagement.name
   moduleDescriptionTranslationKey: module.permissionManagement.description
   editorTranslationFile: {fileID: 4900000, guid: b3111c74c36512443b8a7fcd5a768018, type: 3}

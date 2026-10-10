@@ -267,9 +267,11 @@ namespace Yamadev.YamaStream.UI
       _controller.SetPlayerType(VideoPlayerType.UnityVideoPlayer);
     }
 
+    // The settings show the player a URL entered next plays on (see
+    // OfferedPlayerType), and so do these two.
     public void SetAVProPlayer()
     {
-      if (_controller.Handler.Type == VideoPlayerType.AVProVideoPlayer) return;
+      if (OfferedPlayerType() == VideoPlayerType.AVProVideoPlayer) return;
       if (!Utilities.IsValid(_modalDialog) || (_controller.Stopped && !_controller.IsLoading))
       {
         SetAVProPlayerInternal();
@@ -289,10 +291,13 @@ namespace Yamadev.YamaStream.UI
       _controller.SetPlayerType(VideoPlayerType.AVProVideoPlayer);
     }
 
+    // A picture a track put up is on the image viewer already: choosing it
+    // stops nothing, so nothing is asked.
     public void SetImageViewer()
     {
-      if (_controller.Handler.Type == VideoPlayerType.ImageViewer) return;
-      if (!Utilities.IsValid(_modalDialog) || (_controller.Stopped && !_controller.IsLoading))
+      if (OfferedPlayerType() == VideoPlayerType.ImageViewer) return;
+      if (!Utilities.IsValid(_modalDialog) || (_controller.Stopped && !_controller.IsLoading)
+        || _controller.Handler.Type == VideoPlayerType.ImageViewer)
       {
         SetImageViewerInternal();
         return;
@@ -356,7 +361,7 @@ namespace Yamadev.YamaStream.UI
 
       if (!Utilities.IsValid(_modalDialog) || (_controller.Stopped && !_controller.IsLoading))
       {
-        PlayUrlInternal(ToOfferedPlayerType(_controller.Handler.Type), urlInputField.GetUrl());
+        PlayUrlInternal(OfferedPlayerType(), urlInputField.GetUrl());
         urlInputField.SetUrl(VRCUrl.Empty);
         return;
       }
@@ -403,11 +408,25 @@ namespace Yamadev.YamaStream.UI
       HideVideoPlayerSelector();
     }
 
+    // Whether this UI is pointed at a player. A tablet placed without one
+    // has nothing to show a picture on.
+    public bool HasController => Utilities.IsValid(_controller);
+
+    // Shows a picture on the player at once, on the image viewer (issue
+    // #182): the tablet's image app sends the picture it shows. Unlike a URL
+    // entered in the field, nothing is asked, even over something playing;
+    // the permissions apply as they do to playing a URL.
+    public void PlayImageUrl(VRCUrl url)
+    {
+      if (!Utilities.IsValid(_controller) || !Utilities.IsValid(url) || string.IsNullOrEmpty(url.Get())) return;
+      PlayUrlInternal(VideoPlayerType.ImageViewer, url);
+    }
+
     public void ShowVideoPlayerSelector()
     {
       if (!Utilities.IsValid(_modalPlayerSelectorGroup)) return;
 
-      var type = ToOfferedPlayerType(_controller.Handler.Type);
+      var type = OfferedPlayerType();
       if (Utilities.IsValid(_modalUnityPlayerToggle))
       {
         _modalUnityPlayerToggle.isOn = type == VideoPlayerType.UnityVideoPlayer;
@@ -437,15 +456,18 @@ namespace Yamadev.YamaStream.UI
       if (Utilities.IsValid(_modalUnityPlayerToggle) && _modalUnityPlayerToggle.isOn) return VideoPlayerType.UnityVideoPlayer;
       if (Utilities.IsValid(_modalAVProPlayerToggle) && _modalAVProPlayerToggle.isOn) return VideoPlayerType.AVProVideoPlayer;
       if (Utilities.IsValid(_modalImageViewerToggle) && _modalImageViewerToggle.isOn) return VideoPlayerType.ImageViewer;
-      return ToOfferedPlayerType(_controller.Handler.Type);
+      return OfferedPlayerType();
     }
 
-    // A URL entered in the world plays on AVPro unless it is an image: Unity
-    // Video Player is no longer offered (issue #139). The active handler can
-    // still be Unity -- after falling back from an AVPro error, or while a
-    // track baked as Unity plays -- and the next URL must not inherit that.
-    private VideoPlayerType ToOfferedPlayerType(VideoPlayerType type)
+    // A URL entered in the world plays on AVPro unless someone chose the
+    // image viewer: Unity Video Player is no longer offered (issue #139). The
+    // player in use can be another one a track switched to -- Unity for a
+    // track baked as Unity, or the image viewer for a picture from the tablet
+    // (issue #182) -- and the next URL must not inherit it.
+    private VideoPlayerType OfferedPlayerType()
     {
+      if (_controller.HandlerFromTrack) return VideoPlayerType.AVProVideoPlayer;
+      var type = _controller.Handler.Type;
       return type == VideoPlayerType.UnityVideoPlayer ? VideoPlayerType.AVProVideoPlayer : type;
     }
 
@@ -1096,11 +1118,14 @@ namespace Yamadev.YamaStream.UI
       if (Utilities.IsValid(_idleScreenImage) && Utilities.IsValid(_idleScreenSprite)) _idleScreenImage.sprite = _idleScreenSprite;
     }
 
+    // The player a URL entered next plays on, which is not always the one in
+    // use: a picture from the tablet leaves the settings on AVPro.
     public void UpdatePlayerSelector()
     {
-      if (Utilities.IsValid(_unityPlayerToggle)) _unityPlayerToggle.SetIsOnWithoutNotify(_controller.Handler.Type == VideoPlayerType.UnityVideoPlayer);
-      if (Utilities.IsValid(_avProPlayerToggle)) _avProPlayerToggle.SetIsOnWithoutNotify(_controller.Handler.Type == VideoPlayerType.AVProVideoPlayer);
-      if (Utilities.IsValid(_imageViewerToggle)) _imageViewerToggle.SetIsOnWithoutNotify(_controller.Handler.Type == VideoPlayerType.ImageViewer);
+      var type = OfferedPlayerType();
+      if (Utilities.IsValid(_unityPlayerToggle)) _unityPlayerToggle.SetIsOnWithoutNotify(type == VideoPlayerType.UnityVideoPlayer);
+      if (Utilities.IsValid(_avProPlayerToggle)) _avProPlayerToggle.SetIsOnWithoutNotify(type == VideoPlayerType.AVProVideoPlayer);
+      if (Utilities.IsValid(_imageViewerToggle)) _imageViewerToggle.SetIsOnWithoutNotify(type == VideoPlayerType.ImageViewer);
     }
 
     #region Event Handlers

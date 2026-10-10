@@ -135,6 +135,9 @@ namespace Yamadev.YamaStream.Tablet
 
     public string GetTranslation(string key) => Utilities.IsValid(_uiController) ? _uiController.GetTranslation(key) : string.Empty;
 
+    // The tablet's own UIController, which acts on the player it is pointed at.
+    public UIController UIController => _uiController;
+
     // The font of the player's language. UIController sets it on every text
     // under it, the clock included, as soon as a translation is asked for.
     public Font CurrentFont => Utilities.IsValid(_clockText) ? _clockText.font : null;

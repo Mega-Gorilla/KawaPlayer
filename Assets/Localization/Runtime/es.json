@@ -131,6 +131,7 @@
   "tablet.image.hideDetails": "Ocultar detalles",
   "tablet.image.retry": "Reintentar",
   "tablet.image.back": "Volver",
+  "tablet.image.showOnPlayer": "Mostrar en KawaPlayer",
   "tablet.image.listEmpty": "Introduce una URL y las imágenes que muestres aparecerán aquí",
   "tablet.settings.video": "Video",
   "tablet.settings.audio": "Audio",
