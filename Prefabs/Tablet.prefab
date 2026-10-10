@@ -8487,7 +8487,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1.15
-  m_Text: "KawaPlayer \u306B\u6620\u3059"
+  m_Text: "KawaPlayer \u306B\u9001\u308B"
 --- !u!114 &7063415674126447551
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -12159,7 +12159,7 @@ GameObject:
   - component: {fileID: 1804309150874322121}
   - component: {fileID: 7749459908248917628}
   m_Layer: 0
-  m_Name: ShowOnPlayer
+  m_Name: SendToPlayer
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

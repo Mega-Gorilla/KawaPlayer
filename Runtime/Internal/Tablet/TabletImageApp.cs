@@ -93,7 +93,7 @@ namespace Yamadev.YamaStream.Tablet
     [SerializeField, RegisterEvent(nameof(Button.onClick), nameof(BackToList))] private Button _backButton;
     [SerializeField] private Text _backButtonText;
     // Shows the picture on the KawaPlayer screen (issue #182).
-    [SerializeField, RegisterEvent(nameof(Button.onClick), nameof(ShowOnPlayer))] private Button _playerButton;
+    [SerializeField, RegisterEvent(nameof(Button.onClick), nameof(SendToPlayer))] private Button _playerButton;
     [SerializeField] private Text _playerButtonText;
     [SerializeField, RegisterEvent(nameof(Button.onClick), nameof(ToggleDetails))] private Button _detailsButton;
     [SerializeField, RegisterEvent(nameof(Button.onClick), nameof(Retry))] private Button _retryButton;
@@ -522,21 +522,21 @@ namespace Yamadev.YamaStream.Tablet
     {
       if (!Utilities.IsValid(_controls)) return;
       _controls.SetActive(_controlsOpen || !string.IsNullOrEmpty(_statusKey));
-      if (Utilities.IsValid(_playerButton)) _playerButton.gameObject.SetActive(CanShowOnPlayer());
+      if (Utilities.IsValid(_playerButton)) _playerButton.gameObject.SetActive(CanSendToPlayer());
     }
 
     // Sends the picture this player sees to the player the tablet is pointed
     // at, through the tablet's UIController: it plays at once, in place of
     // whatever is playing, and the permissions apply.
-    public void ShowOnPlayer()
+    public void SendToPlayer()
     {
-      if (!CanShowOnPlayer()) return;
+      if (!CanSendToPlayer()) return;
       _screen.UIController.PlayImageUrl(_requestedUrl);
     }
 
     // Only a picture that has loaded: one loading or failed may not be one,
     // and the player would not show it either.
-    private bool CanShowOnPlayer()
+    private bool CanSendToPlayer()
     {
       if (!_viewing || !string.IsNullOrEmpty(_statusKey) || !Utilities.IsValid(_screen)) return false;
       if (!Utilities.IsValid(_requestedUrl) || string.IsNullOrEmpty(_requestedUrl.Get())) return false;
@@ -671,7 +671,7 @@ namespace Yamadev.YamaStream.Tablet
         _screen.SetTranslatedText(_hintText, "tablet.image.inputHint");
         _screen.SetTranslatedText(_listEmptyText, "tablet.image.listEmpty");
         _screen.SetTranslatedText(_backButtonText, "tablet.image.back");
-        _screen.SetTranslatedText(_playerButtonText, "tablet.image.showOnPlayer");
+        _screen.SetTranslatedText(_playerButtonText, "tablet.image.sendToPlayer");
       }
       UpdateStatusView();
     }

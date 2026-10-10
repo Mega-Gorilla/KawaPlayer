@@ -131,7 +131,7 @@
   "tablet.image.hideDetails": "상세 닫기",
   "tablet.image.retry": "다시 불러오기",
   "tablet.image.back": "뒤로",
-  "tablet.image.showOnPlayer": "KawaPlayer에 표시",
+  "tablet.image.sendToPlayer": "KawaPlayer로 보내기",
   "tablet.image.listEmpty": "URL을 입력하면 표시한 이미지가 여기에 나열됩니다",
   "tablet.settings.video": "영상",
   "tablet.settings.audio": "음성",
