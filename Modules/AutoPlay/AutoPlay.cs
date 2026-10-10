@@ -16,7 +16,9 @@ namespace Yamadev.YamaStream.Modules.AutoPlay
   {
     [SerializeField] private AutoPlayMode _autoPlayMode = AutoPlayMode.Off;
     [SerializeField, Range(0, 60)] private float _delay;
-    [SerializeField] private VideoPlayerType _videoPlayerType;
+    // AVPro by default: Unity Video Player cannot play HLS and gets YouTube
+    // at 360p (issues #139, #166).
+    [SerializeField] private VideoPlayerType _videoPlayerType = VideoPlayerType.AVProVideoPlayer;
     [SerializeField] private string _title;
     [SerializeField] private VRCUrl _url;
     [SerializeField] private int _playlistIndex = 0;

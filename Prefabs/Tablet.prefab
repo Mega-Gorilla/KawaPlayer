@@ -24877,7 +24877,6 @@ MonoBehaviour:
   _systemUIAnimator: {fileID: 0}
   _modalDialog: {fileID: 8350579720964534575}
   _modalPlayerSelectorGroup: {fileID: 0}
-  _modalUnityPlayerToggle: {fileID: 0}
   _modalAVProPlayerToggle: {fileID: 0}
   _modalImageViewerToggle: {fileID: 0}
   _urlInterceptor: {fileID: 0}
@@ -24910,7 +24909,6 @@ MonoBehaviour:
   _progressSliderHelper: {fileID: 0}
   _progressTooltipButton: {fileID: 0}
   _progressTooltipText: {fileID: 0}
-  _unityPlayerToggle: {fileID: 0}
   _avProPlayerToggle: {fileID: 0}
   _imageViewerToggle: {fileID: 0}
   _speedSlider: {fileID: 0}
@@ -24971,7 +24969,6 @@ MonoBehaviour:
   _tabUiLabel: {fileID: 0}
   _videoPlayerTitleLabel: {fileID: 0}
   _videoPlayerDescLabel: {fileID: 0}
-  _unityVideoPlayerLabel: {fileID: 0}
   _avproVideoPlayerLabel: {fileID: 0}
   _imageViewerLabel: {fileID: 0}
   _playbackSpeedTitleLabel: {fileID: 0}
@@ -24994,7 +24991,6 @@ MonoBehaviour:
   _maxResolutionDescLabel: {fileID: 0}
   _languageSelectTitleLabel: {fileID: 5835946981313556393}
   _unlockUiMessageLabel: {fileID: 0}
-  _modalUnityVideoPlayerLabel: {fileID: 0}
   _modalAVProVideoPlayerLabel: {fileID: 0}
   _modalImageViewerLabel: {fileID: 0}
   _lockDetectionRect: {fileID: 0}

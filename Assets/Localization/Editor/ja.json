@@ -32,7 +32,6 @@
   "settings.disableUIDistance.label": "UI操作距離",
   "settings.disableUIDistance.desc": "一定メートル以上ビームが出ないようにする。",
   "settings.videoPlayerType.label": "プレイヤー",
-  "settings.videoPlayerType.tooltip": "デフォルトで使用される動画プレイヤーエンジンを選択する。",
   "settings.defaultPlaylistOpen.label": "プレイリストオープン",
   "settings.defaultPlaylistOpen.desc": "起動後にプレイリストを表示する。",
   "settings.idleImage.label": "待ち受け画像",

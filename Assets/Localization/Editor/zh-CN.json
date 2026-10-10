@@ -31,7 +31,6 @@
   "settings.disableUIDistance.label": "UI操作距离",
   "settings.disableUIDistance.desc": "当光束超过一定距离时，将不会发射。",
   "settings.videoPlayerType.label": "播放器",
-  "settings.videoPlayerType.tooltip": "选择默认使用的视频播放器引擎。",
   "settings.defaultPlaylistOpen.label": "打开播放列表",
   "settings.defaultPlaylistOpen.desc": "启动时显示播放列表。",
   "settings.idleImage.label": "待机画面",

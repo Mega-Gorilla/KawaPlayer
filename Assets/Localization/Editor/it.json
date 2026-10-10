@@ -32,7 +32,6 @@
   "settings.disableUIDistance.label": "Distanza Operazione UI",
   "settings.disableUIDistance.desc": "Disabilita il raggio oltre una certa distanza in metri.",
   "settings.videoPlayerType.label": "Player",
-  "settings.videoPlayerType.tooltip": "Seleziona il motore video player predefinito.",
   "settings.defaultPlaylistOpen.label": "Apri Playlist",
   "settings.defaultPlaylistOpen.desc": "Mostra la playlist all'avvio.",
   "settings.idleImage.label": "Immagine di Attesa",

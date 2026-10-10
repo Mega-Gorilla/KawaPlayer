@@ -123,7 +123,7 @@ Resolve API (`/r/{poolId}/{playlistId}`) が返す JSON は index 化済み。Un
 | `name` | プレイリスト名 |
 | `tracks[].index` | サーバーが割り当てた pool スロット番号 |
 | `tracks[].title` | トラックタイトル。空の場合 Unity 側の VideoInfoDownloader が補完可能 |
-| `tracks[].mode` | VideoPlayerType (0=Unity, 1=AVPro, 2=ImageViewer)。サーバーは解釈せずパススルー |
+| `tracks[].mode` | VideoPlayerType (0=Unity, 1=AVPro, 2=ImageViewer)。サーバーは解釈せずパススルー。KawaPlayer は 0 と、`mode` がない曲を AVPro として読み込む（#166: Unity は HLS を再生できず、YouTube が 360p になる）。2 は画像のまま |
 
 ---
 

@@ -31,7 +31,6 @@
   "settings.disableUIDistance.label": "Дистанция управления UI",
   "settings.disableUIDistance.desc": "Когда луч превышает определённое расстояние, он не будет излучаться.",
   "settings.videoPlayerType.label": "Плеер",
-  "settings.videoPlayerType.tooltip": "Выберите видеоплеер для использования по умолчанию.",
   "settings.defaultPlaylistOpen.label": "Открыть плейлист",
   "settings.defaultPlaylistOpen.desc": "Показывать плейлист при запуске.",
   "settings.idleImage.label": "Изображение ожидания",
