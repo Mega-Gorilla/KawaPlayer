@@ -33,9 +33,10 @@ namespace Yamadev.YamaStream
     [UdonSynced] private VRCUrl _url = VRCUrl.Empty;
     [UdonSynced] private byte[] _trackExtension = new byte[0];
     // Whether the player in use was switched to by a track -- a picture from
-    // the tablet, or a track from a playlist or the queue -- rather than
-    // chosen in the settings (issue #182). A URL entered next does not keep
-    // the image viewer a picture left behind.
+    // the tablet, a URL played on the player picked for it in the URL dialog,
+    // or a track from a playlist or the queue -- rather than chosen in the
+    // settings (issue #182). A URL entered next does not keep the image
+    // viewer a picture left behind.
     [UdonSynced] private bool _handlerFromTrack;
     private bool _appliedHandlerFromTrack;
     private object[] _track;
@@ -242,8 +243,7 @@ namespace Yamadev.YamaStream
     private void KeepHandler()
     {
       if (!_handlerFromTrack) return;
-      _handlerFromTrack = false;
-      _appliedHandlerFromTrack = false;
+      SetHandlerFromTrack(false);
       if (Networking.IsOwner(gameObject) && !_isLocal) RequestSerialization();
       NotifyPlayerHandlerChanged();
     }
@@ -251,17 +251,26 @@ namespace Yamadev.YamaStream
     // Cleared before switching, so the listeners told of the switch see it.
     private void SwitchToChosenHandler(int index)
     {
-      if (index >= 0 && index < _videoPlayerHandlers.Length && Utilities.IsValid(_videoPlayerHandlers[index]))
-      {
-        _handlerFromTrack = false;
-        _appliedHandlerFromTrack = false;
-      }
+      if (IsValidHandlerIndex(index)) SetHandlerFromTrack(false);
       SwitchToHandlerIndex(index);
+    }
+
+    // The applied copy follows every change made here, so OnDeserialization
+    // notices only one that came over the network.
+    private void SetHandlerFromTrack(bool value)
+    {
+      _handlerFromTrack = value;
+      _appliedHandlerFromTrack = value;
+    }
+
+    private bool IsValidHandlerIndex(int index)
+    {
+      return index >= 0 && index < _videoPlayerHandlers.Length && Utilities.IsValid(_videoPlayerHandlers[index]);
     }
 
     private bool SwitchToHandlerIndex(int index)
     {
-      if (index < 0 || index >= _videoPlayerHandlers.Length || !Utilities.IsValid(_videoPlayerHandlers[index]))
+      if (!IsValidHandlerIndex(index))
       {
         PrintError($"Cannot switch handler: invalid handler index {index}.");
         return false;
@@ -522,11 +531,7 @@ namespace Yamadev.YamaStream
       if (index >= 0)
       {
         // Only a switch counts: a track on the player chosen leaves it chosen.
-        if (_videoPlayerHandlers[index] != Handler)
-        {
-          _handlerFromTrack = true;
-          _appliedHandlerFromTrack = true;
-        }
+        if (_videoPlayerHandlers[index] != Handler) SetHandlerFromTrack(true);
         SwitchToHandlerIndex(index);
       }
 
