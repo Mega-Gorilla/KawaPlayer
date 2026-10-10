@@ -24,6 +24,8 @@ namespace Yamadev.YamaStream.Tablet
     private const int VisitorsApp = 4;
 
     private const float DistanceCheckInterval = 0.5f;
+    // How bright the home button stays on the home screen.
+    private const float HomeButtonDimAlpha = 0.35f;
 
     [SerializeField] private UIController _uiController;
     [SerializeField] private TabletPickup _tablet;
@@ -38,6 +40,8 @@ namespace Yamadev.YamaStream.Tablet
 
     [Header("Buttons")]
     [SerializeField, RegisterEvent(nameof(Button.onClick), nameof(GoHome))] private Button _homeButton;
+    // The home button with its ring and icon, dimmed together.
+    [SerializeField] private CanvasGroup _homeButtonGroup;
     [SerializeField, RegisterEvent(nameof(Button.onClick), nameof(OpenVersionApp))] private Button _versionAppButton;
     [SerializeField, RegisterEvent(nameof(Button.onClick), nameof(OpenKawaPlayerApp))] private Button _kawaPlayerAppButton;
     [SerializeField, RegisterEvent(nameof(Button.onClick), nameof(OpenImageApp))] private Button _imageAppButton;
@@ -139,6 +143,14 @@ namespace Yamadev.YamaStream.Tablet
       for (int i = 0; i < _apps.Length; i++)
       {
         if (Utilities.IsValid(_apps[i])) _apps[i].SetActive(i == app);
+      }
+      // The home button is lit while there is an app to leave (issue #180).
+      // On the home screen it is dim and takes no press: one would only take
+      // the screen over and sync it for nothing.
+      if (Utilities.IsValid(_homeButtonGroup))
+      {
+        _homeButtonGroup.alpha = app == Home ? HomeButtonDimAlpha : 1f;
+        _homeButtonGroup.interactable = app != Home;
       }
       if (app == VersionApp && Utilities.IsValid(_updateLogScroll)) _updateLogScroll.verticalNormalizedPosition = 1f;
     }
