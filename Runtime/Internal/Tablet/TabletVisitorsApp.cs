@@ -47,6 +47,12 @@ namespace Yamadev.YamaStream.Tablet
     [SerializeField] private float _listEntryHeight = 136f;
     [SerializeField] private float _logHeadingHeight = 64f;
     [SerializeField] private float _logEntryHeight = 88f;
+    // The rows for a tablet held upright (issue #183): narrower, so their
+    // parts sit differently, and an entry takes more lines.
+    [SerializeField] private RectTransform _listRowTemplatePortrait;
+    [SerializeField] private RectTransform _logRowTemplatePortrait;
+    [SerializeField] private float _listEntryHeightPortrait = 180f;
+    [SerializeField] private float _logEntryHeightPortrait = 136f;
 
     [Header("Icons")]
     [SerializeField] private Sprite _vrIcon;
@@ -54,6 +60,7 @@ namespace Yamadev.YamaStream.Tablet
     [SerializeField] private Sprite _mobileIcon;
 
     private bool _dirty = true;
+    private bool _portrait;
     private long _utcOffsetTicks;
 
     // What each view shows, top to bottom: the kind of row, what it is about
@@ -118,6 +125,37 @@ namespace Yamadev.YamaStream.Tablet
       if (gameObject.activeInHierarchy) Refresh();
     }
 
+    // TabletScreen calls this when the tablet turns between landscape and
+    // portrait: the rows are made again from the other templates, as many as
+    // the view's new height needs.
+    public void SetPortrait(bool portrait)
+    {
+      if (portrait == _portrait) return;
+      _portrait = portrait;
+      DestroyRows(_listRows);
+      DestroyRows(_logRows);
+      _listRows = new RectTransform[0];
+      _listRowItems = new int[0];
+      _logRows = new RectTransform[0];
+      _logRowItems = new int[0];
+      _dirty = true;
+      if (gameObject.activeInHierarchy) Refresh();
+    }
+
+    private void DestroyRows(RectTransform[] rows)
+    {
+      foreach (RectTransform row in rows)
+      {
+        if (!Utilities.IsValid(row)) continue;
+        row.gameObject.SetActive(false);
+        Destroy(row.gameObject);
+      }
+    }
+
+    private float ListEntryHeight => _portrait ? _listEntryHeightPortrait : _listEntryHeight;
+
+    private float LogEntryHeight => _portrait ? _logEntryHeightPortrait : _logEntryHeight;
+
     // Each view's ScrollRect calls its own as it moves.
     public void OnListScroll() => ShowRows(true, _listScroll, _listRows, _listRowItems, _listTops);
 
@@ -178,11 +216,11 @@ namespace Yamadev.YamaStream.Tablet
 
       StartBuilding(2 + count);
       AddItem(KindPresentHeading, 0, _listHeadingHeight);
-      for (int i = 0; i < _presentCount; i++) AddItem(KindVisitor, present[i], _listEntryHeight);
+      for (int i = 0; i < _presentCount; i++) AddItem(KindVisitor, present[i], ListEntryHeight);
       if (_departedCount > 0)
       {
         AddItem(KindDepartedHeading, 0, _listHeadingHeight);
-        for (int i = 0; i < _departedCount; i++) AddItem(KindVisitor, departed[i], _listEntryHeight);
+        for (int i = 0; i < _departedCount; i++) AddItem(KindVisitor, departed[i], ListEntryHeight);
       }
       _listKinds = TakeKinds();
       _listValues = TakeValues();
@@ -204,7 +242,7 @@ namespace Yamadev.YamaStream.Tablet
           lastDay = day;
           AddItem(KindDateHeading, i, _logHeadingHeight);
         }
-        AddItem(KindLogEntry, i, _logEntryHeight);
+        AddItem(KindLogEntry, i, LogEntryHeight);
       }
       _logKinds = TakeKinds();
       _logValues = TakeValues();
@@ -290,9 +328,11 @@ namespace Yamadev.YamaStream.Tablet
 
     private void MakeRows()
     {
-      _listRows = MakeRows(_listScroll, _listRowTemplate, Mathf.Min(_listHeadingHeight, _listEntryHeight));
+      RectTransform listTemplate = _portrait && Utilities.IsValid(_listRowTemplatePortrait) ? _listRowTemplatePortrait : _listRowTemplate;
+      RectTransform logTemplate = _portrait && Utilities.IsValid(_logRowTemplatePortrait) ? _logRowTemplatePortrait : _logRowTemplate;
+      _listRows = MakeRows(_listScroll, listTemplate, Mathf.Min(_listHeadingHeight, ListEntryHeight));
       _listRowItems = new int[_listRows.Length];
-      _logRows = MakeRows(_logScroll, _logRowTemplate, Mathf.Min(_logHeadingHeight, _logEntryHeight));
+      _logRows = MakeRows(_logScroll, logTemplate, Mathf.Min(_logHeadingHeight, LogEntryHeight));
       _logRowItems = new int[_logRows.Length];
     }
 

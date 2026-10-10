@@ -12,6 +12,11 @@ namespace Yamadev.YamaStream.Tablet
   // joiner included (issue #108, D6), and so is the URL of the image app's
   // picture (D2). Whoever presses a button takes the screen over; what
   // happens inside an app stays with each player.
+  //
+  // The screen also turns with the tablet (issue #183): held upright, the
+  // display is turned a quarter and the apps take their portrait layout;
+  // upside down, it is turned half. Each player works this out from the
+  // tablet's own orientation, which everyone sees alike.
   [UdonBehaviourSyncMode(BehaviourSyncMode.Manual)]
   public class TabletScreen : YamaPlayerBehaviour
   {
@@ -24,6 +29,12 @@ namespace Yamadev.YamaStream.Tablet
     private const int VisitorsApp = 4;
 
     private const float DistanceCheckInterval = 0.5f;
+    private const float OrientationCheckInterval = 0.2f;
+    // How far past the last quarter turn the tablet must go before the
+    // screen follows, so it does not flip back and forth around 45 degrees.
+    private const float TurnThreshold = 55f;
+    // Lying flatter than this, which way is up says nothing.
+    private const float FlatLimit = 0.8f;
     // How many pictures the image app's list holds (issue #181).
     private const int ImageListSize = 5;
 
@@ -71,6 +82,25 @@ namespace Yamadev.YamaStream.Tablet
     // from there, and every canvas a pointer can reach costs a raycast.
     [SerializeField] private float _interactDistance = 5f;
 
+    // The display, turned a quarter for portrait or half when upside down,
+    // and the parts that sit elsewhere in portrait: each part's anchors (min
+    // x, min y, max x, max y) and position and size (x, y, width, height) in
+    // either layout. KawaPlayer > Tablet Layout captures them.
+    [Header("Orientation")]
+    [SerializeField] private RectTransform _display;
+    [SerializeField] private RectTransform[] _layoutParts = new RectTransform[0];
+    [SerializeField] private Vector4[] _landscapeAnchors = new Vector4[0];
+    [SerializeField] private Vector4[] _landscapeRects = new Vector4[0];
+    [SerializeField] private Vector4[] _portraitAnchors = new Vector4[0];
+    [SerializeField] private Vector4[] _portraitRects = new Vector4[0];
+    // Layout groups that place their children in landscape only; in portrait
+    // the parts above say where each child goes.
+    [SerializeField] private Behaviour[] _landscapeLayouts = new Behaviour[0];
+    // The KawaPlayer app stays landscape, so that its controls keep their
+    // size; it turns over with the tablet, around the middle of its screen.
+    [SerializeField] private Transform _kawaPlayerApp;
+    [SerializeField] private Transform _kawaPlayerScreen;
+
     [UdonSynced] private int _appIndex = Home;
     [UdonSynced] private VRCUrl _imageUrl = VRCUrl.Empty;
     // The image app's list, newest first, and whether the app shows the
@@ -80,15 +110,27 @@ namespace Yamadev.YamaStream.Tablet
     [UdonSynced] private bool _imageViewing;
     private int _shownApp = int.MinValue;
     private bool _interactable = true;
+    // The screen's turn in degrees: 0, 90, 180 or -90.
+    private float _turn;
+    private bool _portrait;
+    private bool _layoutApplied;
+    private Vector2 _displaySize;
+    private float _kawaPlayerTurn;
+    private Vector3 _kawaPlayerPosition;
+    private Quaternion _kawaPlayerRotation;
+    private Vector3 _kawaPlayerCenter;
+    private Vector3 _kawaPlayerAxis;
 
     private void Start()
     {
       if (Utilities.IsValid(_uiController)) _uiController.AddListener(this);
+      StartOrientation();
       UpdateTranslation();
       UpdateUpdateLog();
       ShowApp();
       _OnMinute();
       _CheckDistance();
+      _CheckOrientation();
     }
 
     public string GetTranslation(string key) => Utilities.IsValid(_uiController) ? _uiController.GetTranslation(key) : string.Empty;
@@ -268,6 +310,112 @@ namespace Yamadev.YamaStream.Tablet
         weekday < weekdays.Length ? weekdays[weekday] : string.Empty,
         month < months.Length ? months[month] : string.Empty);
     }
+
+    #region Orientation
+
+    private void StartOrientation()
+    {
+      if (Utilities.IsValid(_display)) _displaySize = _display.sizeDelta;
+      if (Utilities.IsValid(_kawaPlayerApp))
+      {
+        _kawaPlayerPosition = _kawaPlayerApp.localPosition;
+        _kawaPlayerRotation = _kawaPlayerApp.localRotation;
+        Transform parent = _kawaPlayerApp.parent;
+        if (Utilities.IsValid(parent))
+        {
+          _kawaPlayerCenter = parent.InverseTransformPoint(Utilities.IsValid(_kawaPlayerScreen) ? _kawaPlayerScreen.position : _kawaPlayerApp.position);
+          _kawaPlayerAxis = parent.InverseTransformDirection(transform.forward);
+        }
+      }
+      _turn = FindTurn(true);
+      ApplyOrientation();
+    }
+
+    public void _CheckOrientation()
+    {
+      SendCustomEventDelayedSeconds(nameof(_CheckOrientation), OrientationCheckInterval);
+      float turn = FindTurn(false);
+      if (turn == _turn) return;
+      _turn = turn;
+      ApplyOrientation();
+    }
+
+    // The quarter turn that keeps the screen upright: on the screen, from
+    // the tablet's up to the world's. Lying flat, it stays as it was.
+    private float FindTurn(bool immediate)
+    {
+      Vector3 normal = transform.forward;
+      float facing = Vector3.Dot(normal, Vector3.up);
+      if (Mathf.Abs(facing) > FlatLimit) return _turn;
+      Vector3 up = Vector3.up - normal * facing;
+      float angle = Vector3.SignedAngle(transform.up, up, normal);
+      if (!immediate && Mathf.Abs(Mathf.DeltaAngle(_turn, angle)) < TurnThreshold) return _turn;
+      float turn = Mathf.Round(angle / 90f) * 90f;
+      return turn <= -180f ? 180f : turn;
+    }
+
+    private void ApplyOrientation()
+    {
+      bool portrait = Mathf.Abs(Mathf.Abs(_turn) - 90f) < 1f;
+      if (Utilities.IsValid(_display))
+      {
+        _display.sizeDelta = portrait ? new Vector2(_displaySize.y, _displaySize.x) : _displaySize;
+        _display.localEulerAngles = new Vector3(0f, 0f, _turn);
+      }
+      if (portrait != _portrait || !_layoutApplied)
+      {
+        _portrait = portrait;
+        _layoutApplied = true;
+        ApplyLayout(portrait);
+      }
+      // Held upright, the KawaPlayer app keeps the way it last faced.
+      if (!portrait) _kawaPlayerTurn = _turn;
+      TurnKawaPlayer(_kawaPlayerTurn);
+      if (Utilities.IsValid(_tablet)) _tablet.Touch();
+    }
+
+    // In portrait, the layout groups stop first, so they do not move what the
+    // parts place; in landscape they start last, and place their children.
+    private void ApplyLayout(bool portrait)
+    {
+      if (portrait) SetLayoutsEnabled(false);
+      Vector4[] anchors = portrait ? _portraitAnchors : _landscapeAnchors;
+      Vector4[] rects = portrait ? _portraitRects : _landscapeRects;
+      int count = Mathf.Min(_layoutParts.Length, Mathf.Min(anchors.Length, rects.Length));
+      for (int i = 0; i < count; i++)
+      {
+        RectTransform part = _layoutParts[i];
+        if (!Utilities.IsValid(part)) continue;
+        Vector4 a = anchors[i];
+        Vector4 r = rects[i];
+        part.anchorMin = new Vector2(a.x, a.y);
+        part.anchorMax = new Vector2(a.z, a.w);
+        part.anchoredPosition = new Vector2(r.x, r.y);
+        part.sizeDelta = new Vector2(r.z, r.w);
+      }
+      if (!portrait) SetLayoutsEnabled(true);
+
+      if (Utilities.IsValid(_imageApp)) _imageApp.OnLayoutChanged();
+      if (Utilities.IsValid(_visitorsApp)) _visitorsApp.SetPortrait(portrait);
+    }
+
+    private void SetLayoutsEnabled(bool enabled)
+    {
+      foreach (Behaviour layout in _landscapeLayouts)
+      {
+        if (Utilities.IsValid(layout)) layout.enabled = enabled;
+      }
+    }
+
+    private void TurnKawaPlayer(float turn)
+    {
+      if (!Utilities.IsValid(_kawaPlayerApp)) return;
+      Quaternion rotation = Quaternion.AngleAxis(turn, _kawaPlayerAxis);
+      _kawaPlayerApp.localRotation = rotation * _kawaPlayerRotation;
+      _kawaPlayerApp.localPosition = _kawaPlayerCenter + rotation * (_kawaPlayerPosition - _kawaPlayerCenter);
+    }
+
+    #endregion
 
     public void _CheckDistance()
     {
