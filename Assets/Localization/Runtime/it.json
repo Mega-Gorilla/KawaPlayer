@@ -130,6 +130,8 @@
   "tablet.image.showDetails": "Dettagli errore",
   "tablet.image.hideDetails": "Nascondi dettagli",
   "tablet.image.retry": "Riprova",
+  "tablet.image.back": "Indietro",
+  "tablet.image.listEmpty": "Inserisci un URL e le immagini che mostri appariranno qui",
   "tablet.settings.video": "Video",
   "tablet.settings.audio": "Audio",
   "tablet.settings.note": "Le modifiche fatte qui valgono solo per te",

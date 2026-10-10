@@ -130,6 +130,8 @@
   "tablet.image.showDetails": "エラーの詳細",
   "tablet.image.hideDetails": "詳細を閉じる",
   "tablet.image.retry": "もう一度読み込む",
+  "tablet.image.back": "戻る",
+  "tablet.image.listEmpty": "URL を入力すると、表示した画像がここに並びます",
   "tablet.settings.video": "映像",
   "tablet.settings.audio": "音声",
   "tablet.settings.note": "ここで変えた設定は、あなたにだけ反映されます",
