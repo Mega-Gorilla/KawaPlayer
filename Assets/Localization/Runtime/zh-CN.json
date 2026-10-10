@@ -131,6 +131,7 @@
   "tablet.image.hideDetails": "关闭详情",
   "tablet.image.retry": "重新加载",
   "tablet.image.back": "返回",
+  "tablet.image.sendToPlayer": "发送到 KawaPlayer",
   "tablet.image.listEmpty": "输入\u00a0URL\u00a0后，显示过的图片会排列在这里",
   "tablet.settings.video": "视频",
   "tablet.settings.audio": "音频",

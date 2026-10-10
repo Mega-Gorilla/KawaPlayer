@@ -6,6 +6,7 @@ using VRC.SDK3.Components;
 using VRC.SDK3.Image;
 using VRC.SDKBase;
 using VRC.Udon.Common.Interfaces;
+using Yamadev.YamaStream.UI;
 
 namespace Yamadev.YamaStream.Tablet
 {
@@ -16,7 +17,9 @@ namespace Yamadev.YamaStream.Tablet
   // each player downloads the picture themselves, and only while the picture
   // is up, so a closed app takes nothing from the world's shared image rate
   // limit. A player whose download fails is told why and what to do next,
-  // and can try again on their own when that may help (issue #178).
+  // and can try again on their own when that may help (issue #178). A
+  // picture that has loaded can be sent on to the KawaPlayer screen, which
+  // shows it to the whole world (issue #182).
   //
   // A downloaded picture is copied, made smaller, into a RenderTexture and
   // let go of at once: one is up to 2048 x 2048 and, kept as it comes, can
@@ -89,6 +92,9 @@ namespace Yamadev.YamaStream.Tablet
     [SerializeField] private GameObject _controls;
     [SerializeField, RegisterEvent(nameof(Button.onClick), nameof(BackToList))] private Button _backButton;
     [SerializeField] private Text _backButtonText;
+    // Shows the picture on the KawaPlayer screen (issue #182).
+    [SerializeField, RegisterEvent(nameof(Button.onClick), nameof(SendToPlayer))] private Button _playerButton;
+    [SerializeField] private Text _playerButtonText;
     [SerializeField, RegisterEvent(nameof(Button.onClick), nameof(ToggleDetails))] private Button _detailsButton;
     [SerializeField, RegisterEvent(nameof(Button.onClick), nameof(Retry))] private Button _retryButton;
     // The frame, and the part inside it the picture and the messages sit in.
@@ -516,6 +522,26 @@ namespace Yamadev.YamaStream.Tablet
     {
       if (!Utilities.IsValid(_controls)) return;
       _controls.SetActive(_controlsOpen || !string.IsNullOrEmpty(_statusKey));
+      if (Utilities.IsValid(_playerButton)) _playerButton.gameObject.SetActive(CanSendToPlayer());
+    }
+
+    // Sends the picture this player sees to the player the tablet is pointed
+    // at, through the tablet's UIController: it plays at once, in place of
+    // whatever is playing, and the permissions apply.
+    public void SendToPlayer()
+    {
+      if (!CanSendToPlayer()) return;
+      _screen.UIController.PlayImageUrl(_requestedUrl);
+    }
+
+    // Only a picture that has loaded: one loading or failed may not be one,
+    // and the player would not show it either.
+    private bool CanSendToPlayer()
+    {
+      if (!_viewing || !string.IsNullOrEmpty(_statusKey) || !Utilities.IsValid(_screen)) return false;
+      if (!Utilities.IsValid(_requestedUrl) || string.IsNullOrEmpty(_requestedUrl.Get())) return false;
+      UIController ui = _screen.UIController;
+      return Utilities.IsValid(ui) && ui.HasController;
     }
 
     // What went wrong, as what the player can do about it. VRChat's message
@@ -645,6 +671,7 @@ namespace Yamadev.YamaStream.Tablet
         _screen.SetTranslatedText(_hintText, "tablet.image.inputHint");
         _screen.SetTranslatedText(_listEmptyText, "tablet.image.listEmpty");
         _screen.SetTranslatedText(_backButtonText, "tablet.image.back");
+        _screen.SetTranslatedText(_playerButtonText, "tablet.image.sendToPlayer");
       }
       UpdateStatusView();
     }

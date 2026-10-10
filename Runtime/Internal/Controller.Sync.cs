@@ -116,7 +116,13 @@ namespace Yamadev.YamaStream
       bool trackChanged = _trackVersion != _appliedTrackVersion;
       _appliedTrackVersion = _trackVersion;
 
+      // Switching the player tells the listeners; the same player now chosen,
+      // or now switched to by a track, has to be told on its own.
+      bool fromTrackChanged = _handlerFromTrack != _appliedHandlerFromTrack;
+      _appliedHandlerFromTrack = _handlerFromTrack;
+      bool handlerChanged = _videoPlayerHandlers[handlerIndex] != Handler;
       SwitchToHandlerIndex(handlerIndex);
+      if (fromTrackChanged && !handlerChanged) NotifyPlayerHandlerChanged();
       if (SyncedState != PlayerState.Idle && trackChanged)
       {
         LoadTrackLocal(track, false);
