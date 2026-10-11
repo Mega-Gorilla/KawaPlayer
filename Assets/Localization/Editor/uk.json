@@ -151,6 +151,7 @@
   "playlist.import.duplicate": "«{0}» імпортовано з того самого джерела. Оновити його чи додати новий плейлист?",
   "playlist.import.addNew": "Додати новий",
   "playlist.sourceUrl": "URL джерела",
+  "playlist.vhubUnityAsAVPro": "У плейлисті, імпортованому з VHub, треки з Unity відтворюються у світі через AVPro. Треки, які потрібно відтворювати через Unity, помістіть у плейлист, не імпортований з VHub.",
   "playlist.panel.ytdlp": "yt-dlp використовується для читання плейлистів YouTube. Він завантажується в тимчасову теку, а не в проєкт.",
   "playlist.panel.ytdlpInstalled": "Стан: встановлено",
   "playlist.panel.ytdlpMissing": "Стан: не встановлено",

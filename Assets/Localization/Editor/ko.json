@@ -151,6 +151,7 @@
   "playlist.import.duplicate": "「{0}」은(는) 같은 원본에서 가져왔습니다. 업데이트할까요, 새 재생목록으로 추가할까요?",
   "playlist.import.addNew": "새로 추가",
   "playlist.sourceUrl": "원본 URL",
+  "playlist.vhubUnityAsAVPro": "VHub에서 가져온 재생 목록에서는 Unity로 지정한 곡도 월드에서 AVPro로 재생됩니다. Unity로 재생하려는 곡은 VHub에서 가져오지 않은 재생 목록에 넣으세요.",
   "playlist.panel.ytdlp": "YouTube 재생목록을 읽는 데 yt-dlp를 사용합니다. 프로젝트가 아닌 임시 폴더에 저장됩니다.",
   "playlist.panel.ytdlpInstalled": "상태: 설치됨",
   "playlist.panel.ytdlpMissing": "상태: 설치되지 않음",

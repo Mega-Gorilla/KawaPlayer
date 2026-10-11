@@ -151,6 +151,7 @@
   "playlist.import.duplicate": "《{0}》來自相同的來源。要更新它，還是新增為新的播放清單？",
   "playlist.import.addNew": "新增",
   "playlist.sourceUrl": "來源 URL",
+  "playlist.vhubUnityAsAVPro": "從 VHub 匯入的播放清單中，指定為 Unity 的曲目在世界中也會以 AVPro 播放。想以 Unity 播放的曲目，請放入不是從 VHub 匯入的播放清單。",
   "playlist.panel.ytdlp": "讀取 YouTube 播放清單時會使用 yt-dlp。它儲存在暫存資料夾中，而非專案內。",
   "playlist.panel.ytdlpInstalled": "狀態：已安裝",
   "playlist.panel.ytdlpMissing": "狀態：未安裝",

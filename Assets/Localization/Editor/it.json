@@ -154,6 +154,7 @@
   "playlist.import.duplicate": "\"{0}\" è stata importata dalla stessa fonte. Aggiornarla o aggiungere una nuova playlist?",
   "playlist.import.addNew": "Aggiungi nuova",
   "playlist.sourceUrl": "URL di origine",
+  "playlist.vhubUnityAsAVPro": "In una playlist importata da VHub, i brani impostati su Unity vengono riprodotti con AVPro nel mondo. Metti i brani da riprodurre con Unity in una playlist non importata da VHub.",
   "playlist.panel.ytdlp": "yt-dlp viene usato per leggere le playlist di YouTube. Viene scaricato nella cartella temporanea, non nel progetto.",
   "playlist.panel.ytdlpInstalled": "Stato: installato",
   "playlist.panel.ytdlpMissing": "Stato: non installato",
