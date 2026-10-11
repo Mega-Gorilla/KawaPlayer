@@ -31,7 +31,6 @@ namespace Yamadev.YamaStream.UI
     [Header("Modal Dialog")]
     [SerializeField] private Modal _modalDialog;
     [SerializeField] private ToggleGroup _modalPlayerSelectorGroup;
-    [SerializeField] private Toggle _modalUnityPlayerToggle;
     [SerializeField] private Toggle _modalAVProPlayerToggle;
     [SerializeField] private Toggle _modalImageViewerToggle;
 
@@ -84,7 +83,6 @@ namespace Yamadev.YamaStream.UI
     [SerializeField] private Text _progressTooltipText;
 
     [Header("Settings - Playback")]
-    [SerializeField, RegisterEvent(nameof(Toggle.onValueChanged), nameof(SetUnityPlayer))] private Toggle _unityPlayerToggle;
     [SerializeField, RegisterEvent(nameof(Toggle.onValueChanged), nameof(SetAVProPlayer))] private Toggle _avProPlayerToggle;
     [SerializeField, RegisterEvent(nameof(Toggle.onValueChanged), nameof(SetImageViewer))] private Toggle _imageViewerToggle;
     [SerializeField, RegisterEventTrigger(EventTriggerType.EndDrag, nameof(SetSpeed))] private Slider _speedSlider;
@@ -243,28 +241,6 @@ namespace Yamadev.YamaStream.UI
       // that it had been asked.
       return _modalDialog.TryShow(title, message, GetTranslation("button.cancel"), confirmText,
           target, cancelEventName, confirmEventName);
-    }
-
-    public void SetUnityPlayer()
-    {
-      if (_controller.Handler.Type == VideoPlayerType.UnityVideoPlayer) return;
-      if (!Utilities.IsValid(_modalDialog) || (_controller.Stopped && !_controller.IsLoading))
-      {
-        SetUnityPlayerInternal();
-        return;
-      }
-      ConfirmChangePlayer(nameof(SetUnityPlayerInternal));
-    }
-
-    public void SetUnityPlayerInternal()
-    {
-      if (!InvokeBeforeEvent("BeforeUserChangePlayerHandler"))
-      {
-        UpdateUI();
-        return;
-      }
-      _controller.TakeOwnership();
-      _controller.SetPlayerType(VideoPlayerType.UnityVideoPlayer);
     }
 
     // The settings show the player a URL entered next plays on (see
@@ -427,10 +403,6 @@ namespace Yamadev.YamaStream.UI
       if (!Utilities.IsValid(_modalPlayerSelectorGroup)) return;
 
       var type = OfferedPlayerType();
-      if (Utilities.IsValid(_modalUnityPlayerToggle))
-      {
-        _modalUnityPlayerToggle.isOn = type == VideoPlayerType.UnityVideoPlayer;
-      }
       if (Utilities.IsValid(_modalAVProPlayerToggle))
       {
         _modalAVProPlayerToggle.isOn = type == VideoPlayerType.AVProVideoPlayer;
@@ -453,14 +425,13 @@ namespace Yamadev.YamaStream.UI
 
     public VideoPlayerType GetVideoPlayerSelectorValue()
     {
-      if (Utilities.IsValid(_modalUnityPlayerToggle) && _modalUnityPlayerToggle.isOn) return VideoPlayerType.UnityVideoPlayer;
       if (Utilities.IsValid(_modalAVProPlayerToggle) && _modalAVProPlayerToggle.isOn) return VideoPlayerType.AVProVideoPlayer;
       if (Utilities.IsValid(_modalImageViewerToggle) && _modalImageViewerToggle.isOn) return VideoPlayerType.ImageViewer;
       return OfferedPlayerType();
     }
 
     // A URL entered in the world plays on AVPro unless someone chose the
-    // image viewer: Unity Video Player is no longer offered (issue #139). The
+    // image viewer: Unity Video Player is not offered (issues #139, #166). The
     // player in use can be another one a track switched to -- Unity for a
     // track baked as Unity, or the image viewer for a picture from the tablet
     // (issue #182) -- and the next URL must not inherit it.
@@ -1123,7 +1094,6 @@ namespace Yamadev.YamaStream.UI
     public void UpdatePlayerSelector()
     {
       var type = OfferedPlayerType();
-      if (Utilities.IsValid(_unityPlayerToggle)) _unityPlayerToggle.SetIsOnWithoutNotify(type == VideoPlayerType.UnityVideoPlayer);
       if (Utilities.IsValid(_avProPlayerToggle)) _avProPlayerToggle.SetIsOnWithoutNotify(type == VideoPlayerType.AVProVideoPlayer);
       if (Utilities.IsValid(_imageViewerToggle)) _imageViewerToggle.SetIsOnWithoutNotify(type == VideoPlayerType.ImageViewer);
     }

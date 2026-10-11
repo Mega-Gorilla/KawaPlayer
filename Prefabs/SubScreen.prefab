@@ -369,10 +369,6 @@ PrefabInstance:
       propertyPath: m_AnchorMax.y
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 1511656783058936256, guid: 4a1752e1fc7dff64b98083dc0bc3c591, type: 3}
-      propertyPath: serializationData.Prefab
-      value: 
-      objectReference: {fileID: 1511656783058936256, guid: 4a1752e1fc7dff64b98083dc0bc3c591, type: 3}
     - target: {fileID: 1636132074183017730, guid: 4a1752e1fc7dff64b98083dc0bc3c591, type: 3}
       propertyPath: serializationData.Prefab
       value: 
