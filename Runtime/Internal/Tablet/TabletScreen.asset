@@ -2022,7 +2022,7 @@ MonoBehaviour:
       Data: 127|System.RuntimeType, mscorlib
     - Name: 
       Entry: 1
-      Data: UnityEngine.Behaviour[], UnityEngine.CoreModule
+      Data: UnityEngine.UI.LayoutGroup[], UnityEngine.UI
     - Name: 
       Entry: 8
       Data: 

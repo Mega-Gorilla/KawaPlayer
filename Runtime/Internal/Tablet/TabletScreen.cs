@@ -94,8 +94,9 @@ namespace Yamadev.YamaStream.Tablet
     [SerializeField] private Vector4[] _portraitAnchors = new Vector4[0];
     [SerializeField] private Vector4[] _portraitRects = new Vector4[0];
     // Layout groups that place their children in landscape only; in portrait
-    // the parts above say where each child goes.
-    [SerializeField] private Behaviour[] _landscapeLayouts = new Behaviour[0];
+    // the parts above say where each child goes. LayoutGroup, not Behaviour:
+    // Udon in SDK 3.8 does not expose Behaviour.enabled (issue #191).
+    [SerializeField] private LayoutGroup[] _landscapeLayouts = new LayoutGroup[0];
     // The KawaPlayer app stays landscape, so that its controls keep their
     // size; it turns over with the tablet, around the middle of its screen.
     [SerializeField] private Transform _kawaPlayerApp;
@@ -404,7 +405,7 @@ namespace Yamadev.YamaStream.Tablet
 
     private void SetLayoutsEnabled(bool enabled)
     {
-      foreach (Behaviour layout in _landscapeLayouts)
+      foreach (LayoutGroup layout in _landscapeLayouts)
       {
         if (Utilities.IsValid(layout)) layout.enabled = enabled;
       }
