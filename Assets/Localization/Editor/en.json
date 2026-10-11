@@ -300,7 +300,7 @@
   "module.manager.autoplayConflict": "\"{0}\" and \"{1}\" are both enabled. Both start a video when someone joins, so which one plays depends on timing, and \"{0}\" may not play. Disable one of them.",
   "settings.ui.label": "UI Settings",
   "settings.ui.idleScreenSprite": "Idle Screen Sprite",
-  "settings.ui.idleScreenSprite.tooltip": "Set the image displayed when no video is playing.",
+  "settings.ui.idleScreenSprite.tooltip": "Set the image displayed when no video is playing. The default image shows the KawaPlayer logo and name over it; an image you choose is shown as it is.",
   "label.yamaPlayer": "KawaPlayer",
   "msg.playModeNotAvailable": "KawaPlayer is not available in play mode.",
   "msg.yamaPlayerRequired": "KawaPlayer reference is required.",

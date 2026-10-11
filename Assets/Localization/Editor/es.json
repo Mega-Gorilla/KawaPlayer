@@ -312,7 +312,7 @@
   "settings.playback.maxRetry": "Máximo de reintentos",
   "settings.ui.label": "Configuración de UI",
   "settings.ui.idleScreenSprite": "Sprite de pantalla de espera",
-  "settings.ui.idleScreenSprite.tooltip": "Establece la imagen que se muestra cuando no se reproduce ningún video.",
+  "settings.ui.idleScreenSprite.tooltip": "Establece la imagen que se muestra cuando no se reproduce ningún video. Sobre la imagen predeterminada se muestran el logotipo y el nombre de KawaPlayer; la imagen que elijas se muestra tal cual.",
   "label.yamaPlayer": "KawaPlayer",
   "msg.playModeNotAvailable": "KawaPlayer no está disponible en modo de juego.",
   "msg.yamaPlayerRequired": "Se requiere la referencia de KawaPlayer.",

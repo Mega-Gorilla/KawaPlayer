@@ -312,7 +312,7 @@
   "settings.playback.maxRetry": "Макс. кол-во повторов",
   "settings.ui.label": "Настройки UI",
   "settings.ui.idleScreenSprite": "Спрайт экрана ожидания",
-  "settings.ui.idleScreenSprite.tooltip": "Установить изображение, отображаемое когда видео не воспроизводится.",
+  "settings.ui.idleScreenSprite.tooltip": "Установить изображение, отображаемое когда видео не воспроизводится. Поверх изображения по умолчанию показываются логотип и название KawaPlayer; выбранное вами изображение показывается как есть.",
   "label.yamaPlayer": "KawaPlayer",
   "msg.playModeNotAvailable": "KawaPlayer недоступен в режиме воспроизведения.",
   "msg.yamaPlayerRequired": "Требуется ссылка на KawaPlayer.",

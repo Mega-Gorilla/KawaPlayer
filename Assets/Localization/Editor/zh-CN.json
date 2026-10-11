@@ -312,7 +312,7 @@
   "settings.playback.maxRetry": "最大重试次数",
   "settings.ui.label": "UI设置",
   "settings.ui.idleScreenSprite": "待机画面精灵图",
-  "settings.ui.idleScreenSprite.tooltip": "设置视频未播放时显示的图片。",
+  "settings.ui.idleScreenSprite.tooltip": "设置视频未播放时显示的图片。默认图片上会叠加显示 KawaPlayer 的标志和名称；你选择的图片会按原样显示。",
   "label.yamaPlayer": "KawaPlayer",
   "msg.playModeNotAvailable": "KawaPlayer在播放模式下不可用。",
   "msg.yamaPlayerRequired": "需要KawaPlayer引用。",

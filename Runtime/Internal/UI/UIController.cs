@@ -23,6 +23,12 @@ namespace Yamadev.YamaStream.UI
     [Header("Appearance - Idle Screen")]
     [SerializeField] private Image _idleScreenImage;
     [SerializeField] private Sprite _idleScreenSprite;
+    // The default idle image is only its background; the logo and the name
+    // are drawn over it (_idleScreenLogo), from the logo the tablet's back
+    // also uses, so the picture costs kilobytes instead of megabytes (issue
+    // #189). An image the world creator chose is shown alone.
+    [SerializeField] private Sprite _defaultIdleScreenSprite;
+    [SerializeField] private GameObject _idleScreenLogo;
 
     [Header("Animator")]
     [SerializeField] private Animator _userUIAnimator;
@@ -1087,6 +1093,10 @@ namespace Yamadev.YamaStream.UI
     private void UpdateIdleScreenView()
     {
       if (Utilities.IsValid(_idleScreenImage) && Utilities.IsValid(_idleScreenSprite)) _idleScreenImage.sprite = _idleScreenSprite;
+      if (Utilities.IsValid(_idleScreenLogo))
+      {
+        _idleScreenLogo.SetActive(Utilities.IsValid(_idleScreenSprite) && _idleScreenSprite == _defaultIdleScreenSprite);
+      }
     }
 
     // The player a URL entered next plays on, which is not always the one in
