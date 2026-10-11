@@ -312,7 +312,7 @@
   "settings.playback.maxRetry": "최대 재시도 횟수",
   "settings.ui.label": "UI 설정",
   "settings.ui.idleScreenSprite": "대기 화면 스프라이트",
-  "settings.ui.idleScreenSprite.tooltip": "영상이 재생되지 않을 때 표시되는 이미지를 설정합니다.",
+  "settings.ui.idleScreenSprite.tooltip": "영상이 재생되지 않을 때 표시되는 이미지를 설정합니다. 기본 이미지에는 KawaPlayer 로고와 이름이 겹쳐 표시되며, 직접 고른 이미지는 그대로 표시됩니다.",
   "label.yamaPlayer": "KawaPlayer",
   "msg.playModeNotAvailable": "KawaPlayer는 플레이 모드에서 사용할 수 없습니다.",
   "msg.yamaPlayerRequired": "KawaPlayer 참조가 필요합니다.",

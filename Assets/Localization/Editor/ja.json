@@ -300,7 +300,7 @@
   "module.manager.autoplayConflict": "「{0}」と「{1}」が両方とも有効です。どちらも入室時に再生を始めるため、どちらが再生されるかは入室のタイミングで決まり、「{0}」の設定が再生されないことがあります。どちらかを無効にしてください。",
   "settings.ui.label": "UI設定",
   "settings.ui.idleScreenSprite": "待ち受け画像",
-  "settings.ui.idleScreenSprite.tooltip": "動画が再生されていないときに表示される画像を設定します。",
+  "settings.ui.idleScreenSprite.tooltip": "動画が再生されていないときに表示される画像を設定します。既定の画像には KawaPlayer のロゴと名前を重ねて表示し、差し替えた画像はそのまま表示します。",
   "label.yamaPlayer": "KawaPlayer",
   "msg.playModeNotAvailable": "KawaPlayerはプレイモード中に利用できません。",
   "msg.yamaPlayerRequired": "KawaPlayerの参照が必要です。",

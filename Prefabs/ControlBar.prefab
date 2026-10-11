@@ -1613,6 +1613,8 @@ MonoBehaviour:
   _secondaryColor: {r: 0.7019608, g: 0.8980392, b: 0.9882353, a: 0.25}
   _idleScreenImage: {fileID: 0}
   _idleScreenSprite: {fileID: 0}
+  _defaultIdleScreenSprite: {fileID: 0}
+  _idleScreenLogo: {fileID: 0}
   _userUIAnimator: {fileID: 0}
   _systemUIAnimator: {fileID: 0}
   _modalDialog: {fileID: 0}
