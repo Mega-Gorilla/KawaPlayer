@@ -18,14 +18,12 @@ namespace Yamadev.YamaStream.Editor
   {
     public int callbackOrder => -100000;
 
+    // TypeCache lists the types that implement the interface, kept by the editor
+    // across builds, so a scene build no longer goes through every type of every
+    // assembly (issue #195).
     public void OnProcessScene(Scene scene, BuildReport report)
     {
-      var processors = AppDomain.CurrentDomain.GetAssemblies()
-        .SelectMany(assembly =>
-        {
-          try { return assembly.GetTypes(); }
-          catch { return Type.EmptyTypes; }
-        })
+      var processors = TypeCache.GetTypesDerivedFrom<IYamaPlayerBuildProcess>()
         .Where(IsValidProcessorType)
         .Select(CreateProcessorInstance)
         .Where(processor => processor != null)
@@ -35,9 +33,7 @@ namespace Yamadev.YamaStream.Editor
 
     private static bool IsValidProcessorType(Type type)
     {
-      return !type.IsInterface
-        && !type.IsAbstract
-        && type.GetInterfaces().Contains(typeof(IYamaPlayerBuildProcess));
+      return !type.IsInterface && !type.IsAbstract;
     }
 
     private static IYamaPlayerBuildProcess CreateProcessorInstance(Type type)

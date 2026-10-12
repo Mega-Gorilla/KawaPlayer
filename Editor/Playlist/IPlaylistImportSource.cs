@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Cysharp.Threading.Tasks;
+using UnityEditor;
 using UnityEngine;
 
 namespace Yamadev.YamaStream.Editor
@@ -64,22 +65,15 @@ namespace Yamadev.YamaStream.Editor
   {
     private static IPlaylistImportSource[] _cached;
 
-    // Same assembly sweep as YamaPlayerBuildProcess, but this one feeds
-    // editor GUI code, so the result is cached instead of being rebuilt on
-    // every repaint. A domain reload clears the static and re-scans.
+    // Found through TypeCache, as YamaPlayerBuildProcess finds its processors,
+    // but this one feeds editor GUI code, so the instances are cached instead of
+    // being made on every repaint. A domain reload clears the static.
     public static IPlaylistImportSource[] Get()
     {
       if (_cached != null) return _cached;
 
-      _cached = AppDomain.CurrentDomain.GetAssemblies()
-        .SelectMany(assembly =>
-        {
-          try { return assembly.GetTypes(); }
-          catch { return Type.EmptyTypes; }
-        })
-        .Where(type => !type.IsInterface
-          && !type.IsAbstract
-          && type.GetInterfaces().Contains(typeof(IPlaylistImportSource)))
+      _cached = TypeCache.GetTypesDerivedFrom<IPlaylistImportSource>()
+        .Where(type => !type.IsInterface && !type.IsAbstract)
         .Select(CreateInstance)
         .Where(source => source != null)
         .OrderBy(source => source.Order)
