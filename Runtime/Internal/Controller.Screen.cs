@@ -24,6 +24,10 @@ namespace Yamadev.YamaStream
     [SerializeField, HideInInspector] private Object[] _screens;
     [SerializeField, HideInInspector] private string[] _textureProperties;
     private MaterialPropertyBlock _propertyBlock;
+    // Given to a renderer screen while there is no video texture, to take off
+    // what _propertyBlock put there. It is never filled, so one serves every
+    // frame; a new one each frame while a video started was garbage (issue #195).
+    private MaterialPropertyBlock _emptyPropertyBlock;
 
     private void InitializeScreen()
     {
@@ -153,7 +157,8 @@ namespace Yamadev.YamaStream
           case ScreenType.Renderer:
             if (!Utilities.IsValid(texture))
             {
-              ((Renderer)_screens[i]).SetPropertyBlock(new MaterialPropertyBlock(), 0);
+              if (!Utilities.IsValid(_emptyPropertyBlock)) _emptyPropertyBlock = new MaterialPropertyBlock();
+              ((Renderer)_screens[i]).SetPropertyBlock(_emptyPropertyBlock, 0);
             }
             else
             {
