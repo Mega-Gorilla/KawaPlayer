@@ -7,8 +7,11 @@ namespace Yamadev.YamaStream
   public static class TrackingUtils
   {
     private const float MAX_RAY_DISTANCE = 100f;
+    public const int MAX_RAY_HITS = 32;
 
-    public static Vector3 GetMousePosition(VRCPlayerApi player, TrackingDataType trackingDataType)
+    // hitBuffer is the caller's own, MAX_RAY_HITS long and kept between calls:
+    // a slider asks every frame, and a new array each time is garbage (issue #195).
+    public static Vector3 GetMousePosition(VRCPlayerApi player, TrackingDataType trackingDataType, RaycastHit[] hitBuffer)
     {
       if (!Utilities.IsValid(player)) return Vector3.zero;
 
@@ -30,12 +33,11 @@ namespace Yamadev.YamaStream
         rotation *= Quaternion.Euler(0f, handRotOffsetY, 0f);
       }
 
-      return GetRayPoint(origin, rotation * Vector3.forward, MAX_RAY_DISTANCE);
+      return GetRayPoint(origin, rotation * Vector3.forward, MAX_RAY_DISTANCE, hitBuffer);
     }
 
-    private static Vector3 GetRayPoint(Vector3 origin, Vector3 direction, float maxDistance)
+    private static Vector3 GetRayPoint(Vector3 origin, Vector3 direction, float maxDistance, RaycastHit[] hitBuffer)
     {
-      RaycastHit[] hitBuffer = new RaycastHit[32];
       int hitCount = Physics.RaycastNonAlloc(origin, direction, hitBuffer, maxDistance);
 
       float closestPhysicsDistance = float.MaxValue;
