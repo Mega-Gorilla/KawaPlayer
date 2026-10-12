@@ -145,6 +145,8 @@ Japanese-language docs explaining the playlist/URL-loading architecture. Read th
 - `docs/analysis/` — how the playlist system works (Playlist/QueueList/HistoryList), URL-to-playback pipeline, and why runtime JSON playlists are impossible
 - `docs/design/` — the URL Pool design (Unity side, loader side, server side)
 
+`docs/guide/README.md` is the user guide, step by step with pictures: placing KawaPlayer in a world (for creators) and using it in the world (for players). When a change alters what a picture shows (the inspector, Module Manager, the Playlist Editor, the screen UI, the tablet apps), take that picture again. The pictures are WebP in `docs/guide/images/`, a few tens of KB each: `docs/` goes into the package zip, and Unity does not import WebP as a texture. Show sample names, never a real playlist or song (the testing project's are real).
+
 ## Key Constraints
 
 - All runtime scripts must be valid UdonSharp (subset of C#). Many standard C# features are unavailable (no generics on UdonSharpBehaviour, limited reflection, no async/await, etc.).
