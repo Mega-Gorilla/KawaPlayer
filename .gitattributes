@@ -1,0 +1,2 @@
+# Shell scripts run under sh, which stops at a carriage return: keep them LF on Windows too.
+*.sh text eol=lf

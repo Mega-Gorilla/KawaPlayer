@@ -126,7 +126,7 @@ YamaPlayer の動画プレイヤーとしての全機能 — YouTube/Twitch/HLS 
 
 ## 利用規約
 
-本家 YamaPlayer の利用規約に準じます。
+本家 YamaPlayer の利用規約に準じます。ロゴやポスターなどの素材は、この利用規約とは別の条件です（下の「素材」）。
 
 許可:
 - 改変
@@ -134,6 +134,12 @@ YamaPlayer の動画プレイヤーとしての全機能 — YouTube/Twitch/HLS 
 - 有償・無償問わず販売ワールドアセットへの取り組み
 
 クレジット記載は任意ですが、**販売ワールドアセットに取り組む場合はクレジット記載が必須**です。
+
+## 素材
+
+KawaPlayer のロゴと、クイックスタートガイドのポスターを [`Media~/`](Media~/) に置いています。KawaPlayer を置いたワールドへの掲示や、KawaPlayer の紹介に使えます。
+
+著作権フリーではありません。正式な利用条件は検討中です（[#196](https://github.com/Mega-Gorilla/KawaPlayer/issues/196)）。
 
 ## クレジット
 
