@@ -92,15 +92,22 @@ namespace Yamadev.YamaStream.Modules.SlideShower
       if (!Utilities.IsValid(_currentTimeText) || !Utilities.IsValid(_totalDurationText) || !Utilities.IsValid(_progressSlider)) return;
       int page = _slideShower.SlidePage;
       int pageCount = _slideShower.SlidePageCount;
-      if (page == _shownPage && pageCount == _shownPageCount) return;
+      bool pageChanged = page != _shownPage || pageCount != _shownPageCount;
+      // The slider can be off the page while the page is not: a drag let go of
+      // and then cancelled, as a permission does before this UI is asked, or a
+      // page SetSlidePage would not move to. It goes back to the page.
+      float sliderPage = Mathf.Clamp(page, _progressSlider.minValue, _progressSlider.maxValue);
+      if (!pageChanged && _progressSlider.value == sliderPage) return;
 
-      // A page the slider is being dragged to is not set; the drag ends in
-      // BeforeUserSetTime, which has the page shown again.
+      // Not while the slider is being dragged: that is the page being chosen.
       if ((bool)_uiController.GetProgramVariable("_progressDrag")) return;
-      _shownPage = page;
-      _shownPageCount = pageCount;
-      _currentTimeText.text = $"{page}";
-      _totalDurationText.text = $"{pageCount}";
+      if (pageChanged)
+      {
+        _shownPage = page;
+        _shownPageCount = pageCount;
+        _currentTimeText.text = $"{page}";
+        _totalDurationText.text = $"{pageCount}";
+      }
       _progressSlider.SetValueWithoutNotify(page);
     }
 
@@ -179,7 +186,6 @@ namespace Yamadev.YamaStream.Modules.SlideShower
 
       _slideShower.TakeOwnership();
       _slideShower.SetSlidePage((int)_progressSlider.value);
-      _shownPage = int.MinValue;
     }
 
     public void BeforeUserBackward()
