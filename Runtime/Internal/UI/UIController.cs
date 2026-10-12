@@ -135,7 +135,9 @@ namespace Yamadev.YamaStream.UI
     // made only when the second or the percent changes (issue #195). A text that
     // something else wrote over since, as the slideshow does, is written again.
     // The times count in seconds only while the controller's time format shows
-    // nothing finer (no f or F); with fractions they are made every frame.
+    // nothing finer: a custom format with no f or F. The one-letter formats are
+    // the standard ones (c, g, G, t, T), which all show fractions; those, and any
+    // format with fractions, are made every frame.
     private bool _timesInWholeSeconds;
     private int _shownVolumePercent = -1;
     private string _shownVolumeText;
@@ -155,7 +157,7 @@ namespace Yamadev.YamaStream.UI
       }
       _controller.AddListener(this);
       string timeFormat = _controller.TimeFormat;
-      _timesInWholeSeconds = !string.IsNullOrEmpty(timeFormat) && timeFormat.IndexOf('f') < 0 && timeFormat.IndexOf('F') < 0;
+      _timesInWholeSeconds = timeFormat != null && timeFormat.Length > 1 && timeFormat.IndexOf('f') < 0 && timeFormat.IndexOf('F') < 0;
 
       InitializeTranslation();
       UpdateTranslation();
