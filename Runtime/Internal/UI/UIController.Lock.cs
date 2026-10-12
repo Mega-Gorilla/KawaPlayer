@@ -21,13 +21,14 @@ namespace Yamadev.YamaStream.UI
     private float _lastInputTime = 0f;
     private bool _pointerInside = false;
     private bool _rightHand = true;
+    private RaycastHit[] _rayHits = new RaycastHit[TrackingUtils.MAX_RAY_HITS];
 
     public override void PostLateUpdate()
     {
       if (!Utilities.IsValid(_lockDetectionRect) || !_locked) return;
 
       var trackingDataType = IsInVR ? (_rightHand ? TrackingDataType.RightHand : TrackingDataType.LeftHand) : TrackingDataType.Head;
-      Vector3 mousePosition = TrackingUtils.GetMousePosition(LocalPlayer, trackingDataType);
+      Vector3 mousePosition = TrackingUtils.GetMousePosition(LocalPlayer, trackingDataType, _rayHits);
 
       if (mousePosition == Vector3.zero)
       {

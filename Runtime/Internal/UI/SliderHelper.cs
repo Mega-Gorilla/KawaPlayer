@@ -13,6 +13,7 @@ namespace Yamadev.YamaStream.UI
     private RectTransform _rect;
     private float _percent = 0f;
     private bool _rightHand = true;
+    private RaycastHit[] _rayHits = new RaycastHit[TrackingUtils.MAX_RAY_HITS];
 
     private void Start()
     {
@@ -24,7 +25,7 @@ namespace Yamadev.YamaStream.UI
     public override void PostLateUpdate()
     {
       var trackingDataType = IsInVR ? (_rightHand ? TrackingDataType.RightHand : TrackingDataType.LeftHand) : TrackingDataType.Head;
-      Vector3 mousePosition = TrackingUtils.GetMousePosition(LocalPlayer, trackingDataType);
+      Vector3 mousePosition = TrackingUtils.GetMousePosition(LocalPlayer, trackingDataType, _rayHits);
 
       if (mousePosition == Vector3.zero)
       {
