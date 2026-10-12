@@ -30,6 +30,13 @@ namespace Yamadev.YamaStream.Modules.SlideShower
     private Text _totalDurationText;
     private Slider _progressSlider;
     private SliderHelper _progressSliderHelper;
+    // What the page texts show, so they are written only when the page or the
+    // count changes; the pages are shown with the video paused, so they rarely
+    // do. While in slide mode this UI holds the progress of its UIController,
+    // which then leaves the texts and the slider alone (issue #195).
+    private bool _slideModeShown;
+    private int _shownPage = int.MinValue;
+    private int _shownPageCount = int.MinValue;
 
     private void Start()
     {
@@ -50,16 +57,16 @@ namespace Yamadev.YamaStream.Modules.SlideShower
 
     private void LateUpdate()
     {
-      UpdatePageDisplay();
-      UpdateProgressDisplay();
+      if (_slideModeShown) UpdatePageDisplay();
     }
 
     private void UpdateDisplay()
     {
       UpdateSlideModeDisplay();
       UpdateSlideSecondsDisplay();
-      UpdatePageDisplay();
       UpdateProgressDisplay();
+      _shownPage = int.MinValue;
+      UpdatePageDisplay();
     }
 
     private void UpdateSlideModeDisplay()
@@ -83,25 +90,33 @@ namespace Yamadev.YamaStream.Modules.SlideShower
     {
       if (!Utilities.IsValid(_slideShower) || !_slideShower.SlideMode) return;
       if (!Utilities.IsValid(_currentTimeText) || !Utilities.IsValid(_totalDurationText) || !Utilities.IsValid(_progressSlider)) return;
-      _currentTimeText.text = $"{_slideShower.SlidePage}";
-      _totalDurationText.text = $"{_slideShower.SlidePageCount}";
+      int page = _slideShower.SlidePage;
+      int pageCount = _slideShower.SlidePageCount;
+      if (page == _shownPage && pageCount == _shownPageCount) return;
 
-      if (!(bool)_uiController.GetProgramVariable("_progressDrag"))
-      {
-        _progressSlider.SetValueWithoutNotify(_slideShower.SlidePage);
-      }
+      // A page the slider is being dragged to is not set; the drag ends in
+      // BeforeUserSetTime, which has the page shown again.
+      if ((bool)_uiController.GetProgramVariable("_progressDrag")) return;
+      _shownPage = page;
+      _shownPageCount = pageCount;
+      _currentTimeText.text = $"{page}";
+      _totalDurationText.text = $"{pageCount}";
+      _progressSlider.SetValueWithoutNotify(page);
     }
 
     private void UpdateProgressDisplay()
     {
       if (!Utilities.IsValid(_slideShower) || !Utilities.IsValid(_progressSlider)) return;
-      _progressSlider.wholeNumbers = _slideShower.SlideMode;
-      _progressSlider.minValue = _slideShower.SlideMode && _slideShower.SlidePage > 0 ? 1 : 0;
-      _progressSlider.maxValue = _slideShower.SlideMode && _slideShower.SlidePageCount > 0 ? _slideShower.SlidePageCount : 1;
-      if (Utilities.IsValid(_progressSliderHelper))
-      {
-        _progressSliderHelper.gameObject.SetActive(!_slideShower.SlideMode);
-      }
+      bool slideMode = _slideShower.SlideMode;
+      _slideModeShown = slideMode;
+      _progressSlider.wholeNumbers = slideMode;
+      _progressSlider.minValue = slideMode && _slideShower.SlidePage > 0 ? 1 : 0;
+      _progressSlider.maxValue = slideMode && _slideShower.SlidePageCount > 0 ? _slideShower.SlidePageCount : 1;
+      // Out of slide mode, UIController shows the seek tooltip when it fits (not
+      // for a live stream or a picture); letting go of the progress has it show
+      // the time again at once.
+      if (slideMode && Utilities.IsValid(_progressSliderHelper)) _progressSliderHelper.gameObject.SetActive(false);
+      if (Utilities.IsValid(_uiController)) _uiController.ProgressHeld = slideMode;
     }
 
     private void UpdateTranslation()
@@ -164,6 +179,7 @@ namespace Yamadev.YamaStream.Modules.SlideShower
 
       _slideShower.TakeOwnership();
       _slideShower.SetSlidePage((int)_progressSlider.value);
+      _shownPage = int.MinValue;
     }
 
     public void BeforeUserBackward()

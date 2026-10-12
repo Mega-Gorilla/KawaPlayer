@@ -148,6 +148,12 @@ namespace Yamadev.YamaStream.UI
     private int _shownSeekSecond = -1;
     private string _shownSeekText;
 
+    // A module that shows its own numbers in the time and length texts and on
+    // the progress slider, as the slideshow does its pages, holds them while it
+    // does. UpdateProgressView then leaves them, the seek tooltip with them,
+    // where before the two wrote over each other every frame (issue #195).
+    private bool _progressHeld;
+
     private void Start()
     {
       if (!_controller)
@@ -189,6 +195,17 @@ namespace Yamadev.YamaStream.UI
         }
       }
       if (!_controller.Stopped && !_controller.IsLoading) UpdateProgressView();
+    }
+
+    public bool ProgressHeld
+    {
+      get => _progressHeld;
+      set
+      {
+        if (_progressHeld == value) return;
+        _progressHeld = value;
+        if (!value && Utilities.IsValid(_controller)) UpdateProgressView();
+      }
     }
 
     public void AddListener(UdonSharpBehaviour listener)
@@ -908,6 +925,8 @@ namespace Yamadev.YamaStream.UI
 
     private void UpdateProgressView()
     {
+      if (_progressHeld) return;
+
       if (Utilities.IsValid(_currentTimeText))
       {
         if (_controller.IsLive) _currentTimeText.text = string.Empty;
