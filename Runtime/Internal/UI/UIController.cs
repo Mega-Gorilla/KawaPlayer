@@ -131,6 +131,18 @@ namespace Yamadev.YamaStream.UI
     private bool _progressDrag;
     private bool _actionCancelled;
 
+    // What the texts that Update keeps current last showed, so a new string is
+    // made only when the second or the percent changes (issue #195). A text that
+    // something else wrote over since, as the slideshow does, is written again.
+    private int _shownVolumePercent = -1;
+    private string _shownVolumeText;
+    private int _shownVideoSecond = -1;
+    private string _shownVideoTimeText;
+    private int _shownDurationSecond = -1;
+    private string _shownDurationText;
+    private int _shownSeekSecond = -1;
+    private string _shownSeekText;
+
     private void Start()
     {
       if (!_controller)
@@ -161,7 +173,13 @@ namespace Yamadev.YamaStream.UI
       if (!Utilities.IsValid(_controller)) return;
       if (Utilities.IsValid(_volumeSliderHelper) && Utilities.IsValid(_volumeTooltipText))
       {
-        _volumeTooltipText.text = $"{Mathf.Ceil(_volumeSliderHelper.Percent * 100)}%";
+        int percent = Mathf.CeilToInt(_volumeSliderHelper.Percent * 100);
+        if (percent != _shownVolumePercent || _volumeTooltipText.text != _shownVolumeText)
+        {
+          _shownVolumePercent = percent;
+          _shownVolumeText = $"{percent}%";
+          _volumeTooltipText.text = _shownVolumeText;
+        }
       }
       if (!_controller.Stopped && !_controller.IsLoading) UpdateProgressView();
     }
@@ -885,12 +903,33 @@ namespace Yamadev.YamaStream.UI
     {
       if (Utilities.IsValid(_currentTimeText))
       {
-        _currentTimeText.text = _controller.FormatedVideoTime;
+        if (_controller.IsLive) _currentTimeText.text = string.Empty;
+        else
+        {
+          int second = Mathf.FloorToInt(_controller.VideoTime);
+          if (second != _shownVideoSecond || _currentTimeText.text != _shownVideoTimeText)
+          {
+            _shownVideoSecond = second;
+            _shownVideoTimeText = _controller.FormatedVideoTime;
+            _currentTimeText.text = _shownVideoTimeText;
+          }
+        }
       }
 
       if (Utilities.IsValid(_totalDurationText))
       {
-        _totalDurationText.text = _controller.Handler.Type == VideoPlayerType.ImageViewer ? "Image" : _controller.IsLive ? "Live" : _controller.FormatedDuration;
+        if (_controller.Handler.Type == VideoPlayerType.ImageViewer) _totalDurationText.text = "Image";
+        else if (_controller.IsLive) _totalDurationText.text = "Live";
+        else
+        {
+          int second = Mathf.FloorToInt(_controller.Duration);
+          if (second != _shownDurationSecond || _totalDurationText.text != _shownDurationText)
+          {
+            _shownDurationSecond = second;
+            _shownDurationText = _controller.FormatedDuration;
+            _totalDurationText.text = _shownDurationText;
+          }
+        }
       }
 
       if (Utilities.IsValid(_progressSlider) && !_progressDrag)
@@ -912,9 +951,17 @@ namespace Yamadev.YamaStream.UI
       if (!showTooltip) return;
 
       var seekSeconds = _controller.Duration * _progressSliderHelper.Percent;
-      var tooltipText = float.IsInfinity(seekSeconds) || float.IsNaN(seekSeconds) ? "Live" : TimeSpan.FromSeconds(seekSeconds).ToString(_controller.TimeFormat);
+      if (float.IsInfinity(seekSeconds) || float.IsNaN(seekSeconds))
+      {
+        _progressTooltipText.text = "Live";
+        return;
+      }
 
-      _progressTooltipText.text = tooltipText;
+      int second = Mathf.FloorToInt(seekSeconds);
+      if (second == _shownSeekSecond && _progressTooltipText.text == _shownSeekText) return;
+      _shownSeekSecond = second;
+      _shownSeekText = TimeSpan.FromSeconds(seekSeconds).ToString(_controller.TimeFormat);
+      _progressTooltipText.text = _shownSeekText;
     }
 
     private void UpdatePlaybackView()
