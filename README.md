@@ -137,9 +137,13 @@ YamaPlayer の動画プレイヤーとしての全機能 — YouTube/Twitch/HLS 
 
 ## 素材
 
-KawaPlayer のロゴと、クイックスタートガイドのポスターを [`Media~/`](Media~/) に置いています。KawaPlayer を置いたワールドへの掲示や、KawaPlayer の紹介に使えます。
+KawaPlayer のロゴと、クイックスタートガイドのポスターを [`Media~/`](Media~/) に置いています。KawaPlayer を置いたワールドへの掲示（販売するワールドへの同梱を含む）や、KawaPlayer の紹介に使えます。
 
-著作権フリーではありません。正式な利用条件は検討中です（[#196](https://github.com/Mega-Gorilla/KawaPlayer/issues/196)）。
+著作権フリーではありません。使うときは [KawaPlayer 素材ライセンス](Media~/LICENSE.md) に従ってください。パッケージの中のロゴ（`Assets/Images/kawaplayer-logo.png`）も同じ条件です。
+
+- 改変、自作発言、KawaPlayer が公認していると誤解させる使い方はできません
+- 素材だけを配ったり売ったり、グッズにしたりはできません
+- 販売するワールドに同梱するときは、「KawaPlayer の素材を含む」と書いてください
 
 ## クレジット
 
