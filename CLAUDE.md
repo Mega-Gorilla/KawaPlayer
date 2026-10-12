@@ -8,7 +8,7 @@ KawaPlayer is a fork of the VRChat video player [YamaPlayer](https://github.com/
 
 - **Unity version**: 2022.3
 - **Language**: C# / UdonSharp (VRChat's Udon scripting layer)
-- **Dependencies**: VRChat Worlds SDK (>=3.8.1), Newtonsoft.Json (3.2.1)
+- **Dependencies**: VRChat Worlds SDK (>=3.10.2), Newtonsoft.Json (3.2.1)
 
 ## Build & Release
 
@@ -151,7 +151,7 @@ Japanese-language docs explaining the playlist/URL-loading architecture. Read th
 - **`string → VRCUrl` conversion is impossible at runtime** (`new VRCUrl(string)` is editor-only). Any feature needing dynamic URLs must use the Pre-baked URL Pool pattern: a large `VRCUrl[]` of redirect-server slot URLs is baked into serialized fields at build time, and the server maps slots to real URLs via HTTP 302. See `docs/design/url-pool-playlist-loader.md`.
 - Network sync uses `[UdonSynced]` fields with manual sync (`UdonBehaviourSyncMode.Manual`). Only the owner can modify synced variables.
 - **Never add an UdonBehaviour to, or remove one from, an object that already has one in a shipped prefab** (e.g. a second U# component beside the `Controller`). A world records the network components of each object when it is built; after the update the SDK reports "Network Components Changed" and refuses to build the world (`Failed to assign network IDs`) until its creator fixes it in the Network ID Utility. Put the new behaviour on a new child object, or into the existing one. ClientSim repairs this on Play, so only a world build shows it.
-- **The U# code must compile on the oldest SDK the package accepts** (`vpmDependencies`: `com.vrchat.worlds` 3.8.1 and later). VCC does not update a creator's SDK when they install KawaPlayer, and Udon in an older SDK exposes less than the one this project is developed on: SDK 3.8 has no `Behaviour.enabled`, which came in 3.10.2, so the tablet keeps its layout groups as `LayoutGroup[]`, whose `enabled` both expose (issue #191). Call a Unity member through the concrete type rather than a base class, and when unsure, compile in a project with only the oldest SDK and KawaPlayer.
+- **The U# code must compile on the oldest SDK the package accepts** (`vpmDependencies`: `com.vrchat.worlds` 3.10.2 and later, issue #193). A creator's project may stay on that SDK, since it satisfies the range, and Udon there can expose less than the SDK this project is developed on. The minimum was 3.8.1, inherited from upstream and never tried, until the tablet failed to compile there: Udon gained `Behaviour.enabled` only in 3.10.2 (issue #191). Call a Unity member through the concrete type where you can, and before relying on something newer, compile in a project with only the oldest SDK and KawaPlayer; to need a newer SDK, raise the minimum in `package.json`, this file and the README together.
 - The project is primarily documented in Japanese. README and UI localization files contain Japanese as the primary language.
 
 ## Coding Style & Commits

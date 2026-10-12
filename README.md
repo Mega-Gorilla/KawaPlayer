@@ -117,7 +117,7 @@ YamaPlayer の動画プレイヤーとしての全機能 — YouTube/Twitch/HLS 
 
 ## .unitypackage で導入 (VCC を使わない場合)
 
-1. VRChat Worlds SDK (>=3.8.1) 導入済みの Unity プロジェクトを用意
+1. VRChat Worlds SDK (>=3.10.2) 導入済みの Unity プロジェクトを用意
 2. [Releases ページ](https://github.com/Mega-Gorilla/KawaPlayer/releases) から `com.vhub.kawaplayer-x.x.x.unitypackage` をダウンロード
 3. Unity メニュー **Assets > Import Package > Custom Package** でインポート
 4. **GameObject > KawaPlayer > Main** または `KawaPlayer.prefab` をシーンにドラッグ
