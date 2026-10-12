@@ -134,6 +134,9 @@ namespace Yamadev.YamaStream.UI
     // What the texts that Update keeps current last showed, so a new string is
     // made only when the second or the percent changes (issue #195). A text that
     // something else wrote over since, as the slideshow does, is written again.
+    // The times count in seconds only while the controller's time format shows
+    // nothing finer (no f or F); with fractions they are made every frame.
+    private bool _timesInWholeSeconds;
     private int _shownVolumePercent = -1;
     private string _shownVolumeText;
     private int _shownVideoSecond = -1;
@@ -151,6 +154,8 @@ namespace Yamadev.YamaStream.UI
         return;
       }
       _controller.AddListener(this);
+      string timeFormat = _controller.TimeFormat;
+      _timesInWholeSeconds = !string.IsNullOrEmpty(timeFormat) && timeFormat.IndexOf('f') < 0 && timeFormat.IndexOf('F') < 0;
 
       InitializeTranslation();
       UpdateTranslation();
@@ -907,7 +912,7 @@ namespace Yamadev.YamaStream.UI
         else
         {
           int second = Mathf.FloorToInt(_controller.VideoTime);
-          if (second != _shownVideoSecond || _currentTimeText.text != _shownVideoTimeText)
+          if (!_timesInWholeSeconds || second != _shownVideoSecond || _currentTimeText.text != _shownVideoTimeText)
           {
             _shownVideoSecond = second;
             _shownVideoTimeText = _controller.FormatedVideoTime;
@@ -923,7 +928,7 @@ namespace Yamadev.YamaStream.UI
         else
         {
           int second = Mathf.FloorToInt(_controller.Duration);
-          if (second != _shownDurationSecond || _totalDurationText.text != _shownDurationText)
+          if (!_timesInWholeSeconds || second != _shownDurationSecond || _totalDurationText.text != _shownDurationText)
           {
             _shownDurationSecond = second;
             _shownDurationText = _controller.FormatedDuration;
@@ -958,7 +963,7 @@ namespace Yamadev.YamaStream.UI
       }
 
       int second = Mathf.FloorToInt(seekSeconds);
-      if (second == _shownSeekSecond && _progressTooltipText.text == _shownSeekText) return;
+      if (_timesInWholeSeconds && second == _shownSeekSecond && _progressTooltipText.text == _shownSeekText) return;
       _shownSeekSecond = second;
       _shownSeekText = TimeSpan.FromSeconds(seekSeconds).ToString(_controller.TimeFormat);
       _progressTooltipText.text = _shownSeekText;
