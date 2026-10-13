@@ -13,7 +13,14 @@ YamaPlayer を使っていたプロジェクトは、先に [README の移行手
 
 追加のしかたは A・B・C の 3 つあり、どれで追加しても同じです。
 
-**A. VCC 用のページから（いちばん簡単）:** [KawaPlayer の VCC 用のページ](https://mega-gorilla.github.io/vpm-repos/) で **Add to VCC** を押すと、VCC が開いてリポジトリを追加できます（[クイックスタートの 1.](quickstart.md#1-vcc-に-kawaplayer-のリポジトリを追加する)）。GitHub では VCC を開くリンク（`vcc://`）を直接押せないので、いったんこのページを開きます。
+**A. VCC 用のページから（いちばん簡単）:** GitHub では VCC を開くリンク（`vcc://`）を直接押せないので、いったん VCC 用のページを開きます。
+
+1. 次のリンクを開きます: **[KawaPlayer の VCC 用のページ（mega-gorilla.github.io/vpm-repos）](https://mega-gorilla.github.io/vpm-repos/)**
+2. ページの上のほう、**Copy** の左にある **Add to VCC** を押します。
+
+   ![VCC 用のページ。「VHub Packages」の見出しの下、Copy の左にある「Add to VCC」に印がある](images/vcc/listing-page.webp)
+
+3. VCC が開いてリポジトリの追加を聞かれるので、**I Understand, Add Repository** を押します。
 
 ### リポジトリを追加するほかの方法
 
