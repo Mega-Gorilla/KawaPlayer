@@ -77,6 +77,10 @@ MARKS = {
         dict(box=(28, 423, 834, 537), n=1),
         dict(box=(746, 615, 828, 1163), n=2),
     ]),
+    "unity/build": dict(scale=0.72, pad=dict(left=16), marks=[
+        dict(box=(9, 257, 404, 288), n=1),
+        dict(box=(10, 304, 631, 402), n=2),
+    ]),
     "unity/tablet-inspector": dict(scale=0.72, pad=dict(right=270), marks=[
         dict(box=(274, 430, 664, 456), n=1, cap="KawaPlayer を入れる", at=(826, 443)),
         dict(box=(28, 700, 664, 756), n=2, cap="元の場所に戻す", at=(826, 728)),

@@ -51,14 +51,14 @@ VCC の **Manage Project** でワールドのプロジェクトを開きます�
 
 ## 5. ビルドして確かめる
 
-メニューの **VRChat SDK > Show Control Panel** で開くパネルの **Builder** で、**Build Type** を選んで、その下のボタンを押します。
+メニューの **VRChat SDK > Show Control Panel** で開くパネルの **Builder** で、**Build Type**（①）を選んで、その下のボタン（②）を押します。上の **Review Any Alerts** に問題が出ているときは、先に直してください。
 
-| Build Type | すること |
+![VRChat SDK の Builder。① Build Type の欄と、② その下のビルドのボタンに印がある](images/unity/build.webp)
+
+| Build Type（①） | すること |
 | --- | --- |
 | **Build & Test Your World** | 自分の PC だけで、ワールドを試す |
 | **Build & Publish Your World Online** | ワールドをアップロードする |
-
-自動再生(Owner) は、Build & Test では試せません。インスタンスを作った人（Instance Owner）がいないためです。アップロードしたワールドで、自分で作った Invite・Friends などのインスタンスに入って確かめてください。
 
 ## 6. ワールドの中で動画を流す
 
