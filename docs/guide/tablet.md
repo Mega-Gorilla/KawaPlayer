@@ -5,7 +5,10 @@
 ## 置く
 
 1. Hierarchy の何もないところを押して、何も選んでいない状態にします。KawaPlayer などが選ばれたままだと、タブレットがその中に置かれてしまいます。
-2. Unity のメニューの **GameObject > KawaPlayer > Tablet** を選びます。何台置いてもかまいません。
+2. Unity のメニューの **GameObject**（①）> **KawaPlayer**（②）> **Tablet**（③）を選びます。何台置いてもかまいません。
+
+   ![Unity の GameObject メニュー。① GameObject、② KawaPlayer、③ Tablet に印がある](images/unity/gameobject-menu-tablet.webp)
+
 3. インスペクターの **KawaPlayer** の欄（①）に、操作する KawaPlayer を入れます。
 
 ![タブレットのインスペクター。① 操作する KawaPlayer を入れる欄と、② 元の場所に戻す設定に印がある](images/unity/tablet-inspector.webp)

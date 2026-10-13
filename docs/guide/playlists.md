@@ -38,11 +38,11 @@ YouTube のプレイリストの読み込みは、左下の [プレイリスト�
 [VHub Playlist](https://playlist.vrc-hub.com) で作ったプレイリストを、そのまま取り込みます。
 
 1. 上の **URL から読み込み**（①）を押します。
-2. **VHub プレイリスト** の欄（②）に、VHub の共有 URL（`https://playlist.vrc-hub.com/r/default/…` の形）を貼ります。
+2. **VHub プレイリスト** の欄（②）に、VHub の VRChat用URL（`https://playlist.vrc-hub.com/r/default/…` の形）を貼ります。コピーのしかたは [VHub Playlist の使い方](vhub.md#vrchat用url-をコピーする) にあります。
 3. 右の **URL から読み込み**（③）を押すと、左の **プレイリスト** に入ります。
 4. 右上の **保存**（④）を押します。
 
-![URL から読み込みを開いたプレイリストエディター。① 上の URL から読み込み、② VHub の共有 URL を入れる欄、③ 右の URL から読み込み、④ 保存 に印がある](images/unity/playlist-import.webp)
+![URL から読み込みを開いたプレイリストエディター。① 上の URL から読み込み、② VHub の VRChat用URL を入れる欄、③ 右の URL から読み込み、④ 保存 に印がある](images/unity/playlist-import.webp)
 
 - **取り込みのしくみ:** 曲名と並び順は、ワールドをビルドしたときに焼き込まれます。曲の URL は VHub を通るので、再生には VHub が要ります。Public・Group Public のインスタンスで流すには、ワールドの Video Player Allowed Domains に `playlist.vrc-hub.com` を足しておきます（[クイックスタートの 6.](quickstart.md#6-vrchatcom-で-vhub-を許可する)）。それ以外のインスタンスでは、聞く人が VRChat の設定で **Allow Untrusted URLs** をオンにしておく必要があります（[オンにする手順](quickstart.md#7-allow-untrusted-urls-をオンにする)）。
 - **取り込み直す:** 同じ URL をもう一度取り込むと、今のプレイリストを更新するか、新しいプレイリストとして足すかを聞かれます。
@@ -92,7 +92,7 @@ JSON ファイルから、プレイリストを読み込む欄を開きます（
 | `active` | 有効かどうか（`true`・`false`）。`false` だとワールドに入らない | `true` |
 | `tracks` | 曲の一覧（配列） | 曲なし |
 | `youtubeListId` | プレイリスト設定の、YouTube のプレイリストの欄の中身（文字列） | 空 |
-| `vhubPlaylistUrl` | VHub から取り込んだときの共有 URL（文字列）。入っていると、Unity を指定した曲もワールドでは AVPro で再生する | 空 |
+| `vhubPlaylistUrl` | VHub から取り込んだときの VRChat用URL（文字列）。入っていると、Unity を指定した曲もワールドでは AVPro で再生する | 空 |
 
 **曲**（`tracks` の中の 1 つ）
 
@@ -192,13 +192,13 @@ JSON ファイルから、プレイリストを読み込む欄を開きます（
 
 ### プレイリストの URL を入れる
 
-[VHub Playlist](https://playlist.vrc-hub.com) のプレイリストは、共有 URL（`https://playlist.vrc-hub.com/r/default/…` の形）を、動画と同じ **URL を入力**（①）の欄に入れると読み込めます。
+[VHub Playlist](https://playlist.vrc-hub.com) のプレイリストは、VRChat用URL（`https://playlist.vrc-hub.com/r/default/…` の形）を、動画と同じ **URL を入力**（①）の欄に入れると読み込めます。VRChat用URL のコピーのしかたは、[VHub Playlist の使い方](vhub.md#vrchat用url-をコピーする) にあります。
 
 ![「プレイリストを追加しました」の表示。『作業用BGM』の 12 曲を読み込んだ。URL を入れるボタンに印がある](images/screen/playlist-loaded.webp)
 
 - **入り方:** 読み込んだプレイリストは、プレイリストの一覧に 1 つ足されます。再生キューには入りません。止まっているときに読み込むと、そのまま再生が始まります。
 - **読み込める数:** VHub から読み込む枠は、標準で 5 件です（ワールドに最初から入っているプレイリストは別）。いっぱいのときに新しく読み込むと、一番古いものを消してよいか聞かれます。
-- **入れる URL:** VHub の Web ページの URL（`/playlists/…`）では読み込めません。共有の URL を入れてください。
+- **入れる URL:** VHub の Web ページの URL（`/playlists/…`）では読み込めません。VHub の **VRChat用URLをコピー** でコピーした URL を入れてください。
 - **読み込める人:** ワールドに権限管理のモジュールが入っているときは、再生できる権限のある人だけが読み込めます。
 
 この機能は、最初から入っている **外部プレイリスト読込** のモジュールのものです（[モジュール](modules.md)）。

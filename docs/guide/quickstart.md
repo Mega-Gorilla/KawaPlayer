@@ -40,8 +40,11 @@ VCC の **Manage Project** でワールドのプロジェクトを開きます�
 手に持って KawaPlayer を操作できるタブレットです。
 
 1. もう一度、Hierarchy の何もないところを押します。置いたばかりの KawaPlayer が選ばれたままだと、タブレットがその中に置かれてしまいます。
-2. メニューの **GameObject > KawaPlayer > Tablet** を選びます。何台置いてもかまいません。
-3. インスペクターの **KawaPlayer** の欄（①）に、手順 3 で置いた KawaPlayer を入れます。
+2. メニューの **GameObject**（①）> **KawaPlayer**（②）> **Tablet**（③）を選びます。何台置いてもかまいません。
+
+   ![Unity の GameObject メニュー。① GameObject、② KawaPlayer、③ Tablet に印がある](images/unity/gameobject-menu-tablet.webp)
+
+3. インスペクターの **KawaPlayer** の欄（①）に、3. で置いた KawaPlayer を入れます。
 
    ![タブレットのインスペクター。一番上の、操作する KawaPlayer を入れる欄に ① の印がある](images/unity/tablet-player-field.webp)
 
@@ -107,7 +110,7 @@ Friends・Invite などのインスタンスでは、この設定がなくても
 ## 8. ワールドの中で動画を流す
 
 1. スクリーンを指して、左上の **URL を入力**（①）を押します。デスクトップでは視線（画面の中央）を、VR ではコントローラーのレーザーを向けてください。
-2. 動画の URL（YouTube など）か、[VHub Playlist](https://playlist.vrc-hub.com) のプレイリストの共有 URL を貼って、確定します。
+2. 動画の URL（YouTube など）か、[VHub Playlist](https://playlist.vrc-hub.com) のプレイリストの **VRChat用URL** を貼って、確定します。VRChat用URL のコピーのしかたは、[VHub Playlist の使い方](vhub.md#vrchat用url-をコピーする) にあります。
 
 ![「プレイリストを追加しました」の表示。『作業用BGM』の 12 曲を読み込んだ。URL を入れるボタンに印がある](images/screen/playlist-loaded.webp)
 
@@ -117,6 +120,7 @@ Friends・Invite などのインスタンスでは、この設定がなくても
 | --- | --- |
 | 色・言語・音量などの初期値を変えたい | [KawaPlayer の設定](settings.md) |
 | 最初からプレイリストを入れておきたい | [プレイリスト](playlists.md) |
+| VHub でプレイリストを探したい、作りたい | [VHub Playlist の使い方](vhub.md) |
 | 入室時に動画を自動で流したい、機能を足したい | [モジュール](modules.md) |
 | ワールドの中での操作を知りたい | [ワールドの中で使う](playing.md) |
 

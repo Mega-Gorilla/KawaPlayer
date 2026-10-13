@@ -29,7 +29,7 @@ KawaPlayer が置かれたワールドで、スクリーンを操作する方法
 | **再生キューに追加する** | 再生キューの最後に足して、順番に流す |
 | **キャンセル** | やめる |
 
-VHub のプレイリストの共有 URL も、同じ欄で読み込めます（[プレイリスト](playlists.md#ワールドの中で-vhub-のプレイリストを読み込む)）。VHub のプレイリストを読み込むには、VRChat の設定で **Allow Untrusted URLs** をオンにしておく必要があります（[オンにする手順](quickstart.md#7-allow-untrusted-urls-をオンにする)）。
+VHub のプレイリストの VRChat用URL も、同じ欄で読み込めます（[プレイリスト](playlists.md#ワールドの中で-vhub-のプレイリストを読み込む)）。VRChat用URL のコピーのしかたは、[VHub Playlist の使い方](vhub.md#vrchat用url-をコピーする) にあります。VHub のプレイリストを読み込むには、VRChat の設定で **Allow Untrusted URLs** をオンにしておく必要があります（[オンにする手順](quickstart.md#7-allow-untrusted-urls-をオンにする)）。
 
 ## 設定を変える
 

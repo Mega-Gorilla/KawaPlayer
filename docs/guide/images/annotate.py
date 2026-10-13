@@ -57,6 +57,11 @@ MARKS = {
         dict(box=(8, 242, 400, 276), n=2),
         dict(box=(410, 244, 632, 276), n=3, badge=(636, 240)),
     ]),
+    "unity/gameobject-menu-tablet": dict(src="unity/gameobject-menu", scale=0.7, pad=dict(top=24, left=24), marks=[
+        dict(box=(2, 1, 118, 27), n=1),
+        dict(box=(8, 242, 400, 276), n=2),
+        dict(box=(410, 396, 632, 427), n=3, badge=(636, 392)),
+    ]),
     "unity/hierarchy-menu": dict(scale=0.7, marks=[
         dict(box=(19, 190, 328, 223), n=1),
         dict(box=(340, 192, 564, 222), n=2, badge=(568, 188)),
@@ -170,6 +175,43 @@ MARKS = {
     "vrchat/site-edit-world-info": dict(scale=0.8, marks=[]),
     "vrchat/site-allowed-domains": dict(scale=0.9, marks=[
         dict(box=(31, 149, 1115, 203), n=3, cap="playlist.vrc-hub.com を入れる", at=(745, 119)),
+    ]),
+    "vhub/top-search": dict(src="vhub/top", scale=0.8, marks=[
+        dict(box=(309, 223, 1250, 278), n=1),
+    ]),
+    "vhub/top-login": dict(src="vhub/top", scale=0.8, marks=[
+        dict(box=(1169, 12, 1250, 52), n=1, badge=(1158, 68)),
+        dict(box=(1082, 12, 1160, 52), n=2, badge=(1072, 68)),
+    ]),
+    "vhub/detail": dict(scale=0.8, marks=[
+        dict(box=(18, 432, 611, 504), n=1),
+    ]),
+    "vhub/detail-copied": dict(scale=0.8, marks=[]),
+    "vhub/create-name": dict(scale=0.8, marks=[
+        dict(box=(10, 36, 728, 103), n=1),
+        dict(box=(14, 136, 138, 163), n=2),
+    ]),
+    "vhub/create-videos": dict(scale=0.8, marks=[
+        dict(box=(34, 176, 599, 230), n=1),
+        dict(box=(613, 176, 703, 230), n=2),
+    ]),
+    "vhub/create-classify": dict(scale=0.8, marks=[
+        dict(box=(34, 118, 703, 179), n=1),
+        dict(box=(34, 453, 216, 495), n=2),
+        dict(box=(30, 552, 706, 668), n=3),
+    ]),
+    "vhub/create-button": dict(scale=0.8, marks=[
+        dict(box=(9, 12, 729, 77), n=1),
+    ]),
+    "vhub/created-url": dict(scale=0.8, marks=[
+        dict(box=(343, 328, 1110, 378), n=1),
+        dict(box=(1122, 323, 1265, 383), n=2),
+    ]),
+    "vhub/edit-button": dict(scale=0.8, marks=[
+        dict(box=(216, 132, 350, 204), n=1),
+    ]),
+    "vhub/delete": dict(scale=0.8, marks=[
+        dict(box=(35, 110, 307, 166), n=1),
     ]),
     "screen/controls": dict(scale=0.667, marks=[
         dict(box=(27, 148, 69, 575), cap="左の列", at=(173, 360)),
