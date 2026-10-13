@@ -297,6 +297,14 @@ MARKS = {
     "screen/settings-other": dict(scale=0.667, marks=[
         dict(box=(250, 116, 860, 250), n=1),
     ]),
+    "screen/autoplay-owner": dict(scale=0.667, marks=[
+        dict(box=(24, 124, 196, 174), n=1),
+        dict(box=(214, 124, 352, 174), n=2),
+    ]),
+    "screen/autoplay-owner-set": dict(scale=0.667, marks=[
+        dict(box=(24, 94, 508, 122), n=1),
+    ]),
+    "screen/autoplay-other": dict(scale=0.667, marks=[]),
     "screen/url-button": dict(src="screen/controls", scale=0.667, marks=[
         dict(box=(26, 146, 70, 190), n=1, cap="ここを押す", at=(190, 168)),
     ]),
