@@ -44,7 +44,7 @@ YouTube のプレイリストの読み込みは、左下の [プレイリスト�
 
 ![URL から読み込みを開いたプレイリストエディター。① 上の URL から読み込み、② VHub の共有 URL を入れる欄、③ 右の URL から読み込み、④ 保存 に印がある](images/unity/playlist-import.webp)
 
-- **取り込みのしくみ:** 曲名と並び順は、ワールドをビルドしたときに焼き込まれます。曲の URL は VHub を通るので、再生には VHub が要ります。聞く人は、VRChat の設定で **Allow Untrusted URLs** をオンにしておく必要があります（[オンにする手順](quickstart.md#6-allow-untrusted-urls-をオンにする)）。
+- **取り込みのしくみ:** 曲名と並び順は、ワールドをビルドしたときに焼き込まれます。曲の URL は VHub を通るので、再生には VHub が要ります。Public・Group Public のインスタンスで流すには、ワールドの Video Player Allowed Domains に `playlist.vrc-hub.com` を足しておきます（[クイックスタートの 6.](quickstart.md#6-vrchatcom-で-vhub-を許可する)）。それ以外のインスタンスでは、聞く人が VRChat の設定で **Allow Untrusted URLs** をオンにしておく必要があります（[オンにする手順](quickstart.md#7-allow-untrusted-urls-をオンにする)）。
 - **取り込み直す:** 同じ URL をもう一度取り込むと、今のプレイリストを更新するか、新しいプレイリストとして足すかを聞かれます。
 - **動画プレイヤー:** VHub から取り込んだプレイリストでは、Unity を指定した曲も、ワールドでは AVPro で再生します。Unity で再生したい曲は、VHub から取り込んでいないプレイリストに入れてください。
 
@@ -181,9 +181,14 @@ JSON ファイルから、プレイリストを読み込む欄を開きます（
 
 ## ワールドの中で VHub のプレイリストを読み込む
 
-**先に、VRChat の設定で Allow Untrusted URLs（信頼されていない URL を許可する設定）をオンにしてください。** VHub（`playlist.vrc-hub.com`）は、VRChat が初めから信頼しているサイトではありません。そのため、オフのままでは、プレイリストの読み込みも曲の再生もできません。この設定は一人ひとりのもので、ほかの人がオンにしても、自分には効きません。
+**先に、VRChat の設定で Allow Untrusted URLs（信頼されていない URL を許可する設定）をオンにしてください。** VHub（`playlist.vrc-hub.com`）は、VRChat が初めから信頼しているサイトではありません。そのため、オフのままでは、プレイリストを読み込めません。この設定は一人ひとりのもので、ほかの人がオンにしても、自分には効きません。
 
-オンにする手順は、画像付きで [クイックスタートの 6.](quickstart.md#6-allow-untrusted-urls-をオンにする) にあります。
+曲を流すときは、インスタンスの種類で決まりが違います。
+
+- **Public・Group Public:** ワールドの Video Player Allowed Domains に `playlist.vrc-hub.com` が入っていると流れます（[クイックスタートの 6.](quickstart.md#6-vrchatcom-で-vhub-を許可する)）。入っていないと、Allow Untrusted URLs をオンにしていても流れません。
+- **Friends・Invite など:** 聞く人が Allow Untrusted URLs をオンにしていると流れます。
+
+オンにする手順は、画像付きで [クイックスタートの 7.](quickstart.md#7-allow-untrusted-urls-をオンにする) にあります。
 
 ### プレイリストの URL を入れる
 

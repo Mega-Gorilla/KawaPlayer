@@ -49,7 +49,7 @@ KawaPlayer の機能の一部は、モジュールとして分かれていて、
 
 [VHub Playlist](https://playlist.vrc-hub.com) のプレイリストを、ワールドの中の URL の欄から読み込むモジュールです。使い方は [プレイリスト](playlists.md#ワールドの中で-vhub-のプレイリストを読み込む) にあります。
 
-- **必要なもの:** VHub（`playlist.vrc-hub.com`）。聞く人は、VRChat の設定で Allow Untrusted URLs をオンにしておく必要があります（[クイックスタートの 6.](quickstart.md#6-allow-untrusted-urls-をオンにする)）。
+- **必要なもの:** VHub（`playlist.vrc-hub.com`）。ワールドの中でプレイリストを読み込む人は、VRChat の設定で Allow Untrusted URLs をオンにしておく必要があります（[クイックスタートの 7.](quickstart.md#7-allow-untrusted-urls-をオンにする)）。Public・Group Public のインスタンスで曲を流すには、ワールドの Video Player Allowed Domains に `playlist.vrc-hub.com` を足しておきます（[クイックスタートの 6.](quickstart.md#6-vrchatcom-で-vhub-を許可する)）。
 - **設定:** **設定** を押すと、次の欄が出ます。初めの値のままで使えます。
 
   ![外部プレイリスト読込の設定。References、Pool Settings、Pool Status、Generate Pool、Playlist Limits、Auto Load の欄](images/unity/module-playlist-loader.webp)
