@@ -324,5 +324,7 @@
   "msg.inspectorLocked.title": "检查器已锁定",
   "msg.inspectorLocked": "检查器已锁定。请先解锁。",
   "sceneOverlay.front": "正面",
-  "sceneOverlay.back": "背面"
+  "sceneOverlay.back": "背面",
+  "guide.open": "查看使用方法",
+  "guide.open.tooltip": "在浏览器中打开 GitHub 上的 KawaPlayer 使用指南（日语）。"
 }

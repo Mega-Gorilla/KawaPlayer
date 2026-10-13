@@ -324,5 +324,7 @@
   "msg.inspectorLocked.title": "Інспектор заблоковано",
   "msg.inspectorLocked": "Інспектор заблоковано. Спочатку розблокуйте його.",
   "sceneOverlay.front": "Лицьова",
-  "sceneOverlay.back": "Зворотня"
+  "sceneOverlay.back": "Зворотня",
+  "guide.open": "Посібник",
+  "guide.open.tooltip": "Відкриває в браузері посібник з KawaPlayer на GitHub (японською)."
 }

@@ -312,5 +312,7 @@
   "msg.inspectorLocked.title": "インスペクタがロックされています",
   "msg.inspectorLocked": "インスペクタがロックされています。先にロックを解除してください。",
   "sceneOverlay.front": "表",
-  "sceneOverlay.back": "裏"
+  "sceneOverlay.back": "裏",
+  "guide.open": "使い方を見る",
+  "guide.open.tooltip": "KawaPlayer の使い方ガイド（GitHub）をブラウザーで開きます。"
 }

@@ -114,7 +114,7 @@ The screen turns with the tablet (issue #183). Five times a second `TabletScreen
 
 ### Editor Tools (`Editor/`)
 
-Custom inspectors, build processors, menu items, and the module/localization editors. Separate assembly (`Yamadev.YamaStream.Editor.asmdef`) referencing the runtime assembly.
+Custom inspectors, build processors, menu items, and the module/localization editors. Separate assembly (`Yamadev.YamaStream.Editor.asmdef`) referencing the runtime assembly. The header every KawaPlayer inspector draws (`EditorBase`: logo, version, language) has a button that opens the user guide on GitHub (`docs/guide` on develop), since the guide is not in the package; module inspectors, which hide the header, do not show it.
 
 ### Assembly Definitions
 
