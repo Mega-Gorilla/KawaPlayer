@@ -227,6 +227,9 @@ MARKS = {
         dict(box=(27, 613, 1253, 699), cap="下", at=(640, 580)),
         dict(box=(892, 107, 1252, 143), cap="右", at=(1072, 73)),
     ]),
+    "screen/url-button": dict(src="screen/controls", scale=0.667, marks=[
+        dict(box=(26, 146, 70, 190), n=1, cap="ここを押す", at=(190, 168)),
+    ]),
     "screen/playlist-loaded": dict(scale=0.667, marks=[
         dict(box=(29, 148, 163, 191), n=1, cap="ここに URL を入れる", at=(280, 107)),
     ]),
@@ -253,6 +256,7 @@ MARKS = {
         dict(box=(98, 277, 134, 314), n=1, cap="URL を入れる", at=(304, 240)),
         dict(box=(611, 714, 669, 773), n=2, cap="ホームへ戻る", at=(880, 744)),
     ]),
+    "tablet/rotate": dict(scale=0.72, marks=[]),
     "tablet/image": dict(scale=0.72, marks=[
         dict(box=(571, 74, 1176, 126), cap="画像の URL を入れる", at=(872, 184)),
     ]),
