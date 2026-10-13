@@ -73,7 +73,11 @@ Public・Group Public のインスタンスでは、ワールドが許可した�
 
    ![Edit World Info のページの上の部分。Name の欄がある](images/vrchat/site-edit-world-info.webp)
 
-5. ページの下のほうの **Video Player Allowed Domains**（③）に `playlist.vrc-hub.com` を入れて、保存します。
+5. ページの下のほうの **Video Player Allowed Domains**（③）に、次のアドレスをコピーして貼り、保存します。
+
+   ```
+   playlist.vrc-hub.com
+   ```
 
    ![Edit World Info の Video Player Allowed Domains。playlist.vrc-hub.com を入れた欄に ③ の印がある](images/vrchat/site-allowed-domains.webp)
 
