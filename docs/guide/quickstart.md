@@ -61,7 +61,7 @@ VCC の **Manage Project** でワールドのプロジェクトを開きます�
 Public・Group Public のインスタンスでは、ワールドが許可したサイトの動画しか流れません。遊ぶ人が Allow Untrusted URLs をオンにしていても同じです。VHub の曲は `playlist.vrc-hub.com` の URL で流れるので、ワールドに VHub を許可しておきます。
 
 1. **Build & Publish Your World Online** で、ワールドをアップロードします。
-2. VRChat のサイト（[vrchat.com](https://vrchat.com/home)）にログインし、左のメニューの **My Worlds**（①）を押します。
+2. VRChat のサイト **[https://vrchat.com/home](https://vrchat.com/home)** を開いてログインし、左のメニューの **My Worlds**（①）を押します。
 
    ![VRChat のサイトの左のメニュー。My Worlds に ① の印がある](images/vrchat/site-menu.webp)
 
