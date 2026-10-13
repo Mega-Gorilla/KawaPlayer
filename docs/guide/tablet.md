@@ -4,12 +4,13 @@
 
 ## 置く
 
-1. Unity のメニューの **GameObject > KawaPlayer > Tablet** を選ぶと、シーンにタブレットが置かれます。何台置いてもかまいません。
-2. インスペクターの **KawaPlayer** の欄（①）に、操作する KawaPlayer を入れます。
+1. Hierarchy の何もないところを押して、何も選んでいない状態にします。KawaPlayer などが選ばれたままだと、タブレットがその中に置かれてしまいます。
+2. Unity のメニューの **GameObject > KawaPlayer > Tablet** を選びます。何台置いてもかまいません。
+3. インスペクターの **KawaPlayer** の欄（①）に、操作する KawaPlayer を入れます。
 
 ![タブレットのインスペクター。① 操作する KawaPlayer を入れる欄と、② 元の場所に戻す設定に印がある](images/unity/tablet-inspector.webp)
 
-Hierarchy で KawaPlayer を選んだままメニューを選ぶと、タブレットは KawaPlayer の子として置かれます。別の場所に置くときは、先に選択を外してください。
+中に置いてしまったときは、Hierarchy でタブレットを何もないところへドラッグすると外に出せます。
 
 ## インスペクターの設定
 

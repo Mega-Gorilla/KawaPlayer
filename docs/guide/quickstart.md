@@ -28,24 +28,24 @@ VCC の **Manage Project** でワールドのプロジェクトを開きます�
 
 ## 3. シーンに KawaPlayer を置く
 
-Unity のメニューの **GameObject**（①）> **KawaPlayer**（②）> **Main**（③）を選ぶと、シーンに KawaPlayer が置かれます。
+1. Hierarchy の何もないところを押して、何も選んでいない状態にします。
+2. Unity のメニューの **GameObject**（①）> **KawaPlayer**（②）> **Main**（③）を選びます。
 
-![Unity の GameObject メニュー。① GameObject、② KawaPlayer、③ Main に印がある](images/unity/gameobject-menu.webp)
+   ![Unity の GameObject メニュー。① GameObject、② KawaPlayer、③ Main に印がある](images/unity/gameobject-menu.webp)
 
-置いたままで使えます。VHub のプレイリストを読み込む機能（外部プレイリスト読込）と、インスタンスを作った人が入室時に流す動画を決める機能（自動再生(Owner)）も、最初から入っていて有効です。設定を変えたいときは、[KawaPlayer の設定](settings.md) を見てください。
-
-Hierarchy でオブジェクトを選んだままメニューを選ぶと、そのオブジェクトの子として置かれます。シーンの一番上に置くときは、先に Hierarchy の空いているところを押して、選択を外してください。
+3. 置かれた KawaPlayer を、Scene で好きな場所に動かします。
 
 ## 4. タブレットを置く
 
 手に持って KawaPlayer を操作できるタブレットです。
 
-1. 同じメニューの **GameObject > KawaPlayer > Tablet** を選ぶと、シーンにタブレットが置かれます。何台置いてもかまいません。
-2. インスペクターの **KawaPlayer** の欄（①）に、3. で置いた KawaPlayer を入れます。
+1. もう一度、Hierarchy の何もないところを押します。置いたばかりの KawaPlayer が選ばれたままだと、タブレットがその中に置かれてしまいます。
+2. メニューの **GameObject > KawaPlayer > Tablet** を選びます。何台置いてもかまいません。
+3. インスペクターの **KawaPlayer** の欄（①）に、手順 3 で置いた KawaPlayer を入れます。
 
-![タブレットのインスペクター。① 操作する KawaPlayer を入れる欄と、② 元の場所に戻す設定に印がある](images/unity/tablet-inspector.webp)
+   ![タブレットのインスペクター。① 操作する KawaPlayer を入れる欄と、② 元の場所に戻す設定に印がある](images/unity/tablet-inspector.webp)
 
-置き忘れたタブレットを元の場所に戻す設定（②）などは、[タブレット](tablet.md) を見てください。
+中に置いてしまったときは、Hierarchy でタブレットを何もないところへドラッグすると外に出せます。置き忘れたタブレットを元の場所に戻す設定（②）などは、[タブレット](tablet.md) を見てください。
 
 ## 5. ビルドして確かめる
 
