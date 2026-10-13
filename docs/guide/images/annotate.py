@@ -118,6 +118,14 @@ MARKS = {
         dict(box=(1165, 37, 1297, 62), n=1),
         dict(box=(1204, 137, 1339, 160), n=2),
     ]),
+    # The track list of a real playlist, which the owner allowed for this picture only.
+    "unity/playlist-tracks": dict(crop=(582, 62, 1352, 482), scale=0.8, pad=dict(left=16), marks=[
+        dict(box=(1251, 68, 1346, 94), n=1, badge=(1234, 81)),
+        dict(box=(592, 121, 612, 136), n=2),
+        dict(box=(741, 115, 940, 140), n=3),
+        dict(box=(741, 144, 1313, 201), n=4, badge=(726, 172)),
+        dict(box=(1285, 118, 1310, 138), n=5, badge=(1266, 128)),
+    ]),
     "unity/module-manager": dict(scale=0.72, marks=[
         dict(box=(28, 423, 834, 537), n=1),
         dict(box=(746, 615, 828, 1163), n=2),
