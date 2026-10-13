@@ -49,7 +49,7 @@ KawaPlayer の機能の一部は、モジュールとして分かれていて、
 
 [VHub Playlist](https://playlist.vrc-hub.com) のプレイリストを、ワールドの中の URL の欄から読み込むモジュールです。使い方は [プレイリスト](playlists.md#ワールドの中で-vhub-のプレイリストを読み込む) にあります。
 
-- **必要なもの:** VHub（`playlist.vrc-hub.com`）。ワールドの中でプレイリストを読み込む人は、VRChat の設定で Allow Untrusted URLs をオンにしておく必要があります（[クイックスタートの 7.](quickstart.md#7-allow-untrusted-urls-をオンにする)）。Public・Group Public のインスタンスで曲を流すには、ワールドの Video Player Allowed Domains に `playlist.vrc-hub.com` を足しておきます（[クイックスタートの 6.](quickstart.md#6-vrchatcom-で-vhub-を許可する)）。
+- **必要なもの:** VHub（`playlist.vrc-hub.com`）。ワールドの中でプレイリストを読み込む人と、曲を聞く人それぞれが、VRChat の設定で Allow Untrusted URLs をオンにしておく必要があります（[クイックスタートの 7.](quickstart.md#7-allow-untrusted-urls-をオンにする)）。Public・Group Public のインスタンスでは、そのうえで、ワールドの Video Player Allowed Domains に `playlist.vrc-hub.com` を足しておく必要があります（[クイックスタートの 6.](quickstart.md#6-vrchatcom-で-vhub-を許可する)）。
 - **設定:** **設定** を押すと、次の欄が出ます。**値は変えないでください。** 今の VHub は、初めの値（特に **Pool ID** と、そこから作ったプール）で動くように作られています。値を変えると、VHub のプレイリストを読み込めなくなります。
 
   ![外部プレイリスト読込の設定。References、Pool Settings、Pool Status、Generate Pool、Playlist Limits、Auto Load の欄](images/unity/module-playlist-loader.webp)
@@ -110,7 +110,7 @@ KawaPlayer の音を、AudioLink に送るモジュールです。
 
   ![自動再生(World) の From Playlist の設定。プレイリスト、トラック、更新](images/unity/module-autoplay-playlist.webp)
 
-- **流れるとき:** インスタンスを作った人が入ったときに、一度だけ流れます。そのとき何かを再生していれば、流しません。
+- **流れるとき:** インスタンスのマスター（ふつうは、インスタンスに最初に入った人）の KawaPlayer が動き出したときに、**開始遅延** の秒数のあと、一度だけ流します。そのとき何かを再生していれば、流しません。あとから人が入っても、もう一度は流れません（流れている動画は、同期して見えます）。インスタンスを作った人かどうかは関係ありません（それは [自動再生(Owner)](#自動再生owner)）。ローカルモードの KawaPlayer では、入った人それぞれの画面で流れます。
 - **注意:**
   - [自動再生(Owner)](#自動再生owner) と一緒には使えません。自動再生(World) を使うときは、自動再生(Owner) を無効化してください。両方が有効だと、モジュール管理・KawaPlayer のインスペクター・ビルドのログにエラーが出ます。
   - **From Playlist** で選ぶプレイリストより前に、無効のプレイリストや曲のないプレイリストがあると、別のプレイリストが流れることがあります。ワールドに入るプレイリストを、上に並べてください。
@@ -172,7 +172,7 @@ KawaPlayer の音を、AudioLink に送るモジュールです。
 
 遊ぶ人それぞれの設定を、ワールドに入り直したときに戻すモジュールです。戻すのは、音量・ミュート・ミラー反転・明るさの 4 つです。
 
-- **必要なもの:** VRChat の Player Persistence（SDK 3.5.0 以降。KawaPlayer が求める SDK 3.10.2 以上なら使えます）。
+- **必要なもの:** VRChat の Player Persistence（KawaPlayer が求める SDK 3.10.2 以上なら使えます）。
 - **設定:**
 
   ![設定の永続化の設定。ユニークID の欄、ID が未設定という警告、IDを生成・IDをクリア](images/unity/module-persistence.webp)

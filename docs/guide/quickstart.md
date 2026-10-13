@@ -64,7 +64,7 @@ VCC の **Manage Project** でワールドのプロジェクトを開きます�
 
 ## 6. VRChat.com で VHub を許可する
 
-Public・Group Public のインスタンスでは、ワールドが許可したサイトの動画しか流れません。遊ぶ人が Allow Untrusted URLs をオンにしていても同じです。VHub の曲は `playlist.vrc-hub.com` の URL で流れるので、ワールドに VHub を許可しておきます。
+Public・Group Public のインスタンスでは、VRChat が初めから信頼していないサイトの動画は、ワールドがそのサイトを許可していて、**かつ** 見る人が Allow Untrusted URLs をオンにしているとき（次の 7.）だけ流れます。VHub の曲は `playlist.vrc-hub.com` の URL で流れるので、ワールドに VHub を許可しておきます。
 
 1. **Build & Publish Your World Online** で、ワールドをアップロードします。
 2. VRChat のサイト **[https://vrchat.com/home](https://vrchat.com/home)** を開いてログインし、左のメニューの **My Worlds**（①）を押します。
@@ -91,7 +91,7 @@ Friends・Invite などのインスタンスでは、この設定がなくても
 
 ## 7. Allow Untrusted URLs をオンにする
 
-ワールドの中で VHub のプレイリストを読み込むには、VRChat の設定で **Allow Untrusted URLs**（信頼されていない URL を許可）をオンにする必要があります。VHub（`playlist.vrc-hub.com`）は、VRChat が初めから信頼しているサイトではないためです。Friends・Invite などのインスタンスでは、VHub の曲を流すのにも、この設定が要ります。この設定は一人ひとりのもので、遊ぶ人それぞれがオンにします。
+ワールドの中で VHub のプレイリストを読み込むのにも、VHub の曲を聞くのにも、VRChat の設定で **Allow Untrusted URLs**（信頼されていない URL を許可）をオンにする必要があります。VHub（`playlist.vrc-hub.com`）は、VRChat が初めから信頼しているサイトではないためです。インスタンスの種類にかかわらず要ります（Public・Group Public では、6. のワールドの許可も要ります）。この設定は一人ひとりのもので、遊ぶ人それぞれがオンにします。
 
 1. クイックメニューを開き、下の並びの右端の **歯車**（①）を押します。
 

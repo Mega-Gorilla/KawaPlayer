@@ -101,7 +101,7 @@ MARKS = {
     "unity/playlist-editor": dict(scale=0.8, marks=[]),
     "unity/playlist-import": dict(scale=0.8, pad=dict(top=8), marks=[
         dict(box=(855, 37, 1008, 62), n=1),
-        dict(box=(197, 76, 1178, 101), n=2, cap="VHub の共有 URL を貼る", at=(960, 320)),
+        dict(box=(197, 76, 1178, 101), n=2, cap="VHub の VRChat用URL を貼る", at=(960, 320)),
         dict(box=(1186, 76, 1339, 101), n=3),
         dict(box=(1302, 37, 1346, 62), n=4),
     ]),

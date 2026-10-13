@@ -28,7 +28,7 @@ KawaPlayer で読み込めるのは、この VRChat用URL（`https://playlist.vr
 
 ## ワールドの中で読み込む
 
-**先に、VRChat の設定で Allow Untrusted URLs をオンにしてください**（[オンにする手順](quickstart.md#7-allow-untrusted-urls-をオンにする)）。オフのままでは、VHub のプレイリストを読み込めません。
+**先に、VRChat の設定で Allow Untrusted URLs をオンにしてください**（[オンにする手順](quickstart.md#7-allow-untrusted-urls-をオンにする)）。オフのままでは、VHub のプレイリストを読み込めず、曲も流れません。Public・Group Public のインスタンスでは、ワールドが VHub を許可している必要もあります（ワールドの作者が設定します。[クイックスタートの 6.](quickstart.md#6-vrchatcom-で-vhub-を許可する)）。
 
 1. スクリーンの左上の **URL を入力**（①）を押し、コピーした VRChat用URL を貼って確定します。**プレイリストを追加しました** と出れば、プレイリストの一覧に 1 つ足されています。止まっているときに読み込むと、そのまま再生が始まります。
 
@@ -51,7 +51,7 @@ KawaPlayer で読み込めるのは、この VRChat用URL（`https://playlist.vr
 
 ![URL から読み込みを開いたプレイリストエディター。① 上の URL から読み込み、② VHub の VRChat用URL を入れる欄、③ 右の URL から読み込み、④ 保存 に印がある](images/unity/playlist-import.webp)
 
-Public・Group Public のインスタンスで流すには、ワールドの Video Player Allowed Domains に `playlist.vrc-hub.com` を足しておきます（[クイックスタートの 6.](quickstart.md#6-vrchatcom-で-vhub-を許可する)）。取り込み直し方などは、[URL から読み込み](playlists.md#url-から読み込み) にあります。
+Public・Group Public のインスタンスで流すには、ワールドの Video Player Allowed Domains に `playlist.vrc-hub.com` を足しておきます（[クイックスタートの 6.](quickstart.md#6-vrchatcom-で-vhub-を許可する)）。どのインスタンスでも、聞く人それぞれが Allow Untrusted URLs をオンにしておく必要もあります。取り込み直し方などは、[URL から読み込み](playlists.md#url-から読み込み) にあります。
 
 ## プレイリストを作る
 

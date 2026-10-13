@@ -44,7 +44,7 @@ YouTube のプレイリストの読み込みは、左下の [プレイリスト�
 
 ![URL から読み込みを開いたプレイリストエディター。① 上の URL から読み込み、② VHub の VRChat用URL を入れる欄、③ 右の URL から読み込み、④ 保存 に印がある](images/unity/playlist-import.webp)
 
-- **取り込みのしくみ:** 曲名と並び順は、ワールドをビルドしたときに焼き込まれます。曲の URL は VHub を通るので、再生には VHub が要ります。Public・Group Public のインスタンスで流すには、ワールドの Video Player Allowed Domains に `playlist.vrc-hub.com` を足しておきます（[クイックスタートの 6.](quickstart.md#6-vrchatcom-で-vhub-を許可する)）。それ以外のインスタンスでは、聞く人が VRChat の設定で **Allow Untrusted URLs** をオンにしておく必要があります（[オンにする手順](quickstart.md#7-allow-untrusted-urls-をオンにする)）。
+- **取り込みのしくみ:** 曲名と並び順は、ワールドをビルドしたときに焼き込まれます。曲の URL は VHub を通るので、再生には VHub が要ります。聞く人それぞれが、VRChat の設定で **Allow Untrusted URLs** をオンにしておく必要があります（[オンにする手順](quickstart.md#7-allow-untrusted-urls-をオンにする)）。Public・Group Public のインスタンスでは、そのうえで、ワールドの Video Player Allowed Domains に `playlist.vrc-hub.com` を足しておく必要があります（[クイックスタートの 6.](quickstart.md#6-vrchatcom-で-vhub-を許可する)）。
 - **取り込み直す:** 同じ URL をもう一度取り込むと、今のプレイリストを更新するか、新しいプレイリストとして足すかを聞かれます。
 - **動画プレイヤー:** VHub から取り込んだプレイリストでは、Unity を指定した曲も、ワールドでは AVPro で再生します。Unity で再生したい曲は、VHub から取り込んでいないプレイリストに入れてください。
 
@@ -183,10 +183,13 @@ JSON ファイルから、プレイリストを読み込む欄を開きます（
 
 **先に、VRChat の設定で Allow Untrusted URLs（信頼されていない URL を許可する設定）をオンにしてください。** VHub（`playlist.vrc-hub.com`）は、VRChat が初めから信頼しているサイトではありません。そのため、オフのままでは、プレイリストを読み込めません。この設定は一人ひとりのもので、ほかの人がオンにしても、自分には効きません。
 
-曲を流すときは、インスタンスの種類で決まりが違います。
+読み込んだ曲を聞くのにも、聞く人それぞれの Allow Untrusted URLs が要ります。インスタンスの種類で、要るものが違います。
 
-- **Public・Group Public:** ワールドの Video Player Allowed Domains に `playlist.vrc-hub.com` が入っていると流れます（[クイックスタートの 6.](quickstart.md#6-vrchatcom-で-vhub-を許可する)）。入っていないと、Allow Untrusted URLs をオンにしていても流れません。
-- **Friends・Invite など:** 聞く人が Allow Untrusted URLs をオンにしていると流れます。
+| インスタンス | 曲が流れるのに要るもの |
+| --- | --- |
+| **Public・Group Public** | 聞く人の Allow Untrusted URLs **と**、ワールドの Video Player Allowed Domains の `playlist.vrc-hub.com`（[クイックスタートの 6.](quickstart.md#6-vrchatcom-で-vhub-を許可する)）。どちらか一方だけでは流れない |
+| **Friends・Invite など** | 聞く人の Allow Untrusted URLs |
+| （プレイリストの読み込み） | インスタンスの種類にかかわらず、読み込む人の Allow Untrusted URLs |
 
 オンにする手順は、画像付きで [クイックスタートの 7.](quickstart.md#7-allow-untrusted-urls-をオンにする) にあります。
 
