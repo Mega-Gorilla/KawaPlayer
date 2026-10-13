@@ -34,6 +34,14 @@ VCC が開かないときは、VCC の **Settings > Packages > Add Repository** 
 https://mega-gorilla.github.io/vpm-repos/index.json
 ```
 
+**Repository Listing URL** の欄に貼って、右の **Add** を押します。
+
+![VCC の Settings の Packages。Repository Listing URL の欄に KawaPlayer のリポジトリの URL が入り、右に Add ボタンがある](images/vcc-add-repository.webp)
+
+どちらの方法でも、追加できると **Settings > Packages** の一覧に **VHub Packages**（URL は `mega-gorilla.github.io`）の行が出ます。左にチェックが入っていれば、次へ進めます。
+
+![一覧の VHub Packages の行。左にチェックが入っている](images/vcc-repository-list.webp)
+
 ### 3. プロジェクトに KawaPlayer を入れる
 
 VCC の **Manage Project** でワールドのプロジェクトを開き、一覧の **KawaPlayer** の **Add** を押します。新しい版が出たときも、ここから更新できます。
