@@ -45,11 +45,6 @@ VCC の **Manage Project** でワールドのプロジェクトを開きます�
 
    ![タブレットのインスペクター。一番上の、操作する KawaPlayer を入れる欄に ① の印がある](images/unity/tablet-player-field.webp)
 
-**タブレットが KawaPlayer の中に入ってしまったとき:** Hierarchy で **Tablet** が **KawaPlayer** の下に、一段下げて並んでいたら、KawaPlayer の中に置かれています。中に入ったままだと、KawaPlayer を動かしたときにタブレットも一緒に動きます。直し方は、次のどちらかです。
-
-- **A. 取り消してやり直す:** タブレットが消えるまで Ctrl+Z（Mac は Cmd+Z）を押して取り消し、上の 1. からやり直します。
-- **B. 外に出す:** Hierarchy で **Tablet** をつかみ、一番下の何もないところまでドラッグして離します。**KawaPlayer** と同じ高さ（一段下げない位置）に並べば、外に出ています。
-
 ## 5. ビルドして確かめる
 
 メニューの **VRChat SDK > Show Control Panel** で開くパネルの **Builder** で、**Build Type**（①）を選んで、その下のボタン（②）を押します。上の **Review Any Alerts** に問題が出ているときは、先に直してください。
