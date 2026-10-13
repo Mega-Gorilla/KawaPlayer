@@ -61,8 +61,21 @@ VCC の **Manage Project** でワールドのプロジェクトを開きます�
 Public・Group Public のインスタンスでは、ワールドが許可したサイトの動画しか流れません。遊ぶ人が Allow Untrusted URLs をオンにしていても同じです。VHub の曲は `playlist.vrc-hub.com` の URL で流れるので、ワールドに VHub を許可しておきます。
 
 1. **Build & Publish Your World Online** で、ワールドをアップロードします。
-2. VRChat のサイト（[vrchat.com](https://vrchat.com/home)）にログインし、**My Worlds** からワールドを選んで、**Edit World Info** を開きます。
-3. **Video Player Allowed Domains** に `playlist.vrc-hub.com` を足して、保存します。
+2. VRChat のサイト（[vrchat.com](https://vrchat.com/home)）にログインし、左のメニューの **My Worlds**（①）を押します。
+
+   ![VRChat のサイトの左のメニュー。My Worlds に ① の印がある](images/vrchat/site-menu.webp)
+
+3. 一覧から、KawaPlayer を置いたワールド（②）を選びます。
+
+   ![My Worlds のワールドの一覧。ワールドに ② の印がある](images/vrchat/site-my-worlds.webp)
+
+4. ワールドの **Edit World Info** を開きます。
+
+   ![Edit World Info のページの上の部分。Name の欄がある](images/vrchat/site-edit-world-info.webp)
+
+5. ページの下のほうの **Video Player Allowed Domains**（③）に `playlist.vrc-hub.com` を入れて、保存します。
+
+   ![Edit World Info の Video Player Allowed Domains。playlist.vrc-hub.com を入れた欄に ③ の印がある](images/vrchat/site-allowed-domains.webp)
 
 Friends・Invite などのインスタンスでは、この設定がなくても、遊ぶ人が次の 7. の設定をオンにしていれば流れます。
 

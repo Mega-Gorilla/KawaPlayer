@@ -161,6 +161,16 @@ MARKS = {
         dict(box=(12, 338, 240, 393), n=3, badge=(244, 334)),
         dict(box=(986, 334, 1068, 378), n=4, cap="オンにする", at=(800, 357)),
     ]),
+    "vrchat/site-menu": dict(scale=0.8, pad=dict(left=16), marks=[
+        dict(box=(8, 169, 388, 233), n=1),
+    ]),
+    "vrchat/site-my-worlds": dict(scale=0.8, pad=dict(left=12), marks=[
+        dict(box=(22, 178, 588, 668), n=2),
+    ]),
+    "vrchat/site-edit-world-info": dict(scale=0.8, marks=[]),
+    "vrchat/site-allowed-domains": dict(scale=0.9, marks=[
+        dict(box=(31, 149, 1115, 203), n=3, cap="playlist.vrc-hub.com を入れる", at=(745, 119)),
+    ]),
     "screen/controls": dict(scale=0.667, marks=[
         dict(box=(27, 148, 69, 575), cap="左の列", at=(173, 360)),
         dict(box=(27, 613, 1253, 699), cap="下", at=(640, 580)),

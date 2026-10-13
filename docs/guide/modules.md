@@ -50,7 +50,7 @@ KawaPlayer の機能の一部は、モジュールとして分かれていて、
 [VHub Playlist](https://playlist.vrc-hub.com) のプレイリストを、ワールドの中の URL の欄から読み込むモジュールです。使い方は [プレイリスト](playlists.md#ワールドの中で-vhub-のプレイリストを読み込む) にあります。
 
 - **必要なもの:** VHub（`playlist.vrc-hub.com`）。ワールドの中でプレイリストを読み込む人は、VRChat の設定で Allow Untrusted URLs をオンにしておく必要があります（[クイックスタートの 7.](quickstart.md#7-allow-untrusted-urls-をオンにする)）。Public・Group Public のインスタンスで曲を流すには、ワールドの Video Player Allowed Domains に `playlist.vrc-hub.com` を足しておきます（[クイックスタートの 6.](quickstart.md#6-vrchatcom-で-vhub-を許可する)）。
-- **設定:** **設定** を押すと、次の欄が出ます。初めの値のままで使えます。
+- **設定:** **設定** を押すと、次の欄が出ます。**値は変えないでください。** 今の VHub は、初めの値（特に **Pool ID** と、そこから作ったプール）で動くように作られています。値を変えると、VHub のプレイリストを読み込めなくなります。
 
   ![外部プレイリスト読込の設定。References、Pool Settings、Pool Status、Generate Pool、Playlist Limits、Auto Load の欄](images/unity/module-playlist-loader.webp)
 
@@ -58,9 +58,9 @@ KawaPlayer の機能の一部は、モジュールとして分かれていて、
   | --- | --- |
   | **Controller** | KawaPlayer の本体。初めからつながっている |
   | **Pool Base URL**・**Pool Size** | VHub の URL を読み込むための、URL の束（プール）の設定。変えられない |
-  | **Pool ID** | VHub 側のプールの名前。ふつうは `default` のまま |
+  | **Pool ID** | VHub 側のプールの名前。`default` から変えない |
   | **Current Pool Size**・**Estimated File Size** | 入っているプールの件数と、およその大きさ |
-  | **Generate Pool** | プールを作り直す。**Pool ID** を変えたときだけ使う。作る前に、VHub にそのプールがあるか確かめる |
+  | **Generate Pool** | プールを作り直すボタン。押さない（**Pool ID** を変えたときに使うもので、今の VHub では使わない） |
   | **Max Tracks** | 1 つのプレイリストから読み込む曲の上限（1〜500、初めは 200） |
   | **Max Sync Bytes** | 1 つのプレイリストで全員に送るデータの上限（4096〜65536、初めは 32768）。大きくすると、全員に行き渡るまでの時間が延びる |
   | **Auto Load On Start** | オンにすると、インスタンスができたときに、決めたプレイリストを読み込む。オンにすると **Resolve URL**（読み込む URL）と **Delay (sec)**（待つ秒数）が出る |
