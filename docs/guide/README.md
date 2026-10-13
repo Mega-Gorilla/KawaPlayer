@@ -18,11 +18,14 @@ KawaPlayer を、ワールドに置くところから、ワールドの中で使
 
 ### 2. VCC に KawaPlayer のリポジトリを追加する
 
-下のボタンを押すと、KawaPlayer の VCC 用のページが開きます。そのページの **Add to VCC** を押すと VCC が開き、リポジトリの追加を聞かれるので、**I Understand, Add Repository** を押してください。
+1. 次のリンクを開きます: **[KawaPlayer の VCC 用のページ（mega-gorilla.github.io/vpm-repos）](https://mega-gorilla.github.io/vpm-repos/)**
+2. ページの上のほう、**Copy** の左にある **Add to VCC** を押します。
 
-[![Add to VCC](images/add-to-vcc.svg)](https://mega-gorilla.github.io/vpm-repos/)
+   ![VCC 用のページ。「VHub Packages」の見出しの下、Copy の左にある「Add to VCC」が枠で囲まれている](images/vcc-listing-page.webp)
 
-GitHub では VCC を開くリンク（`vcc://`）を直接押せないので、いったんこのページを開きます。ボタンが使えないときは、下の URL をブラウザのアドレスバーに貼って Enter を押しても、同じように VCC が開きます。
+3. VCC が開いてリポジトリの追加を聞かれるので、**I Understand, Add Repository** を押します。
+
+GitHub では VCC を開くリンク（`vcc://`）を直接押せないので、いったんこのページを開きます。ページが開けないときは、下の URL をブラウザのアドレスバーに貼って Enter を押しても、同じように VCC が開きます。
 
 ```
 vcc://vpm/addRepo?url=https://mega-gorilla.github.io/vpm-repos/index.json
