@@ -28,9 +28,10 @@ ACCENT = (255, 102, 0)
 WHITE = (255, 255, 255)
 SS = 2  # Marks are drawn at twice the size and reduced, so their edges are smooth.
 
-# name: pad (margin added around the original, for captions), scale (size of the
-# marks), marks. A mark: box, n (badge), badge (where, if not the box's top-left),
-# cap (caption) and at (its centre).
+# name: src (the original to draw on, if not the one of the same name), pad (margin
+# added around the original, for captions), scale (size of the marks), marks. A mark:
+# box, n (badge), badge (where, if not the box's top-left), cap (caption) and at (its
+# centre).
 MARKS = {
     "vcc/listing-page": dict(scale=0.9, marks=[
         dict(box=(526, 168, 640, 204), cap="ここを押す", at=(290, 186)),
@@ -79,6 +80,10 @@ MARKS = {
     "unity/module-manager": dict(scale=0.72, marks=[
         dict(box=(28, 423, 834, 537), n=1),
         dict(box=(746, 615, 828, 1163), n=2),
+    ]),
+    # The quickstart only fills in the KawaPlayer field; the tablet page explains the rest.
+    "unity/tablet-player-field": dict(src="unity/tablet-inspector", scale=0.72, pad=dict(right=270), marks=[
+        dict(box=(274, 430, 664, 456), n=1, cap="KawaPlayer を入れる", at=(826, 443)),
     ]),
     "unity/build": dict(scale=0.72, pad=dict(left=16), marks=[
         dict(box=(9, 257, 404, 288), n=1),
@@ -206,7 +211,7 @@ def shift(m, dx, dy):
 
 
 def make(name, spec, font_path):
-    im = Image.open(os.path.join(HERE, "original", name + ".webp")).convert("RGB")
+    im = Image.open(os.path.join(HERE, "original", spec.get("src", name) + ".webp")).convert("RGB")
     marks = spec["marks"]
     if "pad" in spec:
         im = add_margin(im, **spec["pad"])

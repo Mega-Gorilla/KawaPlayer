@@ -9,14 +9,14 @@
 | `vrchat/` | VRChat のメニュー（クイックメニューと設定） |
 | `screen/` | ワールドの中の、KawaPlayer のスクリーン |
 | `tablet/` | ワールドの中の、タブレット |
-| `original/` | 上の 5 つと同じ名前の、印を付ける前の画像 |
+| `original/` | 上の 5 つと同じ名前の、印を付ける前の画像（`src` で元を指定した画像は、その元を使う） |
 
 ## 印の付け方
 
 ガイドの画像には、押す場所や入れる場所に印（枠・番号・矢印つきの説明）があります。印は `annotate.py` が `original/` の画像に描いたもので、画像を直接は編集しません。
 
 1. 撮り直したときは、印のない画像を、`original/` の同じ名前で置き換えます。
-2. 印の位置や文言は、`annotate.py` の `MARKS` を直します。座標は `original/` の画像の画素です。
+2. 印の位置や文言は、`annotate.py` の `MARKS` を直します。座標は `original/` の画像の画素です。同じ画像に別の印を付けたものが要るときは、新しい名前で足し、`src` に元の画像の名前を書きます（クイックスタートの `unity/tablet-player-field` がそうです）。
 3. `python annotate.py <フォント> [名前 ...]` で作り直します。フォントは [Zen Maru Gothic](https://fonts.google.com/specimen/Zen+Maru+Gothic) の Regular で、Pillow が要ります。名前を省くと、全部を作り直します。
 
 本文の ①② は、画像の番号と合わせてください。
