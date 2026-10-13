@@ -96,7 +96,7 @@
   "msg.confirmPlayUrlDetail": "播放中的视频将会停止。",
   "msg.unlockUiVr": "请将控制器对准屏幕并长按触发器以解锁...",
   "msg.unlockUiDesktop": "请将光标对准屏幕并长按左键以解锁...",
-  "error.accessDenied": "Access Denied...\n请确认「Allow Untrusted URLs」是否开启。",
+  "error.accessDenied": "Access Denied...\n请开启「Allow Untrusted URLs」。\n在 Public・Group Public 中，还需要世界允许此网站。",
   "error.unknown": "Unknown Error...\n发生未知错误。",
   "error.invalidUrl": "Invalid URL...\n您输入的url是无效url。",
   "error.playerError": "Player Error...\n视频播放器发生错误。",

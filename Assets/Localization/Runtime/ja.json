@@ -96,7 +96,7 @@
   "msg.confirmPlayUrlDetail": "再生中の動画が停止します。",
   "msg.unlockUiVr": "ロック解除するにはコントローラーを画面に向けてトリガーを長押ししてください...",
   "msg.unlockUiDesktop": "ロック解除するにはカーソルを画面に向けて左クリックを長押ししてください...",
-  "error.accessDenied": "Access Denied...\n「Allow Untrusted URLs」が適用されているか確認してください。",
+  "error.accessDenied": "Access Denied...\n「Allow Untrusted URLs」をオンにしてください。\nPublic・Group Public では、ワールドの許可も必要です。",
   "error.unknown": "Unknown Error...\n不明なエラーが発生しました。",
   "error.invalidUrl": "Invalid URL...\nご入力されたURLは有効なURLではありません。",
   "error.playerError": "Player Error...\n動画プレイヤーのエラーが発生しました。",
