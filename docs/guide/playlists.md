@@ -54,12 +54,66 @@ JSON ファイルから、プレイリストを読み込む欄を開きます（
 
 ![Jsonからインポートの欄を開いたプレイリストエディターの上の部分。① 上の Jsonからインポート、② 欄の中の Jsonからインポート に印がある](images/unity/playlist-json-import.webp)
 
-- **読めるファイル:** **Jsonに書き出す** で書き出したファイルと、YamaPlayer で書き出したファイル、同じ形で手動で書いたファイルです。形は [JSON の形式](#json-の形式) にあります。
+- **読めるファイル:** **Jsonに書き出す** で書き出したファイルと、YamaPlayer で書き出したファイル、同じ形で手動で書いたファイルです。形は、この節の下の [JSON の形式](#json-の形式) にあります。
 - **今あるプレイリスト:** 消えません。読み込んだ分が足されるだけです。
 - **読み込めないとき:** 理由がダイアログに出て、プレイリストは 1 つも足されません。
 - **保存:** 足したプレイリストは、**保存** するまでシーンに入りません。
 
 ほかのプロジェクトに移すときは、移す元の **Jsonに書き出す** で書き出したファイルを、ここで読み込みます。
+
+#### JSON の形式
+
+**Jsonからインポート** で読めるのは、次の形の JSON です。**Jsonに書き出す** で書き出すと、この形になります。
+
+```json
+{
+  "playlists": [
+    {
+      "name": "作業用BGM",
+      "active": true,
+      "tracks": [
+        { "playerType": 1, "title": "サンプル曲 01", "url": "https://example.com/sample01.mp4" },
+        { "playerType": 1, "title": "サンプル曲 02", "url": "https://example.com/sample02.mp4" }
+      ],
+      "youtubeListId": "",
+      "vhubPlaylistUrl": ""
+    }
+  ]
+}
+```
+
+一番上の `playlists` に、プレイリストを並べます。1 つのファイルに、いくつ入れてもかまいません。
+
+**プレイリスト**（`playlists` の中の 1 つ）
+
+| キー | 中身 | 省いたとき |
+| --- | --- | --- |
+| `name` | プレイリストの名前（文字列） | 名前なし |
+| `active` | 有効かどうか（`true`・`false`）。`false` だとワールドに入らない | `true` |
+| `tracks` | 曲の一覧（配列） | 曲なし |
+| `youtubeListId` | プレイリスト設定の、YouTube のプレイリストの欄の中身（文字列） | 空 |
+| `vhubPlaylistUrl` | VHub から取り込んだときの共有 URL（文字列）。入っていると、Unity を指定した曲もワールドでは AVPro で再生する | 空 |
+
+**曲**（`tracks` の中の 1 つ）
+
+| キー | 中身 | 省いたとき |
+| --- | --- | --- |
+| `playerType` | 再生する動画プレイヤー。数字か名前で書く（下の表） | AV Pro Video Player |
+| `title` | 曲の名前（文字列） | 空 |
+| `url` | 動画の URL（文字列） | 空 |
+
+| `playerType` | 動画プレイヤー |
+| --- | --- |
+| `1` か `"AVProVideoPlayer"` | AV Pro Video Player |
+| `0` か `"UnityVideoPlayer"` | Unity Video Player |
+| `2` か `"ImageViewer"` | Image Viewer（画像） |
+
+- **YamaPlayer の JSON:** YamaPlayer で書き出した JSON は、曲の動画プレイヤーのキーが `mode` です。これもそのまま読めます。
+- **キーの大文字:** `Name`・`Tracks`・`Title` のように、大文字で始まるキーも読めます。
+- **読み込めないとき:** 次のようなときは、理由がダイアログに出て、プレイリストは 1 つも足されません。
+  - JSON として読めない
+  - 一番上に `playlists` がない
+  - 値の型が違う（例: `active` が文字列）
 
 ### Jsonに書き出す
 
@@ -68,6 +122,7 @@ JSON ファイルから、プレイリストを読み込む欄を開きます（
 ![Jsonに書き出すの欄を開いたプレイリストエディターの上の部分。① 上の Jsonに書き出す、② 欄の中の Jsonに書き出す に印がある](images/unity/playlist-export.webp)
 
 - **書き出すもの:** シーンに保存済みのプレイリストを、全部書き出します。変えたあとは、先に **保存** を押してください。
+- **ファイルの形:** [JSON の形式](#json-の形式) のとおりです。
 - **無効のプレイリスト:** **有効** を外したプレイリストも、`"active": false` で書き出されます。
 - **使いどころ:** ほかのプロジェクトに移すときや、控えを取っておくときに使います。
 
@@ -147,57 +202,3 @@ JSON ファイルから、プレイリストを読み込む欄を開きます（
 ![プレイリスト『作業用BGM』の曲の一覧。① 曲と、② 右上の削除・更新に印がある](images/screen/playlist.webp)
 
 読み込んだ VHub のプレイリストは、右上の **更新** で最新の内容に、**削除** で一覧から外せます（②）。
-
-## JSON の形式
-
-**Jsonからインポート** で読めるのは、次の形の JSON です。**Jsonに書き出す** で書き出すと、この形になります。
-
-```json
-{
-  "playlists": [
-    {
-      "name": "作業用BGM",
-      "active": true,
-      "tracks": [
-        { "playerType": 1, "title": "サンプル曲 01", "url": "https://example.com/sample01.mp4" },
-        { "playerType": 1, "title": "サンプル曲 02", "url": "https://example.com/sample02.mp4" }
-      ],
-      "youtubeListId": "",
-      "vhubPlaylistUrl": ""
-    }
-  ]
-}
-```
-
-一番上の `playlists` に、プレイリストを並べます。1 つのファイルに、いくつ入れてもかまいません。
-
-**プレイリスト**（`playlists` の中の 1 つ）
-
-| キー | 中身 | 省いたとき |
-| --- | --- | --- |
-| `name` | プレイリストの名前（文字列） | 名前なし |
-| `active` | 有効かどうか（`true`・`false`）。`false` だとワールドに入らない | `true` |
-| `tracks` | 曲の一覧（配列） | 曲なし |
-| `youtubeListId` | プレイリスト設定の、YouTube のプレイリストの欄の中身（文字列） | 空 |
-| `vhubPlaylistUrl` | VHub から取り込んだときの共有 URL（文字列）。入っていると、Unity を指定した曲もワールドでは AVPro で再生する | 空 |
-
-**曲**（`tracks` の中の 1 つ）
-
-| キー | 中身 | 省いたとき |
-| --- | --- | --- |
-| `playerType` | 再生する動画プレイヤー。数字か名前で書く（下の表） | AV Pro Video Player |
-| `title` | 曲の名前（文字列） | 空 |
-| `url` | 動画の URL（文字列） | 空 |
-
-| `playerType` | 動画プレイヤー |
-| --- | --- |
-| `1` か `"AVProVideoPlayer"` | AV Pro Video Player |
-| `0` か `"UnityVideoPlayer"` | Unity Video Player |
-| `2` か `"ImageViewer"` | Image Viewer（画像） |
-
-- **YamaPlayer の JSON:** YamaPlayer で書き出した JSON は、曲の動画プレイヤーのキーが `mode` です。これもそのまま読めます。
-- **キーの大文字:** `Name`・`Tracks`・`Title` のように、大文字で始まるキーも読めます。
-- **読み込めないとき:** 次のようなときは、理由がダイアログに出て、プレイリストは 1 つも足されません。
-  - JSON として読めない
-  - 一番上に `playlists` がない
-  - 値の型が違う（例: `active` が文字列）
