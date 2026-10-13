@@ -41,6 +41,8 @@ KawaPlayer は YamaPlayer の全機能を継承しつつ、**ワールド作成�
 
 これで KawaPlayer の全機能 (PlaylistLoader / DefaultUrl 含む) が **追加設定なしで** 使えます。
 
+画像付きの手順は、[クイックスタート](docs/guide/quickstart.md) を見てください。インストール・設定・プレイリスト・モジュール・タブレット・ワールドの中での使い方は、[使い方ガイド](docs/guide/README.md) にカテゴリーごとのページがあります。
+
 > アップデートも VCC からワンクリックで実行できます。
 
 ---
