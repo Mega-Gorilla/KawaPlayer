@@ -28,10 +28,11 @@ ACCENT = (255, 102, 0)
 WHITE = (255, 255, 255)
 SS = 2  # Marks are drawn at twice the size and reduced, so their edges are smooth.
 
-# name: src (the original to draw on, if not the one of the same name), pad (margin
-# added around the original, for captions), scale (size of the marks), marks. A mark:
-# box, n (badge), badge (where, if not the box's top-left), cap (caption) and at (its
-# centre).
+# name: src (the original to draw on, if not the one of the same name), crop (the part
+# of the original to keep), pad (margin added around it, for captions), scale (size of
+# the marks), marks. A mark: box, n (badge), badge (where, if not the box's top-left;
+# a badge alone needs no box), cap (caption) and at (its centre). Coordinates are those
+# of the original, before crop and pad.
 MARKS = {
     "vcc/listing-page": dict(scale=0.9, marks=[
         dict(box=(526, 168, 640, 204), cap="ここを押す", at=(290, 186)),
@@ -67,6 +68,26 @@ MARKS = {
         dict(box=(24, 961, 832, 1051), n=4),
         dict(box=(24, 1067, 832, 1207), n=5),
         dict(box=(24, 1223, 832, 1380), n=6),
+    ]),
+    # The settings page shows each part of the inspector under its heading, with the
+    # number it has on the whole inspector.
+    "unity/inspector-language": dict(src="unity/inspector", crop=(196, 338, 676, 400), scale=0.72, marks=[
+        dict(n=1, badge=(260, 372)),
+    ]),
+    "unity/inspector-appearance": dict(src="unity/inspector", crop=(3, 418, 841, 556), scale=0.72, pad=dict(left=28), marks=[
+        dict(n=2, badge=(-11, 441)),
+    ]),
+    "unity/inspector-player": dict(src="unity/inspector", crop=(3, 553, 841, 953), scale=0.72, pad=dict(left=28), marks=[
+        dict(n=3, badge=(-11, 576)),
+    ]),
+    "unity/inspector-playlist": dict(src="unity/inspector", crop=(3, 951, 841, 1059), scale=0.72, pad=dict(left=28), marks=[
+        dict(n=4, badge=(-11, 974)),
+    ]),
+    "unity/inspector-modules": dict(src="unity/inspector", crop=(3, 1057, 841, 1215), scale=0.72, pad=dict(left=28), marks=[
+        dict(n=5, badge=(-11, 1080)),
+    ]),
+    "unity/inspector-version": dict(src="unity/inspector", crop=(3, 1213, 841, 1391), scale=0.72, pad=dict(left=28), marks=[
+        dict(n=6, badge=(-11, 1236)),
     ]),
     "unity/playlist-editor": dict(scale=0.8, pad=dict(top=8), marks=[
         dict(box=(855, 37, 1008, 62), n=1, cap="VHub から取り込む", at=(1010, 190)),
@@ -169,9 +190,10 @@ def draw_marks(size, marks, scale, font_path):
     f_cap = ImageFont.truetype(font_path, round(28 * k))
     for m in marks:
         pad = 6 * k
-        b = tuple(v * SS for v in m["box"])
-        b = (b[0] - pad, b[1] - pad, b[2] + pad, b[3] + pad)
-        d.rounded_rectangle(b, radius=12 * k, outline=ACCENT, width=w)
+        if "box" in m:
+            b = tuple(v * SS for v in m["box"])
+            b = (b[0] - pad, b[1] - pad, b[2] + pad, b[3] + pad)
+            d.rounded_rectangle(b, radius=12 * k, outline=ACCENT, width=w)
         if m.get("cap"):
             cx, cy = (v * SS for v in m["at"])
             pw, ph = d.textlength(m["cap"], font=f_cap) + 30 * k, 46 * k
@@ -203,7 +225,9 @@ def add_margin(im, top=0, bottom=0, left=0, right=0):
 
 
 def shift(m, dx, dy):
-    m = dict(m, box=(m["box"][0] + dx, m["box"][1] + dy, m["box"][2] + dx, m["box"][3] + dy))
+    m = dict(m)
+    if "box" in m:
+        m["box"] = (m["box"][0] + dx, m["box"][1] + dy, m["box"][2] + dx, m["box"][3] + dy)
     for key in ("at", "badge"):
         if key in m:
             m[key] = (m[key][0] + dx, m[key][1] + dy)
@@ -213,6 +237,10 @@ def shift(m, dx, dy):
 def make(name, spec, font_path):
     im = Image.open(os.path.join(HERE, "original", spec.get("src", name) + ".webp")).convert("RGB")
     marks = spec["marks"]
+    if "crop" in spec:
+        c = spec["crop"]
+        im = im.crop(c)
+        marks = [shift(m, -c[0], -c[1]) for m in marks]
     if "pad" in spec:
         im = add_margin(im, **spec["pad"])
         marks = [shift(m, spec["pad"].get("left", 0), spec["pad"].get("top", 0)) for m in marks]
