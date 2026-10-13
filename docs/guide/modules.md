@@ -85,10 +85,10 @@ KawaPlayer の音を、AudioLink に送るモジュールです。
   | --- | --- |
   | **Audio Link** | 使う AudioLink。空のままでよい。ビルドのとき、シーンで最初に見つかった AudioLink が入る |
   | **AudioLinkをシーンに追加** | **Audio Link** が空のときに出る。シーンに AudioLink を置いて、つなぐ |
-  | **デフォルトでAudioLinkを有効にする** | 入ったときに、AudioLink への連携をオンにしておくか。初めはオフ |
+  | **デフォルトでAudioLinkを有効にする** | 入ったときに、KawaPlayer の音を AudioLink につないでおくか。初めはオフで、オフのときは AudioLink に何もしない |
 
 - **ワールドの中:** スクリーンの設定の **映像・音声** に **AudioLink 連携**、タブレットの設定アプリの **音声** に同じ欄が出ます。**無効**・**有効** で切り替えます。効くのは、切り替えた人だけです。
-- **注意:** **デフォルトでAudioLinkを有効にする** がオフだと、入ったときに AudioLink が止まります。KawaPlayer 以外の音でも AudioLink を使っているワールドでは、オンにしてください。
+- **ほかの音で AudioLink を使うワールド:** **無効** に切り替えたときに外すのは、AudioLink が KawaPlayer の音につながっているときだけです。DJ ブースなど、ほかの音につないだ AudioLink は止めません。
 
 ### 自動再生(World)
 
