@@ -89,8 +89,9 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
       if (kind != PlaylistLoader.UrlKindOwnPlaylist)
       {
         // Web-page URL (/playlists/{id}) or malformed /r/ path: guide the
-        // user to the share URL. Rewriting to /r/... is impossible at
-        // runtime (string -> VRCUrl conversion is editor-only).
+        // user to the URL VHub's "VRChat用URLをコピー" copies. Rewriting to
+        // /r/... is impossible at runtime (string -> VRCUrl conversion is
+        // editor-only).
         ShowError(ui, "errorSharePageUrl");
         return;
       }
