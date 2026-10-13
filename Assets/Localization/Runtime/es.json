@@ -96,7 +96,7 @@
   "msg.confirmPlayUrlDetail": "El video que se está reproduciendo actualmente se detendrá.",
   "msg.unlockUiVr": "Por favor, mantenga presionado el gatillo mientras mira la pantalla para desbloquear...",
   "msg.unlockUiDesktop": "Por favor, mantenga presionado el clic izquierdo mientras mira la pantalla para desbloquear...",
-  "error.accessDenied": "Access Denied...\nPor favor, asegúrate de que 'Allow Untrusted URLs' está activado.",
+  "error.accessDenied": "Access Denied...\nActiva 'Allow Untrusted URLs'.\nEn Public / Group Public, el mundo también debe permitir este sitio.",
   "error.unknown": "Unknown Error...\nSe ha producido un error desconocido.",
   "error.invalidUrl": "Invalid URL...\nLa URL que has introducido no es válida.",
   "error.playerError": "Player Error...\nSe ha producido un error en el reproductor de video.",

@@ -96,7 +96,7 @@
   "msg.confirmPlayUrlDetail": "The video currently playing will stop.",
   "msg.unlockUiVr": "Please press and hold the trigger while looking at the screen to unlock...",
   "msg.unlockUiDesktop": "Please press and hold the left click while looking at the screen to unlock...",
-  "error.accessDenied": "Access Denied...\nPlease make sure that \"Allow Untrusted URLs\" is turned on.",
+  "error.accessDenied": "Access Denied...\nPlease turn on \"Allow Untrusted URLs\".\nIn Public / Group Public, the world must also allow this site.",
   "error.unknown": "Unknown Error...\nAn unknown error occurred.",
   "error.invalidUrl": "Invalid URL...\nThe url you entered is an invalid url.",
   "error.playerError": "Player Error...\nAn error occurred in the video player.",

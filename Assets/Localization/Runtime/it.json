@@ -96,7 +96,7 @@
   "msg.confirmPlayUrlDetail": "Il video corrente si fermerà.",
   "msg.unlockUiVr": "Premi e tieni premuto il trigger mentre guardi lo schermo per sbloccare...",
   "msg.unlockUiDesktop": "Premi e tieni premuto il tasto sinistro mentre guardi lo schermo per sbloccare...",
-  "error.accessDenied": "Accesso bloccato...\nAssicurati che \"Allow Untrusted URLs\" sia attivato.",
+  "error.accessDenied": "Accesso bloccato...\nAttiva \"Allow Untrusted URLs\".\nIn Public / Group Public, anche il mondo deve consentire questo sito.",
   "error.unknown": "Errore sconosciuto...\nE' avvenuto un errore sconosciuto.",
   "error.invalidUrl": "URL Invalido...\nL'url deve essere valido.",
   "error.playerError": "Errore Player...\nSi è verificato un errore nel video player.",
