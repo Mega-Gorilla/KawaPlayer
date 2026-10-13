@@ -140,7 +140,7 @@ MARKS = {
     ]),
     # The quickstart only fills in the KawaPlayer field; the tablet page explains the rest.
     "unity/tablet-player-field": dict(src="unity/tablet-inspector", scale=0.72, pad=dict(right=270), marks=[
-        dict(box=(274, 430, 664, 456), n=1, cap="KawaPlayer を入れる", at=(826, 443)),
+        dict(box=(274, 430, 664, 456), cap="KawaPlayer を入れる", at=(826, 443)),
     ]),
     "unity/build": dict(scale=0.72, pad=dict(left=16), marks=[
         dict(box=(9, 257, 404, 288), n=1),
@@ -155,10 +155,6 @@ MARKS = {
     "unity/module-persistence": dict(crop=(6, 368, 840, 542), scale=0.72, marks=[]),
     "unity/module-slideshow": dict(crop=(6, 398, 840, 473), scale=0.72, marks=[]),
     "unity/module-timeline-sync": dict(crop=(6, 368, 840, 602), scale=0.72, marks=[]),
-    "unity/tablet-inspector": dict(scale=0.72, pad=dict(right=270), marks=[
-        dict(box=(274, 430, 664, 456), n=1, cap="KawaPlayer を入れる", at=(826, 443)),
-        dict(box=(28, 700, 664, 756), n=2, cap="元の場所に戻す", at=(826, 728)),
-    ]),
     "vrchat/quick-menu": dict(scale=0.8, pad=dict(bottom=64), marks=[
         dict(box=(736, 522, 796, 582), n=1, cap="歯車を押す", at=(600, 640)),
     ]),
