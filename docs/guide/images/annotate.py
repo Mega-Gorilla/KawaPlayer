@@ -103,6 +103,11 @@ MARKS = {
         dict(box=(592, 222, 1333, 310), n=3),
         dict(box=(1302, 37, 1346, 62), n=4),
     ]),
+    # The toolbar and the Export JSON panel, cut from the top of the hand-made playlist.
+    "unity/playlist-export": dict(src="unity/playlist-manual", crop=(0, 0, 1352, 168), scale=0.8, pad=dict(top=8), marks=[
+        dict(box=(1165, 37, 1297, 62), n=1),
+        dict(box=(1204, 137, 1339, 160), n=2),
+    ]),
     "unity/module-manager": dict(scale=0.72, marks=[
         dict(box=(28, 423, 834, 537), n=1),
         dict(box=(746, 615, 828, 1163), n=2),
