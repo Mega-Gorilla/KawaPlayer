@@ -73,6 +73,24 @@ jobs:
           mkdir Packages/${{ env.packageName }}
           ls | grep -v Packages | xargs mv -t Packages/${{ env.packageName }}
 
+      # Left out of both the zip and the .unitypackage: what a world does not
+      # use. The docs are read on GitHub (the user guide among them), the
+      # instructions are for coding agents, Source~ holds the scripts that make
+      # the tablet's model and logo map, and the editor tests compile only in a
+      # project that tests this package. Media~ stays: its pictures are for the
+      # creators who use KawaPlayer.
+      - name: Leave Out What Is Not Part Of The Package
+        working-directory: Packages/${{ env.packageName }}
+        run: |
+          for path in docs CLAUDE.md AGENTS.md "Assets/Models/Tablet/Source~" Tests Tests.meta; do
+            if [ -e "$path" ]; then
+              rm -rf -- "$path"
+              echo "left out $path"
+            else
+              echo "::warning::$path is not in the package; check the list in release.yml"
+            fi
+          done
+
       - name: Create Zip
         uses: thedoctor0/zip-release@09336613be18a8208dfa66bd57efafd9e2685657
         with:
