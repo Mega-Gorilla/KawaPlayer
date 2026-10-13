@@ -33,7 +33,7 @@ KawaPlayer は、VRChat のワールドに置く動画プレイヤーです。Yo
 | 動画が再生できない | [ワールドの中で使う](playing.md#再生できないとき) |
 | VHub のプレイリストを探す、作る、URL をコピーする | [VHub Playlist の使い方](vhub.md) |
 | VHub のプレイリストを読み込めるようにする（Allow Untrusted URLs） | [クイックスタート](quickstart.md#7-allow-untrusted-urls-をオンにする) |
-| VHub のプレイリストを読み込む、曲を選ぶ | [プレイリスト](playlists.md#ワールドの中で-vhub-のプレイリストを読み込む) |
+| VHub のプレイリストを読み込む、曲を選ぶ | [VHub Playlist の使い方](vhub.md#ワールドの中で読み込む) |
 | タブレットのアプリを使う | [タブレット](tablet.md#使う) |
 
 ## 困ったとき

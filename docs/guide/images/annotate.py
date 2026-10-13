@@ -210,6 +210,16 @@ MARKS = {
     "vhub/edit-button": dict(scale=0.8, marks=[
         dict(box=(216, 132, 350, 204), n=1),
     ]),
+    "vhub/top-library": dict(src="vhub/top", scale=0.8, marks=[
+        dict(box=(258, 12, 377, 52), n=1),
+    ]),
+    "vhub/edit-videos": dict(scale=0.8, marks=[
+        dict(box=(48, 284, 164, 454), n=1),
+        dict(box=(1160, 292, 1222, 331), n=2),
+    ]),
+    "vhub/edit-save": dict(scale=0.8, pad=dict(top=14), marks=[
+        dict(box=(1126, 8, 1272, 74), n=1),
+    ]),
     "vhub/delete": dict(scale=0.8, marks=[
         dict(box=(35, 110, 307, 166), n=1),
     ]),
