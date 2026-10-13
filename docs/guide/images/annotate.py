@@ -227,6 +227,28 @@ MARKS = {
         dict(box=(27, 613, 1253, 699), cap="下", at=(640, 580)),
         dict(box=(892, 107, 1252, 143), cap="右", at=(1072, 73)),
     ]),
+    "screen/controls-left": dict(src="screen/controls", scale=0.667, marks=[
+        dict(box=(28, 147, 68, 189), n=1),
+        dict(box=(28, 211, 68, 253), n=2),
+        dict(box=(28, 275, 68, 317), n=3),
+        dict(box=(28, 339, 68, 381), n=4),
+        dict(box=(28, 403, 68, 445), n=5),
+        dict(box=(28, 467, 68, 509), n=6),
+        dict(box=(28, 531, 68, 573), n=7),
+    ]),
+    "screen/controls-right": dict(src="screen/controls", scale=0.667, marks=[
+        dict(box=(892, 104, 960, 140), n=1),
+        dict(box=(1032, 104, 1088, 140), n=2),
+        dict(box=(1138, 104, 1252, 140), n=3),
+    ]),
+    "screen/controls-bottom": dict(src="screen/controls", scale=0.667, marks=[
+        dict(box=(35, 659, 69, 693), n=1),
+        dict(box=(87, 659, 121, 693), n=2),
+        dict(box=(139, 659, 173, 693), n=3),
+        dict(box=(191, 659, 225, 693), n=4),
+        dict(box=(28, 614, 1252, 642), n=5, badge=(640, 604)),
+        dict(box=(1056, 656, 1250, 696), n=6),
+    ]),
     "screen/url-button": dict(src="screen/controls", scale=0.667, marks=[
         dict(box=(26, 146, 70, 190), n=1, cap="ここを押す", at=(190, 168)),
     ]),
