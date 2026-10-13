@@ -89,13 +89,18 @@ MARKS = {
     "unity/inspector-version": dict(src="unity/inspector", crop=(3, 1213, 841, 1391), scale=0.72, pad=dict(left=28), marks=[
         dict(n=6, badge=(-11, 1236)),
     ]),
-    "unity/playlist-editor": dict(scale=0.8, pad=dict(top=8), marks=[
-        dict(box=(855, 37, 1008, 62), n=1, cap="VHub から取り込む", at=(1010, 190)),
-        dict(box=(469, 177, 553, 204), n=2, cap="手で作る", at=(300, 330)),
-    ]),
+    # The first look at the editor, with nothing to press yet.
+    "unity/playlist-editor": dict(scale=0.8, marks=[]),
     "unity/playlist-import": dict(scale=0.8, pad=dict(top=8), marks=[
+        dict(box=(855, 37, 1008, 62), n=1),
         dict(box=(197, 76, 1178, 101), n=2, cap="VHub の共有 URL を貼る", at=(960, 320)),
         dict(box=(1186, 76, 1339, 101), n=3),
+        dict(box=(1302, 37, 1346, 62), n=4),
+    ]),
+    "unity/playlist-manual": dict(scale=0.8, pad=dict(top=8), marks=[
+        dict(box=(470, 288, 510, 315), n=1, cap="プレイリストを足す", at=(300, 380)),
+        dict(box=(1241, 320, 1283, 347), n=2, cap="曲を足す", at=(1080, 420)),
+        dict(box=(592, 222, 1333, 310), n=3),
         dict(box=(1302, 37, 1346, 62), n=4),
     ]),
     "unity/module-manager": dict(scale=0.72, marks=[
