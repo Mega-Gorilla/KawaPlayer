@@ -62,6 +62,9 @@ MARKS = {
         dict(box=(8, 242, 400, 276), n=2),
         dict(box=(410, 396, 632, 427), n=3, badge=(636, 392)),
     ]),
+    "unity/hierarchy-empty": dict(scale=0.7, marks=[
+        dict(box=(16, 196, 360, 318), cap="何もないところを押す", at=(188, 368)),
+    ]),
     "unity/hierarchy-menu": dict(scale=0.7, marks=[
         dict(box=(19, 190, 328, 223), n=1),
         dict(box=(340, 192, 564, 222), n=2, badge=(568, 188)),

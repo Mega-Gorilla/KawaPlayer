@@ -4,7 +4,10 @@
 
 ## 置く
 
-1. Hierarchy の何もないところを押して、何も選んでいない状態にします。KawaPlayer などが選ばれたままだと、タブレットがその中に置かれてしまいます。
+1. Hierarchy の一覧の下の、何もないところを押して、何も選んでいない状態にします。KawaPlayer などが選ばれたままだと、タブレットがその中に置かれてしまいます。一覧が長いときは、一番下までスクロールした、その下を押します。
+
+   ![Hierarchy。Room N の中の VRCWorld・lightings・world・KawaPlayer の行の下の、何もないところに印がある](images/unity/hierarchy-empty.webp)
+
 2. Unity のメニューの **GameObject**（①）> **KawaPlayer**（②）> **Tablet**（③）を選びます。何台置いてもかまいません。
 
    ![Unity の GameObject メニュー。① GameObject、② KawaPlayer、③ Tablet に印がある](images/unity/gameobject-menu-tablet.webp)
