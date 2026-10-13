@@ -103,7 +103,17 @@ MARKS = {
         dict(box=(592, 222, 1333, 310), n=3),
         dict(box=(1302, 37, 1346, 62), n=4),
     ]),
-    # The toolbar and the Export JSON panel, cut from the top of the hand-made playlist.
+    # The toolbar and the panel each button opens, cut from the top of the editor.
+    "unity/playlist-ytdlp": dict(crop=(0, 0, 1352, 168), scale=0.8, pad=dict(top=8), marks=[
+        dict(box=(709, 37, 852, 62), n=1),
+        dict(box=(12, 138, 134, 160), n=2, badge=(156, 149)),
+        dict(box=(1193, 137, 1339, 160), n=3),
+    ]),
+    "unity/playlist-json-import": dict(crop=(0, 0, 1352, 168), scale=0.8, pad=dict(top=8), marks=[
+        dict(box=(1011, 37, 1161, 62), n=1),
+        dict(box=(1186, 137, 1339, 160), n=2),
+    ]),
+    # Export JSON's panel shows in the picture of the hand-made playlist.
     "unity/playlist-export": dict(src="unity/playlist-manual", crop=(0, 0, 1352, 168), scale=0.8, pad=dict(top=8), marks=[
         dict(box=(1165, 37, 1297, 62), n=1),
         dict(box=(1204, 137, 1339, 160), n=2),
