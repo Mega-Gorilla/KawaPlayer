@@ -21,7 +21,11 @@ namespace Yamadev.YamaStream.Modules.PitchShifter
     private AudioClip[] _outputClips;
     private float[] _readBufferL;
     private float[] _readBufferR;
-    private float[][] _writeBuffers;
+    // This frame's shifted samples, left and right interleaved. Every output
+    // plays the same ones, so they are made once a frame, when the first output
+    // that takes them comes, and written into each output's clip (issue #195).
+    private float[] _writeBuffer;
+    private bool _writeBufferReady;
 
     private long _previousDspTimeSample = -1;
     private float _readPhase = 0f;
@@ -98,11 +102,11 @@ namespace Yamadev.YamaStream.Modules.PitchShifter
       _outputClipFrames = _bufferLength * 2;
 
       _outputClips = new AudioClip[sourceCount];
-      _writeBuffers = new float[sourceCount][];
       _outputClipWriteHeads = new int[sourceCount];
 
       _readBufferL = new float[_bufferLength];
       _readBufferR = new float[_bufferLength];
+      _writeBuffer = new float[_bufferLength * 2];
 
       for (int i = 0; i < sourceCount; i++)
       {
@@ -118,7 +122,6 @@ namespace Yamadev.YamaStream.Modules.PitchShifter
         _outputSources[i].loop = true;
         _outputSources[i].playOnAwake = false;
 
-        _writeBuffers[i] = new float[_bufferLength * 2];
         _outputClipWriteHeads[i] = 0;
       }
 
@@ -225,14 +228,12 @@ namespace Yamadev.YamaStream.Modules.PitchShifter
       int readBeginIndex = _bufferLength - freshDataFrames;
       _previousDspTimeSample = currentDspTimeSample;
 
+      // The input plays at VOLUME_SCALE, so it is not heard itself; its samples
+      // are scaled back up as they are read, only those used, rather than the
+      // whole buffer every frame.
       _inputSource.GetOutputData(_readBufferL, 0);
       _inputSource.GetOutputData(_readBufferR, 1);
-
-      for (int i = 0; i < _bufferLength; i++)
-      {
-        _readBufferL[i] *= VOLUME_MULTIPLIER;
-        _readBufferR[i] *= VOLUME_MULTIPLIER;
-      }
+      _writeBufferReady = false;
 
       for (int i = 0; i < _outputSources.Length; i++)
       {
@@ -246,7 +247,6 @@ namespace Yamadev.YamaStream.Modules.PitchShifter
     private void ProcessOutput(int index, int readBeginIndex, int freshDataFrames)
     {
       var outputSource = _outputSources[index];
-      var writeBuffer = _writeBuffers[index];
       var outputClip = _outputClips[index];
 
       if (outputSource.isPlaying)
@@ -265,9 +265,13 @@ namespace Yamadev.YamaStream.Modules.PitchShifter
         }
       }
 
-      ProcessPitchShift(writeBuffer, readBeginIndex, freshDataFrames);
+      if (!_writeBufferReady)
+      {
+        ProcessPitchShift(_writeBuffer, readBeginIndex, freshDataFrames);
+        _writeBufferReady = true;
+      }
 
-      outputClip.SetData(writeBuffer, _outputClipWriteHeads[index]);
+      outputClip.SetData(_writeBuffer, _outputClipWriteHeads[index]);
       _outputClipWriteHeads[index] += freshDataFrames;
 
       if (!outputSource.isPlaying && _outputClipWriteHeads[index] >= _bufferLength)
@@ -292,8 +296,8 @@ namespace Yamadev.YamaStream.Modules.PitchShifter
         {
           int srcIdx = readBeginIndex + i;
           int dstIdx = i * 2;
-          writeBuf[dstIdx] = _readBufferL[srcIdx];
-          writeBuf[dstIdx + 1] = _readBufferR[srcIdx];
+          writeBuf[dstIdx] = _readBufferL[srcIdx] * VOLUME_MULTIPLIER;
+          writeBuf[dstIdx + 1] = _readBufferR[srcIdx] * VOLUME_MULTIPLIER;
         }
         _readPhase = 0f;
         return;
@@ -310,8 +314,8 @@ namespace Yamadev.YamaStream.Modules.PitchShifter
         float frac = inputPos - Mathf.Floor(inputPos);
 
         int dstIdx = outIdx * 2;
-        writeBuf[dstIdx] = Mathf.LerpUnclamped(_readBufferL[idx0], _readBufferL[idx1], frac);
-        writeBuf[dstIdx + 1] = Mathf.LerpUnclamped(_readBufferR[idx0], _readBufferR[idx1], frac);
+        writeBuf[dstIdx] = Mathf.LerpUnclamped(_readBufferL[idx0], _readBufferL[idx1], frac) * VOLUME_MULTIPLIER;
+        writeBuf[dstIdx + 1] = Mathf.LerpUnclamped(_readBufferR[idx0], _readBufferR[idx1], frac) * VOLUME_MULTIPLIER;
 
         _readPhase += pitchRatio;
       }
