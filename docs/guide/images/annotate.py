@@ -12,8 +12,8 @@ an original, run:
 Needs Pillow. Without names, every picture is made again.
 
 The pictures are WebP: those of VCC and Unity at their captured size, lossless or
-quality 90, whichever is smaller; those of the world 1280 wide (as the originals are),
-at quality 80.
+quality 90, whichever is smaller; those of the world and of VRChat's menus at most 1280
+wide (as the originals are), at quality 80.
 """
 import io
 import math
@@ -80,6 +80,16 @@ MARKS = {
     "unity/tablet-inspector": dict(scale=0.72, pad=dict(right=270), marks=[
         dict(box=(274, 430, 664, 456), n=1, cap="KawaPlayer を入れる", at=(826, 443)),
         dict(box=(28, 700, 664, 756), n=2, cap="元の場所に戻す", at=(826, 728)),
+    ]),
+    "vrchat/quick-menu": dict(scale=0.8, pad=dict(bottom=64), marks=[
+        dict(box=(736, 522, 796, 582), n=1, cap="歯車を押す", at=(600, 640)),
+    ]),
+    "vrchat/quick-menu-settings": dict(scale=0.8, marks=[
+        dict(box=(772, 18, 822, 66), n=2, badge=(748, 42), cap="全画面にする", at=(560, 140)),
+    ]),
+    "vrchat/untrusted-urls": dict(scale=0.8, marks=[
+        dict(box=(12, 338, 240, 393), n=3, badge=(244, 334)),
+        dict(box=(986, 334, 1068, 378), n=4, cap="オンにする", at=(800, 357)),
     ]),
     "screen/controls": dict(scale=0.667, marks=[
         dict(box=(27, 148, 69, 575), cap="左の列", at=(173, 360)),

@@ -65,7 +65,7 @@ Hierarchy でオブジェクトを選んだままメニューを選ぶと、そ�
 
 ![「プレイリストを追加しました」の表示。『作業用BGM』の 12 曲を読み込んだ。URL を入れるボタンに印がある](images/screen/playlist-loaded.webp)
 
-VHub のプレイリストを読み込むには、先に VRChat の設定で **Allow Untrusted URLs** をオンにしてください（[プレイリスト](playlists.md#ワールドの中で-vhub-のプレイリストを読み込む)）。
+VHub のプレイリストを読み込むには、先に VRChat の設定で **Allow Untrusted URLs**（信頼されていない URL を許可）をオンにしてください（[オンにする手順](playlists.md#allow-untrusted-urls-をオンにする)）。
 
 ## 次に読むページ
 
