@@ -249,6 +249,23 @@ MARKS = {
         dict(box=(28, 614, 1252, 642), n=5, badge=(640, 604)),
         dict(box=(1056, 656, 1250, 696), n=6),
     ]),
+    "screen/playlist-list": dict(scale=0.667, marks=[
+        dict(box=(1136, 102, 1254, 142), n=1),
+        dict(box=(884, 154, 1110, 196), n=2, cap="押すと曲の一覧へ", at=(1000, 252)),
+    ]),
+    "screen/playlist-tracks": dict(scale=0.667, marks=[
+        dict(box=(884, 198, 1200, 246), n=1, cap="曲を押す", at=(760, 222)),
+        dict(box=(898, 106, 934, 142), n=2),
+    ]),
+    "screen/track-actions": dict(scale=0.667, marks=[
+        dict(box=(914, 198, 962, 246), n=1),
+        dict(box=(976, 198, 1052, 246), n=2),
+        dict(box=(1058, 198, 1134, 246), n=3),
+        dict(box=(1152, 198, 1214, 246), n=4),
+    ]),
+    "screen/playlist-vhub": dict(src="screen/playlist", scale=0.667, marks=[
+        dict(box=(1197, 109, 1260, 137), n=1, cap="削除・更新", at=(1133, 67)),
+    ]),
     "screen/url-button": dict(src="screen/controls", scale=0.667, marks=[
         dict(box=(26, 146, 70, 190), n=1, cap="ここを押す", at=(190, 168)),
     ]),
