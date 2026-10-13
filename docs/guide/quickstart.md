@@ -1,0 +1,79 @@
+# クイックスタート
+
+KawaPlayer をワールドに置いて、ワールドの中で動画を流すまでを、いちばん短い手順で説明します。細かい設定は、[使い方ガイドの目次](README.md) から、カテゴリーごとのページを開いてください。
+
+## 用意するもの
+
+- VRChat Creator Companion（VCC）で作った、ワールドのプロジェクト
+- VRChat SDK - Worlds 3.10.2 以上。古いときは、先に VCC の **Manage Project** で SDK を新しくしてください。
+
+## 1. VCC に KawaPlayer のリポジトリを追加する
+
+1. 次のリンクを開きます: **[KawaPlayer の VCC 用のページ（mega-gorilla.github.io/vpm-repos）](https://mega-gorilla.github.io/vpm-repos/)**
+2. ページの上のほう、**Copy** の左にある **Add to VCC** を押します。
+
+   ![VCC 用のページ。「VHub Packages」の見出しの下、Copy の左にある「Add to VCC」に印がある](images/vcc/listing-page.webp)
+
+3. VCC が開いてリポジトリの追加を聞かれるので、**I Understand, Add Repository** を押します。
+
+VCC が開かないときは、[インストールと更新](install.md#リポジトリを追加するほかの方法) のほかの方法で追加してください。
+
+## 2. プロジェクトに KawaPlayer を入れる
+
+VCC の **Manage Project** でワールドのプロジェクトを開きます。パッケージの一覧で **KawaPlayer** の行を探し、右端の **＋**（Add）を押します。
+
+![VCC のパッケージの一覧の KawaPlayer の行。Not Installed と出ていて、右端の ＋ に印がある](images/vcc/add-package.webp)
+
+画像の版の数字は、撮ったときのものです。
+
+## 3. シーンに KawaPlayer を置く
+
+Unity のメニューの **GameObject**（①）> **KawaPlayer**（②）> **Main**（③）を選ぶと、シーンに KawaPlayer が置かれます。
+
+![Unity の GameObject メニュー。① GameObject、② KawaPlayer、③ Main に印がある](images/unity/gameobject-menu.webp)
+
+置いたままで使えます。VHub のプレイリストを読み込む機能（外部プレイリスト読込）と、インスタンスを作った人が入室時に流す動画を決める機能（自動再生(Owner)）も、最初から入っていて有効です。設定を変えたいときは、[KawaPlayer の設定](settings.md) を見てください。
+
+Hierarchy でオブジェクトを選んだままメニューを選ぶと、そのオブジェクトの子として置かれます。シーンの一番上に置くときは、先に Hierarchy の空いているところを押して、選択を外してください。
+
+## 4. タブレットを置く
+
+手に持って KawaPlayer を操作できるタブレットです。
+
+1. 同じメニューの **GameObject > KawaPlayer > Tablet** を選ぶと、シーンにタブレットが置かれます。何台置いてもかまいません。
+2. インスペクターの **KawaPlayer** の欄（①）に、3. で置いた KawaPlayer を入れます。
+
+![タブレットのインスペクター。① 操作する KawaPlayer を入れる欄と、② 元の場所に戻す設定に印がある](images/unity/tablet-inspector.webp)
+
+置き忘れたタブレットを元の場所に戻す設定（②）などは、[タブレット](tablet.md) を見てください。
+
+## 5. ビルドして確かめる
+
+メニューの **VRChat SDK > Show Control Panel** で開くパネルの **Builder** で、**Build Type** を選んで、その下のボタンを押します。
+
+| Build Type | すること |
+| --- | --- |
+| **Build & Test Your World** | 自分の PC だけで、ワールドを試す |
+| **Build & Publish Your World Online** | ワールドをアップロードする |
+
+自動再生(Owner) は、Build & Test では試せません。インスタンスを作った人（Instance Owner）がいないためです。アップロードしたワールドで、自分で作った Invite・Friends などのインスタンスに入って確かめてください。
+
+## 6. ワールドの中で動画を流す
+
+1. スクリーンを指して、左上の **URL を入力**（①）を押します。デスクトップでは視線（画面の中央）を、VR ではコントローラーのレーザーを向けてください。
+2. 動画の URL（YouTube など）か、[VHub Playlist](https://playlist.vrc-hub.com) のプレイリストの共有 URL を貼って、確定します。
+
+![「プレイリストを追加しました」の表示。『作業用BGM』の 12 曲を読み込んだ。URL を入れるボタンに印がある](images/screen/playlist-loaded.webp)
+
+VHub のプレイリストを読み込むには、先に VRChat の設定で **Allow Untrusted URLs** をオンにしてください（[プレイリスト](playlists.md#ワールドの中で-vhub-のプレイリストを読み込む)）。
+
+## 次に読むページ
+
+| 知りたいこと | ページ |
+| --- | --- |
+| 色・言語・音量などの初期値を変えたい | [KawaPlayer の設定](settings.md) |
+| 最初からプレイリストを入れておきたい | [プレイリスト](playlists.md) |
+| 入室時に動画を自動で流したい、機能を足したい | [モジュール](modules.md) |
+| ワールドの中での操作を知りたい | [ワールドの中で使う](playing.md) |
+
+困ったときは、気軽に [Discord サーバー](https://discord.gg/tkrHek6PvN) で聞いてください。

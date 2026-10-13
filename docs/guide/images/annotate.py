@@ -56,19 +56,26 @@ MARKS = {
         dict(box=(19, 190, 328, 223), n=1),
         dict(box=(340, 192, 564, 222), n=2, badge=(568, 188)),
     ]),
-    "unity/inspector": dict(scale=0.72, pad=dict(right=240), marks=[
-        dict(box=(28, 1024, 664, 1049), n=1, cap="5. プレイリスト", at=(812, 1036)),
-        dict(box=(28, 1180, 664, 1205), n=2, cap="6. 自動再生", at=(812, 1192)),
+    "unity/inspector": dict(scale=0.72, marks=[
+        dict(box=(285, 360, 581, 385), n=1),
+        dict(box=(24, 428, 832, 548), n=2),
+        dict(box=(24, 563, 832, 945), n=3),
+        dict(box=(24, 961, 832, 1051), n=4),
+        dict(box=(24, 1067, 832, 1207), n=5),
+        dict(box=(24, 1223, 832, 1380), n=6),
     ]),
-    "unity/playlist-editor": dict(scale=0.8, pad=dict(top=44), marks=[
-        dict(box=(856, 4, 1006, 30), n=1),
-        dict(box=(196, 44, 1176, 68), n=2, cap="VHub の共有 URL を貼る", at=(560, 200)),
-        dict(box=(1184, 44, 1338, 68), n=3),
-        dict(box=(1302, 4, 1346, 30), n=4),
+    "unity/playlist-editor": dict(scale=0.8, pad=dict(top=8), marks=[
+        dict(box=(855, 37, 1008, 62), n=1, cap="VHub から取り込む", at=(1010, 190)),
+        dict(box=(469, 177, 553, 204), n=2, cap="手で作る", at=(300, 330)),
     ]),
-    "unity/module-manager": dict(scale=0.72, pad=dict(right=250), marks=[
-        dict(box=(30, 428, 664, 480), n=1, cap="入っている（Owner）", at=(816, 454)),
-        dict(box=(578, 678, 652, 704), n=2, cap="World はここで追加", at=(816, 691)),
+    "unity/playlist-import": dict(scale=0.8, pad=dict(top=8), marks=[
+        dict(box=(197, 76, 1178, 101), n=2, cap="VHub の共有 URL を貼る", at=(960, 320)),
+        dict(box=(1186, 76, 1339, 101), n=3),
+        dict(box=(1302, 37, 1346, 62), n=4),
+    ]),
+    "unity/module-manager": dict(scale=0.72, marks=[
+        dict(box=(28, 423, 834, 537), n=1),
+        dict(box=(746, 615, 828, 1163), n=2),
     ]),
     "unity/tablet-inspector": dict(scale=0.72, pad=dict(right=270), marks=[
         dict(box=(274, 430, 664, 456), n=1, cap="KawaPlayer を入れる", at=(826, 443)),
