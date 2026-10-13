@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="196" height="44" viewBox="0 0 196 44" role="img" aria-label="Add to VCC">
+  <title>Add to VCC</title>
+  <rect x="0.5" y="0.5" width="195" height="43" rx="10" fill="#4FC3F7" stroke="#0288D1"/>
+  <g fill="none" stroke="#0B2A3A" stroke-width="2.4" stroke-linecap="round">
+    <line x1="30" y1="14" x2="30" y2="30"/>
+    <line x1="22" y1="22" x2="38" y2="22"/>
+  </g>
+  <text x="114" y="28.5" text-anchor="middle" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="17" font-weight="700" fill="#0B2A3A">Add to VCC</text>
+</svg>
