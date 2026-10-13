@@ -47,6 +47,9 @@ MARKS = {
     "vcc/add-package": dict(scale=0.8, pad=dict(bottom=64), marks=[
         dict(box=(1203, 13, 1239, 49), cap="＋ を押す", at=(1060, 100)),
     ]),
+    "vcc/update-package": dict(scale=0.8, pad=dict(bottom=70), marks=[
+        dict(box=(691, 9, 1009, 55), cap="押すと更新", at=(560, 104)),
+    ]),
     "unity/gameobject-menu": dict(scale=0.7, pad=dict(top=24, left=24), marks=[
         dict(box=(2, 1, 118, 27), n=1),
         dict(box=(8, 242, 400, 276), n=2),
