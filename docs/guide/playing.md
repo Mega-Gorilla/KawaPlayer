@@ -250,6 +250,16 @@ VHub から読み込んだプレイリストの曲の一覧には、右上に **
 
 ![再生エラーの詳細。エラーの一覧の下の、① Discord の URL をコピーできる欄と ② 閉じる に印がある](images/screen/error-details.webp)
 
+### Access Denied と出たとき
+
+VRChat が初めから信頼していないサイトの動画は、見る人それぞれが VRChat の設定で **Allow Untrusted URLs** をオンにしていないと流れません（[オンにする手順](quickstart.md#7-allow-untrusted-urls-をオンにする)）。
+
+- **遊ぶ人:** まず Allow Untrusted URLs をオンにしてください。それでも再生できないときは、ワールドの制作者に伝えてください。Public・Group Public のインスタンスでは、ワールドが許可したサイトの動画しか流せず、その許可を変えられるのはワールドの制作者だけです。**詳細** の画面を撮って見せると、制作者は何をすればよいか分かります。
+- **ワールドの制作者:** **詳細** の直近のエラーの下に、Video Player Allowed Domains に足すドメインが出ます（スクロールした先にあります）。[クイックスタートの 6.](quickstart.md#6-vrchatcom-で-vhub-を許可する) と同じ手順で、そのドメインを足してください。Public・Group Public 以外のインスタンスでは、この一覧は要りません。
+- **画像のとき:** 画像を映しているときの Access Denied は、Allow Untrusted URLs だけで直ります。ワールドの許可は要らないので、**詳細** に制作者向けの案内は出ません。
+
+![再生エラーの詳細を下までスクロールしたところ。直近のエラーの下の、ワールドの制作者向けの案内（Video Player Allowed Domains に playlist.vrc-hub.com を足す）に印がある](images/screen/error-access-denied.webp)
+
 ## タブレット
 
 ワールドにタブレットが置いてあれば、手元でも操作できます（[タブレット](tablet.md#使う)）。

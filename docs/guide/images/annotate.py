@@ -326,6 +326,9 @@ MARKS = {
         dict(box=(377, 497, 903, 532), n=1, cap="Discord の URL をコピー", at=(1067, 453)),
         dict(box=(377, 545, 903, 584), n=2, cap="閉じる", at=(1067, 564)),
     ]),
+    "screen/error-access-denied": dict(scale=0.667, marks=[
+        dict(box=(369, 316, 911, 410), cap="ワールドの制作者向けの案内", at=(1090, 363)),
+    ]),
     "tablet/home": dict(scale=0.72, marks=[
         dict(box=(138, 442, 1142, 645), n=1, cap="アプリを開く", at=(640, 400)),
         dict(box=(618, 720, 662, 766), n=2, cap="ホームボタン", at=(880, 744)),

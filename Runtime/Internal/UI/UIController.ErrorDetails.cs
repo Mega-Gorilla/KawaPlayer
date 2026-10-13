@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using VRC.SDK3.Components.Video;
 using VRC.SDKBase;
 
 namespace Yamadev.YamaStream.UI
@@ -57,6 +58,7 @@ namespace Yamadev.YamaStream.UI
       string detail = _controller.GetErrorDetail(0);
       if (!string.IsNullOrEmpty(detail)) text += $"\nDetail: {detail}";
       text += "\n" + BuildErrorReportLine(max);
+      text += BuildAccessDeniedNote();
 
       for (int i = 1; i < _controller.ErrorLogCount; i++)
       {
@@ -76,6 +78,20 @@ namespace Yamadev.YamaStream.UI
       if (_controller.GetErrorWillRetry(0) && _controller.GetErrorNextPlayer(0) != _controller.GetErrorPlayer(0)) players += "→" + PlayerLabel(_controller.GetErrorNextPlayer(0));
       string host = UrlUtils.GetHostFromUrl(_controller.GetErrorUrl(0));
       return $"KawaPlayer {_controller.Version} | #{_controller.GetErrorNumber(0)} {_controller.GetVideoError(0)} | {players} | retry {_controller.GetErrorAttempt(0)}/{max} | {(string.IsNullOrEmpty(host) ? "-" : host)} | {PlatformLabel()} | {_controller.MaxResolution}p";
+    }
+
+    // In Public and Group Public instances, a site VRChat does not trust
+    // plays only when the world lists it in its Video Player Allowed Domains
+    // (issue #225). Only the world's creator can change that list, so the
+    // screen asks the viewer to turn on Allow Untrusted URLs and then to ask
+    // the creator, and this tells the creator which domain to add. The list
+    // is for the video players: a picture needs only Allow Untrusted URLs.
+    private string BuildAccessDeniedNote()
+    {
+      if (_controller.GetVideoError(0) != VideoError.AccessDenied || _controller.GetErrorPlayer(0) == VideoPlayerType.ImageViewer) return string.Empty;
+      string host = UrlUtils.GetHostFromUrl(_controller.GetErrorUrl(0));
+      if (string.IsNullOrEmpty(host)) return string.Empty;
+      return "\n\n" + GetTranslation("errorDetails.accessDenied").Replace("{0}", host);
     }
 
     private string AttemptLabel(int attempt, int max) => attempt == 0 ? "first try" : $"retry {attempt}/{max}";
