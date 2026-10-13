@@ -11,17 +11,19 @@ YamaPlayer を使っていたプロジェクトは、先に [README の移行手
 
 ## リポジトリを追加する
 
-[KawaPlayer の VCC 用のページ](https://mega-gorilla.github.io/vpm-repos/) で **Add to VCC** を押すと、VCC が開いてリポジトリを追加できます（[クイックスタートの 1.](quickstart.md#1-vcc-に-kawaplayer-のリポジトリを追加する)）。GitHub では VCC を開くリンク（`vcc://`）を直接押せないので、いったんこのページを開きます。
+追加のしかたは A・B・C の 3 つあり、どれで追加しても同じです。
+
+**A. VCC 用のページから（いちばん簡単）:** [KawaPlayer の VCC 用のページ](https://mega-gorilla.github.io/vpm-repos/) で **Add to VCC** を押すと、VCC が開いてリポジトリを追加できます（[クイックスタートの 1.](quickstart.md#1-vcc-に-kawaplayer-のリポジトリを追加する)）。GitHub では VCC を開くリンク（`vcc://`）を直接押せないので、いったんこのページを開きます。
 
 ### リポジトリを追加するほかの方法
 
-**URL をブラウザに貼る:** 次の URL をブラウザのアドレスバーに貼って Enter を押すと、VCC 用のページと同じように VCC が開きます。
+**B. URL をブラウザに貼る:** 次の URL をブラウザのアドレスバーに貼って Enter を押すと、A と同じように VCC が開きます。
 
 ```
 vcc://vpm/addRepo?url=https://mega-gorilla.github.io/vpm-repos/index.json
 ```
 
-**VCC の設定で追加する:** VCC が開かないときは、VCC の **Settings** で追加します。
+**C. VCC の設定で追加する:** A でも B でも VCC が開かないときは、VCC の **Settings** で追加します。
 
 1. **Packages**（①）を開いて、**Add Repository**（②）を押します。
 2. **Repository Listing URL** の欄（③）に、次の URL を貼ります。
@@ -58,15 +60,15 @@ Unity の中からも確かめられます。KawaPlayer のインスペクター
 
 ## シーンに置く
 
-置き方は 3 つあり、どれでも同じものが置かれます。
+置き方は A・B・C の 3 つあり、どれでも同じものが置かれます。
 
-1. **メニューから:** Unity のメニューの **GameObject > KawaPlayer > Main** を選びます（[クイックスタートの 3.](quickstart.md#3-シーンに-kawaplayer-を置く)）。
-2. **Hierarchy の右クリックから:** Hierarchy の空いているところを右クリックして、**KawaPlayer**（①）> **Main**（②）を選びます。
+- **A. メニューから:** Hierarchy の何もないところを押して、何も選んでいない状態にしてから、Unity のメニューの **GameObject > KawaPlayer > Main** を選びます（[クイックスタートの 3.](quickstart.md#3-シーンに-kawaplayer-を置く)）。オブジェクトが選ばれたままだと、その中に置かれます。
+- **B. Hierarchy の右クリックから:** Hierarchy の何もないところを右クリックして、**KawaPlayer**（①）> **Main**（②）を選びます。
 
-   ![Hierarchy の右クリックのメニュー。① KawaPlayer、② Main に印がある](images/unity/hierarchy-menu.webp)
+  ![Hierarchy の右クリックのメニュー。① KawaPlayer、② Main に印がある](images/unity/hierarchy-menu.webp)
 
-3. **プレハブから:** Project の **Packages > KawaPlayer** にある `KawaPlayer.prefab` を、シーンにドラッグします。
+- **C. プレハブから:** Project の **Packages > KawaPlayer** にある `KawaPlayer.prefab` を、シーンにドラッグします。
 
-メニューで置くときは、先に Hierarchy の何もないところを押して、何も選んでいない状態にしてください。オブジェクトが選ばれたままだと、その中に置かれます。中に置いてしまったときは、Hierarchy でドラッグして外に出せます。
+ほかのオブジェクトの中に置いてしまったときは、Hierarchy でドラッグして外に出せます。
 
 同じメニューには、タブレット（**Tablet**、[タブレット](tablet.md)）のほかに、スクリーンや操作パネルを足すための部品（**SubScreen**・**Controller Bar**・**Playlist Panel**）もあります。
