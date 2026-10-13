@@ -69,6 +69,4 @@ Unity の中からも確かめられます。KawaPlayer のインスペクター
 
 - **C. プレハブから:** Project の **Packages > KawaPlayer** にある `KawaPlayer.prefab` を、シーンにドラッグします。
 
-ほかのオブジェクトの中に置いてしまうと、Hierarchy で、そのオブジェクトの下に一段下げて並びます。Ctrl+Z（Mac は Cmd+Z）で取り消してやり直すか、置いたものを Hierarchy の一番下の何もないところまでドラッグして離すと、外に出せます。
-
 同じメニューには、タブレット（**Tablet**、[タブレット](tablet.md)）のほかに、スクリーンや操作パネルを足すための部品（**SubScreen**・**Controller Bar**・**Playlist Panel**）もあります。
