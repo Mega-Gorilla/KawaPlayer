@@ -266,6 +266,37 @@ MARKS = {
     "screen/playlist-vhub": dict(src="screen/playlist", scale=0.667, marks=[
         dict(box=(1197, 109, 1260, 137), n=1, cap="削除・更新", at=(1133, 67)),
     ]),
+    "screen/queue": dict(scale=0.667, marks=[
+        dict(box=(892, 104, 960, 140), n=1),
+        dict(box=(886, 152, 1140, 300), n=2),
+    ]),
+    "screen/queue-actions": dict(scale=0.667, marks=[
+        dict(box=(916, 198, 956, 248), n=1),
+        dict(box=(982, 198, 1050, 248), n=2),
+        dict(box=(1062, 198, 1130, 248), n=3),
+        dict(box=(1156, 198, 1198, 248), n=4),
+    ]),
+    "screen/history": dict(scale=0.667, marks=[
+        dict(box=(1032, 104, 1088, 140), n=1),
+        dict(box=(886, 152, 1140, 334), n=2),
+    ]),
+    "screen/settings-playback": dict(scale=0.667, marks=[
+        dict(box=(250, 120, 1080, 226), n=1),
+        dict(box=(250, 236, 1126, 386), n=2),
+        dict(box=(250, 397, 1066, 532), n=3),
+    ]),
+    "screen/settings-playback2": dict(scale=0.667, marks=[
+        dict(box=(250, 398, 726, 490), n=4),
+        dict(box=(250, 503, 980, 616), n=5),
+    ]),
+    "screen/settings-video": dict(scale=0.667, marks=[
+        dict(box=(250, 118, 640, 203), n=1),
+        dict(box=(250, 215, 1136, 292), n=2),
+        dict(box=(250, 297, 830, 415), n=3),
+    ]),
+    "screen/settings-other": dict(scale=0.667, marks=[
+        dict(box=(250, 116, 860, 250), n=1),
+    ]),
     "screen/url-button": dict(src="screen/controls", scale=0.667, marks=[
         dict(box=(26, 146, 70, 190), n=1, cap="ここを押す", at=(190, 168)),
     ]),
