@@ -138,6 +138,15 @@ MARKS = {
         dict(box=(9, 257, 404, 288), n=1),
         dict(box=(10, 304, 631, 402), n=2),
     ]),
+    # Each module's settings, cut from its inspector below the U# header (the modules page).
+    "unity/module-default-url": dict(crop=(6, 289, 840, 365), scale=0.72, marks=[]),
+    "unity/module-playlist-loader": dict(crop=(6, 293, 840, 1045), scale=0.72, marks=[]),
+    "unity/module-autoplay-track": dict(crop=(6, 368, 840, 623), scale=0.72, marks=[]),
+    "unity/module-autoplay-playlist": dict(crop=(6, 368, 840, 632), scale=0.72, marks=[]),
+    "unity/module-permission": dict(crop=(6, 398, 840, 761), scale=0.72, marks=[]),
+    "unity/module-persistence": dict(crop=(6, 368, 840, 542), scale=0.72, marks=[]),
+    "unity/module-slideshow": dict(crop=(6, 398, 840, 473), scale=0.72, marks=[]),
+    "unity/module-timeline-sync": dict(crop=(6, 368, 840, 602), scale=0.72, marks=[]),
     "unity/tablet-inspector": dict(scale=0.72, pad=dict(right=270), marks=[
         dict(box=(274, 430, 664, 456), n=1, cap="KawaPlayer を入れる", at=(826, 443)),
         dict(box=(28, 700, 664, 756), n=2, cap="元の場所に戻す", at=(826, 728)),
