@@ -2,6 +2,7 @@
 using UdonSharp;
 using UnityEngine;
 using VRC.SDKBase;
+using VRC.Udon.Common.Interfaces;
 
 namespace Yamadev.YamaStream
 {
@@ -383,6 +384,30 @@ namespace Yamadev.YamaStream
       }
       RequestReload();
     }
+
+    // Whether a reload for everyone would do anything: the video is shared as
+    // playing or paused. Each player then judges for itself, as for its own
+    // reload, so a load of theirs still under way is left to finish.
+    public bool CanGlobalReload => SyncedState != PlayerState.Idle;
+
+    // Every player reloads its own video, as if each had pressed reload: for
+    // a live event, where a stream is not placed by the clock and players fall
+    // behind, each by their own amount (issue #236). Only the press is sent,
+    // and nothing synced changes. A local player has no one to send it to.
+    public void GlobalReload()
+    {
+      if (!CanGlobalReload) return;
+      if (_isLocal)
+      {
+        Reload();
+        return;
+      }
+      SendCustomNetworkEvent(NetworkEventTarget.All, nameof(OnGlobalReload));
+    }
+
+    // Run on every player by GlobalReload. Its name has no leading
+    // underscore, as Udon lets no network event call such a method.
+    public void OnGlobalReload() => Reload();
 
     // Keeps this Controller's reloads and retries 5.1 s apart, as VRChat
     // turns away a second load within 5 s. Presses while waiting make one

@@ -52,22 +52,27 @@ MARKS = {
     "vcc/update-package": dict(scale=0.8, pad=dict(bottom=70), marks=[
         dict(box=(691, 9, 1009, 55), cap="押すと更新", at=(560, 104)),
     ]),
-    "unity/gameobject-menu": dict(scale=0.7, pad=dict(top=24, left=24), marks=[
+    "unity/gameobject-menu": dict(scale=0.7, pad=dict(top=24, left=24, right=12), marks=[
         dict(box=(2, 1, 118, 27), n=1),
-        dict(box=(8, 242, 400, 276), n=2),
-        dict(box=(410, 244, 632, 276), n=3, badge=(636, 240)),
+        dict(box=(8, 242, 447, 276), n=2),
+        dict(box=(457, 244, 742, 276), n=3, badge=(746, 240)),
     ]),
-    "unity/gameobject-menu-tablet": dict(src="unity/gameobject-menu", scale=0.7, pad=dict(top=24, left=24), marks=[
+    "unity/gameobject-menu-tablet": dict(src="unity/gameobject-menu", scale=0.7, pad=dict(top=24, left=24, right=12), marks=[
         dict(box=(2, 1, 118, 27), n=1),
-        dict(box=(8, 242, 400, 276), n=2),
-        dict(box=(410, 396, 632, 427), n=3, badge=(636, 392)),
+        dict(box=(8, 242, 447, 276), n=2),
+        dict(box=(457, 396, 742, 427), n=3, badge=(746, 392)),
+    ]),
+    "unity/gameobject-menu-global-reload": dict(src="unity/gameobject-menu", scale=0.7, pad=dict(top=24, left=24, right=12), marks=[
+        dict(box=(2, 1, 118, 27), n=1),
+        dict(box=(8, 242, 447, 276), n=2),
+        dict(box=(457, 431, 742, 462), n=3, badge=(746, 427)),
     ]),
     "unity/hierarchy-empty": dict(scale=0.7, marks=[
         dict(box=(16, 196, 360, 318), cap="何もないところを押す", at=(188, 368)),
     ]),
-    "unity/hierarchy-menu": dict(scale=0.7, marks=[
-        dict(box=(19, 190, 328, 223), n=1),
-        dict(box=(340, 192, 564, 222), n=2, badge=(568, 188)),
+    "unity/hierarchy-menu": dict(scale=0.7, pad=dict(left=16, right=12), marks=[
+        dict(box=(8, 190, 346, 224), n=1),
+        dict(box=(355, 192, 641, 224), n=2, badge=(645, 188)),
     ]),
     "unity/inspector": dict(scale=0.72, marks=[
         dict(box=(285, 360, 581, 385), n=1),
@@ -319,6 +324,7 @@ MARKS = {
         dict(box=(164, 117, 236, 356), n=1, cap="切り替える", at=(200, 427)),
         dict(box=(160, 72, 299, 97), n=2, cap="戻る", at=(373, 40)),
     ]),
+    "screen/global-reload": dict(scale=0.667, marks=[]),
     "screen/error": dict(scale=0.667, marks=[
         dict(box=(552, 504, 728, 544), cap="押す", at=(840, 524)),
     ]),
