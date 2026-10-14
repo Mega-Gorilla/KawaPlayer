@@ -149,7 +149,7 @@ flowchart LR
 
 位置は、共有した位置 $t_s$ と時刻 $T_s$ から、誰でも次の式で計算する。 $v$ は速度、 $d$ は自分だけの遅延の補正（`LocalDelay`）である。
 
-$$t_{\mathrm{play}} = t_s + (T_{\mathrm{now}} - T_s)\,v + d \qquad t_{\mathrm{pause}} = t_s + d$$
+$$t_{\mathrm{play}} = t_s + (T_{\mathrm{now}} - T_s) \cdot v + d \qquad t_{\mathrm{pause}} = t_s + d$$
 
 オーナーは、再生・一時停止・準備完了（位置 0）・ループ・シーク・速度の変更のたびに $t_s$ と $T_s$ を送る。再生中は、全員が（オーナーも）5 秒ごとに計算した位置と比べ、0.3 秒以上ずれていればシークする（`EnsureVideoTime`）。オーナーのシークは `SetTime` を通るので、そのたびに値を送り直す。
 
