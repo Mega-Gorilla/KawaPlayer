@@ -266,7 +266,7 @@ VVMW の作者は、バッファ中にシークすると読みかけのバッフ
 | リトライとフォールバック | 戻さない | 0 から（`retryCount`・`retryUsedPlayers`） |
 | 読み込み中に値を送るか | 送らない（`_reloading`） | 送らない（`isLocalReloading`。`OnPreSerialization` が何もしない） |
 | 準備完了のあと | 共有の状態が再生なら再生し、時計から位置を計算してシーク（`EnsureVideoTime`） | 共有の状態に合わせて再生・一時停止し、計算した位置へシーク |
-| オーナーが押したとき | 準備完了のあとの位置合わせ（`SetTime`）で値を送る。プレイヤーが替わると `_handlerFromTrack` も書く | 準備完了で印を外してから再生するので、再生の知らせで状態と開始の時刻を送る。そのとき書く開始の時刻は位置を合わせる前のもので、0.5 秒後に直す（Unity で確認）。送る値は、送るときに計算し直す |
+| オーナーが押したとき | 準備完了のあとの位置合わせ（`SetTime`）で時刻を書き、送信を要求する。送る直前には時刻を計算し直さない。プレイヤーが替わると `_handlerFromTrack` も書く | 準備完了で印を外してから再生するので、再生の知らせで状態と開始の時刻を書き、送信を要求する。書く開始の時刻は位置を合わせる前のもので、0.5 秒後に直る（Unity で確認）。送る直前には、その時点の位置から開始の時刻を計算し直す。ほかの人に届く値は確かめていない |
 | ボタン | いつも押せる | URL があるときだけ出る |
 | 権限 | PermissionManagement があると Editor 以上 | 制限なし（UI のロックで止まるのは全員の読み込み直しだけ） |
 | 0.5 秒以内の 2 回目 | — | オーナーへの送り直しの依頼になる（§11） |
@@ -311,7 +311,7 @@ stateDiagram-v2
 **オーナーが押したときの送信：**
 
 - **KawaPlayer：** 準備完了のあとの位置合わせ（`EnsureVideoTime` から `SetTime`）が `RequestSerialization` まで届く（レビューで発見）。送る位置は時計と合っているので、見た目の害は小さい。この書き換えは Unity でも確かめた（付録 D の 4）。再生の知らせ（`AfterVideoPlayed`）は `Play()` の中ですぐに呼ばれ、まだ `_reloading` が立っているので送らない。
-- **VVMW：** 読み込み中の印（`isLocalReloading`）は、準備完了で外してから再生する（`OnVideoReady`）。動画プレイヤーの `Play` は再生の知らせ（`OnVideoPlay`）をその場で呼ぶので、読み直したのがオーナーなら、ここで状態と開始の時刻を送る。位置を合わせる（`Time = videoTime`）のは再生のあとなので、再生の知らせで書く開始の時刻は、位置を合わせる前（0 秒の位置）のものになる。Unity で確かめると、オーナーの開始の時刻は、準備完了から 0.5 秒のあいだ 0 秒の位置にあたる値のままで、0.5 秒後の確かめ（`_AutoSyncTime`）で正しい値に書き直された。位置そのものは 0.1 秒以内に合った（付録 D の V2）。ただし、VRChat で送る値は、送るとき（`OnPreSerialization`）にプレイヤーの位置から計算し直す。0 秒の位置がほかの人に届くのは、シークが効く前に送った場合だけで、どちらになるかは複数のクライアントで確かめていない。
+- **VVMW：** 読み込み中の印（`isLocalReloading`）は、準備完了で外してから再生する（`OnVideoReady`）。動画プレイヤーの `Play` は再生の知らせ（`OnVideoPlay`）をその場で呼ぶので、読み直したのがオーナーなら、ここで状態と開始の時刻を書き、送信を要求する（`RequestSerialization`）。位置を合わせる（`Time = videoTime`）のは再生のあとなので、このとき書く開始の時刻は、位置を合わせる前（0 秒の位置）のものになる。ただし、送信の要求は、その時点の値をすぐに送ることではない。VRChat は要求のあと、送る直前に `OnPreSerialization` を呼び、VVMW はそこで、その時点のプレイヤーの位置から開始の時刻を計算し直す（[Core.cs L699](https://github.com/JLChnToZ/VVMW/blob/834bd5ec453297b713399a5fbba1bd52a81b4f82/Packages/idv.jlchntoz.vvmw/Runtime/VVMW/Core.cs#L699)）。確かめたのは、送信のない Unity（ClientSim）での変数の値だけである。開始の時刻は、準備完了から 0.5 秒のあいだ 0 秒の位置にあたる値のままで、0.5 秒後の確かめ（`_AutoSyncTime`）で正しい値に書き直された。位置そのものは 0.1 秒以内に合った（付録 D の V2）。シークが効くのと送るのとどちらが先か、ほかの人の画面がずれるかは確かめていない。経路からは、シークが効く前に送れば 0 秒の位置が届き、あとなら正しい値が届く。
 
 **VVMW の限り：** 読み込み中に押すと、遅いだけの正常な読み込みも最初からやり直しになる。読み込みが一定時間続いたら自動で直す、といった決まりもない。VR のオーバーレイからの読み込み直しは再生中のときだけで、エラーからは戻せない（`OverlayControl.ReloadCore` の `IsPlaying`）。また、`LocalSync` はオーナーでも、手元の URL を同期する URL（`pcUrl`）で上書きしてから読み直す。`pcUrl` は送るとき（`OnPreSerialization`）に作られるので、オーナーが URL を変えてまだ送っていないと、前の URL を読み直す。送らない ClientSim では、エラーのあとの `LocalSync` が前の動画を読み直した（付録 D の V1）。VRChat では、送るまでの短いあいだに限られる。
 
@@ -475,7 +475,7 @@ AVPro は、速度を変えると読み込み直す必要がある。KawaPlayer 
 | [Core.cs L368–L410](https://github.com/JLChnToZ/VVMW/blob/834bd5ec453297b713399a5fbba1bd52a81b4f82/Packages/idv.jlchntoz.vvmw/Runtime/VVMW/Core.cs#L368-L410) | エラーとリトライ |
 | [Core.cs L450–L502](https://github.com/JLChnToZ/VVMW/blob/834bd5ec453297b713399a5fbba1bd52a81b4f82/Packages/idv.jlchntoz.vvmw/Runtime/VVMW/Core.cs#L450-L502) | `GlobalSync`・`LocalSync`・`ReloadUrlCore` |
 | [Core.cs L564–L616](https://github.com/JLChnToZ/VVMW/blob/834bd5ec453297b713399a5fbba1bd52a81b4f82/Packages/idv.jlchntoz.vvmw/Runtime/VVMW/Core.cs#L564-L616) | 準備完了のあとの当て直しと、再生の知らせ（`OnVideoPlay`） |
-| [Core.cs L674–L780](https://github.com/JLChnToZ/VVMW/blob/834bd5ec453297b713399a5fbba1bd52a81b4f82/Packages/idv.jlchntoz.vvmw/Runtime/VVMW/Core.cs#L674-L780) | 送る値と、受け取ったときの動き |
+| [Core.cs L674–L780](https://github.com/JLChnToZ/VVMW/blob/834bd5ec453297b713399a5fbba1bd52a81b4f82/Packages/idv.jlchntoz.vvmw/Runtime/VVMW/Core.cs#L674-L780) | 送る値と、受け取ったときの動き。送る直前に、今の位置から開始の時刻を計算し直す（L699） |
 | [Core_Timing.cs L190–L284](https://github.com/JLChnToZ/VVMW/blob/834bd5ec453297b713399a5fbba1bd52a81b4f82/Packages/idv.jlchntoz.vvmw/Runtime/VVMW/Core_Timing.cs#L190-L284) | 0.5 秒ごとの時刻合わせ、位置の計算（`CalcVideoTime`）、バッファの扱い |
 | [Core_Timing.cs L367–L405](https://github.com/JLChnToZ/VVMW/blob/834bd5ec453297b713399a5fbba1bd52a81b4f82/Packages/idv.jlchntoz.vvmw/Runtime/VVMW/Core_Timing.cs#L367-L405) | `OwnerSync` |
 | [RateLimitResolver.cs L13–L41](https://github.com/JLChnToZ/VVMW/blob/834bd5ec453297b713399a5fbba1bd52a81b4f82/Packages/idv.jlchntoz.vvmw/Runtime/VVMW/RateLimitResolver.cs#L13-L41) | 読み込みの間引き |
