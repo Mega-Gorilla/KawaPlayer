@@ -1,4 +1,6 @@
-"""Draws the SVG figures of docs/design/228-playback-sync/README.md (figures 7, 8 and 11).
+"""Draws the SVG charts of docs/design/228-playback-sync: figures 5 and 8 of
+comparison.md (the drift model, the rate limit) and figure 2 of README.md
+(impact and difficulty).
 
   python figures.py            # writes the SVGs next to this script
 
