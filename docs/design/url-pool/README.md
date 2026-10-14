@@ -4,7 +4,7 @@
 
 サーバー上で管理されたプレイリストから KawaPlayer の Queue をランタイムで自動構築する。
 
-VRChat/Udon はランタイムで `string → VRCUrl` 変換を行えないため（[調査結果](../analysis/why-no-runtime-json-playlist.md)）、**Pre-baked URL Pool + リダイレクトサーバー方式**を採用する。
+VRChat/Udon はランタイムで `string → VRCUrl` 変換を行えないため（[調査結果](../../analysis/why-no-runtime-json-playlist.md)）、**Pre-baked URL Pool + リダイレクトサーバー方式**を採用する。
 
 ---
 
@@ -131,16 +131,16 @@ Resolve API (`/r/{poolId}/{playlistId}`) が返す JSON は index 化済み。Un
 
 | Phase | 内容 | 詳細 |
 |-------|------|------|
-| **B1: サーバー** | MiAuth 認証, Resolve API, Redirect API, Pool 管理, 動画カタログ, プレイリスト管理 | [サーバー側設計](url-pool-server.md) |
-| **B2: Unity Editor** | Pool 生成 Inspector, バリデーション | [Unity 側設計](url-pool-unity.md) |
-| **B3: Unity Runtime** | PlaylistLoader モジュール, UI, Queue 追加 | [Unity 側設計](url-pool-unity.md) |
+| **B1: サーバー** | MiAuth 認証, Resolve API, Redirect API, Pool 管理, 動画カタログ, プレイリスト管理 | [サーバー側設計](server.md) |
+| **B2: Unity Editor** | Pool 生成 Inspector, バリデーション | [Unity 側設計](unity.md) |
+| **B3: Unity Runtime** | PlaylistLoader モジュール, UI, Queue 追加 | [Unity 側設計](unity.md) |
 | **B4: 品質** | テスト (pool 上限, サーバーダウン, untrusted URL 等) | 両方 |
 
 ### 既存コードへの変更 (実装順の最初に行う)
 
 本設計の実装にあたり、既存コードへの変更が1件必要。**Phase B2・B3 より先に実装すること**（PlaylistLoader モジュールがこのメソッドに依存するため）:
 
-- `QueueList.AddTracks(object[][] tracks)` メソッドの新規追加 (`Runtime/Internal/Playlist/QueueList.cs`)。既存の `AddTrack()` は1件ずつ同期・イベント発火するため、一括追加時の効率が悪い。詳細は [Unity 側設計](url-pool-unity.md) を参照。
+- `QueueList.AddTracks(object[][] tracks)` メソッドの新規追加 (`Runtime/Internal/Playlist/QueueList.cs`)。既存の `AddTrack()` は1件ずつ同期・イベント発火するため、一括追加時の効率が悪い。詳細は [Unity 側設計](unity.md) を参照。
 
 ---
 

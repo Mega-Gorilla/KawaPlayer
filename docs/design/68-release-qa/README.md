@@ -508,5 +508,5 @@ blueprint ID   :
 ## 関連
 
 - **#68** — チェックリスト本体。**項目本文と合否はあちらが持つ**
-- `docs/qa/playlist-editor-verification.md` — J-1 (Editor 側) の実施結果と、Editor を自動操作する手順
-- `docs/design/url-pool-playlist-loader.md` — 取り込んだ URL がリダイレクトスロットのままである理由
+- [`playlist-editor-verification.md`](playlist-editor-verification.md) — J-1 (Editor 側) の実施結果と、Editor を自動操作する手順
+- [`docs/design/url-pool/README.md`](../url-pool/README.md) — 取り込んだ URL がリダイレクトスロットのままである理由
