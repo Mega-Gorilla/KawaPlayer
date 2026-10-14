@@ -38,8 +38,3 @@ BEAT role=2 pid=3 t=170.68 srv=1581081.37 T=161.3  | K own=0 ss=1 st=63.119 tk=6
 BEAT role=2 pid=3 t=175.72 srv=1581086.42 T=166.4  | K own=0 ss=1 st=63.119 tk=639275587751620000 rl=False h=AVProPlayer ld=False stp=False pl=True kpos=232.03 | V own=0 st=0 tm=0 ld=False lr=False er=False vpos=-1.00
 BEAT role=2 pid=3 t=180.74 srv=1581091.44 T=171.4  | K own=0 ss=1 st=63.119 tk=639275587751620000 rl=False h=AVProPlayer ld=False stp=False pl=True kpos=237.05 | V own=0 st=0 tm=0 ld=False lr=False er=False vpos=-1.00
 BEAT role=2 pid=3 t=185.74 srv=1581096.44 T=176.4  | K own=0 ss=1 st=63.119 tk=639275587751620000 rl=False h=AVProPlayer ld=False stp=False pl=True kpos=242.05 | V own=0 st=0 tm=0 ld=False lr=False er=False vpos=-1.00
-
-BEAT role=2
-BEAT role=2 pid=3 t=187.74 srv=
-BEAT role=2 pid=3 t=187.74 srv=1581098.44 T=178.4 
-BEAT role=2 pid=3 t=187.74 srv=1581098.44 T=178.4  | K own=0 ss=1 st=63.119 tk=639275587751620000 rl=False h=AVProPlayer ld=False stp=False pl=True kpos=244.05 | 
