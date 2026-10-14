@@ -1,0 +1,38 @@
+START role=-1 pid=1 t=8.41 srv=1581513.63 nd=2200 sl=1555059.153 T=-1.0  |  kpos=0.00 |  vpos=0.00
+K V role=-1 pid=1 t=8.41 srv=1581513.64 nd=2201 sl=1555059.154 T=-1.0  | K own=1 ss=0 st=0 tk=0 rl=False h=AVProPlayer ld=False stp=True pl=False kpos=0.00 | V own=1 st=0 tm=0 ld=False lr=False er=False vpos=-1.00
+BEAT role=-1 pid=1 t=13.43 srv=1581519.01 nd=2201 sl=1555059.153 T=-1.0  | K own=1 ss=0 st=0 tk=0 rl=False h=AVProPlayer ld=False stp=True pl=False kpos=0.00 | V own=1 st=0 tm=0 ld=False lr=False er=False vpos=-1.00
+BEAT role=-1 pid=1 t=18.43 srv=1581524.01 nd=2200 sl=1555059.153 T=-1.0  | K own=1 ss=0 st=0 tk=0 rl=False h=AVProPlayer ld=False stp=True pl=False kpos=0.00 | V own=1 st=0 tm=0 ld=False lr=False er=False vpos=-1.00
+BEAT role=-1 pid=1 t=23.43 srv=1581529.01 nd=2201 sl=1555059.153 T=-1.0  | K own=1 ss=0 st=0 tk=0 rl=False h=AVProPlayer ld=False stp=True pl=False kpos=0.00 | V own=1 st=0 tm=0 ld=False lr=False er=False vpos=-1.00
+BEAT role=-1 pid=1 t=28.45 srv=1581534.03 nd=2201 sl=1555059.153 T=-1.0  | K own=1 ss=0 st=0 tk=0 rl=False h=AVProPlayer ld=False stp=True pl=False kpos=0.00 | V own=1 st=0 tm=0 ld=False lr=False er=False vpos=-1.00
+BEAT role=-1 pid=1 t=33.48 srv=1581539.06 nd=2201 sl=1555059.153 T=-1.0  | K own=1 ss=0 st=0 tk=0 rl=False h=AVProPlayer ld=False stp=True pl=False kpos=0.00 | V own=1 st=0 tm=0 ld=False lr=False er=False vpos=-1.00
+BEAT role=-1 pid=1 t=38.48 srv=1581544.06 nd=2200 sl=1555059.154 T=-1.0  | K own=1 ss=0 st=0 tk=0 rl=False h=AVProPlayer ld=False stp=True pl=False kpos=0.00 | V own=1 st=0 tm=0 ld=False lr=False er=False vpos=-1.00
+BEAT role=-1 pid=1 t=43.48 srv=1581549.06 nd=2201 sl=1555059.153 T=-1.0  | K own=1 ss=0 st=0 tk=0 rl=False h=AVProPlayer ld=False stp=True pl=False kpos=0.00 | V own=1 st=0 tm=0 ld=False lr=False er=False vpos=-1.00
+BEAT role=-1 pid=1 t=48.48 srv=1581554.06 nd=2201 sl=1555059.153 T=-1.0  | K own=1 ss=0 st=0 tk=0 rl=False h=AVProPlayer ld=False stp=True pl=False kpos=0.00 | V own=1 st=0 tm=0 ld=False lr=False er=False vpos=-1.00
+BEAT role=-1 pid=1 t=53.48 srv=1581559.06 nd=2201 sl=1555059.154 T=-1.0  | K own=1 ss=0 st=0 tk=0 rl=False h=AVProPlayer ld=False stp=True pl=False kpos=0.00 | V own=1 st=0 tm=0 ld=False lr=False er=False vpos=-1.00
+BEAT role=-1 pid=1 t=58.50 srv=1581564.08 nd=2201 sl=1555059.153 T=-1.0  | K own=1 ss=0 st=0 tk=0 rl=False h=AVProPlayer ld=False stp=True pl=False kpos=0.00 | V own=1 st=0 tm=0 ld=False lr=False er=False vpos=-1.00
+T0 role=0 pid=1 t=62.95 srv=1581568.54 nd=2201 sl=1555059.153 T=0.0 role=0 | K own=1 ss=0 st=0 tk=0 rl=False h=AVProPlayer ld=False stp=True pl=False kpos=0.00 | V own=1 st=0 tm=0 ld=False lr=False er=False vpos=-1.00
+BEAT role=0 pid=1 t=63.51 srv=1581569.09 nd=2201 sl=1555059.153 T=0.6  | K own=1 ss=0 st=0 tk=0 rl=False h=AVProPlayer ld=False stp=True pl=False kpos=0.00 | V own=1 st=0 tm=0 ld=False lr=False er=False vpos=-1.00
+BEAT role=0 pid=1 t=68.52 srv=1581574.10 nd=2201 sl=1555059.154 T=5.6  | K own=1 ss=0 st=0 tk=0 rl=False h=AVProPlayer ld=False stp=True pl=False kpos=0.00 | V own=1 st=0 tm=0 ld=False lr=False er=False vpos=-1.00
+BEAT role=0 pid=1 t=73.52 srv=1581579.10 nd=2200 sl=1555059.152 T=10.6  | K own=1 ss=0 st=0 tk=0 rl=False h=AVProPlayer ld=False stp=True pl=False kpos=0.00 | V own=1 st=0 tm=0 ld=False lr=False er=False vpos=-1.00
+ACT role=0 pid=1 t=77.97 srv=1581583.56 nd=2200 sl=1555059.153 T=15.0 kawa-play | K own=1 ss=0 st=0 tk=0 rl=False h=AVProPlayer ld=False stp=True pl=False kpos=0.00 | V own=1 st=0 tm=0 ld=False lr=False er=False vpos=-1.00
+K role=0 pid=1 t=77.97 srv=1581583.56 nd=2201 sl=1555059.153 T=15.0  | K own=1 ss=1 st=0 tk=0 rl=False h=AVProPlayer ld=True stp=False pl=False kpos=0.00 | V own=1 st=0 tm=0 ld=False lr=False er=False vpos=-1.00
+BEAT role=0 pid=1 t=78.98 srv=1581584.56 nd=2201 sl=1555059.154 T=16.0  | K own=1 ss=1 st=0 tk=0 rl=False h=AVProPlayer ld=True stp=False pl=False kpos=0.00 | V own=1 st=0 tm=0 ld=False lr=False er=False vpos=-1.00
+BEAT role=0 pid=1 t=84.00 srv=1581589.58 nd=2200 sl=1555059.153 T=21.0  | K own=1 ss=1 st=0 tk=0 rl=False h=AVProPlayer ld=True stp=False pl=False kpos=0.00 | V own=1 st=0 tm=0 ld=False lr=False er=False vpos=-1.00
+K role=0 pid=1 t=86.09 srv=1581591.67 nd=2201 sl=1555059.153 T=23.1  | K own=1 ss=1 st=0 tk=639275593347060000 rl=False h=AVProPlayer ld=False stp=False pl=True kpos=0.00 | V own=1 st=0 tm=0 ld=False lr=False er=False vpos=-1.00
+BEAT role=0 pid=1 t=89.09 srv=1581594.67 nd=2200 sl=1555059.153 T=26.1  | K own=1 ss=1 st=0 tk=639275593347060000 rl=False h=AVProPlayer ld=False stp=False pl=True kpos=2.98 | V own=1 st=0 tm=0 ld=False lr=False er=False vpos=-1.00
+BEAT role=0 pid=1 t=94.09 srv=1581599.67 nd=2200 sl=1555059.153 T=31.1  | K own=1 ss=1 st=0 tk=639275593347060000 rl=False h=AVProPlayer ld=False stp=False pl=True kpos=7.98 | V own=1 st=0 tm=0 ld=False lr=False er=False vpos=-1.00
+BEAT role=0 pid=1 t=99.11 srv=1581604.70 nd=2201 sl=1555059.153 T=36.2  | K own=1 ss=1 st=0 tk=639275593347060000 rl=False h=AVProPlayer ld=False stp=False pl=True kpos=13.01 | V own=1 st=0 tm=0 ld=False lr=False er=False vpos=-1.00
+BEAT role=0 pid=1 t=104.12 srv=1581609.71 nd=2200 sl=1555059.153 T=41.2  | K own=1 ss=1 st=0 tk=639275593347060000 rl=False h=AVProPlayer ld=False stp=False pl=True kpos=18.02 | V own=1 st=0 tm=0 ld=False lr=False er=False vpos=-1.00
+BEAT role=0 pid=1 t=109.13 srv=1581614.71 nd=2201 sl=1555059.154 T=46.2  | K own=1 ss=1 st=0 tk=639275593347060000 rl=False h=AVProPlayer ld=False stp=False pl=True kpos=23.02 | V own=1 st=0 tm=0 ld=False lr=False er=False vpos=-1.00
+BEAT role=0 pid=1 t=114.14 srv=1581619.72 nd=2201 sl=1555059.153 T=51.2  | K own=1 ss=1 st=0 tk=639275593347060000 rl=False h=AVProPlayer ld=False stp=False pl=True kpos=28.03 | V own=1 st=0 tm=0 ld=False lr=False er=False vpos=-1.00
+BEAT role=0 pid=1 t=119.14 srv=1581624.72 nd=2201 sl=1555059.153 T=56.2  | K own=1 ss=1 st=0 tk=639275593347060000 rl=False h=AVProPlayer ld=False stp=False pl=True kpos=33.03 | V own=1 st=0 tm=0 ld=False lr=False er=False vpos=-1.00
+BEAT role=0 pid=1 t=124.15 srv=1581629.73 nd=2202 sl=1555059.154 T=61.2  | K own=1 ss=1 st=0 tk=639275593347060000 rl=False h=AVProPlayer ld=False stp=False pl=True kpos=38.05 | V own=1 st=0 tm=0 ld=False lr=False er=False vpos=-1.00
+BEAT role=0 pid=1 t=129.16 srv=1581634.74 nd=2201 sl=1555059.153 T=66.2  | K own=1 ss=1 st=0 tk=639275593347060000 rl=False h=AVProPlayer ld=False stp=False pl=True kpos=43.05 | V own=1 st=0 tm=0 ld=False lr=False er=False vpos=-1.00
+BEAT role=0 pid=1 t=134.16 srv=1581639.74 nd=2200 sl=1555059.154 T=71.2  | K own=1 ss=1 st=0 tk=639275593347060000 rl=False h=AVProPlayer ld=False stp=False pl=True kpos=48.05 | V own=1 st=0 tm=0 ld=False lr=False er=False vpos=-1.00
+BEAT role=0 pid=1 t=139.18 srv=1581644.76 nd=2201 sl=1555059.153 T=76.2  | K own=1 ss=1 st=0 tk=639275593347060000 rl=False h=AVProPlayer ld=False stp=False pl=True kpos=53.07 | V own=1 st=0 tm=0 ld=False lr=False er=False vpos=-1.00
+
+BEAT role=0 pid=1
+BEAT role=0 pid=1 t=139.18 srv=1581644.76 nd=
+BEAT role=0 pid=1 t=139.18 srv=1581644.76 nd=2201 sl=1555059.153 T=76.2
+BEAT role=0 pid=1 t=139.18 srv=1581644.76 nd=2201 sl=1555059.153 T=76.2  | K own=1 ss=1 st=0 tk=639275593347060000 rl=False h=AVProPlayer ld=False stp=False pl=True kpos=
+BEAT role=0 pid=1 t=139.18 srv=1581644.76 nd=2201 sl=1555059.153 T=76.2  | K own=1 ss=1 st=0 tk=639275593347060000 rl=False h=AVProPlayer ld=False stp=False pl=True kpos=53.07 | V own=1 st=0 tm=0 ld=False lr=False er=False vpos=-1.00

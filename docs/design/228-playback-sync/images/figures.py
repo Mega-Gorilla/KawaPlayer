@@ -190,8 +190,8 @@ def fig_ratelimit():
 
 # Figure 11: the problems placed by impact and difficulty (three-step estimates).
 def fig_priority():
-    W, H = 820, 492
-    L, R, T, B = 110, 790, 86, 416
+    W, H = 820, 560
+    L, R, T, B = 110, 790, 86, 484
     cw, chh = (R - L) / 3, (B - T) / 3
     cx = lambda i: L + cw * (i + 0.5)
     cy = lambda j: B - chh * (j + 0.5)
@@ -208,13 +208,14 @@ def fig_priority():
         b.append(text(L - 12, cy(i) + 4, s, "tm f12", "end"))
     b.append(text((L + R) / 2, B + 42, "直す難しさ（実装と確認）", "tm f12", "middle"))
     b.append(text(L - 12, T - 10, "影響", "tm f12", "end"))
-    pts = [  # id, label, difficulty, impact, dx, dy, group (1: confirmed in code, 2: needs a repro)
-        ("P1", "自分だけ止まって戻せない", 1, 2, -55, -16, 1),
-        ("P7", "オーナー交代で先頭に戻る", 1, 2, 55, 18, 2),
-        ("P4", "読み込み直しに権限が要る", 0, 1, -40, -16, 1),
-        ("P5", "間引きがリトライだけ", 0, 1, 40, 18, 1),
-        ("P8", "全員を読み直す手段がない", 1, 1, 0, 0, 1),
-        ("P6", "バッファ中の時刻合わせ", 2, 1, 0, 0, 2),
+    pts = [  # id, label, difficulty, impact, dx, dy, group (1: confirmed in code or VRChat, 2: to be measured)
+        ("P1", "自分だけ止まって戻せない", 1, 2, 0, 0, 1),
+        ("P7", "オーナー交代で先頭に戻る", 0, 2, 0, 0, 1),
+        ("P4", "読み込み直しに権限が要る", 0, 1, -38, -36, 1),
+        ("P5", "間引きがリトライだけ", 0, 1, 48, -2, 1),
+        ("P9", "時計がずれたまま直らない", 0, 1, -38, 32, 2),
+        ("P8", "全員を読み直す手段がない", 1, 1, -55, -16, 1),
+        ("P6", "バッファ中の時刻合わせ", 1, 1, 55, 18, 2),
         ("P2", "押せるのに何も起きない", 0, 0, -40, -16, 1),
         ("P3", "オーナーの読み直しが送る", 0, 0, 40, 18, 1),
     ]
@@ -224,10 +225,10 @@ def fig_priority():
         b.append(text(x, y - 13, pid, "t1 f12", "middle"))
         b.append(text(x, y + 23, label, "t2 f12", "middle"))
     lx, ly = L, H - 12
-    b.append(f'<circle class="d1" cx="{lx + 6}" cy="{ly - 4}" r="6"/>' + text(lx + 18, ly, "コードで確かめた", "t2 f12"))
-    b.append(f'<circle class="d2" cx="{lx + 170}" cy="{ly - 4}" r="6"/>' + text(lx + 182, ly, "実機での再現が要る（位置は仮）", "t2 f12"))
+    b.append(f'<circle class="d1" cx="{lx + 6}" cy="{ly - 4}" r="6"/>' + text(lx + 18, ly, "コードか VRChat で確かめた", "t2 f12"))
+    b.append(f'<circle class="d2" cx="{lx + 210}" cy="{ly - 4}" r="6"/>' + text(lx + 222, ly, "頻度や数値を実機で測る（位置は仮）", "t2 f12"))
     return svg(W, H, "問題ごとの影響と直す難しさ",
-               "P1は影響大・難しさ中、P7は影響大・難しさ中で要再現、P4とP5は影響中・難しさ小、P8は影響中・難しさ中、P6は影響中・難しさ大で要再現、P2とP3は影響小・難しさ小。", "".join(b))
+               "P1は影響大・難しさ中、P7は影響大・難しさ小、P4とP5は影響中・難しさ小、P9は影響中・難しさ小で要測定、P8は影響中・難しさ中、P6は影響中・難しさ中で要測定、P2とP3は影響小・難しさ小。", "".join(b))
 
 
 os.makedirs(OUT, exist_ok=True)

@@ -1,0 +1,232 @@
+// Temporary harness for the #228 sync tests in Build & Test. Delete with the __SyncTest folder.
+// Each client logs "[SYNCT]" lines: a heartbeat every second, and a line whenever a shared value
+// changes or the video position jumps. Client roles follow join order; the first two clients run
+// the timeline below. Keypad keys run the same actions by hand.
+using UdonSharp;
+using UnityEngine;
+using VRC.SDKBase;
+using VRC.Udon;
+using VRC.SDK3.Components;
+using VRC.SDK3.Video.Components.Base;
+
+[UdonBehaviourSyncMode(BehaviourSyncMode.None)]
+public class SyncTestHarness : UdonSharpBehaviour
+{
+  public UdonBehaviour kawaUi;
+  public UdonBehaviour kawaCtl;
+  public UdonBehaviour vvCore;
+  public UdonBehaviour vvUi;
+  public VRCUrl videoUrl;
+  public bool autoRun = true;
+  public int playersForT0 = 3;
+
+  float[] _at;
+  int[] _who;
+  int[] _act;
+  int _step;
+  int _role = -1;
+  float _t0 = -1f;
+  float _lastBeat;
+  float _lastT;
+  float _kLastPos = -1f;
+  float _vLastPos = -1f;
+  bool _kLastPlaying;
+  bool _vLastPlaying;
+  string _kKey = "";
+  string _vKey = "";
+  float _kPos;
+  bool _kPlaying;
+  float _vPos;
+  bool _vPlaying;
+
+  void Start()
+  {
+    // Seconds after two players are in, who acts (join order), and what.
+    // 5 VVMW play, 6 VVMW LocalSync, 9 VVMW stop, 1 KawaPlayer play, 2 KawaPlayer reload, 3 KawaPlayer ErrorRetry
+    // Run 2: the owner plays on KawaPlayer; later the second client pauses its own player and
+    // retries (a load that is not a reload) while the first client is closed from outside.
+    _at = new float[] { 15f, 75f };
+    _who = new int[] { 0, 1 };
+    _act = new int[] { 1, 3 };
+    Log("START", "");
+  }
+
+  void Update()
+  {
+    if (_t0 < 0f && VRCPlayerApi.GetPlayerCount() >= playersForT0)
+    {
+      _t0 = Time.time;
+      _role = Rank();
+      Log("T0", "role=" + _role);
+    }
+    if (autoRun && _t0 >= 0f && _step < _at.Length && Time.time - _t0 >= _at[_step])
+    {
+      if (_who[_step] == _role) Act(_act[_step]);
+      _step++;
+    }
+    if (Input.GetKeyDown(KeyCode.Keypad1)) Act(1);
+    if (Input.GetKeyDown(KeyCode.Keypad2)) Act(2);
+    if (Input.GetKeyDown(KeyCode.Keypad3)) Act(3);
+    if (Input.GetKeyDown(KeyCode.Keypad5)) Act(5);
+    if (Input.GetKeyDown(KeyCode.Keypad6)) Act(6);
+    if (Input.GetKeyDown(KeyCode.Keypad9)) Act(9);
+    if (Input.GetKeyDown(KeyCode.Keypad0)) Log("MARK", "");
+    Watch();
+  }
+
+  int Rank()
+  {
+    var players = new VRCPlayerApi[32];
+    VRCPlayerApi.GetPlayers(players);
+    int me = Networking.LocalPlayer.playerId;
+    int rank = 0;
+    for (int i = 0; i < players.Length; i++)
+    {
+      if (Utilities.IsValid(players[i]) && players[i].playerId < me) rank++;
+    }
+    return rank;
+  }
+
+  void Act(int a)
+  {
+    if (a == 1)
+    {
+      var f = (VRCUrlInputField)kawaUi.GetProgramVariable("_urlInputField");
+      f.SetUrl(videoUrl);
+      kawaUi.SendCustomEvent("PlayUrl");
+      Log("ACT", "kawa-play");
+    }
+    else if (a == 2)
+    {
+      kawaUi.SendCustomEvent("Reload");
+      Log("ACT", "kawa-reload");
+    }
+    else if (a == 3)
+    {
+      var h = (UdonBehaviour)kawaCtl.GetProgramVariable("_handler");
+      var fbObj = kawaCtl.GetProgramVariable("_useFallback");
+      if (fbObj != null && (bool)fbObj && h != null) h = (UdonBehaviour)h.GetProgramVariable("_fallbackHandler");
+      if (h != null)
+      {
+        var p = (BaseVRCVideoPlayer)h.GetProgramVariable("_baseVideoPlayer");
+        if (p != null) p.Pause();
+      }
+      kawaCtl.SetProgramVariable("_retryTargetTrack", kawaCtl.GetProgramVariable("_track"));
+      kawaCtl.SendCustomEvent("ErrorRetry");
+      Log("ACT", "kawa-errorretry");
+    }
+    else if (a == 5)
+    {
+      var f = (VRCUrlInputField)vvUi.GetProgramVariable("urlInput");
+      f.SetUrl(videoUrl);
+      vvUi.SendCustomEvent("_InputConfirmClick");
+      Log("ACT", "vv-play");
+    }
+    else if (a == 6)
+    {
+      vvCore.SendCustomEvent("LocalSync");
+      Log("ACT", "vv-localsync");
+    }
+    else if (a == 9)
+    {
+      vvCore.SendCustomEvent("Stop");
+      Log("ACT", "vv-stop");
+    }
+  }
+
+  void Watch()
+  {
+    float now = Time.time;
+    float dt = now - _lastT;
+    _lastT = now;
+    string k = KState();
+    string v = VState();
+    string why = "";
+    if (k != _kKey) why += "K ";
+    if (v != _vKey) why += "V ";
+    if (_kPlaying && _kLastPlaying && Mathf.Abs(_kPos - _kLastPos - dt) > 0.5f) why += "KJUMP ";
+    if (_vPlaying && _vLastPlaying && Mathf.Abs(_vPos - _vLastPos - dt) > 0.5f) why += "VJUMP ";
+    if (why == "" && now - _lastBeat >= 1f) why = "BEAT ";
+    _kKey = k;
+    _vKey = v;
+    if (why != "")
+    {
+      _lastBeat = now;
+      Log(why.Trim(), "");
+    }
+    _kLastPos = _kPos;
+    _vLastPos = _vPos;
+    _kLastPlaying = _kPlaying;
+    _vLastPlaying = _vPlaying;
+  }
+
+  string KState()
+  {
+    _kPos = -1f;
+    _kPlaying = false;
+    if (kawaCtl == null) return "K none";
+    var h = (UdonBehaviour)kawaCtl.GetProgramVariable("_handler");
+    var fbObj = kawaCtl.GetProgramVariable("_useFallback");
+    if (fbObj != null && (bool)fbObj && h != null)
+    {
+      var f = (UdonBehaviour)h.GetProgramVariable("_fallbackHandler");
+      if (f != null) h = f;
+    }
+    string s = "K own=" + (Networking.IsOwner(kawaCtl.gameObject) ? 1 : 0)
+      + " ss=" + kawaCtl.GetProgramVariable("_syncedState")
+      + " st=" + kawaCtl.GetProgramVariable("_syncedVideoTime")
+      + " tk=" + kawaCtl.GetProgramVariable("_networkDataTimeTicks")
+      + " rl=" + kawaCtl.GetProgramVariable("_reloading");
+    if (h != null)
+    {
+      s += " h=" + h.gameObject.name + " ld=" + h.GetProgramVariable("_loading") + " stp=" + h.GetProgramVariable("_stopped");
+      var p = (BaseVRCVideoPlayer)h.GetProgramVariable("_baseVideoPlayer");
+      if (p != null)
+      {
+        _kPlaying = p.IsPlaying;
+        _kPos = p.GetTime();
+        s += " pl=" + _kPlaying;
+      }
+    }
+    return s;
+  }
+
+  string VState()
+  {
+    _vPos = -1f;
+    _vPlaying = false;
+    if (vvCore == null) return "V none";
+    string s = "V own=" + (Networking.IsOwner(vvCore.gameObject) ? 1 : 0)
+      + " st=" + vvCore.GetProgramVariable("state")
+      + " tm=" + vvCore.GetProgramVariable("time")
+      + " ld=" + vvCore.GetProgramVariable("isLoading")
+      + " lr=" + vvCore.GetProgramVariable("isLocalReloading")
+      + " er=" + vvCore.GetProgramVariable("isError");
+    var h = (UdonBehaviour)vvCore.GetProgramVariable("activeHandler");
+    if (h != null)
+    {
+      s += " h=" + h.gameObject.name + " req=" + h.GetProgramVariable("isLoadUrlRequested");
+      var p = (BaseVRCVideoPlayer)h.GetProgramVariable("videoPlayer");
+      if (p != null)
+      {
+        _vPlaying = p.IsPlaying;
+        _vPos = p.GetTime();
+        s += " pl=" + _vPlaying;
+      }
+    }
+    return s;
+  }
+
+  void Log(string tag, string extra)
+  {
+    Debug.Log("[SYNCT] " + tag + " role=" + _role + " pid=" + Networking.LocalPlayer.playerId
+      + " t=" + Time.time.ToString("F2")
+      + " srv=" + Networking.GetServerTimeInSeconds().ToString("F2")
+      + " nd=" + ((Networking.GetNetworkDateTime().Ticks - System.DateTime.UtcNow.Ticks) / 10000)
+      + " sl=" + (Networking.GetServerTimeInSeconds() - System.DateTime.UtcNow.TimeOfDay.TotalSeconds).ToString("F3")
+      + " T=" + (_t0 < 0f ? -1f : Time.time - _t0).ToString("F1")
+      + " " + extra
+      + " | " + _kKey + " kpos=" + _kPos.ToString("F2")
+      + " | " + _vKey + " vpos=" + _vPos.ToString("F2"));
+  }
+}
