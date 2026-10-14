@@ -1,10 +1,9 @@
 """Draws the SVG charts of docs/design/228-playback-sync: figures 5 and 8 of
-comparison.md (the drift model, the rate limit) and figure 2 of README.md
-(impact and difficulty).
+comparison.md (the drift model, the rate limit).
 
   python figures.py            # writes the SVGs next to this script
 
-Figure 8 comes from the small model below, not from a measurement: one viewer,
+Figure 5 comes from the small model below, not from a measurement: one viewer,
 a network stall, and a fixed re-buffer after every seek. The checks copy the
 rules of KawaPlayer (Controller.Update, EnsureVideoTime) and of VVMW
 (Core_Timing._AutoSyncTime, SyncTime). Each SVG carries its own light and dark
@@ -89,7 +88,7 @@ def text(x, y, s, cls="t2 f12", anchor="start", rotate=None):
     return f'<text x="{x:.1f}" y="{y:.1f}" class="{cls}" text-anchor="{anchor}"{tr}>{s}</text>'
 
 
-# Figure 7: the time-correction model, as two panels sharing the time axis.
+# Figure 5: the time-correction model, as two panels sharing the time axis.
 def fig_drift():
     W, H = 820, 500
     L, R = 84, 790
@@ -140,7 +139,7 @@ def fig_drift():
                "通信が4秒止まり、シークごとに0.6秒の読み直しがかかる仮定で、KawaPlayerは5秒ごとにシークを繰り返し、VVMWは1回のシークで0.6秒遅れのまま落ち着く。", "".join(b))
 
 
-# Figure 6: three presses of reload, with and without spacing the loads.
+# Figure 8: three presses of reload, with and without spacing the loads.
 def fig_ratelimit():
     W, H = 820, 310
     L, R = 200, 790
@@ -187,52 +186,8 @@ def fig_ratelimit():
     return svg(W, H, "読み込みの間引き",
                "間引きがないと、5秒以内の2回目と3回目の読み込みはVRChatに断られる。VVMWの方式では、2回目と3回目の頼みは5.05秒の枠の1回にまとまる。", "".join(b))
 
-
-# Figure 11: the problems placed by impact and difficulty (three-step estimates).
-def fig_priority():
-    W, H = 820, 560
-    L, R, T, B = 110, 790, 86, 484
-    cw, chh = (R - L) / 3, (B - T) / 3
-    cx = lambda i: L + cw * (i + 0.5)
-    cy = lambda j: B - chh * (j + 0.5)
-    b = [text(24, 30, "問題ごとの影響と、直す難しさ（目安）", "t1 f14"),
-         text(24, 50, "どちらも 3 段階の目安。左上（影響が大きく、手間が小さい）ほど先に直す価値が高い", "t2 f12")]
-    for i in range(4):
-        x = L + cw * i
-        y = T + chh * i
-        b.append(f'<line class="grid" x1="{x:.1f}" x2="{x:.1f}" y1="{T}" y2="{B}"/>')
-        b.append(f'<line class="grid" x1="{L}" x2="{R}" y1="{y:.1f}" y2="{y:.1f}"/>')
-    b.append(f'<line class="axis" x1="{L}" x2="{R}" y1="{B}" y2="{B}"/><line class="axis" x1="{L}" x2="{L}" y1="{T}" y2="{B}"/>')
-    for i, s in enumerate(("小", "中", "大")):
-        b.append(text(cx(i), B + 20, s, "tm f12", "middle"))
-        b.append(text(L - 12, cy(i) + 4, s, "tm f12", "end"))
-    b.append(text((L + R) / 2, B + 42, "直す難しさ（実装と確認）", "tm f12", "middle"))
-    b.append(text(L - 12, T - 10, "影響", "tm f12", "end"))
-    pts = [  # id, label, difficulty, impact, dx, dy, group (1: confirmed in code or VRChat, 2: to be measured)
-        ("P1", "自分だけ止まって戻せない", 1, 2, 0, 0, 1),
-        ("P7", "オーナー交代で先頭に戻る", 0, 2, 0, 0, 1),
-        ("P4", "読み込み直しに権限が要る", 0, 1, -38, -36, 1),
-        ("P5", "間引きがリトライだけ", 0, 1, 48, -2, 1),
-        ("P9", "時計がずれたまま直らない", 0, 1, -38, 32, 2),
-        ("P8", "全員を読み直す手段がない", 1, 1, -55, -16, 1),
-        ("P6", "バッファ中の時刻合わせ", 1, 1, 55, 18, 2),
-        ("P2", "押せるのに何も起きない", 0, 0, -40, -16, 1),
-        ("P3", "オーナーの読み直しが送る", 0, 0, 40, 18, 1),
-    ]
-    for pid, label, d, im, dx, dy, g in pts:
-        x, y = cx(d) + dx, cy(im) + dy
-        b.append(f'<circle class="{"d1" if g == 1 else "d2"}" cx="{x:.1f}" cy="{y:.1f}" r="7"/>')
-        b.append(text(x, y - 13, pid, "t1 f12", "middle"))
-        b.append(text(x, y + 23, label, "t2 f12", "middle"))
-    lx, ly = L, H - 12
-    b.append(f'<circle class="d1" cx="{lx + 6}" cy="{ly - 4}" r="6"/>' + text(lx + 18, ly, "コードか VRChat で確かめた", "t2 f12"))
-    b.append(f'<circle class="d2" cx="{lx + 210}" cy="{ly - 4}" r="6"/>' + text(lx + 222, ly, "頻度や数値を実機で測る（位置は仮）", "t2 f12"))
-    return svg(W, H, "問題ごとの影響と直す難しさ",
-               "P1は影響大・難しさ中、P7は影響大・難しさ小、P4とP5は影響中・難しさ小、P9は影響中・難しさ小で要測定、P8は影響中・難しさ中、P6は影響中・難しさ中で要測定、P2とP3は影響小・難しさ小。", "".join(b))
-
-
 os.makedirs(OUT, exist_ok=True)
-for name, f in (("rate-limit.svg", fig_ratelimit), ("drift-model.svg", fig_drift), ("priority.svg", fig_priority)):
+for name, f in (("rate-limit.svg", fig_ratelimit), ("drift-model.svg", fig_drift)):
     with open(os.path.join(OUT, name), "w", encoding="utf-8", newline="\n") as fh:
         fh.write(f())
     print("wrote", name)
