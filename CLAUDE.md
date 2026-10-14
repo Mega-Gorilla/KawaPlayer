@@ -60,6 +60,8 @@ Published VPM versions must not be deleted (breaks projects using source control
 - Multiple video player handlers with automatic fallback on error
 - Owner-based authority model (VRChat networking)
 
+Every client places the video by the same clock: the owner shares a video time and the server time it was taken at (`_syncedServerTimeMs`, from `Networking.GetServerTimeInMilliseconds`, 0 while there is none), and the time since is worked out with `Networking.CalculateServerDeltaTime`, which takes seconds and copes with the value wrapping. `GetNetworkDateTime`, used before, stays on the local clock on a client whose date sync fails (VRChat logs `Failed to sync network DateTime`), and that client played off by its clock's error for good (issue #237). A synced field whose type changes keeps instances of older builds apart (VRChat's network compatibility check), but PC and Android are separate builds that meet in one instance: when the synced fields change, both have to be rebuilt.
+
 **Handler System** (`Handlers/`) — Abstraction over video backends:
 - `PlayerHandler` — abstract base
 - `BaseVideoPlayerHandler` — wraps VRC's built-in video players
