@@ -1,4 +1,4 @@
-"""Draws the SVG figures of docs/design/playback-sync.md (figures 7, 8 and 11).
+"""Draws the SVG figures of docs/design/228-playback-sync/README.md (figures 7, 8 and 11).
 
   python figures.py            # writes the SVGs next to this script
 
