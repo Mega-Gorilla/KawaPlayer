@@ -82,7 +82,7 @@ jobs:
       - name: Leave Out What Is Not Part Of The Package
         working-directory: Packages/${{ env.packageName }}
         run: |
-          for path in docs CLAUDE.md AGENTS.md "Assets/Models/Tablet/Source~" Tests Tests.meta; do
+          for path in docs CLAUDE.md AGENTS.md "Assets/Models/Tablet/Source~" "Media~/poster/source" Tests Tests.meta; do
             if [ -e "$path" ]; then
               rm -rf -- "$path"
               echo "left out $path"

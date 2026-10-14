@@ -16,7 +16,7 @@ There is no local build command — the project is opened and compiled in the Un
 
 **Release workflow** (`.github/workflows/release.yml`, manual trigger with a `publish` checkbox):
 1. Reads version from `package.json`
-2. Packages into ZIP and UnityPackage formats (the UnityPackage is built by `.github/scripts/create-unitypackage.sh`), after leaving out what a world does not use: `docs/`, `CLAUDE.md`, `AGENTS.md`, `Assets/Models/Tablet/Source~/` and `Tests/` (the list is in the workflow's "Leave Out What Is Not Part Of The Package" step; a new folder that is not for worlds goes there too)
+2. Packages into ZIP and UnityPackage formats (the UnityPackage is built by `.github/scripts/create-unitypackage.sh`), after leaving out what a world does not use: `docs/`, `CLAUDE.md`, `AGENTS.md`, `Assets/Models/Tablet/Source~/`, `Media~/poster/source/` (what the poster is drawn from; the poster itself ships) and `Tests/` (the list is in the workflow's "Leave Out What Is Not Part Of The Package" step; a new folder that is not for worlds goes there too)
 3. Uploads both plus `package.json` as a workflow artifact — **without `publish` the run stops here (dry run)**
 4. With `publish`: creates a GitHub Release with both artifacts **and an empty body** (refused unless run from `develop` and the tag does not exist yet). The release notes are added afterwards — see the checklist
 5. With `publish`: triggers `repository-dispatch` to `Mega-Gorilla/vpm-repos` to rebuild the VPM listing
