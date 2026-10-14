@@ -1,0 +1,110 @@
+// VizVid (VVMW) probe for the sync tests (#228). ACTION:
+//   place (edit mode: add "VVMW (On-Screen Controls)" as __VVMWTest) | dump | url ARG=url | player ARG=index |
+//   localsync | presync | sample-start | sample-stop | sample-read
+GameObject root = null;
+foreach (var r in UnityEngine.SceneManagement.SceneManager.GetActiveScene().GetRootGameObjects()) if (r.name == "__VVMWTest") root = r;
+string action = "ACTION", arg = @"ARG";
+var sb = new System.Text.StringBuilder();
+if (action == "place")
+{
+  if (root != null) return "already placed";
+  var prefab = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>("Packages/idv.jlchntoz.vvmw/VVMW (On-Screen Controls).prefab");
+  var go = (GameObject)UnityEditor.PrefabUtility.InstantiatePrefab(prefab, UnityEngine.SceneManagement.SceneManager.GetActiveScene());
+  go.name = "__VVMWTest";
+  go.transform.position = new Vector3(0, 0, 30);
+  return "placed " + go.name;
+}
+if (root == null) return "no __VVMWTest";
+VRC.Udon.UdonBehaviour Find(string program)
+{
+  foreach (var u in root.GetComponentsInChildren<VRC.Udon.UdonBehaviour>(true))
+    if (u.programSource != null && u.programSource.name == program) return u;
+  return null;
+}
+VRC.Udon.UdonBehaviour Backing(object o)
+{
+  if (o == null) return null;
+  if (o is VRC.Udon.UdonBehaviour ub) return ub;
+  if (o is UdonSharp.UdonSharpBehaviour usb) return UdonSharpEditor.UdonSharpEditorUtility.GetBackingUdonBehaviour(usb);
+  return null;
+}
+var core = Find("Core");
+var ui = Find("UIHandler");
+VRC.Udon.UdonBehaviour rate = null;
+foreach (var u in UnityEngine.Object.FindObjectsByType<VRC.Udon.UdonBehaviour>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+  if (u.programSource != null && u.programSource.name == "RateLimitResolver") rate = u;
+string Line()
+{
+  var h = Backing(core.GetProgramVariable("activeHandler"));
+  var d = new System.Text.StringBuilder();
+  d.Append($"{Time.realtimeSinceStartup:F2} owner={VRC.SDKBase.Networking.IsOwner(core.gameObject)} state={core.GetProgramVariable("state")} time={core.GetProgramVariable("time")} ");
+  d.Append($"loading={core.GetProgramVariable("isLoading")} localReload={core.GetProgramVariable("isLocalReloading")} error={core.GetProgramVariable("isError")} ");
+  var pc = core.GetProgramVariable("pcUrl") as VRC.SDKBase.VRCUrl; var lu = core.GetProgramVariable("localUrl") as VRC.SDKBase.VRCUrl;
+  d.Append($"pcUrl='{(pc == null ? "null" : pc.Get())}' localUrl='{(lu == null ? "null" : lu.Get())}' ");
+  if (h != null)
+  {
+    var vp = h.GetProgramVariable("videoPlayer") as VRC.SDK3.Video.Components.Base.BaseVRCVideoPlayer;
+    d.Append($"handler={h.name} req={h.GetProgramVariable("isLoadUrlRequested")} ");
+    if (vp != null) d.Append($"playing={vp.IsPlaying} pos={vp.GetTime():F2} ");
+  }
+  if (rate != null) d.Append($"rateLast={rate.GetProgramVariable("lastUrlLoadTime")}");
+  return d.ToString();
+}
+switch (action)
+{
+  case "dump": break;
+  case "players":
+  {
+    var hs = core.GetProgramVariable("playerHandlers") as System.Array;
+    for (int i = 0; i < hs.Length; i++) { var b = Backing(hs.GetValue(i)); sb.AppendLine($"{i + 1}: {b?.name} ({b?.GetProgramVariable("playerName")})"); }
+    sb.AppendLine("selectedPlayer=" + ui.GetProgramVariable("selectedPlayer"));
+    break;
+  }
+  case "player": ui.SetProgramVariable("selectedPlayer", byte.Parse(arg)); sb.AppendLine("selectedPlayer=" + arg); break;
+  case "url":
+  {
+    var field = ui.GetProgramVariable("urlInput") as VRC.SDK3.Components.VRCUrlInputField;
+    field.SetUrl(new VRC.SDKBase.VRCUrl(arg));
+    ui.SendCustomEvent("_InputConfirmClick");
+    sb.AppendLine("submitted " + arg);
+    break;
+  }
+  case "localsync": core.SendCustomEvent("LocalSync"); sb.AppendLine("LocalSync sent"); break;
+  case "corevent": core.SendCustomEvent(arg); sb.AppendLine("core " + arg + " sent"); break;
+  case "presync": core.SendCustomEvent("_onPreSerialization"); sb.AppendLine("OnPreSerialization run by hand"); break;
+  case "sample-start":
+  {
+    var log = new System.Collections.Generic.List<string>();
+    string last = null;
+    UnityEditor.EditorApplication.CallbackFunction cb = () =>
+    {
+      if (!Application.isPlaying || core == null) return;
+      var l = Line();
+      var key = l.Substring(l.IndexOf(' ') + 1);
+      if (key != last) { log.Add(l); last = key; }
+    };
+    UnityEditor.EditorApplication.update += cb;
+    System.AppDomain.CurrentDomain.SetData("vvSampler", cb);
+    System.AppDomain.CurrentDomain.SetData("vvLog", log);
+    sb.AppendLine("sampler started");
+    break;
+  }
+  case "sample-stop":
+  {
+    var cb = System.AppDomain.CurrentDomain.GetData("vvSampler") as UnityEditor.EditorApplication.CallbackFunction;
+    if (cb != null) UnityEditor.EditorApplication.update -= cb;
+    System.AppDomain.CurrentDomain.SetData("vvSampler", null);
+    sb.AppendLine("sampler stopped");
+    break;
+  }
+  case "sample-read":
+  {
+    var log = System.AppDomain.CurrentDomain.GetData("vvLog") as System.Collections.Generic.List<string>;
+    if (log == null) return "no log";
+    foreach (var l in log) sb.AppendLine(l);
+    return sb.ToString();
+  }
+  default: return "unknown action " + action;
+}
+sb.Append(Line());
+return sb.ToString();
