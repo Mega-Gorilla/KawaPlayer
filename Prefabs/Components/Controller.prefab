@@ -273,8 +273,6 @@ MonoBehaviour:
   _screenTypes: 
   _screens: []
   _textureProperties: []
-  _syncFrequency: 5
-  _syncMargin: 0.3
 --- !u!114 &7561588978061558976
 MonoBehaviour:
   m_ObjectHideFlags: 0

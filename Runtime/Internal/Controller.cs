@@ -72,9 +72,9 @@ namespace Yamadev.YamaStream
 
     private void Update()
     {
-      if (IsPlaying && Time.time - _lastSync > _syncFrequency)
+      if (IsPlaying && Time.time - _lastSync > SYNC_INTERVAL)
       {
-        EnsureVideoTime();
+        CheckVideoTime();
       }
     }
 
@@ -471,13 +471,32 @@ namespace Yamadev.YamaStream
         RequestSerialization();
       }
 
+      NotifyTimeChanged(time);
+      PrintLog($"{ActiveHandler.Type.GetString()}: Set video time: {time}.");
+    }
+
+    // Places this player's video by the shared time, without sharing a time:
+    // following the shared time is not a seek by the owner. Going through
+    // SetTime made the owner send everyone the time they already had, each
+    // time its own video drifted or reloaded (issue #235).
+    private void SeekLocal(float time)
+    {
+      if (IsLive || Time.frameCount == _lastSetTimeFrame) return;
+      _lastSetTimeFrame = Time.frameCount;
+
+      ActiveHandler.Time = time;
+      NotifyTimeChanged(time);
+      PrintLog($"{ActiveHandler.Type.GetString()}: Follow the shared time: {time}.");
+    }
+
+    private void NotifyTimeChanged(float time)
+    {
       int len = _listeners.Length;
       for (int i = 0; i < len; i++)
       {
         var listener = _listeners[i];
         if (Utilities.IsValid(listener)) listener.AfterTimeChanged(time);
       }
-      PrintLog($"{ActiveHandler.Type.GetString()}: Set video time: {time}.");
     }
 
     public object[] Track
