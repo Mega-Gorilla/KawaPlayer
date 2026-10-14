@@ -195,6 +195,15 @@ namespace Yamadev.YamaStream.UI
         }
       }
       if (!_controller.Stopped && !_controller.IsLoading) UpdateProgressView();
+      // Pressable only when a reload would do anything: it did nothing, while
+      // looking pressable, when everyone was stopped or a load was under way
+      // (issue #232). The wait while loading ends with no event, so it is
+      // checked here.
+      if (Utilities.IsValid(_reloadButton))
+      {
+        bool canReload = _controller.CanReload;
+        if (_reloadButton.interactable != canReload) _reloadButton.interactable = canReload;
+      }
     }
 
     public bool ProgressHeld

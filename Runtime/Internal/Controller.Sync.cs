@@ -135,19 +135,28 @@ namespace Yamadev.YamaStream
       _trackExtension = TrackUtils.GetExtension(Track);
     }
 
-    public override void OnDeserialization()
+    // The player the owner shares, or the one in use when the shared index
+    // is not one of ours.
+    private int SyncedHandlerIndex()
     {
       int handlerIndex = _handlerIndex;
-      bool syncedIndexValid = handlerIndex >= 0 && handlerIndex < _videoPlayerHandlers.Length && Utilities.IsValid(_videoPlayerHandlers[handlerIndex]);
-      if (!syncedIndexValid)
-      {
-        handlerIndex = Mathf.Max(Array.IndexOf(_videoPlayerHandlers, Handler), 0);
-      }
+      if (IsValidHandlerIndex(handlerIndex)) return handlerIndex;
+      return Mathf.Max(Array.IndexOf(_videoPlayerHandlers, Handler), 0);
+    }
 
+    // The track the owner shares, as played on the given player.
+    private object[] BuildSyncedTrack(int handlerIndex)
+    {
       bool hasSyncedExtension = _trackExtension != null && _trackExtension.Length > 0;
-      object[] track = hasSyncedExtension
+      return hasSyncedExtension
         ? TrackUtils.NewTrackWithExtension(_videoPlayerHandlers[handlerIndex].Type, _title, _url, _trackExtension)
         : TrackUtils.NewTrack(_videoPlayerHandlers[handlerIndex].Type, _title, _url);
+    }
+
+    public override void OnDeserialization()
+    {
+      int handlerIndex = SyncedHandlerIndex();
+      object[] track = BuildSyncedTrack(handlerIndex);
 
       int len = _listeners.Length;
       for (int i = 0; i < len; i++)

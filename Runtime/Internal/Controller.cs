@@ -52,6 +52,12 @@ namespace Yamadev.YamaStream
     private string _uiLanguage = string.Empty;
 
     private const float SAFETY_RETRY_INTERVAL = 5.1f;
+    // A reload while loading waits this long, so a load that is only slow is
+    // not restarted: normal loads took up to 8.1 s in VRChat, resolving the
+    // URL alone 3 to 5 s (issue #232). An error can be reloaded at once.
+    private const float RELOAD_WAIT_WHILE_LOADING = 15f;
+    private bool _reloadPending;
+    private bool _reloadAfterLoad;
 
     private void Start()
     {
@@ -351,9 +357,90 @@ namespace Yamadev.YamaStream
       ActiveHandler.Stop();
     }
 
+    // Whether reloading would do anything now: the video is shared as playing
+    // or paused, and this player is not in a load that may still finish.
+    public bool CanReload => SyncedState != PlayerState.Idle && !(IsLoading && Time.time - _lastLoadTime < RELOAD_WAIT_WHILE_LOADING);
+
+    // Reloads this player's video, and only this player's: it also brings
+    // back a video that stopped on an error or is stuck loading, which it did
+    // nothing for before (issue #232), and nothing is sent.
     public void Reload()
     {
-      if (!Stopped && !IsLoading) ResolveAndLoadTrack(Track, true);
+      if (!CanReload) return;
+      RequestReload();
+    }
+
+    // The reload a change of speed or of the maximum resolution needs on
+    // AVPro. A load going on is not restarted: the video is reloaded once it
+    // is ready, so the change is not lost.
+    public void ReloadForSettings()
+    {
+      if (Stopped) return;
+      if (IsLoading)
+      {
+        _reloadAfterLoad = true;
+        return;
+      }
+      RequestReload();
+    }
+
+    // Keeps this Controller's reloads and retries 5.1 s apart, as VRChat
+    // turns away a second load within 5 s. Presses while waiting make one
+    // reload, of whatever is shared when it runs.
+    private void RequestReload()
+    {
+      float wait = _lastLoadTime + SAFETY_RETRY_INTERVAL - Time.time;
+      if (wait <= 0)
+      {
+        ReloadNow();
+        return;
+      }
+      if (_reloadPending) return;
+      _reloadPending = true;
+      SendCustomEventDelayedSeconds(nameof(_RunPendingReload), wait);
+    }
+
+    public void _RunPendingReload()
+    {
+      if (!_reloadPending) return;
+      _reloadPending = false;
+      if (SyncedState == PlayerState.Idle) return;
+      ReloadNow();
+    }
+
+    // A non-owner reloads the track it was sent. The owner, and a local
+    // player, reload their own: what the owner shares is made from it only
+    // when sent, so the synced copy can lag behind, and is empty when local.
+    // The player stays as it is (the synced one for a non-owner), so a reload
+    // never changes what is shared.
+    private void ReloadNow()
+    {
+      _errorRetryCount = 0;
+      _retryTargetTrack = null;
+      _reloadAfterLoad = false;
+
+      object[] track;
+      int handlerIndex;
+      if (Networking.IsOwner(gameObject) || _isLocal)
+      {
+        track = Track;
+        handlerIndex = Array.IndexOf(_videoPlayerHandlers, Handler);
+      }
+      else
+      {
+        handlerIndex = SyncedHandlerIndex();
+        track = BuildSyncedTrack(handlerIndex);
+        Track = track;
+      }
+      if (!Utilities.IsValid(TrackUtils.GetUrl(track)) || string.IsNullOrEmpty(TrackUtils.GetUrl(track).Get())) return;
+
+      // Marked as a reload before anything stops: the fallback player, or the
+      // one switched from, reports a stop, which otherwise reads as the owner
+      // stopping the video, clearing the track and the shared time.
+      _reloading = true;
+      SetUseFallback(false);
+      if (IsValidHandlerIndex(handlerIndex) && _videoPlayerHandlers[handlerIndex] != Handler) SwitchToHandlerIndex(handlerIndex);
+      LoadTrackLocal(track, true);
     }
 
     public bool Loop
@@ -411,7 +498,7 @@ namespace Yamadev.YamaStream
         if (Utilities.IsValid(handler)) handler.Speed = _speed;
       }
       if (!Stopped && ActiveHandler.Type == VideoPlayerType.AVProVideoPlayer)
-        SendCustomEventDelayedFrames(nameof(Reload), 0);
+        SendCustomEventDelayedFrames(nameof(ReloadForSettings), 0);
       UpdateAudioPitch();
     }
 
