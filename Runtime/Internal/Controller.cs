@@ -541,6 +541,10 @@ namespace Yamadev.YamaStream
       {
         _trackVersion++;
         _appliedTrackVersion = _trackVersion;
+        // A new track goes out with no shared time, which its owner starts
+        // when it is ready (AfterVideoReady). Stopping the last track clears
+        // it too, but a track that ended in an error was stopped without.
+        ResetSyncedVideoTime();
         RequestSerialization();
       }
     }
