@@ -147,7 +147,7 @@ flowchart LR
 | `_speed`・`_loop`・`_repeat` | 速度・ループ・区間リピート |
 | `_handlerFromTrack` | プレイヤーが曲によって切り替わったか（#182） |
 
-位置は、共有した位置 $t_s$ と時刻 $T_s$ から、誰でも次の式で計算する。$v$ は速度、$d$ は自分だけの遅延の補正（`LocalDelay`）である。
+位置は、共有した位置 $t_s$ と時刻 $T_s$ から、誰でも次の式で計算する。 $v$ は速度、 $d$ は自分だけの遅延の補正（`LocalDelay`）である。
 
 $$t_{\mathrm{play}} = t_s + (T_{\mathrm{now}} - T_s)\,v + d \qquad t_{\mathrm{pause}} = t_s + d$$
 
@@ -191,7 +191,7 @@ sequenceDiagram
 | `ownerNetworkTime` | 送ったときのオーナーのサーバー時刻（受け取りの遅れの計算に使う） |
 | `syncedSpeed`・`loop`・`rangeLoopStart/End` | 速度・ループ・区間ループ |
 
-位置は、共有した仮想の開始時刻 $T_0$ から計算する。$o$ は自分だけの補正（`syncOffset`）、$\ell$ は受け取りの遅れ（`syncLatency`）である。
+位置は、共有した仮想の開始時刻 $T_0$ から計算する。 $o$ は自分だけの補正（`syncOffset`）、 $\ell$ は受け取りの遅れ（`syncLatency`）である。
 
 $$t_{\mathrm{play}} = (T_{\mathrm{now}} - T_0)\,v + o + \ell \qquad t_{\mathrm{pause}} = t_s$$
 
