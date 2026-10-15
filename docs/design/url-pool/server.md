@@ -1,6 +1,6 @@
 # URL Pool 方式プレイリストローダー — サーバー側設計
 
-全体設計: [url-pool-playlist-loader.md](url-pool-playlist-loader.md)
+全体設計: [README.md](README.md)
 
 ---
 

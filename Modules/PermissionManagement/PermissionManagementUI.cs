@@ -45,7 +45,9 @@ namespace Yamadev.YamaStream.Modules.PermissionManagement
     public void BeforeUserSetTime() => CheckPermission();
     public void BeforeUserBackward() => CheckPermission();
     public void BeforeUserForward() => CheckPermission();
-    public void BeforeUserReloadVideo() => CheckPermission();
+    // BeforeUserReloadVideo is not handled: a reload reloads only the
+    // presser's own screen, and a viewer whose video had stopped had no
+    // other way back until the next track (issue #233).
     public void BeforeUserChangeLoop() => CheckPermission();
     public void BeforeUserChangeShufflePlay() => CheckPermission();
     public void BeforeUserChangeSpeed() => CheckPermission();

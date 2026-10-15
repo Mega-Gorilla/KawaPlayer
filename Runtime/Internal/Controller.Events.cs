@@ -257,7 +257,7 @@ namespace Yamadev.YamaStream
       }
 
       ActiveHandler.LoadTrack(Track);
-      _lastLoadTime = Time.time;
+      MarkLoadStarted();
 
       int len = _listeners.Length;
       for (int i = 0; i < len; i++)

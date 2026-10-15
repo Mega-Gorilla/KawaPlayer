@@ -24,10 +24,10 @@ Unity 2022.3.22f1 / テストプロジェクト `kawa-player-playlist-testing-ch
 | **6** ツールバー 4 パネル | ✅ | 4 つとも開き、`_activePanel` は単一の enum なので**同時に開くことは構造上あり得ない**。再度押すと閉じる |
 | **7** 9 言語 | ✅ | 9 言語すべてで新しい文言が表示。**スペイン語も完全に翻訳表示**。Playlist Editor が使う 55 キー + PlaylistLoader の 16 キーがファイル側でも 9 言語すべてに存在し空でないことを確認 |
 | **8** PlaylistLoader なし | ✅ | ボタンは表示されたまま、パネルに「この KawaPlayer には Playlist Loader モジュールがありません。」 |
-| **9** 同状態で D&D / YouTube / JSON | ✅ | YouTube ✅ (0→13 曲) / JSON ✅ / **D&D はスタブコンポーネントで実施** (2026-08-31 追試)。`EditorWindow.SendEvent` で `DragUpdated` → `DragPerform` を送り、**`HandleDragEvent` の rect 判定と `DragAndDrop.AcceptDrag()` を含む実経路**が動いて 2 曲が追加され、**mode / title / url が fixture と全件一致**。手順は `release-qa-runbook.md` |
+| **9** 同状態で D&D / YouTube / JSON | ✅ | YouTube ✅ (0→13 曲) / JSON ✅ / **D&D はスタブコンポーネントで実施** (2026-08-31 追試)。`EditorWindow.SendEvent` で `DragUpdated` → `DragPerform` を送り、**`HandleDragEvent` の rect 判定と `DragAndDrop.AcceptDrag()` を含む実経路**が動いて 2 曲が追加され、**mode / title / url が fixture と全件一致**。手順はランブック（`README.md`） |
 | **J-1b 1** 存在しない ID | ✅ | 「プレイリストの取得に失敗しました。」/ 全データ不変 / Console に `[yt-dlp] exit=1 ERROR: ...` |
 | **J-1b 2** 取得中に Cancel | ✅ | 進捗バーが閉じ、**ダイアログは出ず**、データ不変、yt-dlp プロセスの残留 0 |
-| **J-1b 3** 部分成功 | ✅ | **yt-dlp スタブで実施** (2026-08-31 追試)。「一部の項目を取得できなかった可能性があります。取得できたトラック: 3 件。この内容で更新しますか？」→ **「いいえ」で既存の 47 曲・名前・取得元 URL がすべて不変**。手順は `release-qa-runbook.md` |
+| **J-1b 3** 部分成功 | ✅ | **yt-dlp スタブで実施** (2026-08-31 追試)。「一部の項目を取得できなかった可能性があります。取得できたトラック: 3 件。この内容で更新しますか？」→ **「いいえ」で既存の 47 曲・名前・取得元 URL がすべて不変**。手順はランブック（`README.md`） |
 | **J-1b 4** 中間の 1 件で成功 | ✅ | 選択も右ペインもその 1 件のまま。末尾へ飛ばない |
 | **J-1c 1** 更新で選択が移る | ✅ | 3 件目を選択したまま 1 件目を更新 → 選択が index 2 → 0 へ |
 | **J-1c 2** 未取り込み URL | ✅ | 末尾に追加されそこが選択、右ペインも一致 |
@@ -69,7 +69,7 @@ Unity 2022.3.22f1 / テストプロジェクト `kawa-player-playlist-testing-ch
 > | 3 行出力 / `n_entries` 5 / exit 0 (**不足側**) | ✅ partial ダイアログ。「いいえ」で 47 曲が不変、「はい」で 3 件が適用される |
 > | 5 行出力 / `n_entries` 5 / exit 1 (**終了コード側**) | ✅ partial ダイアログ (取得できたトラック: 5 件) |
 >
-> スタブのソースと差し替え・復旧手順は **`release-qa-runbook.md` の「fixture を用意する」**にある。**復旧後に実 yt-dlp で 13 曲を取得できるところまで確認すること。**
+> スタブのソースと差し替え・復旧手順は **ランブック（[`README.md`](README.md)）の「fixture を用意する」**にある。**復旧後に実 yt-dlp で 13 曲を取得できるところまで確認すること。**
 >
 > 副産物として、スタブが受け取った argv が Console に残り、**#104 の引数境界が実地で裏付けられた**。
 >
@@ -135,4 +135,4 @@ GUI を人手で触る代わりに、Win32 メッセージで EditorWindow を�
 - #68 — v1.2.0 リリース候補の統合実機検証。J-1 はその一部
 - #103 / #106 — 一覧と詳細ペインの選択整合性。**J-1c と、この文書の落とし穴 6 の出どころ**
 - #104 — yt-dlp への引数の渡し方。**J-1d の出どころ**
-- `docs/design/url-pool-playlist-loader.md` — 取り込んだ URL がリダイレクトスロットのままである理由
+- [`docs/design/url-pool/README.md`](../url-pool/README.md) — 取り込んだ URL がリダイレクトスロットのままである理由

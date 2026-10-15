@@ -8,11 +8,12 @@ namespace Yamadev.YamaStream
   public partial class Controller
   {
     // Every client checks its video against the shared time once a second,
-    // and seeks only when it is 0.9 s of real time off, as VizVid does (issue
-    // #235). The 0.3 s used before was less than what a seek itself costs, so
-    // a client that seeked was off again by the next check. They were fields,
-    // but no inspector showed them, and a value saved in a world would have
-    // kept the old timing.
+    // and seeks only when it is 0.9 s of real time off (issue #235). The 0.9 s
+    // is VizVid's, though VizVid checks every 0.5 s and measures the 0.9 s in
+    // video time, not real time. The 0.3 s used before was less than what a
+    // seek itself costs, so a client that seeked was off again by the next
+    // check. They were fields, but no inspector showed them, and a value saved
+    // in a world would have kept the old timing.
     private const float SYNC_INTERVAL = 1f;
     private const float SYNC_MARGIN = 0.9f;
     [UdonSynced] private float _syncedVideoTime = 0;

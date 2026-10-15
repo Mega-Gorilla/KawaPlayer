@@ -179,9 +179,9 @@ KawaPlayer にこの方式を持ち込む場合、ワールド側で必要なの
 - 将来 `TryGenerateVRCUrl` が公開された場合、サーバー不要の完全自動方式 (案A) へ移行可能
 
 設計詳細:
-- [全体設計](../design/url-pool-playlist-loader.md)
-- [Unity 側設計](../design/url-pool-unity.md)
-- [サーバー側設計](../design/url-pool-server.md)
+- [全体設計](../design/url-pool/README.md)
+- [Unity 側設計](../design/url-pool/unity.md)
+- [サーバー側設計](../design/url-pool/server.md)
 
 ---
 
