@@ -241,6 +241,10 @@ MARKS = {
         dict(box=(28, 467, 68, 509), n=6),
         dict(box=(28, 531, 68, 573), n=7),
     ]),
+    # The technical page on sync points at ReSync alone.
+    "screen/resync": dict(src="screen/controls", crop=(0, 110, 490, 600), scale=0.667, marks=[
+        dict(box=(28, 339, 68, 381), cap="ReSync（押した人の画面だけ）", at=(290, 360)),
+    ]),
     "screen/controls-right": dict(src="screen/controls", scale=0.667, marks=[
         dict(box=(892, 104, 960, 140), n=1),
         dict(box=(1032, 104, 1088, 140), n=2),
