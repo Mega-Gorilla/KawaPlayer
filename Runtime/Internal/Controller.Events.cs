@@ -6,9 +6,13 @@ namespace Yamadev.YamaStream
 {
   public partial class Controller
   {
+    // Set while AfterVideoReady starts the video: that is not the owner
+    // pressing play, and AfterVideoReady decides itself what to share.
+    private bool _playingOnReady;
+
     public override void AfterVideoPlayed()
     {
-      if (Networking.IsOwner(gameObject) && !_isLocal && !_reloading)
+      if (Networking.IsOwner(gameObject) && !_isLocal && !_reloading && !_playingOnReady)
       {
         UpdateSyncedVideoTime(VideoTime);
         RequestSerialization();
@@ -79,11 +83,18 @@ namespace Yamadev.YamaStream
     {
       _errorRetryCount = 0;
       _retryTargetTrack = null;
+      _playingOnReady = true;
       if (SyncedState == PlayerState.Playing) ActiveHandler.Play();
       if (SyncedState == PlayerState.Idle) ActiveHandler.Stop();
+      _playingOnReady = false;
       CheckRepeat();
 
-      if (Networking.IsOwner(gameObject) && !_isLocal && !_reloading)
+      // The owner starts the shared time only when there is none: the track it
+      // has just started. Any other load -- a reload, a retry after an error,
+      // or one an owner took over while it was loading -- is placed by the
+      // time already shared. Sharing 0 then sent everyone back to the start
+      // (issue #234).
+      if (Networking.IsOwner(gameObject) && !_isLocal && !HasSyncedVideoTime)
       {
         UpdateSyncedVideoTime(0f);
         RequestSerialization();
