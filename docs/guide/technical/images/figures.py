@@ -1,8 +1,9 @@
 """Draws the SVG figures of docs/guide/technical/sync.md: figure 1 (the whole
 picture), figure 2 (where the video should be), figure 3 (the check once a second),
-figure 4 (how a drift is put right, a model) and figure 7 (when ReSync loads).
-Figures 1 and 3 are drawn here rather than in mermaid, whose flowcharts GitHub did
-not always draw.
+figure 4 (how a drift is put right, a model), figure 5 (the owner changing),
+figure 7 (when ReSync loads) and figure 9 (a press of the 全員リロードボタン).
+The diagrams are drawn here rather than in mermaid, which GitHub did not always
+draw, so that every figure looks the same and shows wherever the page is read.
 
   python figures.py            # writes the SVGs next to this script
 
@@ -124,6 +125,90 @@ def fig_check():
     b.append(arrow([(756, y + h), (756, yb)], label="はい", at=(764, (y + h + yb) / 2 + 4), anchor="start"))
     return svg(W, H, "1秒ごとの確かめ",
                "ライブ配信か止まっていれば何もしない。動画が進んでいなければ（読み込み中・バッファ中）何もしない。ずれが0.9秒以上のときだけ、今あるべき位置へシークする。", "".join(b))
+
+
+# Sequence diagrams (figures 5 and 9): participants side by side, steps going down.
+# A step is ("msg", from, to, label), ("note", who, [lines]) or ("end", who).
+def seq(W, title, sub, people, steps, desc):
+    cols = len(people)
+    left, right = 40, W - 40
+    xs = [left + (right - left) * (i + 0.5) / cols for i in range(cols)]
+    top = 76
+    b = [text(24, 30, title, "t1 f14"), text(24, 50, sub, "t2 f12")]
+    y = top + 74
+    body, ended = [], {}
+    for st in steps:
+        if st[0] == "msg":
+            _, a, z, label = st
+            x1, x2 = xs[a], xs[z]
+            if a == z:
+                continue
+            body.append(text((x1 + x2) / 2, y - 6, label, "t2 f12", "middle"))
+            off = 4 if x2 > x1 else -4
+            body.append(f'<path class="arr" d="M{x1:.1f},{y} L{x2 - off:.1f},{y}" marker-end="url(#h)"/>')
+            y += 38
+        elif st[0] == "note":
+            _, who, lines = st
+            h = 14 + 17 * len(lines)
+            w = 176
+            body.append(f'<rect class="ask" x="{xs[who] - w / 2:.1f}" y="{y - 12}" width="{w}" height="{h}" rx="6"/>')
+            for i, line in enumerate(lines):
+                body.append(text(xs[who], y + 7 + 17 * i, line, "t1 f12", "middle"))
+            y += h + 12
+        elif st[0] == "notes":
+            _, items = st
+            h = max(14 + 17 * len(lines) for _, lines in items)
+            w = 176
+            for who, lines in items:
+                body.append(f'<rect class="ask" x="{xs[who] - w / 2:.1f}" y="{y - 12}" width="{w}" height="{h}" rx="6"/>')
+                for i, line in enumerate(lines):
+                    body.append(text(xs[who], y + 7 + 17 * i, line, "t1 f12", "middle"))
+            y += h + 12
+        elif st[0] == "end":
+            _, who = st
+            ended[who] = y - 10
+            body.append(f'<path class="arr" d="M{xs[who] - 7:.1f},{y - 17} L{xs[who] + 7:.1f},{y - 3} M{xs[who] - 7:.1f},{y - 3} L{xs[who] + 7:.1f},{y - 17}"/>')
+    bottom = y + 4
+    for i, (name, sub2) in enumerate(people):
+        end = ended.get(i, bottom)
+        b.append(f'<line class="axis" x1="{xs[i]:.1f}" x2="{xs[i]:.1f}" y1="{top + 40}" y2="{end:.1f}"/>')
+        b.append(node(int(xs[i] - 80), top, 160, 40 if sub2 else 32, [name] + ([sub2] if sub2 else []), "box", "t1 f12"))
+    b.extend(body)
+    H = int(bottom + 20)
+    return svg(W, H, title, desc, "".join(b))
+
+
+# Figure 5: the owner leaving while another player is loading.
+def fig_owner():
+    people = [("オーナー A", ""), ("VRChat", ""), ("B", "（読み込み中）"), ("C", "（再生中）")]
+    steps = [
+        ("msg", 0, 1, "位置 30 秒（12:00:00 の時点）"),
+        ("msg", 1, 2, "位置と時刻を配る"),
+        ("msg", 1, 3, "位置と時刻を配る"),
+        ("note", 0, ["A がインスタンスを抜ける"]),
+        ("end", 0),
+        ("msg", 1, 2, "B を新しいオーナーにする"),
+        ("notes", [(2, ["準備ができたら、共有の位置から", "今あるべき位置を出して合わせる"]),
+                   (3, ["そのまま再生を続ける", "（先頭に戻らない）"])]),
+    ]
+    return seq(820, "オーナーが替わるとき", "共有の位置と時刻はそのまま使われ、読み込み中に引き継いだ人も、今あるべき位置から始める", people, steps,
+               "オーナーAが位置と時刻を送ったあとに抜けると、VRChatがBを新しいオーナーにする。Bは準備ができたら共有の位置から今あるべき位置を出して合わせ、Cはそのまま再生を続ける。")
+
+
+# Figure 9: a press of the 全員リロードボタン.
+def fig_global():
+    people = [("押した人", ""), ("VRChat", ""), ("A", "（再生中）"), ("B", "（読み込みを始めて 5 秒）")]
+    steps = [
+        ("msg", 0, 1, "「読み込み直して」の合図（全員あて）"),
+        ("msg", 1, 0, "合図"),
+        ("msg", 1, 2, "合図"),
+        ("msg", 1, 3, "合図"),
+        ("notes", [(0, ["読み込み直し、", "今あるべき位置に戻る"]),
+                   (2, ["読み込み直し、", "今あるべき位置に戻る"]),
+                   (3, ["15 秒たっていないので、", "今の読み込みを続ける"])]),
+    ]
+    return seq(820, "全員リロードボタンを押したとき", "合図は押した人にも届き、受けた人はそれぞれ ReSync と同じ決まりで読み込み直す", people, steps,
+               "押した人の合図をVRChatが押した人を含む全員に配る。再生中の人は読み込み直して今あるべき位置に戻り、読み込みを始めて15秒たっていない人は今の読み込みを続ける。")
 
 
 # Figure 2: the shared position and time, and where everyone works out the video should be.
@@ -313,7 +398,7 @@ def fig_reload():
 
 os.makedirs(OUT, exist_ok=True)
 for name, f in (("overview.svg", fig_overview), ("position.svg", fig_position), ("check.svg", fig_check),
-                ("drift.svg", fig_drift), ("reload.svg", fig_reload)):
+                ("drift.svg", fig_drift), ("owner.svg", fig_owner), ("reload.svg", fig_reload), ("global-reload.svg", fig_global)):
     with open(os.path.join(OUT, name), "w", encoding="utf-8", newline="\n") as fh:
         fh.write(f())
     print("wrote", name)
