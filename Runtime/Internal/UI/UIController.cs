@@ -295,9 +295,8 @@ namespace Yamadev.YamaStream.UI
       if (!Utilities.IsValid(target)) return false;
       if (string.IsNullOrEmpty(confirmEventName)) return false;
 
-      // TryShow, not Show: Show tells a refused caller by firing its cancel
-      // event, which would clear the pending question and then report back
-      // that it had been asked.
+      // A refused question sends no event: the false returned here is all
+      // the caller hears, and it lets go of what it held for the answer.
       return _modalDialog.TryShow(title, message, GetTranslation("button.cancel"), confirmText,
           target, cancelEventName, confirmEventName);
     }
