@@ -76,18 +76,4 @@ Unity の中からも確かめられます。KawaPlayer のインスペクター
 
 - **C. プレハブから:** Project の **Packages > KawaPlayer** にある `KawaPlayer.prefab` を、シーンにドラッグします。
 
-同じメニューには、タブレット（**Tablet**、[タブレット](tablet.md)）のほかに、スクリーンや操作パネルを足すための部品（**SubScreen**・**Controller Bar**・**Playlist Panel**）と、全員の読み込み直しボタン（**Global Reload Button**、[下](#全員の読み込み直しボタンを置く)）もあります。
-
-### 全員の読み込み直しボタンを置く
-
-ライブ配信のイベントなどで、全員の画面を一度に読み込み直すボタンです。六角形の LED 表示のような見た目です。ライブ配信は再生位置を合わせないので、遅れが人によってばらばらにたまります。このボタンを押すと、全員がそれぞれの画面で読み込み直し、配信の今の位置から取り直します。普段は使わないので、スクリーンとタブレットの画面にはありません。要るワールドにだけ置いてください。表示は英語だけです（**RELOAD ALL** など）。
-
-1. Unity のメニューの **GameObject > KawaPlayer > Global Reload Button** を選びます。
-
-   ![GameObject > KawaPlayer のメニュー。③ Global Reload Button に印がある](images/unity/gameobject-menu-global-reload.webp)
-
-2. 置かれたボタンを選び、インスペクターの **KawaPlayer** に、読み込み直すプレイヤーを入れます。
-3. ステージや配信卓の近くなど、主催者が押せる所に動かします。
-
-- **押せる人:** [権限管理](modules.md#権限管理) のモジュールが入っていれば、Editor 以上の人だけが押せます。入っていなければ、ボタンに手が届く人は誰でも押せるので、関係者しか行けない所に置いてください。
-- **押したとき:** 1 回押すと、全員に送られます。確認は出ないので、押せる人と置く場所で守ってください。送ったあと 15 秒は押せません（[ワールドの中での動き](playing.md#全員の読み込み直しボタン)）。
+同じメニューには、タブレット（**Tablet**、[タブレット](tablet.md)）のほかに、スクリーンや操作パネルを足すための部品（**SubScreen**・**Controller Bar**・**Playlist Panel**）と、全員の読み込み直しボタン（**Global Reload Button**、[全員の読み込み直しボタン](global-reload.md)）もあります。
