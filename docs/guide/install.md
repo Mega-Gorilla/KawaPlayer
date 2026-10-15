@@ -78,4 +78,4 @@ KawaPlayer の更新をワールドに反映するには、Unity で **Build & P
 
 - **C. プレハブから:** Project の **Packages > KawaPlayer** にある `KawaPlayer.prefab` を、シーンにドラッグします。
 
-同じメニューには、タブレット（**Tablet**、[タブレット](tablet.md)）のほかに、スクリーンや操作パネルを足すための部品（**SubScreen**・**Controller Bar**・**Playlist Panel**）と、全員の読み込み直しボタン（**Global Reload Button**、[全員の読み込み直しボタン](global-reload.md)。同じ名前のモジュールと一緒に使います）もあります。
+同じメニューには、タブレット（**Tablet**、[タブレット](tablet.md)）のほかに、スクリーンや操作パネルを足すための部品（**SubScreen**・**Controller Bar**・**Playlist Panel**）と、全員リロードボタン（**Global Reload Button**、[全員リロードボタン](global-reload.md)。同じ名前のモジュールと一緒に使います）もあります。
