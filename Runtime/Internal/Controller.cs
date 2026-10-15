@@ -57,6 +57,7 @@ namespace Yamadev.YamaStream
     // URL alone 3 to 5 s (issue #232). An error can be reloaded at once.
     private const float RELOAD_WAIT_WHILE_LOADING = 15f;
     private bool _reloadPending;
+    private float _reloadRequestedAt;
     private bool _reloadAfterLoad;
 
     private void Start()
@@ -397,14 +398,20 @@ namespace Yamadev.YamaStream
       }
       if (_reloadPending) return;
       _reloadPending = true;
+      _reloadRequestedAt = Time.time;
       SendCustomEventDelayedSeconds(nameof(_RunPendingReload), wait);
     }
 
+    // A load that began while the reload waited -- a retry after an error,
+    // scheduled for the same 5.1 s, or a new track -- already does what the
+    // reload would, and loading again now would come within 5 s of it, so
+    // the reload is dropped.
     public void _RunPendingReload()
     {
       if (!_reloadPending) return;
       _reloadPending = false;
       if (SyncedState == PlayerState.Idle) return;
+      if (_lastLoadTime > _reloadRequestedAt) return;
       ReloadNow();
     }
 
@@ -415,6 +422,8 @@ namespace Yamadev.YamaStream
     // never changes what is shared.
     private void ReloadNow()
     {
+      // A reload that runs at once makes any waiting one needless.
+      _reloadPending = false;
       _errorRetryCount = 0;
       _retryTargetTrack = null;
       _reloadAfterLoad = false;
