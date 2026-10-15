@@ -43,7 +43,7 @@ namespace Yamadev.YamaStream.Modules.GlobalReload.Editor
         else
         {
           var playerPath = YamaPlayerModuleBuildProcess.GetPath(GetPlacedObject(controller).transform);
-          Debug.LogWarning($"[KawaPlayer] The Global Reload Button {buttonPath} is left out of the world: its player {playerPath} has no Global Reload module switched on. Add it, or switch it on, in the player's Module Manager.");
+          Debug.LogWarning($"[KawaPlayer] The Global Reload Button {buttonPath} is left out of the world: its player {playerPath} has no Global Reload Button module switched on. Add it, or switch it on, in the player's Module Manager.");
         }
       }
     }
