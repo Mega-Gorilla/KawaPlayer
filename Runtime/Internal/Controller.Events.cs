@@ -83,6 +83,7 @@ namespace Yamadev.YamaStream
     {
       _errorRetryCount = 0;
       _retryTargetTrack = null;
+      _lastCheckedVideoTime = -1f;
       _playingOnReady = true;
       if (SyncedState == PlayerState.Playing) ActiveHandler.Play();
       if (SyncedState == PlayerState.Idle) ActiveHandler.Stop();
@@ -93,13 +94,15 @@ namespace Yamadev.YamaStream
       // has just started. Any other load -- a reload, a retry after an error,
       // or one an owner took over while it was loading -- is placed by the
       // time already shared. Sharing 0 then sent everyone back to the start
-      // (issue #234).
+      // (issue #234). That placing is exact: the margin of the check made
+      // once a second is for drift, and a client that got ready later than
+      // the owner would otherwise stay behind by up to that margin.
       if (Networking.IsOwner(gameObject) && !_isLocal && !HasSyncedVideoTime)
       {
         UpdateSyncedVideoTime(0f);
         RequestSerialization();
       }
-      else EnsureVideoTime();
+      else EnsureVideoTime(true);
 
       int len = _listeners.Length;
       for (int i = 0; i < len; i++)

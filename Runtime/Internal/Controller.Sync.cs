@@ -7,8 +7,15 @@ namespace Yamadev.YamaStream
 {
   public partial class Controller
   {
-    [SerializeField, Range(1f, 10f)] private float _syncFrequency = 5.0f;
-    [SerializeField, Range(0f, 1f)] private float _syncMargin = 0.3f;
+    // Every client checks its video against the shared time once a second,
+    // and seeks only when it is 0.9 s of real time off (issue #235). The 0.9 s
+    // is VizVid's, though VizVid checks every 0.5 s and measures the 0.9 s in
+    // video time, not real time. The 0.3 s used before was less than what a
+    // seek itself costs, so a client that seeked was off again by the next
+    // check. They were fields, but no inspector showed them, and a value saved
+    // in a world would have kept the old timing.
+    private const float SYNC_INTERVAL = 1f;
+    private const float SYNC_MARGIN = 0.9f;
     [UdonSynced] private float _syncedVideoTime = 0;
     // The server time (Networking.GetServerTimeInMilliseconds) when
     // _syncedVideoTime was taken, or 0 while there is none. GetNetworkDateTime,
@@ -20,6 +27,11 @@ namespace Yamadev.YamaStream
     [UdonSynced] private int _trackVersion = 0;
     private int _appliedTrackVersion = 0;
     private float _lastSync = 0;
+    // Where the video was at the last check, or where it was sent by a seek.
+    private float _lastCheckedVideoTime = -1f;
+    // The shared time last placed by: a new one is the owner's seek, pause or
+    // play, and is followed exactly, while other synced changes are not.
+    private int _appliedSyncedServerTimeMs = 0;
     private float _localDelay = 0;
 
     private void ApplySyncedState()
@@ -92,12 +104,29 @@ namespace Yamadev.YamaStream
 
       float offset = Paused ? 0 : SecondsSinceSyncedVideoTime() * Speed;
       float targetTime = Mathf.Clamp(_syncedVideoTime + offset + _localDelay, 0, Duration);
-      if (force || Mathf.Abs(VideoTime - targetTime) >= _syncMargin)
+      if (force || Mathf.Abs(VideoTime - targetTime) / Mathf.Max(Speed, 0.1f) >= SYNC_MARGIN)
       {
-        SetTime(targetTime);
+        SeekLocal(targetTime);
+        _lastCheckedVideoTime = targetTime;
       }
 
       _lastSync = Time.time;
+    }
+
+    // The check made once a second while playing. A video that has not moved
+    // since the last check is buffering, or stuck at the place a seek sent it
+    // to: seeking again would throw away what has loaded and leave it stuck.
+    private void CheckVideoTime()
+    {
+      float videoTime = VideoTime;
+      bool moving = videoTime != _lastCheckedVideoTime;
+      _lastCheckedVideoTime = videoTime;
+      if (!moving)
+      {
+        _lastSync = Time.time;
+        return;
+      }
+      EnsureVideoTime();
     }
 
     public override void OnPreSerialization()
@@ -144,7 +173,9 @@ namespace Yamadev.YamaStream
       }
 
       ApplySyncedState();
-      EnsureVideoTime();
+      bool newSharedTime = _syncedServerTimeMs != _appliedSyncedServerTimeMs;
+      _appliedSyncedServerTimeMs = _syncedServerTimeMs;
+      EnsureVideoTime(newSharedTime);
     }
   }
 }
