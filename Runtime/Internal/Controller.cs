@@ -55,8 +55,9 @@ namespace Yamadev.YamaStream
     private const float SAFETY_RETRY_INTERVAL = 5.1f;
     // A reload while loading waits this long, so a load that is only slow is
     // not restarted: normal loads took up to 8.1 s in VRChat, resolving the
-    // URL alone 3 to 5 s (issue #232). An error can be reloaded at once.
-    private const float RELOAD_WAIT_WHILE_LOADING = 15f;
+    // URL alone 3 to 5 s (issue #232). An error can be reloaded at once. The
+    // global reload button waits as long after a send (UIController).
+    public const float RELOAD_WAIT_WHILE_LOADING = 15f;
     // _RunPendingReload is scheduled: one at a time.
     private bool _reloadPending;
     // When a reload was last asked for; a load begun since covers it.

@@ -684,9 +684,9 @@ namespace Yamadev.YamaStream.UI
     // The global reload button (issue #236). One press sends: who may press
     // it is settled by where it stands and, with PermissionManagement, by
     // Editor or above, as on VizVid's. Once sent, it waits as long as each
-    // player waits before reloading a load it began: a second press sooner
-    // would reload again only those whose load had finished.
-    private const float GLOBAL_RELOAD_WAIT_SECONDS = 15f;
+    // player waits before reloading a load it began
+    // (Controller.RELOAD_WAIT_WHILE_LOADING): a second press sooner would
+    // reload again only those whose load had finished.
     private const float GLOBAL_RELOAD_PERMISSION_INTERVAL = 1f;
     private float _globalReloadSentAt = -1000f;
     private float _globalReloadCheckedAt = -1000f;
@@ -695,7 +695,7 @@ namespace Yamadev.YamaStream.UI
     public void GlobalReload()
     {
       if (!Utilities.IsValid(_controller) || !_controller.CanGlobalReload) return;
-      if (Time.time - _globalReloadSentAt < GLOBAL_RELOAD_WAIT_SECONDS) return;
+      if (Time.time - _globalReloadSentAt < Controller.RELOAD_WAIT_WHILE_LOADING) return;
       _globalReloadCheckedAt = Time.time;
       _globalReloadAllowed = InvokeBeforeEvent("BeforeUserGlobalReload");
       if (_globalReloadAllowed)
@@ -708,9 +708,10 @@ namespace Yamadev.YamaStream.UI
 
     // The button asks as a press would, once a second, so a player who may not
     // press it sees the cross before trying, and sees it go when given the
-    // permission. It cannot be pressed then, nor while waiting after a send,
-    // nor while everyone is stopped, when there is nothing to reload; its words
-    // say which.
+    // permission. Its UIController has no dialog, so a refusal puts up no
+    // message (PermissionManagement shows one only where there is a dialog).
+    // It cannot be pressed then, nor while waiting after a send, nor while
+    // everyone is stopped, when there is nothing to reload; its words say which.
     private void UpdateGlobalReloadButton()
     {
       float now = Time.time;
@@ -720,7 +721,7 @@ namespace Yamadev.YamaStream.UI
         _globalReloadAllowed = InvokeBeforeEvent("BeforeUserGlobalReload");
       }
       bool denied = !_globalReloadAllowed;
-      bool busy = !denied && now - _globalReloadSentAt < GLOBAL_RELOAD_WAIT_SECONDS;
+      bool busy = !denied && now - _globalReloadSentAt < Controller.RELOAD_WAIT_WHILE_LOADING;
       bool idle = !denied && !busy && !_controller.CanGlobalReload;
       bool ready = !denied && !busy && !idle;
       if (_globalReloadButton.interactable != ready) _globalReloadButton.interactable = ready;
