@@ -316,7 +316,7 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
         ShowError(ui, "errorServer");
         return;
       }
-      if (resultCode == PlaylistLoader.LoadResultQueueUnavailable)
+      if (resultCode == PlaylistLoader.LoadResultNoSlot)
       {
         ShowError(ui, "errorInternal");
         return;

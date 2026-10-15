@@ -26,10 +26,9 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
     public const int LoadResultServerError = 4;
     public const int LoadResultEmpty = 5;
     public const int LoadResultPoolMismatch = 6;
-    // No dynamic playlist slot to load into (issue #88). The name and value
-    // are from when this meant the queue was unavailable; both stay, as the
-    // constant is public and PlaylistLoaderUI's mapping uses the value.
-    public const int LoadResultQueueUnavailable = 7;
+    // No dynamic playlist slot to load into at all (issue #88). Not the
+    // same as every slot being in use, which asks to replace the oldest.
+    public const int LoadResultNoSlot = 7;
     // The playlist the player agreed to lose is no longer the one that would
     // go (issue #125). Nothing is written; they are asked to try again.
     public const int LoadResultReplacementChanged = 8;
@@ -391,7 +390,7 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
       if (!Utilities.IsValid(slot))
       {
         PrintError("No dynamic playlist slot is available.");
-        NotifyResult(LoadResultQueueUnavailable, playlistName, 0, 0, 0, false);
+        NotifyResult(LoadResultNoSlot, playlistName, 0, 0, 0, false);
         return;
       }
 
