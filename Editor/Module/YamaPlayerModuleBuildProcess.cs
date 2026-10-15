@@ -105,7 +105,8 @@ namespace Yamadev.YamaStream.Editor
       }
     }
 
-    private static string GetPath(Transform transform)
+    // Also used by module build steps, to name objects in the build log.
+    public static string GetPath(Transform transform)
     {
       var path = transform.name;
       for (var parent = transform.parent; parent != null; parent = parent.parent)
@@ -134,8 +135,9 @@ namespace Yamadev.YamaStream.Editor
 
     // Whether ProcessModule builds the module: both its own object and its
     // root are on. Another parent being off, or its component being disabled,
-    // does not leave it out.
-    internal static bool IsModuleEnabled(Component module)
+    // does not leave it out. Also used by module build steps that link to a
+    // module, such as GlobalReload's buttons.
+    public static bool IsModuleEnabled(Component module)
     {
       return module.gameObject.activeSelf && GetModuleRoot(module).activeSelf;
     }

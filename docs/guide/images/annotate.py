@@ -141,7 +141,7 @@ MARKS = {
     ]),
     "unity/module-manager": dict(scale=0.72, marks=[
         dict(box=(28, 423, 834, 537), n=1),
-        dict(box=(746, 615, 828, 1163), n=2),
+        dict(box=(746, 615, 828, 1222), n=2),
     ]),
     # The quickstart only fills in the KawaPlayer field; the tablet page explains the rest.
     "unity/tablet-player-field": dict(src="unity/tablet-inspector", scale=0.72, pad=dict(right=270), marks=[
