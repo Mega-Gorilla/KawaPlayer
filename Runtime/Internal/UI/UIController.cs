@@ -258,7 +258,7 @@ namespace Yamadev.YamaStream.UI
       return _modalDialog.TryShow(title, message, string.IsNullOrEmpty(closeText) ? GetTranslation("button.close") : closeText, "", this, null, null);
     }
 
-    // Asks before switching away from something that is playing. All three
+    // Asks before switching away from something that is playing. Both
     // toggles ask the same thing and differ only in what continuing runs.
     // Refused while another question is up: the toggle has already moved to
     // the player that will not be selected after all, so put it back -- the
