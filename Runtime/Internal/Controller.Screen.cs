@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 using UnityEngine.Serialization;
 using UnityEngine.UI;
@@ -114,13 +113,6 @@ namespace Yamadev.YamaStream
       }
     }
 
-    [Obsolete("Use MirrorFlip instead")]
-    public bool MirrorInverse
-    {
-      get => MirrorFlip;
-      set => MirrorFlip = value;
-    }
-
     public float Brightness
     {
       get => _brightness;
@@ -135,13 +127,6 @@ namespace Yamadev.YamaStream
           if (Utilities.IsValid(listener)) listener.AfterBrightnessChanged(value);
         }
       }
-    }
-
-    [Obsolete("Use Brightness instead")]
-    public float Emission
-    {
-      get => Brightness;
-      set => Brightness = value;
     }
 
     public override void AfterTextureUpdated(Texture texture)

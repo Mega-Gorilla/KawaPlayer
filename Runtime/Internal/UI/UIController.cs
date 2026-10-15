@@ -501,13 +501,9 @@ namespace Yamadev.YamaStream.UI
       return type == VideoPlayerType.UnityVideoPlayer ? VideoPlayerType.AVProVideoPlayer : type;
     }
 
-    // The question carries which field it came from and which button was
-    // pressed, so all four of these names answer through one handler. The
-    // Top ones are no longer used from here; they stay because they are
-    // public and something outside may still send them.
+    // The question carries which field it came from, so both buttons answer
+    // through one handler whichever field asked.
     public void AddUrlToQueueEvent() => AnswerPendingUrl(false);
-
-    public void AddUrlTopToQueueEvent() => AnswerPendingUrl(false);
 
     public void AddUrlToQueueEventInternal(VideoPlayerType playerType, VRCUrl url)
     {
@@ -522,8 +518,6 @@ namespace Yamadev.YamaStream.UI
     }
 
     public void PlayUrlEvent() => AnswerPendingUrl(true);
-
-    public void PlayUrlTopEvent() => AnswerPendingUrl(true);
 
     // Answers with what the question was asked about, not with whatever the
     // field holds by the time it is answered. Let go of first, so the next
