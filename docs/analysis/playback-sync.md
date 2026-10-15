@@ -13,7 +13,7 @@ KawaPlayer が、動画の再生をインスタンスの全員でどう合わせ
 | #233 | 自分の読み込み直しを、PermissionManagement の権限の対象から外した |
 | #236 | ワールドに置く、全員の読み込み直しのボタンを足した |
 
-変える前の動きと、VizVid（VVMW）との比較は [comparison.md](../design/228-playback-sync/comparison.md) にあります。
+変える前の動きと、VizVid（VVMW）との比較は [comparison.md](../design/228-playback-sync/comparison.md) にあります。ワールドの制作者や主催者向けに、コードの名前を使わずに書いた説明は、ガイドの [再生の同期のしくみ](../guide/technical/sync.md) にあります。
 
 **関連ファイル**:
 ```
