@@ -2,7 +2,6 @@
 using UdonSharp;
 using UnityEngine;
 using VRC.SDKBase;
-using VRC.Udon.Common.Interfaces;
 
 namespace Yamadev.YamaStream
 {
@@ -56,7 +55,7 @@ namespace Yamadev.YamaStream
     // A reload while loading waits this long, so a load that is only slow is
     // not restarted: normal loads took up to 8.1 s in VRChat, resolving the
     // URL alone 3 to 5 s (issue #232). An error can be reloaded at once. The
-    // global reload button waits as long after a send (UIController).
+    // global reload button waits as long after a send (GlobalReloadButton).
     public const float RELOAD_WAIT_WHILE_LOADING = 15f;
     // _RunPendingReload is scheduled: one at a time.
     private bool _reloadPending;
@@ -389,30 +388,6 @@ namespace Yamadev.YamaStream
       }
       RequestReload();
     }
-
-    // Whether a reload for everyone would do anything: the video is shared as
-    // playing or paused. Each player then judges for itself, as for its own
-    // reload, so a load of theirs still under way is left to finish.
-    public bool CanGlobalReload => SyncedState != PlayerState.Idle;
-
-    // Every player reloads its own video, as if each had pressed reload: for
-    // a live event, where a stream is not placed by the clock and players fall
-    // behind, each by their own amount (issue #236). Only the press is sent,
-    // and nothing synced changes. A local player has no one to send it to.
-    public void GlobalReload()
-    {
-      if (!CanGlobalReload) return;
-      if (_isLocal)
-      {
-        Reload();
-        return;
-      }
-      SendCustomNetworkEvent(NetworkEventTarget.All, nameof(OnGlobalReload));
-    }
-
-    // Run on every player by GlobalReload. Its name has no leading
-    // underscore, as Udon lets no network event call such a method.
-    public void OnGlobalReload() => Reload();
 
     // A load starting now takes the speed and resolution as they are, so a
     // reload waiting for the load before it to be ready is no longer needed:

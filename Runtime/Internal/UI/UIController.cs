@@ -116,18 +116,6 @@ namespace Yamadev.YamaStream.UI
     [SerializeField, RegisterEvent(nameof(Toggle.onValueChanged), nameof(SetMaxResolution2160))] private Toggle _maxResolution2160Toggle;
     [SerializeField, RegisterEvent(nameof(Toggle.onValueChanged), nameof(SetMaxResolution4320))] private Toggle _maxResolution4320Toggle;
 
-    [Header("Global Reload Button")]
-    // Set only on the global reload button, which a world creator places for
-    // a live event: the screen and the tablet have no such button (issue #236).
-    // Its words, in English only, are pictures in LED dots, one for each state:
-    // ready to press, reloading (just sent), no video (everyone stopped), and
-    // denied, which also draws a red cross over the icon.
-    [SerializeField, RegisterEvent(nameof(Button.onClick), nameof(GlobalReload))] private Button _globalReloadButton;
-    [SerializeField] private GameObject _globalReloadReady;
-    [SerializeField] private GameObject _globalReloadBusy;
-    [SerializeField] private GameObject _globalReloadIdle;
-    [SerializeField] private GameObject _globalReloadDenied;
-
     [Header("Loading & Message")]
     [SerializeField] private GameObject _loadingIndicator;
     [SerializeField] private Text _statusMessageText;
@@ -216,7 +204,6 @@ namespace Yamadev.YamaStream.UI
         bool canReload = _controller.CanReload;
         if (_reloadButton.interactable != canReload) _reloadButton.interactable = canReload;
       }
-      if (Utilities.IsValid(_globalReloadButton)) UpdateGlobalReloadButton();
     }
 
     public bool ProgressHeld
@@ -679,61 +666,6 @@ namespace Yamadev.YamaStream.UI
       }
 
       _controller.Reload();
-    }
-
-    // The global reload button (issue #236). One press sends: who may press
-    // it is settled by where it stands and, with PermissionManagement, by
-    // Editor or above, as on VizVid's. Once sent, it waits as long as each
-    // player waits before reloading a load it began
-    // (Controller.RELOAD_WAIT_WHILE_LOADING): a second press sooner would
-    // reload again only those whose load had finished.
-    private const float GLOBAL_RELOAD_PERMISSION_INTERVAL = 1f;
-    private float _globalReloadSentAt = -1000f;
-    private float _globalReloadCheckedAt = -1000f;
-    private bool _globalReloadAllowed = true;
-
-    public void GlobalReload()
-    {
-      if (!Utilities.IsValid(_controller) || !_controller.CanGlobalReload) return;
-      if (Time.time - _globalReloadSentAt < Controller.RELOAD_WAIT_WHILE_LOADING) return;
-      _globalReloadCheckedAt = Time.time;
-      _globalReloadAllowed = InvokeBeforeEvent("BeforeUserGlobalReload");
-      if (_globalReloadAllowed)
-      {
-        _globalReloadSentAt = Time.time;
-        _controller.GlobalReload();
-      }
-      UpdateGlobalReloadButton();
-    }
-
-    // The button asks as a press would, once a second, so a player who may not
-    // press it sees the cross before trying, and sees it go when given the
-    // permission. Its UIController has no dialog, so a refusal puts up no
-    // message (PermissionManagement shows one only where there is a dialog).
-    // It cannot be pressed then, nor while waiting after a send, nor while
-    // everyone is stopped, when there is nothing to reload; its words say which.
-    private void UpdateGlobalReloadButton()
-    {
-      float now = Time.time;
-      if (now - _globalReloadCheckedAt >= GLOBAL_RELOAD_PERMISSION_INTERVAL)
-      {
-        _globalReloadCheckedAt = now;
-        _globalReloadAllowed = InvokeBeforeEvent("BeforeUserGlobalReload");
-      }
-      bool denied = !_globalReloadAllowed;
-      bool busy = !denied && now - _globalReloadSentAt < Controller.RELOAD_WAIT_WHILE_LOADING;
-      bool idle = !denied && !busy && !_controller.CanGlobalReload;
-      bool ready = !denied && !busy && !idle;
-      if (_globalReloadButton.interactable != ready) _globalReloadButton.interactable = ready;
-      ShowGlobalReloadState(_globalReloadReady, ready);
-      ShowGlobalReloadState(_globalReloadBusy, busy);
-      ShowGlobalReloadState(_globalReloadIdle, idle);
-      ShowGlobalReloadState(_globalReloadDenied, denied);
-    }
-
-    private void ShowGlobalReloadState(GameObject state, bool shown)
-    {
-      if (Utilities.IsValid(state) && state.activeSelf != shown) state.SetActive(shown);
     }
 
     public void Repeat()

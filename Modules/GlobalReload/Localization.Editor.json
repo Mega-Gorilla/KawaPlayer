@@ -1,0 +1,38 @@
+{
+  "ja": {
+    "module.globalReload.name": "全員の読み込み直し",
+    "module.globalReload.description": "全員の読み込み直しボタンを使えるようにします。ボタンは GameObject メニューから置きます"
+  },
+  "en": {
+    "module.globalReload.name": "Global Reload",
+    "module.globalReload.description": "Makes the Global Reload Button work. Place the button from the GameObject menu"
+  },
+  "ko": {
+    "module.globalReload.name": "전원 다시 불러오기",
+    "module.globalReload.description": "전원 다시 불러오기 버튼을 쓸 수 있게 합니다. 버튼은 GameObject 메뉴에서 놓습니다"
+  },
+  "zh-CN": {
+    "module.globalReload.name": "全员重新加载",
+    "module.globalReload.description": "启用全员重新加载按钮。按钮从 GameObject 菜单放置"
+  },
+  "zh-TW": {
+    "module.globalReload.name": "全員重新載入",
+    "module.globalReload.description": "啟用全員重新載入按鈕。按鈕從 GameObject 選單放置"
+  },
+  "es": {
+    "module.globalReload.name": "Recarga global",
+    "module.globalReload.description": "Activa el botón de recarga global. El botón se coloca desde el menú GameObject"
+  },
+  "ru": {
+    "module.globalReload.name": "Перезагрузка для всех",
+    "module.globalReload.description": "Включает кнопку перезагрузки для всех. Кнопка ставится из меню GameObject"
+  },
+  "uk": {
+    "module.globalReload.name": "Перезавантаження для всіх",
+    "module.globalReload.description": "Вмикає кнопку перезавантаження для всіх. Кнопка ставиться з меню GameObject"
+  },
+  "it": {
+    "module.globalReload.name": "Ricarica globale",
+    "module.globalReload.description": "Attiva il pulsante di ricarica globale. Il pulsante si aggiunge dal menu GameObject"
+  }
+}

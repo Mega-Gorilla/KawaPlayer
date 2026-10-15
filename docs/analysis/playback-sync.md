@@ -21,8 +21,12 @@ Runtime/Internal/
     ├── Controller.cs          再生・一時停止・シーク、読み込み直し、間引き
     ├── Controller.Sync.cs     同期する値、時計、時刻合わせ、受け取り（OnDeserialization）
     ├── Controller.Events.cs   プレイヤーの知らせ（準備完了・再生・エラーとリトライ）
-    └── UI/UIController.cs     読み込み直しのボタン、全員の読み込み直しのボタン
-Prefabs/GlobalReloadButton.prefab  全員の読み込み直しのボタン（制作者がワールドに置く）
+    └── UI/UIController.cs     読み込み直しのボタン
+Modules/GlobalReload/
+    ├── GlobalReload.cs        全員の読み込み直しのモジュール（全員に送る）
+    ├── GlobalReloadButton.cs  ボタン（押せるか、表示、権限）
+    ├── GlobalReloadButton.prefab  ボタン（制作者がワールドに置く）
+    └── Editor/GlobalReloadBuildProcess.cs  ボタンとモジュールをつなぐ、つなげないボタンを外す
 ```
 
 ## 共有する値
@@ -114,18 +118,20 @@ Prefabs/GlobalReloadButton.prefab  全員の読み込み直しのボタン（制
 
 ## 全員の読み込み直し
 
-ワールドの制作者が置く **Global Reload Button**（`Prefabs/GlobalReloadButton.prefab`）は、インスタンスの全員に、それぞれの読み込み直しをさせます（#236）。ライブ配信は位置を合わせないので、遅れが人ごとにたまります。そのときに、全員を配信の今の位置から取り直させるためのものです。普段は要らないので、スクリーンとタブレットの画面にはありません。
+ワールドの制作者が置く **Global Reload Button**（`Modules/GlobalReload/GlobalReloadButton.prefab`）は、インスタンスの全員に、それぞれの読み込み直しをさせます（#236）。ライブ配信は位置を合わせないので、遅れが人ごとにたまります。そのときに、全員を配信の今の位置から取り直させるためのものです。普段は要らないので、スクリーンとタブレットの画面にはありません。
+
+送るのは、プレイヤーの Modules に入れる **GlobalReload** のモジュールです（#248）。コアの `Controller` と `UIController` には、全員の読み込み直しのためのものはありません。ボタンは、ビルドのときにプレイヤーのモジュールにつながります（`GlobalReloadBuildProcess`）。プレイヤーが選ばれていないボタンと、モジュールがない・無効のプレイヤーのボタンは、オブジェクトごと切って `EditorOnly` にし、ワールドに入れません。ビルドのログに、どのボタンかを出します。モジュールの同期は手動（`BehaviourSyncMode.Manual`）です。同期する値はありませんが、同期しない（`None`）と、ネットワークのイベントを送れないためです。
 
 | 項目 | 動き |
 | --- | --- |
-| 押せるとき | 共有の状態が止まっていない（`Controller.CanGlobalReload`）。自分が送ってから 15 秒は押せない。真ん中の文字が、押せる（RELOAD ALL）・送ったあと（RELOADING）・全員が止まっている（NO VIDEO）・権限がない（NO ACCESS、赤い ×）を示し、押せないあいだはアイコンが薄くなる |
+| 押せるとき | 共有の状態が止まっていない（`GlobalReload.CanSend`）。自分が送ってから 15 秒は押せない。真ん中の文字が、押せる（RELOAD ALL）・送ったあと（RELOADING）・全員が止まっている（NO VIDEO）・権限がない（NO ACCESS、赤い ×）を示し、押せないあいだはアイコンが薄くなる |
 | 確認 | ない。1 回押すと送る。押せる人は、置く場所と権限で絞る（VizVid の Global Sync Button と同じ） |
 | 権限 | 押すときと、1 秒ごとに `BeforeUserGlobalReload` を聞き手に送る。PermissionManagement は Editor 以上でなければ断り、ボタンは押せなくなって、赤い × と NO ACCESS を出す。押す前から押せないと分かり、権限が変われば 1 秒ほどで表示も変わる |
-| 送るもの | ネットワークのイベント（`OnGlobalReload`、全員あて、送った人も含む）だけ。同期する値は変えない。ローカルモードでは、自分だけ読み直す |
+| 送るもの | モジュールから、ネットワークのイベント（`OnGlobalReload`、全員あて、送った人も含む）だけ。同期する値は変えない。ローカルモードでは、自分だけ読み直す |
 | 受けた人 | 自分の読み込み直し（`Reload`）と同じ。共有の状態が止まっていれば読まず、読み込みを始めて 15 秒たっていなければ読まず、5.1 秒の間引きを通る |
 
 - **15 秒待つ理由：** 受けた人は、読み込みを始めて 15 秒は読み直しません。それより早い 2 回目は、読み込みを終えた人だけをまた読み直させます。
-- **ボタンの作り：** Controller Bar と同じく、`YamaPlayerSubController` の下に、ボタンだけの `UIController` があります。インスペクターで選んだプレイヤーにつながり、色はほかの画面と同じくパレットから決まります（赤い × と NO ACCESS だけは、どの色の組でも赤のままにするため、パレットの役割を持たない）。見た目は六角形の LED 表示です。六角形の枠（`global-reload-frame.png`）の中の画面に、端まで LED の点（`global-reload-leds.png`）が並び、光った点で丸い枠と回る 2 本の矢印（`global-reload.png`）を描きます。文字は 5 × 7 点の LED 文字の帯（`global-reload-text-*.png`）で、英語だけです（翻訳しない）。どの画像も白い形で、色は Unity で付けます。
+- **ボタンの作り：** Controller Bar と同じく、`YamaPlayerSubController` の下に、ボタンだけの `UIController` があります。押すことと表示は、ボタンの `GlobalReloadButton` が受け持ち、`UIController` は権限の聞き手を入れる所と、色と言語のためだけにあります。インスペクターで選んだプレイヤーにつながり、色はほかの画面と同じくパレットから決まります（赤い × と NO ACCESS だけは、どの色の組でも赤のままにするため、パレットの役割を持たない）。見た目は六角形の LED 表示です。画像は `Modules/GlobalReload/Images/` にあります。六角形の枠（`global-reload-frame.png`）の中の画面に、端まで LED の点（`global-reload-leds.png`）が並び、光った点で丸い枠と回る 2 本の矢印（`global-reload.png`）を描きます。文字は 5 × 7 点の LED 文字の帯（`global-reload-text-*.png`）で、英語だけです（翻訳しない）。どの画像も白い形で、色は Unity で付けます。
 - **権限の差し込み口：** PermissionManagement は、聞き手をモジュールの UI スロットで各 `UIController` に入れます。ボタンには、そのための空の `Canvas/Modules` があります。
 - **受けた側では確かめない：** 送った人の権限は、押した人の画面で確かめるだけです。ほかの操作と同じです。
 
