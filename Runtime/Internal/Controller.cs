@@ -385,6 +385,15 @@ namespace Yamadev.YamaStream
       RequestReload();
     }
 
+    // A load starting now takes the speed and resolution as they are, so a
+    // reload waiting for the load before it to be ready is no longer needed:
+    // an error's retry would otherwise be loaded again once ready.
+    private void MarkLoadStarted()
+    {
+      _lastLoadTime = Time.time;
+      _reloadAfterLoad = false;
+    }
+
     // Keeps this Controller's reloads and retries 5.1 s apart, as VRChat
     // turns away a second load within 5 s. Presses while waiting make one
     // reload, of whatever is shared when it runs.
@@ -426,7 +435,6 @@ namespace Yamadev.YamaStream
       _reloadPending = false;
       _errorRetryCount = 0;
       _retryTargetTrack = null;
-      _reloadAfterLoad = false;
 
       object[] track;
       int handlerIndex;
@@ -441,7 +449,8 @@ namespace Yamadev.YamaStream
         track = BuildSyncedTrack(handlerIndex);
         Track = track;
       }
-      if (!Utilities.IsValid(TrackUtils.GetUrl(track)) || string.IsNullOrEmpty(TrackUtils.GetUrl(track).Get())) return;
+      VRCUrl url = TrackUtils.GetUrl(track);
+      if (!Utilities.IsValid(url) || string.IsNullOrEmpty(url.Get())) return;
 
       // Marked as a reload before anything stops: the fallback player, or the
       // one switched from, reports a stop, which otherwise reads as the owner
@@ -671,7 +680,7 @@ namespace Yamadev.YamaStream
 
       if (!isReload) Track = track;
       ActiveHandler.LoadTrack(track);
-      _lastLoadTime = Time.time;
+      MarkLoadStarted();
 
       int len = _listeners.Length;
       for (int i = 0; i < len; i++)
