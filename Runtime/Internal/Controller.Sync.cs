@@ -10,7 +10,13 @@ namespace Yamadev.YamaStream
     [SerializeField, Range(1f, 10f)] private float _syncFrequency = 5.0f;
     [SerializeField, Range(0f, 1f)] private float _syncMargin = 0.3f;
     [UdonSynced] private float _syncedVideoTime = 0;
-    [UdonSynced] private long _networkDataTimeTicks = 0;
+    // The server time (Networking.GetServerTimeInMilliseconds) when
+    // _syncedVideoTime was taken, or 0 while there is none. GetNetworkDateTime,
+    // used before, stays on the local clock on a client whose date sync fails,
+    // and that client played off by its clock's error for good (issue #237).
+    // The value wraps, so it is only compared through CalculateServerDeltaTime.
+    // Its type changed with it, so VRChat keeps instances of older builds apart.
+    [UdonSynced] private int _syncedServerTimeMs = 0;
     [UdonSynced] private int _trackVersion = 0;
     private int _appliedTrackVersion = 0;
     private float _lastSync = 0;
@@ -58,24 +64,33 @@ namespace Yamadev.YamaStream
     private void UpdateSyncedVideoTime(float time)
     {
       _syncedVideoTime = Mathf.Clamp(time - _localDelay, 0f, Duration);
-      _networkDataTimeTicks = Networking.GetNetworkDateTime().Ticks;
+      int now = Networking.GetServerTimeInMilliseconds();
+      _syncedServerTimeMs = now == 0 ? 1 : now;
     }
 
     private void ResetSyncedVideoTime()
     {
       _syncedVideoTime = 0;
-      _networkDataTimeTicks = 0;
+      _syncedServerTimeMs = 0;
+    }
+
+    private bool HasSyncedVideoTime => _syncedServerTimeMs != 0;
+
+    // CalculateServerDeltaTime takes seconds, as GetServerTimeInSeconds gives.
+    private float SecondsSinceSyncedVideoTime()
+    {
+      return (float)Networking.CalculateServerDeltaTime(Networking.GetServerTimeInSeconds(), _syncedServerTimeMs * 0.001);
     }
 
     private void EnsureVideoTime(bool force = false)
     {
-      if (IsLive || Stopped || _networkDataTimeTicks == 0)
+      if (IsLive || Stopped || !HasSyncedVideoTime)
       {
         _lastSync = Time.time;
         return;
       }
 
-      float offset = Paused ? 0 : (float)(Networking.GetNetworkDateTime().Ticks - _networkDataTimeTicks) / TimeSpan.TicksPerSecond * Speed;
+      float offset = Paused ? 0 : SecondsSinceSyncedVideoTime() * Speed;
       float targetTime = Mathf.Clamp(_syncedVideoTime + offset + _localDelay, 0, Duration);
       if (force || Mathf.Abs(VideoTime - targetTime) >= _syncMargin)
       {
