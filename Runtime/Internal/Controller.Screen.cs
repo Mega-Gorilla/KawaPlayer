@@ -88,7 +88,7 @@ namespace Yamadev.YamaStream
         if (value == _maxResolution) return;
         _maxResolution = value;
         UpdateHandlerMaxResolution();
-        if (!Stopped) SendCustomEventDelayedFrames(nameof(Reload), 0);
+        if (!Stopped) SendCustomEventDelayedFrames(nameof(ReloadForSettings), 0);
         int len = _listeners.Length;
         for (int i = 0; i < len; i++)
         {

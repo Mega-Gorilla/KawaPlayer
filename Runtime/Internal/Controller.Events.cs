@@ -112,6 +112,13 @@ namespace Yamadev.YamaStream
       }
       PrintLog($"{_handler.Type.GetString()}: Video ready.");
       _reloading = false;
+
+      // A change of speed or resolution made while loading reloads now.
+      if (_reloadAfterLoad)
+      {
+        _reloadAfterLoad = false;
+        RequestReload();
+      }
     }
 
     public override void AfterVideoStarted()
@@ -250,7 +257,7 @@ namespace Yamadev.YamaStream
       }
 
       ActiveHandler.LoadTrack(Track);
-      _lastLoadTime = Time.time;
+      MarkLoadStarted();
 
       int len = _listeners.Length;
       for (int i = 0; i < len; i++)
