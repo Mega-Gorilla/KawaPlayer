@@ -58,6 +58,8 @@ namespace Yamadev.YamaStream.Modules.PermissionManagement
     public void BeforeUserRemoveTrackFromQueue() => CheckPermission();
     public void BeforeUserMoveTrackUp() => CheckPermission();
     public void BeforeUserMoveTrackDown() => CheckPermission();
+    // The global reload button reloads everyone's screen (issue #236).
+    public void BeforeUserGlobalReload() => CheckPermission();
 
     private void CheckPermission()
     {

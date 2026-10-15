@@ -7,7 +7,7 @@
 | `vcc/` | VCC と、VCC 用のページ（vpm-repos） |
 | `unity/` | Unity のエディター（メニュー、インスペクター、プレイリストエディター、モジュール管理） |
 | `vrchat/` | VRChat のメニュー（クイックメニューと設定）と、VRChat のサイト（My Worlds、Edit World Info） |
-| `screen/` | ワールドの中の、KawaPlayer のスクリーン |
+| `screen/` | ワールドの中の、KawaPlayer のスクリーンと、全員の読み込み直しボタン |
 | `tablet/` | ワールドの中の、タブレット |
 | `vhub/` | VHub Playlist のサイト |
 | `original/` | 上の 6 つと同じ名前の、印を付ける前の画像（`src` で元を指定した画像は、その元を使う） |
