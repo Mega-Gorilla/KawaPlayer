@@ -1,6 +1,8 @@
-"""Draws the SVG charts of docs/guide/technical/sync.md: figure 2 (where the video
-should be), figure 4 (how a drift is put right, a model) and figure 7 (when ReSync
-loads).
+"""Draws the SVG figures of docs/guide/technical/sync.md: figure 1 (the whole
+picture), figure 2 (where the video should be), figure 3 (the check once a second),
+figure 4 (how a drift is put right, a model) and figure 7 (when ReSync loads).
+Figures 1 and 3 are drawn here rather than in mermaid, whose flowcharts GitHub did
+not always draw.
 
   python figures.py            # writes the SVGs next to this script
 
@@ -30,18 +32,98 @@ font-family:system-ui,-apple-system,"Segoe UI","Yu Gothic UI","Hiragino Sans","N
 .thr{stroke:var(--muted);stroke-width:1} .lead{stroke:var(--muted);stroke-width:1;fill:none}
 .tick{stroke:var(--muted);stroke-width:1.5;stroke-linecap:round}
 .press{stroke:var(--ink2);stroke-width:2;stroke-linecap:round}
+.box{fill:var(--surface);stroke:var(--axis);stroke-width:1.5} .grp{fill:var(--wash);stroke:none}
+.ask{fill:var(--wash);stroke:var(--s1);stroke-width:1.5} .go{fill:var(--s1);fill-opacity:.12;stroke:var(--s1);stroke-width:1.5}
+.arr{fill:none;stroke:var(--ink2);stroke-width:1.5} .arrd{fill:none;stroke:var(--muted);stroke-width:1.5;stroke-dasharray:5 4}
+.head{fill:var(--ink2)} .headm{fill:var(--muted)}
 .f12{font-size:12px} .f13{font-size:13px} .f14{font-size:14px;font-weight:600} .num{font-variant-numeric:tabular-nums}
 </style>"""
 
 
+DEFS = ('<defs><marker id="h" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">'
+        '<path class="head" d="M0,0 L10,5 L0,10 z"/></marker>'
+        '<marker id="hm" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">'
+        '<path class="headm" d="M0,0 L10,5 L0,10 z"/></marker></defs>')
+
+
 def svg(w, h, title, desc, body):
     return (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {w} {h}" width="{w}" height="{h}" role="img" aria-labelledby="t d">'
-            f'<title id="t">{title}</title><desc id="d">{desc}</desc>{STYLE}'
+            f'<title id="t">{title}</title><desc id="d">{desc}</desc>{STYLE}{DEFS}'
             f'<rect class="bg" x="0" y="0" width="{w}" height="{h}" rx="8"/>{body}</svg>\n')
+
+
+def node(x, y, w, h, lines, cls="box", tcls="t1 f13"):
+    out = [f'<rect class="{cls}" x="{x}" y="{y}" width="{w}" height="{h}" rx="6"/>']
+    top = y + h / 2 - (len(lines) - 1) * 9 + 4
+    for i, line in enumerate(lines):
+        out.append(text(x + w / 2, top + i * 18, line, tcls, "middle"))
+    return "".join(out)
+
+
+def arrow(points, dashed=False, label=None, at=None, anchor="middle"):
+    d = "M" + " L".join(f"{x:.1f},{y:.1f}" for x, y in points)
+    out = [f'<path class="{"arrd" if dashed else "arr"}" d="{d}" marker-end="url(#{"hm" if dashed else "h"})"/>']
+    if label:
+        out.append(text(at[0], at[1], label, "t2 f12", anchor))
+    return "".join(out)
 
 
 def text(x, y, s, cls="t2 f12", anchor="start"):
     return f'<text x="{x:.1f}" y="{y:.1f}" class="{cls}" text-anchor="{anchor}">{s}</text>'
+
+
+# Figure 1: the whole picture.
+def fig_overview():
+    W, H = 820, 372
+    b = [text(24, 30, "同期の全体像", "t1 f14"),
+         text(24, 50, "共有するのは値だけで、動画は一人ひとりが読み込み、位置はサーバーの時刻から一人ひとりが出す", "t2 f12")]
+    b.append('<rect class="grp" x="24" y="76" width="176" height="150" rx="8"/>' + text(112, 96, "オーナー（操作した人）", "t1 f13", "middle"))
+    b.append('<rect class="grp" x="262" y="76" width="196" height="150" rx="8"/>' + text(360, 96, "VRChat", "t1 f13", "middle"))
+    b.append('<rect class="grp" x="520" y="76" width="276" height="196" rx="8"/>' + text(658, 96, "ほかの人（一人ひとり）", "t1 f13", "middle"))
+    b.append(node(40, 120, 144, 56, ["曲・状態・位置と", "その時刻を送る"]))
+    b.append(node(278, 110, 164, 52, ["値を全員に配る", "（後から入った人にも）"]))
+    b.append(node(278, 176, 164, 36, ["サーバーの時刻"]))
+    b.append(node(540, 110, 236, 32, ["① 値を受け取る"]))
+    b.append(node(540, 160, 236, 32, ["② 動画を自分で読み込む"]))
+    b.append(node(540, 210, 236, 48, ["③ 今あるべき位置を出して、", "そこから再生する"]))
+    b.append(node(290, 292, 210, 44, ["動画のサイト", "（YouTube・VHub など）"], "box", "t2 f12"))
+    b.append(arrow([(184, 136), (278, 136)]))
+    b.append(arrow([(442, 126), (540, 126)]))
+    b.append(arrow([(658, 142), (658, 160)]))
+    b.append(arrow([(658, 192), (658, 210)]))
+    b.append(arrow([(442, 194), (496, 194), (496, 234), (540, 234)], dashed=True))
+    b.append(arrow([(776, 176), (808, 176), (808, 314), (500, 314)], dashed=True, label="動画を取りに行く", at=(650, 306)))
+    b.append(arrow([(112, 176), (112, 314), (290, 314)], dashed=True, label="オーナーも自分で読み込む", at=(122, 306), anchor="start"))
+    lx, ly = 560, H - 12
+    b.append(f'<path class="arr" d="M{lx},{ly - 4} L{lx + 26},{ly - 4}" marker-end="url(#h)"/>' + text(lx + 34, ly, "値", "t2 f12"))
+    b.append(f'<path class="arrd" d="M{lx + 70},{ly - 4} L{lx + 96},{ly - 4}" marker-end="url(#hm)"/>' + text(lx + 104, ly, "時刻・動画", "t2 f12"))
+    return svg(W, H, "同期の全体像",
+               "オーナーは曲・状態・位置とその時刻を送り、VRChatが全員に配る。ほかの人は値を受け取り、動画を自分で読み込み、サーバーの時刻から今あるべき位置を出して再生する。", "".join(b))
+
+
+# Figure 3: the check once a second.
+def fig_check():
+    W, H = 820, 330
+    b = [text(24, 30, "1 秒ごとの確かめ", "t1 f14"),
+         text(24, 50, "合わせ直すのは、動画が進んでいて、0.9 秒以上ずれているときだけ", "t2 f12")]
+    y, h = 86, 64
+    b.append(node(24, y + 8, 120, 48, ["1 秒ごとに", "比べる"]))
+    b.append(node(180, y, 170, h, ["ライブ配信か、", "止まっているか？"], "ask"))
+    b.append(node(390, y, 180, h, ["前に比べたときから", "動画が進んでいるか？"], "ask"))
+    b.append(node(610, y, 186, h, ["ずれが 0.9 秒以上か？", "（実際の時間で）"], "ask"))
+    yb = 260
+    b.append(node(180, yb, 390, 44, ["何もしない"]))
+    b.append(node(610, yb, 186, 44, ["今あるべき位置へシークする"], "go"))
+    b.append(arrow([(144, y + 32), (180, y + 32)]))
+    b.append(arrow([(350, y + 32), (390, y + 32)], label="いいえ", at=(370, y + 24)))
+    b.append(arrow([(570, y + 32), (610, y + 32)], label="はい", at=(590, y + 24)))
+    b.append(arrow([(265, y + h), (265, yb)], label="はい", at=(273, (y + h + yb) / 2 + 4), anchor="start"))
+    b.append(arrow([(470, y + h), (470, yb)], label="いいえ", at=(462, (y + h + yb) / 2 - 6), anchor="end"))
+    b.append(text(462, (y + h + yb) / 2 + 12, "（読み込み中・バッファ中）", "t2 f12", "end"))
+    b.append(arrow([(650, y + h), (650, 232), (540, 232), (540, yb)], label="いいえ", at=(596, 226)))
+    b.append(arrow([(756, y + h), (756, yb)], label="はい", at=(764, (y + h + yb) / 2 + 4), anchor="start"))
+    return svg(W, H, "1秒ごとの確かめ",
+               "ライブ配信か止まっていれば何もしない。動画が進んでいなければ（読み込み中・バッファ中）何もしない。ずれが0.9秒以上のときだけ、今あるべき位置へシークする。", "".join(b))
 
 
 # Figure 2: the shared position and time, and where everyone works out the video should be.
@@ -230,7 +312,8 @@ def fig_reload():
 
 
 os.makedirs(OUT, exist_ok=True)
-for name, f in (("position.svg", fig_position), ("drift.svg", fig_drift), ("reload.svg", fig_reload)):
+for name, f in (("overview.svg", fig_overview), ("position.svg", fig_position), ("check.svg", fig_check),
+                ("drift.svg", fig_drift), ("reload.svg", fig_reload)):
     with open(os.path.join(OUT, name), "w", encoding="utf-8", newline="\n") as fh:
         fh.write(f())
     print("wrote", name)
