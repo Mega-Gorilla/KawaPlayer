@@ -24,7 +24,6 @@ namespace Yamadev.YamaStream.UI
     private UdonSharpBehaviour _targetUdon;
     private string _copyText = "";
     private string _closeEventName, _executeEventName, _execute2EventName;
-    private bool _notifyingRefusal;
     private RectTransform _scrollRectTransform;
 
     private void Start()
@@ -70,43 +69,14 @@ namespace Yamadev.YamaStream.UI
     public void Execute() => ExecuteAndClose(_executeEventName);
     public void Execute2() => ExecuteAndClose(_execute2EventName);
 
-    // Compiles against the same signature as before, but no longer always
-    // shows. A caller that cannot see the refusal and is waiting for an
-    // answer is told the same thing cancelling tells it, so it is never left
-    // waiting for one that is not coming. Callers that want to know should
-    // use TryShow.
-    public void Show(string title, string message, string closeText, string executeText, UdonSharpBehaviour targetUdon, string closeEventName, string executeEventName)
-    {
-      Show(title, message, closeText, executeText, "", targetUdon, closeEventName, executeEventName, "");
-    }
-
-    public void Show(string title, string message, string closeText, string executeText, string execute2Text, UdonSharpBehaviour targetUdon, string closeEventName, string executeEventName, string execute2EventName)
-    {
-      if (TryShow(title, message, closeText, executeText, execute2Text, targetUdon, closeEventName, executeEventName, execute2EventName)) return;
-      if (!Utilities.IsValid(targetUdon)) return;
-
-      // Nothing to tell only when there is nothing to answer -- the same
-      // thing IsAwaitingAnswer protects, so a close-only dialog counts.
-      if (string.IsNullOrEmpty(closeEventName) &&
-          string.IsNullOrEmpty(executeEventName) &&
-          string.IsNullOrEmpty(execute2EventName)) return;
-
-      // Only ever one deep: a close handler that shows something is refused
-      // again, and answering that refusal too would not end.
-      if (_notifyingRefusal) return;
-      _notifyingRefusal = true;
-      if (!string.IsNullOrEmpty(closeEventName)) targetUdon.SendCustomEvent(closeEventName);
-      else Debug.LogWarning($"[Modal] Refused a dialog for {targetUdon.name} while another is waiting for an answer, and it has no close event to be told with.");
-      _notifyingRefusal = false;
-    }
-
     public bool TryShow(string title, string message, string closeText, string executeText, UdonSharpBehaviour targetUdon, string closeEventName, string executeEventName)
     {
       return TryShow(title, message, closeText, executeText, "", targetUdon, closeEventName, executeEventName, "");
     }
 
-    // Returns whether the dialog was put up. A caller that changed something
-    // in order to show it has to be able to put that back.
+    // Returns whether the dialog was put up: it is refused while another is
+    // waiting for an answer. A caller that changed something in order to
+    // show it has to be able to put that back.
     public bool TryShow(string title, string message, string closeText, string executeText, string execute2Text, UdonSharpBehaviour targetUdon, string closeEventName, string executeEventName, string execute2EventName)
     {
       if (IsAwaitingAnswer) return false;

@@ -250,10 +250,12 @@ namespace Yamadev.YamaStream.UI
     public bool HasModalDialog => Utilities.IsValid(_modalDialog);
     public bool IsModalBusy => Utilities.IsValid(_modalDialog) && _modalDialog.IsAwaitingAnswer;
 
-    public void ShowMessage(string title, string message, string closeText = null)
+    // A message waits for no answer, so it is not shown while a question
+    // is up rather than put up over it; the result says whether it was.
+    public bool ShowMessage(string title, string message, string closeText = null)
     {
-      if (!Utilities.IsValid(_modalDialog)) return;
-      _modalDialog.Show(title, message, string.IsNullOrEmpty(closeText) ? GetTranslation("button.close") : closeText, "", this, null, null);
+      if (!Utilities.IsValid(_modalDialog)) return false;
+      return _modalDialog.TryShow(title, message, string.IsNullOrEmpty(closeText) ? GetTranslation("button.close") : closeText, "", this, null, null);
     }
 
     // Asks before switching away from something that is playing. All three
