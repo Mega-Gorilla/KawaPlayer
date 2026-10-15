@@ -56,8 +56,11 @@ namespace Yamadev.YamaStream
     // not restarted: normal loads took up to 8.1 s in VRChat, resolving the
     // URL alone 3 to 5 s (issue #232). An error can be reloaded at once.
     private const float RELOAD_WAIT_WHILE_LOADING = 15f;
+    // _RunPendingReload is scheduled: one at a time.
     private bool _reloadPending;
+    // When a reload was last asked for; a load begun since covers it.
     private float _reloadRequestedAt;
+    // A change of speed or resolution came while loading: reload once ready.
     private bool _reloadAfterLoad;
 
     private void Start()
@@ -394,33 +397,39 @@ namespace Yamadev.YamaStream
       _reloadAfterLoad = false;
     }
 
-    // Keeps this Controller's reloads and retries 5.1 s apart, as VRChat
-    // turns away a second load within 5 s. Presses while waiting make one
-    // reload, of whatever is shared when it runs.
+    // Asks for a reload. It runs once this Controller's last load is 5.1 s
+    // old, as VRChat turns away a second load within 5 s, and requests made
+    // while it waits make one reload, of whatever is shared when it runs.
     private void RequestReload()
     {
-      float wait = _lastLoadTime + SAFETY_RETRY_INTERVAL - Time.time;
-      if (wait <= 0)
-      {
-        ReloadNow();
-        return;
-      }
-      if (_reloadPending) return;
-      _reloadPending = true;
       _reloadRequestedAt = Time.time;
-      SendCustomEventDelayedSeconds(nameof(_RunPendingReload), wait);
+      RunRequestedReload();
     }
 
-    // A load that began while the reload waited -- a retry after an error,
-    // scheduled for the same 5.1 s, or a new track -- already does what the
-    // reload would, and loading again now would come within 5 s of it, so
-    // the reload is dropped.
     public void _RunPendingReload()
     {
-      if (!_reloadPending) return;
       _reloadPending = false;
-      if (SyncedState == PlayerState.Idle) return;
-      if (_lastLoadTime > _reloadRequestedAt) return;
+      RunRequestedReload();
+    }
+
+    // A load begun after the last request -- a retry after an error, due at
+    // the same 5.1 s, or a new track -- already does what the reload would,
+    // so the request is dropped. A request made after that load still runs,
+    // 5.1 s after it: the wait is worked out again whenever it ends, as a
+    // load may have begun meanwhile.
+    private void RunRequestedReload()
+    {
+      if (_lastLoadTime >= _reloadRequestedAt || SyncedState == PlayerState.Idle) return;
+      float wait = _lastLoadTime + SAFETY_RETRY_INTERVAL - Time.time;
+      if (wait > 0)
+      {
+        if (!_reloadPending)
+        {
+          _reloadPending = true;
+          SendCustomEventDelayedSeconds(nameof(_RunPendingReload), wait);
+        }
+        return;
+      }
       ReloadNow();
     }
 
@@ -431,8 +440,6 @@ namespace Yamadev.YamaStream
     // never changes what is shared.
     private void ReloadNow()
     {
-      // A reload that runs at once makes any waiting one needless.
-      _reloadPending = false;
       _errorRetryCount = 0;
       _retryTargetTrack = null;
 
