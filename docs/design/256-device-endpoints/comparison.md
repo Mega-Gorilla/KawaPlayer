@@ -118,7 +118,7 @@ VRChat のワールドの U#（UdonSharp）では、部品どうしをつなぐ�
 | 部品の層 | `Controller`（再生と同期）、`UIController`（UI ごと）、モジュール、デバイス | `Core`（再生と同期）、`FrontendHandler`（プレイリストとロック、Core に 1 つ）、`UIHandler`（UI ごと）、追加の部品 | §4 |
 | つなぐ相手の正の値 | 各部品の `_controller`。書くのは Sub Controller のインスペクターだけ | 各部品の欄。部品が自分で持つ | §5 |
 | 相手の見つけ方 | 3 通り（エディターで書く・親をたどる・シーン全体を探す） | エディターでいちばん近い物を探す（`[Locatable]`）、ビルドで欄からたどる（`[Resolve]`） | §5 |
-| 部品の足し方 | `GameObject > KawaPlayer > …` で置き、インスペクターでプレイヤーを選ぶ | `GameObject > VizVid > …` で置くと、いちばん近い Core に結ばれる。無ければ Core を置く | §6 |
+| 部品の足し方 | `GameObject > KawaPlayer > …` で置き、インスペクターでプレイヤーを選ぶ | `GameObject > VizVid > …` で置くと、いちばん近い Core（UI は `FrontendHandler`）に結ばれる。相手が無いとき、本体を置くのは一部の部品だけで、UI では置かない | §6 |
 | イベントの配り方 | `Controller` は型付き（29）と名前（E3）、`UIController` は名前、モジュール 4 つが自前のリスト | 共通の基底クラス `UdonSharpEventSender` の `SendEvent(名前)` | §7 |
 | 購読の時 | 実行時の `Start` で `AddListener` | ビルドで `[BindUdonSharpEvent]`。受ける名前を絞れる | §7 |
 | 名前の確かめ | 送る側も受ける側も文字列 | 受ける側は `nameof` で自分のメソッドを指す | §7 |
@@ -199,7 +199,7 @@ public FrontendHandler handler;
 
 | 属性 | 働く時 | 中身 |
 | --- | --- | --- |
-| `[Locatable]` | エディター | 欄の横に「探す」ボタンを出す。階層でいちばん近い型の物を探し、無ければ指定したプレハブを置く（[LocatableAttribute.cs](https://github.com/JLChnToZ/vrcw-foundation/blob/2aa8623832453f8493f18743a6f448f00775f1dc/Packages/idv.jlchntoz.vrcw-foundation/Runtime/Attributes%20Markers/LocatableAttribute.cs#L9)） |
+| `[Locatable]` | エディター | 欄の横に「探す」ボタンを出す。階層でいちばん近い型の物を探し、無ければ指定したプレハブを置ける（置くかは、呼ぶ側が決める。§6）（[LocatableAttribute.cs](https://github.com/JLChnToZ/vrcw-foundation/blob/2aa8623832453f8493f18743a6f448f00775f1dc/Packages/idv.jlchntoz.vrcw-foundation/Runtime/Attributes%20Markers/LocatableAttribute.cs#L9)） |
 | `[Resolve("handler.core")]` | ビルド | 欄の値を、ほかの欄からたどって埋める。たどれるなら、インスペクターに欄を出さない（[ResolveAttribute.cs](https://github.com/JLChnToZ/vrcw-foundation/blob/2aa8623832453f8493f18743a6f448f00775f1dc/Packages/idv.jlchntoz.vrcw-foundation/Runtime/Attributes%20Markers/ResolveAttribute.cs#L15)） |
 | `[BindUdonSharpEvent(名前…)]` | ビルド | 欄が指す送り手の配り先に、自分を足す。名前を書けば、その名前のイベントだけを受ける（[UdonSharpEventSender.cs L16](https://github.com/JLChnToZ/vrcw-foundation/blob/2aa8623832453f8493f18743a6f448f00775f1dc/Packages/idv.jlchntoz.vrcw-foundation/Runtime/UdonSharpEventSender.cs#L16)） |
 | `[SingletonCoreControl]` | エディター | この型が「Core を操作する部品」だと示す。Core のインスペクターが、その部品の設定を埋め込む（`FrontendHandler.core` に付いている） |
@@ -211,12 +211,22 @@ public FrontendHandler handler;
 
 ## 6. 部品の足し方
 
-![KawaPlayer は、メニューで置いてからインスペクターでプレイヤーを選ぶ。VVMW は、メニューで置くと、いちばん近い Core に結ばれ、無ければ Core を置く](images/adding.svg)
+![KawaPlayer は、メニューで置いてからインスペクターでプレイヤーを選ぶ。VVMW は、メニューで置くと、いちばん近い Core か FrontendHandler に結ばれる。相手が無いとき本体を置くのは一部の部品だけで、UI は空のままになる](images/adding.svg)
 
 **図 3** 部品の足し方。
 
 - **KawaPlayer：** `GameObject > KawaPlayer > Tablet` などで、選んでいる物の下にプレハブを置く（`YamaPlayerMenu.cs`）。つなぐプレイヤーは、置いたあとにインスペクターで選ぶ。選ぶまでは、どこにもつながらない。
-- **VVMW：** `GameObject > VizVid > …`（ヒエラルキーで右クリックしても出る）で置くと、メニューの処理が `LocatableAttributeDrawer.Locate` を呼び、いちばん近い Core（UI なら `FrontendHandler`）を欄に入れる（[MenuUtil.cs L51](https://github.com/JLChnToZ/VVMW/blob/834bd5ec453297b713399a5fbba1bd52a81b4f82/Packages/idv.jlchntoz.vvmw/Editor/VVMW/MenuUtil.cs#L51)）。シーンに無ければ、Core のプレハブを置く。プレイヤーの物を選んで足せば、そのプレイヤーにつながる。
+- **VVMW：** `GameObject > VizVid > …`（ヒエラルキーで右クリックしても出る）で置くと、メニューの処理が、置いたプレハブの部品を型ごとに見て、いちばん近い相手を欄に入れる（[MenuUtil.cs L44–L99](https://github.com/JLChnToZ/VVMW/blob/834bd5ec453297b713399a5fbba1bd52a81b4f82/Packages/idv.jlchntoz.vvmw/Editor/VVMW/MenuUtil.cs#L44-L99)）。プレイヤーの物を選んで足せば、そのプレイヤーにつながる。相手が無いときの扱いは、部品の型で違う。
+
+**表 6** VVMW のメニューが、置いた部品の欄を埋めるしかた
+
+| 部品 | 埋める欄 | 相手がシーンに無いとき |
+| --- | --- | --- |
+| `FrontendHandler`・オーバーレイ（`OverlayControl`）・Resync ボタン（`ResyncButtonConfigurator`）・`ActiveRegionConfig` | `core` | Core のプレハブを置く（`Locate` の `createPrefab` が true、[L51・L55・L57・L59](https://github.com/JLChnToZ/VVMW/blob/834bd5ec453297b713399a5fbba1bd52a81b4f82/Packages/idv.jlchntoz.vvmw/Editor/VVMW/MenuUtil.cs#L51-L59)） |
+| UI（`UIHandler`）・近づくと再生（`AutoPlayOnNearV2`）・`StreamLinkAssigner` | `handler`（`StreamLinkAssigner` は `frontendHandler`）と `core` | 置かない。どちらも見つからなければ空のまま（3 つとも `Resolve` を呼び（[L53・L61・L73](https://github.com/JLChnToZ/VVMW/blob/834bd5ec453297b713399a5fbba1bd52a81b4f82/Packages/idv.jlchntoz.vvmw/Editor/VVMW/MenuUtil.cs#L53-L73)）、`autoCreate` を渡さないので既定の false になる（[L81–L95](https://github.com/JLChnToZ/VVMW/blob/834bd5ec453297b713399a5fbba1bd52a81b4f82/Packages/idv.jlchntoz.vvmw/Editor/VVMW/MenuUtil.cs#L81-L95)）） |
+| `Core` | `audioLink`・`yttl` | 置かない（`createPrefab` が false、[L48–L49](https://github.com/JLChnToZ/VVMW/blob/834bd5ec453297b713399a5fbba1bd52a81b4f82/Packages/idv.jlchntoz.vvmw/Editor/VVMW/MenuUtil.cs#L48-L49)） |
+
+`[Locatable]` 属性は、無ければプレハブを置く力を持つが、それを使うかはメニューが部品ごとに決めている。たとえば、追加の UI（`Modules/Separated Controls`、`Prefabs/Default UI.prefab`）を、プレイヤーの無いシーンに置くと、UI の欄は空のままになる。
 
 ---
 
@@ -261,7 +271,7 @@ public FrontendHandler handler;
 
 ### 8.2 権限
 
-**表 6** 権限の確かめ方
+**表 7** 権限の確かめ方
 
 | | KawaPlayer | VVMW |
 | --- | --- | --- |
@@ -273,7 +283,7 @@ public FrontendHandler handler;
 
 - **確かめたこと（付録 B）：** Play 中に `FrontendHandler` へ `_Lock` を送ると、UI の URL 欄が押せなくなり、`_OnUnlock` で戻った。
 
-**表 7** 操作ごとの権限のかかり方
+**表 8** 操作ごとの権限のかかり方
 
 | 操作 | KawaPlayer（権限のモジュールが見るか） | VVMW（ロック中） |
 | --- | --- | --- |
@@ -304,7 +314,7 @@ URL を、動画として読む前に別の部品に渡す口は、両者にあ�
 
 ## 9. ビルド時の処理
 
-**表 8** ビルド時の処理の組み立て
+**表 9** ビルド時の処理の組み立て
 
 | | KawaPlayer | VVMW |
 | --- | --- | --- |
@@ -329,7 +339,7 @@ VVMW の前処理の順番は、`Resolve` と重複のまとめが -1、部品�
 - **VVMW：**
   - 各部品が、自分のインスペクターを持つ。
   - Core のインスペクターは、エディターを開いたときに、すべての型を調べて `[SingletonCoreControl]` の付いた Core の欄を持つ型を集める（[EditorBase.cs L93](https://github.com/JLChnToZ/VVMW/blob/834bd5ec453297b713399a5fbba1bd52a81b4f82/Packages/idv.jlchntoz.vvmw/Editor/VVMW/EditorBase.cs#L93)）。シーンの中で自分を指すその部品（`FrontendHandler`）のインスペクターを、Core のインスペクターの中に埋め込む（[CoreEditor.cs L1185](https://github.com/JLChnToZ/VVMW/blob/834bd5ec453297b713399a5fbba1bd52a81b4f82/Packages/idv.jlchntoz.vvmw/Editor/VVMW/CoreEditor.cs#L1185)）。
-  - Core のインスペクターは、どの部品も個別には知らない。
+  - Core のインスペクターは、どの部品も個別には知らない。ただし、部品を足すメニュー（`MenuUtil`）は、部品の型ごとに分かれている（§6 の表 6）。
 
 ---
 
@@ -343,7 +353,7 @@ VVMW の前処理の順番は、`Resolve` と重複のまとめが -1、部品�
 
 ## 12. 同期の分担
 
-**表 9** 同期する部品
+**表 10** 同期する部品
 
 | | KawaPlayer | VVMW |
 | --- | --- | --- |
@@ -368,7 +378,7 @@ VVMW の前処理の順番は、`Resolve` と重複のまとめが -1、部品�
 - つなぎ方を、部品の欄で宣言する。正の値が部品の側にあり、たどれる値はビルドで決まるので、食い違わない。
 - 部品を足すと、いちばん近い本体に結ばれる。
 - イベントの配り方が 1 つの基底クラスにまとまり、受ける名前をビルドで絞れる。受ける側の名前は、`nameof` でコンパイル時に確かめられる。
-- デバイスに固有の処理（ビルド・インスペクター）を、部品の側に置ける。共通のコードは、個別の部品を知らない。
+- デバイスに固有の処理（ビルド・インスペクター）を、部品の側に置ける。前処理と Core のインスペクターは、個別の部品を知らない（部品を足すメニューは、型ごとに分かれる）。
 - 権限の仕組みとは、2 つの名前のイベント（`_OnUnlock`・`_Lock`）だけでつながる。
 
 **両方に共通する限界**

@@ -209,8 +209,8 @@ def fig_adding():
          text(24, 50, "KawaPlayer は置いたあとにプレイヤーを選ぶ。VVMW は置くとき、いちばん近い本体に結ぶ", "t2 f12")]
     flows = [("KawaPlayer", [["GameObject >", "KawaPlayer > Tablet"], ["選んでいる物の", "下に置く"], ["インスペクターで", "プレイヤーを選ぶ"], ["下の部品の", "_controller に書く"]],
               "選ぶまでは、どこにもつながらない", "ts2 f12"),
-             ("VizVid", [["GameObject >", "VizVid > …"], ["選んでいる物の", "下に置く"], ["Locate：いちばん近い", "Core を探す"], ["欄に入れる", "（無ければ Core を置く）"]],
-              "プレイヤーを選んで足せば、そのプレイヤーにつながる", "ts1 f12")]
+             ("VizVid", [["GameObject >", "VizVid > …"], ["選んでいる物の", "下に置く"], ["Locate：いちばん近い", "Core・Frontend を探す"], ["欄に入れる", "（本体を置くのは", "一部の部品だけ）"]],
+              "プレイヤーを選んで足せば、そのプレイヤーにつながる。UI（UIHandler）は、相手が無ければ空のまま", "ts1 f12")]
     for r, (name, steps, note, ncls) in enumerate(flows):
         y = 82 + r * 120
         b.append(text(24, y + 34, name, "t1 f13 b"))
@@ -222,7 +222,7 @@ def fig_adding():
             x += 172
         b.append(text(130, y + 80, note, ncls))
     return svg(W, H, "部品の足し方",
-               "KawaPlayerは、メニューで選んでいる物の下に置き、インスペクターでプレイヤーを選ぶと下の部品に書く。VVMWは、メニューで置くと、Locateがいちばん近いCoreを探して欄に入れ、無ければCoreを置く。", "".join(b))
+               "KawaPlayerは、メニューで選んでいる物の下に置き、インスペクターでプレイヤーを選ぶと下の部品に書く。VVMWは、メニューで置くと、Locateがいちばん近いCoreかFrontendHandlerを探して欄に入れる。相手が無いとき本体を置くのは一部の部品だけで、UIは空のままになる。", "".join(b))
 
 
 # comparison.md, figure 4: how events go out.
