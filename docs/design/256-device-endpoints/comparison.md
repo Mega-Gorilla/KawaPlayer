@@ -21,7 +21,7 @@ KawaPlayer と VizVid（VVMW）が、本体と、その横に置く部品（UI�
 
 権限にも違いがある。VizVid は、再生の命令の 5 つを受ける側（`FrontendHandler`）が断り、URL の入力などは UI が押せなくする。KawaPlayer は、操作の前に UI が確認のイベントを送り、権限のモジュールが中止する。
 
-VizVid の前処理と配り先の作られ方は、テスト用の Unity（ClientSim）で確かめた（付録 B）。この文書は事実の記録で、直す方針は [README.md](README.md) にまとめる。
+用語の対応（表 2）と、KawaPlayer の接続口 E1〜E12 ごとの VVMW の対応（表 4）も並べた。VizVid の前処理と配り先の作られ方は、テスト用の Unity（ClientSim）で確かめた（付録 B）。この文書は事実の記録で、直す方針は [README.md](README.md) にまとめる。
 
 **キーワード：** デバイス、接続口、VizVid、UdonSharp、ビルド時の前処理、イベント、権限
 
@@ -88,7 +88,30 @@ VRChat のワールドの U#（UdonSharp）では、部品どうしをつなぐ�
 
 ## 3. 比較の一覧
 
-**表 2** つなぎ方の比較（機能ごと）
+### 3.1 用語の対応
+
+同じ役の部品でも、両者で名前が違う。この文書では、次の対応で読む。
+
+**表 2** 用語の対応
+
+| 役 | KawaPlayer | VVMW |
+| --- | --- | --- |
+| 本体（再生と同期） | `Controller` | `Core` |
+| プレイリスト・キュー | `Controller` と `QueueList`・`HistoryList`・`DynamicPlaylist` | `FrontendHandler` |
+| UI | `UIController` | `UIHandler` |
+| 外の部品の根元 | `YamaPlayerSubController` | 無し（部品ごとに Core や `FrontendHandler` の欄を持つ） |
+| 出来事を受ける基底 | `YamaPlayerListener`（型付きのメソッド 29 個） | 無し（名前のメソッドを持つ U# の部品なら受けられる） |
+| 出来事を配る | `Controller.AddListener`・`UIController.AddListener` | `UdonSharpEventSender` の `_AddListener` と `[BindUdonSharpEvent]` |
+| 権限 | `PermissionManagement`（モジュール）と `BeforeUserXxx` | `FrontendHandler.locked` と `_OnUnlock`・`_Lock` |
+| URL の差し込み口 | `UIController._urlInterceptor`（名前で呼ぶ） | `InputFilterBase`（抽象の基底クラス、型で呼ぶ） |
+| ビルド時の処理 | `IYamaPlayerBuildProcess` | `IPreprocessor`・`ISelfPreProcess` |
+| ワールドに 1 つの部品 | `TabletVisitorsBuildProcess`（専用） | `ISingleton<T>`（汎用） |
+| つなぐ相手を探す | Sub Controller のインスペクター | `[Locatable]`・`Locate` |
+| 部品を足すメニュー | `GameObject > KawaPlayer > …` | `GameObject > VizVid > …` |
+
+### 3.2 機能ごとの比較
+
+**表 3** つなぎ方の比較（機能ごと）
 
 | 機能 | KawaPlayer | VVMW | 節 |
 | --- | --- | --- | --- |
@@ -106,6 +129,27 @@ VRChat のワールドの U#（UdonSharp）では、部品どうしをつなぐ�
 | 部品ごとの設定 | 共通の Sub Controller のインスペクターに、タブレットの欄がある | 部品が自分のインスペクターを持つ。Core のインスペクターは、Core を操作する部品の設定を埋め込む | §10 |
 | 画面と音 | `YamaPlayerScreen`・`YamaPlayerSpeaker` を、ビルドで `Controller` に登録する | Core が画面と音の配列を持ち、エディターの部品（`ScreenConfigurator`）がそれを書き換える | §11 |
 | 同期 | `Controller`、キュー・履歴・枠、`TabletScreen` などが、それぞれ同期する。`UIController` は同期しない | `Core` と `FrontendHandler` が同期する。`UIHandler` は変数を同期しない | §12 |
+
+### 3.3 KawaPlayer の接続口と、VVMW の対応
+
+#255 の接続口（E1〜E12）ごとに、VVMW で同じ役をする物を並べる。
+
+**表 4** KawaPlayer の接続口（E1〜E12）と VVMW の対応
+
+| 番号 | KawaPlayer の接続口 | VVMW で同じ役をする物 | 結び方の違い |
+| --- | --- | --- | --- |
+| E1 | 命令（`Controller` の public メソッド） | `Core` と `FrontendHandler` の public メソッド | VVMW は再生系の命令を `FrontendHandler` に分ける |
+| E2 | 型付きの出来事（`AfterXxx`、29 個） | 無し | VVMW は型付きの出来事を持たず、すべて名前で配る |
+| E3 | 名前の出来事（`SendCustomVideoEvent`） | `SendEvent(名前)`（Core 19 種類、`FrontendHandler` 11 種類） | 同じく名前。VVMW は受ける名前をビルドで絞る |
+| E4 | 本体への登録（`AddListener`・`AddScreen` など） | `_AddListener`、ビルドの `[BindUdonSharpEvent]`、画面と音は Core の配列 | VVMW の購読は、ほぼすべてビルドで決まる |
+| E5 | 前の確認（`BeforeUserXxx`、26 個） | 無し（ロックの値を見る） | VVMW は操作ごとには聞かない |
+| E6 | UI の知らせ（`AfterLanguageChanged`） | `FrontendHandler` の `_OnUIUpdate` | どちらも名前 |
+| E7 | 差し込み口（`_urlInterceptor`・`_playlistRefreshHandler`） | `InputFilterBase`（URL の差し込み） | KawaPlayer は欄に書いて名前で呼ぶ。VVMW は抽象の基底クラスで型として呼ぶ（§8.3） |
+| E8 | 窓口（`ShowMessage`・`PlayImageUrl` など） | `UIHandler`・`Core` の public メソッド | どちらも型 |
+| E9 | UI への登録（`UIController.AddListener`） | 無し（`UIHandler` は送り手ではない。送り手は `FrontendHandler`） | — |
+| E10 | Sub Controller のインスペクター | `[Locatable]` と、Core のインスペクターへの埋め込み | KawaPlayer は根元で 1 回書く。VVMW は部品の欄ごと |
+| E11 | ビルド処理（`IYamaPlayerBuildProcess`） | `IPreprocessor`・`ISelfPreProcess` | VVMW は部品自身もビルド処理を持てる（§9） |
+| E12 | UI の差し込み（`uiSlots`、パス） | 無し（UI は自分のプレハブを持つ） | — |
 
 ---
 
@@ -151,7 +195,7 @@ Core core;
 public FrontendHandler handler;
 ```
 
-**表 3** VVMW の、つなぎ方の属性
+**表 5** VVMW の、つなぎ方の属性
 
 | 属性 | 働く時 | 中身 |
 | --- | --- | --- |
@@ -217,7 +261,7 @@ public FrontendHandler handler;
 
 ### 8.2 権限
 
-**表 4** 権限の確かめ方
+**表 6** 権限の確かめ方
 
 | | KawaPlayer | VVMW |
 | --- | --- | --- |
@@ -229,11 +273,38 @@ public FrontendHandler handler;
 
 - **確かめたこと（付録 B）：** Play 中に `FrontendHandler` へ `_Lock` を送ると、UI の URL 欄が押せなくなり、`_OnUnlock` で戻った。
 
+**表 7** 操作ごとの権限のかかり方
+
+| 操作 | KawaPlayer（権限のモジュールが見るか） | VVMW（ロック中） |
+| --- | --- | --- |
+| 再生・一時停止・停止 | 見る | 受ける側が断る。UI もボタンを出さない |
+| 次の曲 | 見る | 受ける側が断る（`_Skip`） |
+| 全員の読み込み直し・同期 | 見る（全員リロードボタン） | 受ける側が断る（`_GlobalSync`） |
+| シーク | 見る | UI がスライダーを止める（Core は断らない） |
+| URL を入れる | 見る | UI が URL 欄を止める（`PlayUrl` は断らない） |
+| リストから選ぶ・キューの並べ替え・削除 | 見る | UI がリストを止める（`PlayAt` は断らない） |
+| リピート・シャッフル | 見る | UI がボタンを止める |
+| 速度 | 見る | 関係ない |
+| 自分の読み込み直し（ReSync・Resync） | 見ない | 関係ない（`_LocalSync`） |
+| 音量・ミュート・ずれの補正 | 見ない | 関係ない |
+| 明るさ・解像度・左右反転・言語 | 見ない | — |
+
+### 8.3 URL の差し込み口
+
+URL を、動画として読む前に別の部品に渡す口は、両者にある。作りが違う。
+
+- **KawaPlayer（E7）：** `UIController` が、欄 `_urlInterceptor` に入った U# の部品に、`SetProgramVariable` で `interceptUrl`・`interceptSource` を書き、`SendCustomEvent("OnUrlSubmitted")` で呼ぶ。答えは、相手の欄 `interceptHandled` を読む。欄の名前もイベントの名前も文字列で、型の確かめは無い。入れるのは、PlaylistLoader のビルド処理である。
+- **VVMW：**
+  - 本体に抽象の基底クラス `InputFilterBase` があり、`pcUrl`・`questUrl` の欄と、抽象のメソッド `_ValidateUrls()` を持つ（[InputFilterBase.cs L12・L37](https://github.com/JLChnToZ/VVMW/blob/834bd5ec453297b713399a5fbba1bd52a81b4f82/Packages/idv.jlchntoz.vvmw/Runtime/VVMW/InputFilterBase.cs#L12-L37)）。
+  - `Core` は、その型の欄 `urlInputFilter` を持つ（[Core.cs L41](https://github.com/JLChnToZ/VVMW/blob/834bd5ec453297b713399a5fbba1bd52a81b4f82/Packages/idv.jlchntoz.vvmw/Runtime/VVMW/Core.cs#L41)）。`FrontendHandler` があれば、それを引き取り、`PlayUrl` の中で、欄に URL を書いてから `_ValidateUrls()` を型として呼ぶ。拒むときは、受けた側が URL を空にする。
+  - 外の人は、`InputFilterBase` を継いだ部品を作り、Core の欄に入れればよい。VVMW の中には、継いだ部品は無い。
+- **違い：** VVMW の差し込み口は型付きなので、欄やメソッドの名前の打ち間違いはコンパイルで見つかる。U# の継承は 1 本なので、差し込み口を継ぐ部品は、ほかの基底を継げない。
+
 ---
 
 ## 9. ビルド時の処理
 
-**表 5** ビルド時の処理の組み立て
+**表 8** ビルド時の処理の組み立て
 
 | | KawaPlayer | VVMW |
 | --- | --- | --- |
@@ -241,6 +312,10 @@ public FrontendHandler handler;
 | 処理の種類 | 目的ごとのクラス（モジュール、全員リロードボタン、PlaylistLoader、画面と音、タブレットの訪問者など） | 汎用の処理（属性を読む `Resolve`・`BindUdonSharpEvent`、重複をまとめる `SingletonBehaviourCombiner`、エディター専用の物を消す）と、部品自身の処理 |
 | デバイスに固有の処理 | 共通の処理か、デバイスのビルド処理のクラスに書く（全員リロードボタンはモジュールの Editor、タブレットの訪問者は共通の Editor） | 部品が `ISelfPreProcess` を実装して、自分の処理を持つ（例：`OverlayControl` はシーンのすべての Core の配り先に自分を足す） |
 | ワールドに 1 つの部品 | `TabletVisitorsBuildProcess` が、最初の記録を残し、残りを止め、参照を付け替える | `ISingleton<T>` を付けた部品を、汎用の前処理がまとめ、参照を付け替える |
+
+![KawaPlayer の YamaPlayerBuildProcess（-100000）が、翻訳・プレイリスト・モジュール・全員リロードボタン・PlaylistLoader・画面と音・後処理の順に動き、そのあと VizVid の土台の BuildPreprocessorManager（-100）が、部品自身の処理・Resolve・ISingleton・BindUdonSharpEvent・エディター専用の物の削除の順に動く](images/build-order.svg)
+
+**図 6** ビルド時の処理の順番。Unity は、シーンの前処理を `callbackOrder` の小さい順に呼ぶので、KawaPlayer の処理がすべて済んでから、VVMW の土台の処理が動く。
 
 VVMW の前処理の順番は、`Resolve` と重複のまとめが -1、部品自身の処理が -10 と 0、イベントの結び付けが 0、エディター専用の物を消すのが 100 である。
 
@@ -268,7 +343,7 @@ VVMW の前処理の順番は、`Resolve` と重複のまとめが -1、部品�
 
 ## 12. 同期の分担
 
-**表 6** 同期する部品
+**表 9** 同期する部品
 
 | | KawaPlayer | VVMW |
 | --- | --- | --- |
@@ -357,5 +432,9 @@ KawaPlayer（`95f818f`）のコードの場所は、[device-connections.md](../.
 | B2 | 前処理のあと（Play）の配り先 | Core の `namedTargets` に 15 個の名前。`FrontendHandler` と `UIHandler` に、受ける名前だけが配られる。`targets` は空のまま |
 | B3 | `[Resolve]` | `UIHandler.core` が、エディターでは空、Play では `handler.core` から埋まる |
 | B4 | 外からのロック | `_Lock` で UI の URL 欄が押せなくなり、`_OnUnlock` で戻る |
+
+![Core の 15 個の名前のうち、動画の出来事・音量・速度など 9 個は FrontendHandler と UIHandler の両方に、題名や読み込みの始まりなど 4 個は FrontendHandler だけに、演者と範囲のループの 2 個は UIHandler だけに届く。FrontendHandler の _OnUIUpdate は UIHandler に届く](images/targets.svg)
+
+**図 7** Play の前処理のあとの、名前ごとの配り先（B2）。
 
 確かめていないこと：VRChat の Build & Test（複数のクライアント）、ロック中に `PlayUrl` を直接呼んだときの動き（コードからは、受ける側で断らないと読める）。
