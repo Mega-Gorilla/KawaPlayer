@@ -15,7 +15,7 @@
     "com.unity.nuget.newtonsoft-json": "3.2.1"
   },
   "vpmDependencies": {
-    "com.vrchat.worlds": ">=3.8.1"
+    "com.vrchat.worlds": ">=3.10.2"
   },
   "samples": [
     {

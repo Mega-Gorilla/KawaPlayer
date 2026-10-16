@@ -23,6 +23,12 @@ namespace Yamadev.YamaStream.UI
     [Header("Appearance - Idle Screen")]
     [SerializeField] private Image _idleScreenImage;
     [SerializeField] private Sprite _idleScreenSprite;
+    // The default idle image is only its background; the logo and the name
+    // are drawn over it (_idleScreenLogo), from the logo the tablet's back
+    // also uses, so the picture costs kilobytes instead of megabytes (issue
+    // #189). An image the world creator chose is shown alone.
+    [SerializeField] private Sprite _defaultIdleScreenSprite;
+    [SerializeField] private GameObject _idleScreenLogo;
 
     [Header("Animator")]
     [SerializeField] private Animator _userUIAnimator;
@@ -31,7 +37,6 @@ namespace Yamadev.YamaStream.UI
     [Header("Modal Dialog")]
     [SerializeField] private Modal _modalDialog;
     [SerializeField] private ToggleGroup _modalPlayerSelectorGroup;
-    [SerializeField] private Toggle _modalUnityPlayerToggle;
     [SerializeField] private Toggle _modalAVProPlayerToggle;
     [SerializeField] private Toggle _modalImageViewerToggle;
 
@@ -84,7 +89,6 @@ namespace Yamadev.YamaStream.UI
     [SerializeField] private Text _progressTooltipText;
 
     [Header("Settings - Playback")]
-    [SerializeField, RegisterEvent(nameof(Toggle.onValueChanged), nameof(SetUnityPlayer))] private Toggle _unityPlayerToggle;
     [SerializeField, RegisterEvent(nameof(Toggle.onValueChanged), nameof(SetAVProPlayer))] private Toggle _avProPlayerToggle;
     [SerializeField, RegisterEvent(nameof(Toggle.onValueChanged), nameof(SetImageViewer))] private Toggle _imageViewerToggle;
     [SerializeField, RegisterEventTrigger(EventTriggerType.EndDrag, nameof(SetSpeed))] private Slider _speedSlider;
@@ -127,6 +131,29 @@ namespace Yamadev.YamaStream.UI
     private bool _progressDrag;
     private bool _actionCancelled;
 
+    // What the texts that Update keeps current last showed, so a new string is
+    // made only when the second or the percent changes (issue #195). A text that
+    // something else wrote over since, as the slideshow does, is written again.
+    // The times count in seconds only while the controller's time format shows
+    // nothing finer: a custom format with no f or F. The one-letter formats are
+    // the standard ones (c, g, G, t, T), which all show fractions; those, and any
+    // format with fractions, are made every frame.
+    private bool _timesInWholeSeconds;
+    private int _shownVolumePercent = -1;
+    private string _shownVolumeText;
+    private int _shownVideoSecond = -1;
+    private string _shownVideoTimeText;
+    private int _shownDurationSecond = -1;
+    private string _shownDurationText;
+    private int _shownSeekSecond = -1;
+    private string _shownSeekText;
+
+    // A module that shows its own numbers in the time and length texts and on
+    // the progress slider, as the slideshow does its pages, holds them while it
+    // does. UpdateProgressView then leaves them, the seek tooltip with them,
+    // where before the two wrote over each other every frame (issue #195).
+    private bool _progressHeld;
+
     private void Start()
     {
       if (!_controller)
@@ -135,6 +162,8 @@ namespace Yamadev.YamaStream.UI
         return;
       }
       _controller.AddListener(this);
+      string timeFormat = _controller.TimeFormat;
+      _timesInWholeSeconds = timeFormat != null && timeFormat.Length > 1 && timeFormat.IndexOf('f') < 0 && timeFormat.IndexOf('F') < 0;
 
       InitializeTranslation();
       UpdateTranslation();
@@ -157,9 +186,35 @@ namespace Yamadev.YamaStream.UI
       if (!Utilities.IsValid(_controller)) return;
       if (Utilities.IsValid(_volumeSliderHelper) && Utilities.IsValid(_volumeTooltipText))
       {
-        _volumeTooltipText.text = $"{Mathf.Ceil(_volumeSliderHelper.Percent * 100)}%";
+        int percent = Mathf.CeilToInt(_volumeSliderHelper.Percent * 100);
+        if (percent != _shownVolumePercent || _volumeTooltipText.text != _shownVolumeText)
+        {
+          _shownVolumePercent = percent;
+          _shownVolumeText = $"{percent}%";
+          _volumeTooltipText.text = _shownVolumeText;
+        }
       }
       if (!_controller.Stopped && !_controller.IsLoading) UpdateProgressView();
+      // Pressable only when a reload would do anything: it did nothing, while
+      // looking pressable, when everyone was stopped or a load was under way
+      // (issue #232). The wait while loading ends with no event, so it is
+      // checked here.
+      if (Utilities.IsValid(_reloadButton))
+      {
+        bool canReload = _controller.CanReload;
+        if (_reloadButton.interactable != canReload) _reloadButton.interactable = canReload;
+      }
+    }
+
+    public bool ProgressHeld
+    {
+      get => _progressHeld;
+      set
+      {
+        if (_progressHeld == value) return;
+        _progressHeld = value;
+        if (!value && Utilities.IsValid(_controller)) UpdateProgressView();
+      }
     }
 
     public void AddListener(UdonSharpBehaviour listener)
@@ -195,13 +250,15 @@ namespace Yamadev.YamaStream.UI
     public bool HasModalDialog => Utilities.IsValid(_modalDialog);
     public bool IsModalBusy => Utilities.IsValid(_modalDialog) && _modalDialog.IsAwaitingAnswer;
 
-    public void ShowMessage(string title, string message, string closeText = null)
+    // A message waits for no answer, so it is not shown while a question
+    // is up rather than put up over it; the result says whether it was.
+    public bool ShowMessage(string title, string message, string closeText = null)
     {
-      if (!Utilities.IsValid(_modalDialog)) return;
-      _modalDialog.Show(title, message, string.IsNullOrEmpty(closeText) ? GetTranslation("button.close") : closeText, "", this, null, null);
+      if (!Utilities.IsValid(_modalDialog)) return false;
+      return _modalDialog.TryShow(title, message, string.IsNullOrEmpty(closeText) ? GetTranslation("button.close") : closeText, "", this, null, null);
     }
 
-    // Asks before switching away from something that is playing. All three
+    // Asks before switching away from something that is playing. Both
     // toggles ask the same thing and differ only in what continuing runs.
     // Refused while another question is up: the toggle has already moved to
     // the player that will not be selected after all, so put it back -- the
@@ -238,38 +295,17 @@ namespace Yamadev.YamaStream.UI
       if (!Utilities.IsValid(target)) return false;
       if (string.IsNullOrEmpty(confirmEventName)) return false;
 
-      // TryShow, not Show: Show tells a refused caller by firing its cancel
-      // event, which would clear the pending question and then report back
-      // that it had been asked.
+      // A refused question sends no event: the false returned here is all
+      // the caller hears, and it lets go of what it held for the answer.
       return _modalDialog.TryShow(title, message, GetTranslation("button.cancel"), confirmText,
           target, cancelEventName, confirmEventName);
     }
 
-    public void SetUnityPlayer()
-    {
-      if (_controller.Handler.Type == VideoPlayerType.UnityVideoPlayer) return;
-      if (!Utilities.IsValid(_modalDialog) || (_controller.Stopped && !_controller.IsLoading))
-      {
-        SetUnityPlayerInternal();
-        return;
-      }
-      ConfirmChangePlayer(nameof(SetUnityPlayerInternal));
-    }
-
-    public void SetUnityPlayerInternal()
-    {
-      if (!InvokeBeforeEvent("BeforeUserChangePlayerHandler"))
-      {
-        UpdateUI();
-        return;
-      }
-      _controller.TakeOwnership();
-      _controller.SetPlayerType(VideoPlayerType.UnityVideoPlayer);
-    }
-
+    // The settings show the player a URL entered next plays on (see
+    // OfferedPlayerType), and so do these two.
     public void SetAVProPlayer()
     {
-      if (_controller.Handler.Type == VideoPlayerType.AVProVideoPlayer) return;
+      if (OfferedPlayerType() == VideoPlayerType.AVProVideoPlayer) return;
       if (!Utilities.IsValid(_modalDialog) || (_controller.Stopped && !_controller.IsLoading))
       {
         SetAVProPlayerInternal();
@@ -289,10 +325,13 @@ namespace Yamadev.YamaStream.UI
       _controller.SetPlayerType(VideoPlayerType.AVProVideoPlayer);
     }
 
+    // A picture a track put up is on the image viewer already: choosing it
+    // stops nothing, so nothing is asked.
     public void SetImageViewer()
     {
-      if (_controller.Handler.Type == VideoPlayerType.ImageViewer) return;
-      if (!Utilities.IsValid(_modalDialog) || (_controller.Stopped && !_controller.IsLoading))
+      if (OfferedPlayerType() == VideoPlayerType.ImageViewer) return;
+      if (!Utilities.IsValid(_modalDialog) || (_controller.Stopped && !_controller.IsLoading)
+        || _controller.Handler.Type == VideoPlayerType.ImageViewer)
       {
         SetImageViewerInternal();
         return;
@@ -356,7 +395,7 @@ namespace Yamadev.YamaStream.UI
 
       if (!Utilities.IsValid(_modalDialog) || (_controller.Stopped && !_controller.IsLoading))
       {
-        PlayUrlInternal(ToOfferedPlayerType(_controller.Handler.Type), urlInputField.GetUrl());
+        PlayUrlInternal(OfferedPlayerType(), urlInputField.GetUrl());
         urlInputField.SetUrl(VRCUrl.Empty);
         return;
       }
@@ -403,15 +442,25 @@ namespace Yamadev.YamaStream.UI
       HideVideoPlayerSelector();
     }
 
+    // Whether this UI is pointed at a player. A tablet placed without one
+    // has nothing to show a picture on.
+    public bool HasController => Utilities.IsValid(_controller);
+
+    // Shows a picture on the player at once, on the image viewer (issue
+    // #182): the tablet's image app sends the picture it shows. Unlike a URL
+    // entered in the field, nothing is asked, even over something playing;
+    // the permissions apply as they do to playing a URL.
+    public void PlayImageUrl(VRCUrl url)
+    {
+      if (!Utilities.IsValid(_controller) || !Utilities.IsValid(url) || string.IsNullOrEmpty(url.Get())) return;
+      PlayUrlInternal(VideoPlayerType.ImageViewer, url);
+    }
+
     public void ShowVideoPlayerSelector()
     {
       if (!Utilities.IsValid(_modalPlayerSelectorGroup)) return;
 
-      var type = ToOfferedPlayerType(_controller.Handler.Type);
-      if (Utilities.IsValid(_modalUnityPlayerToggle))
-      {
-        _modalUnityPlayerToggle.isOn = type == VideoPlayerType.UnityVideoPlayer;
-      }
+      var type = OfferedPlayerType();
       if (Utilities.IsValid(_modalAVProPlayerToggle))
       {
         _modalAVProPlayerToggle.isOn = type == VideoPlayerType.AVProVideoPlayer;
@@ -434,28 +483,26 @@ namespace Yamadev.YamaStream.UI
 
     public VideoPlayerType GetVideoPlayerSelectorValue()
     {
-      if (Utilities.IsValid(_modalUnityPlayerToggle) && _modalUnityPlayerToggle.isOn) return VideoPlayerType.UnityVideoPlayer;
       if (Utilities.IsValid(_modalAVProPlayerToggle) && _modalAVProPlayerToggle.isOn) return VideoPlayerType.AVProVideoPlayer;
       if (Utilities.IsValid(_modalImageViewerToggle) && _modalImageViewerToggle.isOn) return VideoPlayerType.ImageViewer;
-      return ToOfferedPlayerType(_controller.Handler.Type);
+      return OfferedPlayerType();
     }
 
-    // A URL entered in the world plays on AVPro unless it is an image: Unity
-    // Video Player is no longer offered (issue #139). The active handler can
-    // still be Unity -- after falling back from an AVPro error, or while a
-    // track baked as Unity plays -- and the next URL must not inherit that.
-    private VideoPlayerType ToOfferedPlayerType(VideoPlayerType type)
+    // A URL entered in the world plays on AVPro unless someone chose the
+    // image viewer: Unity Video Player is not offered (issues #139, #166). The
+    // player in use can be another one a track switched to -- Unity for a
+    // track baked as Unity, or the image viewer for a picture from the tablet
+    // (issue #182) -- and the next URL must not inherit it.
+    private VideoPlayerType OfferedPlayerType()
     {
+      if (_controller.HandlerFromTrack) return VideoPlayerType.AVProVideoPlayer;
+      var type = _controller.Handler.Type;
       return type == VideoPlayerType.UnityVideoPlayer ? VideoPlayerType.AVProVideoPlayer : type;
     }
 
-    // The question carries which field it came from and which button was
-    // pressed, so all four of these names answer through one handler. The
-    // Top ones are no longer used from here; they stay because they are
-    // public and something outside may still send them.
+    // The question carries which field it came from, so both buttons answer
+    // through one handler whichever field asked.
     public void AddUrlToQueueEvent() => AnswerPendingUrl(false);
-
-    public void AddUrlTopToQueueEvent() => AnswerPendingUrl(false);
 
     public void AddUrlToQueueEventInternal(VideoPlayerType playerType, VRCUrl url)
     {
@@ -470,8 +517,6 @@ namespace Yamadev.YamaStream.UI
     }
 
     public void PlayUrlEvent() => AnswerPendingUrl(true);
-
-    public void PlayUrlTopEvent() => AnswerPendingUrl(true);
 
     // Answers with what the question was asked about, not with whatever the
     // field holds by the time it is answered. Let go of first, so the next
@@ -884,14 +929,37 @@ namespace Yamadev.YamaStream.UI
 
     private void UpdateProgressView()
     {
+      if (_progressHeld) return;
+
       if (Utilities.IsValid(_currentTimeText))
       {
-        _currentTimeText.text = _controller.FormatedVideoTime;
+        if (_controller.IsLive) _currentTimeText.text = string.Empty;
+        else
+        {
+          int second = Mathf.FloorToInt(_controller.VideoTime);
+          if (!_timesInWholeSeconds || second != _shownVideoSecond || _currentTimeText.text != _shownVideoTimeText)
+          {
+            _shownVideoSecond = second;
+            _shownVideoTimeText = _controller.FormatedVideoTime;
+            _currentTimeText.text = _shownVideoTimeText;
+          }
+        }
       }
 
       if (Utilities.IsValid(_totalDurationText))
       {
-        _totalDurationText.text = _controller.Handler.Type == VideoPlayerType.ImageViewer ? "Image" : _controller.IsLive ? "Live" : _controller.FormatedDuration;
+        if (_controller.Handler.Type == VideoPlayerType.ImageViewer) _totalDurationText.text = "Image";
+        else if (_controller.IsLive) _totalDurationText.text = "Live";
+        else
+        {
+          int second = Mathf.FloorToInt(_controller.Duration);
+          if (!_timesInWholeSeconds || second != _shownDurationSecond || _totalDurationText.text != _shownDurationText)
+          {
+            _shownDurationSecond = second;
+            _shownDurationText = _controller.FormatedDuration;
+            _totalDurationText.text = _shownDurationText;
+          }
+        }
       }
 
       if (Utilities.IsValid(_progressSlider) && !_progressDrag)
@@ -913,9 +981,17 @@ namespace Yamadev.YamaStream.UI
       if (!showTooltip) return;
 
       var seekSeconds = _controller.Duration * _progressSliderHelper.Percent;
-      var tooltipText = float.IsInfinity(seekSeconds) || float.IsNaN(seekSeconds) ? "Live" : TimeSpan.FromSeconds(seekSeconds).ToString(_controller.TimeFormat);
+      if (float.IsInfinity(seekSeconds) || float.IsNaN(seekSeconds))
+      {
+        _progressTooltipText.text = "Live";
+        return;
+      }
 
-      _progressTooltipText.text = tooltipText;
+      int second = Mathf.FloorToInt(seekSeconds);
+      if (_timesInWholeSeconds && second == _shownSeekSecond && _progressTooltipText.text == _shownSeekText) return;
+      _shownSeekSecond = second;
+      _shownSeekText = TimeSpan.FromSeconds(seekSeconds).ToString(_controller.TimeFormat);
+      _progressTooltipText.text = _shownSeekText;
     }
 
     private void UpdatePlaybackView()
@@ -1094,13 +1170,19 @@ namespace Yamadev.YamaStream.UI
     private void UpdateIdleScreenView()
     {
       if (Utilities.IsValid(_idleScreenImage) && Utilities.IsValid(_idleScreenSprite)) _idleScreenImage.sprite = _idleScreenSprite;
+      if (Utilities.IsValid(_idleScreenLogo))
+      {
+        _idleScreenLogo.SetActive(Utilities.IsValid(_idleScreenSprite) && _idleScreenSprite == _defaultIdleScreenSprite);
+      }
     }
 
+    // The player a URL entered next plays on, which is not always the one in
+    // use: a picture from the tablet leaves the settings on AVPro.
     public void UpdatePlayerSelector()
     {
-      if (Utilities.IsValid(_unityPlayerToggle)) _unityPlayerToggle.SetIsOnWithoutNotify(_controller.Handler.Type == VideoPlayerType.UnityVideoPlayer);
-      if (Utilities.IsValid(_avProPlayerToggle)) _avProPlayerToggle.SetIsOnWithoutNotify(_controller.Handler.Type == VideoPlayerType.AVProVideoPlayer);
-      if (Utilities.IsValid(_imageViewerToggle)) _imageViewerToggle.SetIsOnWithoutNotify(_controller.Handler.Type == VideoPlayerType.ImageViewer);
+      var type = OfferedPlayerType();
+      if (Utilities.IsValid(_avProPlayerToggle)) _avProPlayerToggle.SetIsOnWithoutNotify(type == VideoPlayerType.AVProVideoPlayer);
+      if (Utilities.IsValid(_imageViewerToggle)) _imageViewerToggle.SetIsOnWithoutNotify(type == VideoPlayerType.ImageViewer);
     }
 
     #region Event Handlers

@@ -100769,6 +100769,7 @@ MonoBehaviour:
   _enterUrlButtonLayout: {fileID: 392367033837705428}
   _enterUrlButtonChrome: 140
   _clearButtonLabel: {fileID: 7077961925948427413}
+  _globalSuffixSize: 28
   _headlineSize: 36
 --- !u!114 &8814409205651835129
 MonoBehaviour:
@@ -100899,7 +100900,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 1
     m_LineSpacing: 1.15
-  m_Text: "\u81EA\u52D5\u518D\u751F"
+  m_Text: "\u81EA\u52D5\u518D\u751F<size=28>(Global)</size>"
 --- !u!114 &4444018915528252081
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -102239,11 +102240,6 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 1027380016196102540, guid: 4a1752e1fc7dff64b98083dc0bc3c591,
         type: 3}
-    - target: {fileID: 1032036445479282942, guid: 4a1752e1fc7dff64b98083dc0bc3c591,
-        type: 3}
-      propertyPath: m_Material
-      value: 
-      objectReference: {fileID: 2100000, guid: 35630e38b4e5ffb40b44ec5348b4333f, type: 2}
     - target: {fileID: 1118142767327942423, guid: 4a1752e1fc7dff64b98083dc0bc3c591,
         type: 3}
       propertyPath: m_SizeDelta.x
@@ -102316,12 +102312,6 @@ PrefabInstance:
       propertyPath: m_Material
       value: 
       objectReference: {fileID: 2100000, guid: 35630e38b4e5ffb40b44ec5348b4333f, type: 2}
-    - target: {fileID: 1511656783058936256, guid: 4a1752e1fc7dff64b98083dc0bc3c591,
-        type: 3}
-      propertyPath: serializationData.Prefab
-      value: 
-      objectReference: {fileID: 1511656783058936256, guid: 4a1752e1fc7dff64b98083dc0bc3c591,
-        type: 3}
     - target: {fileID: 1636132074183017730, guid: 4a1752e1fc7dff64b98083dc0bc3c591,
         type: 3}
       propertyPath: serializationData.Prefab

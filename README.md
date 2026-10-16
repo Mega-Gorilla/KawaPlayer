@@ -41,6 +41,8 @@ KawaPlayer は YamaPlayer の全機能を継承しつつ、**ワールド作成�
 
 これで KawaPlayer の全機能 (PlaylistLoader / DefaultUrl 含む) が **追加設定なしで** 使えます。
 
+画像付きの手順は、[クイックスタート](https://github.com/Mega-Gorilla/KawaPlayer/blob/develop/docs/guide/quickstart.md) を見てください。インストール・設定・プレイリスト・モジュール・タブレット・ワールドの中での使い方は、[使い方ガイド](https://github.com/Mega-Gorilla/KawaPlayer/blob/develop/docs/guide/README.md) にカテゴリーごとのページがあります。
+
 > アップデートも VCC からワンクリックで実行できます。
 
 ---
@@ -117,7 +119,7 @@ YamaPlayer の動画プレイヤーとしての全機能 — YouTube/Twitch/HLS 
 
 ## .unitypackage で導入 (VCC を使わない場合)
 
-1. VRChat Worlds SDK (>=3.8.1) 導入済みの Unity プロジェクトを用意
+1. VRChat Worlds SDK (>=3.10.2) 導入済みの Unity プロジェクトを用意
 2. [Releases ページ](https://github.com/Mega-Gorilla/KawaPlayer/releases) から `com.vhub.kawaplayer-x.x.x.unitypackage` をダウンロード
 3. Unity メニュー **Assets > Import Package > Custom Package** でインポート
 4. **GameObject > KawaPlayer > Main** または `KawaPlayer.prefab` をシーンにドラッグ
@@ -126,7 +128,7 @@ YamaPlayer の動画プレイヤーとしての全機能 — YouTube/Twitch/HLS 
 
 ## 利用規約
 
-本家 YamaPlayer の利用規約に準じます。
+本家 YamaPlayer の利用規約に準じます。ロゴやポスターなどの素材は、この利用規約とは別の条件です（下の「素材」）。
 
 許可:
 - 改変
@@ -134,6 +136,16 @@ YamaPlayer の動画プレイヤーとしての全機能 — YouTube/Twitch/HLS 
 - 有償・無償問わず販売ワールドアセットへの取り組み
 
 クレジット記載は任意ですが、**販売ワールドアセットに取り組む場合はクレジット記載が必須**です。
+
+## 素材
+
+KawaPlayer のロゴと、クイックスタートガイドのポスターを [`Media~/`](Media~/) に置いています。KawaPlayer を置いたワールドへの掲示（販売するワールドへの同梱を含む）や、KawaPlayer の紹介に使えます。
+
+著作権フリーではありません。使うときは [KawaPlayer 素材ライセンス](Media~/LICENSE.md) に従ってください。パッケージの中のロゴ（`Assets/Images/kawaplayer-logo.png`）も同じ条件です。
+
+- 改変、自作発言、KawaPlayer が公認していると誤解させる使い方はできません
+- 素材だけを配ったり売ったり、グッズにしたりはできません
+- クレジットは任意です（販売するワールドに同梱するときも）
 
 ## クレジット
 

@@ -15,7 +15,6 @@ namespace Yamadev.YamaStream
     public virtual void AfterVideoPaused() { }
     public virtual void AfterVideoEnded() { }
     public virtual void AfterVideoStopped() { }
-    public virtual void AfterVideoReloaded() { }
 
     #endregion
 

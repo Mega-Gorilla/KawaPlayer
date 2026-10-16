@@ -32,7 +32,6 @@
   "settings.disableUIDistance.label": "UI operation distance",
   "settings.disableUIDistance.desc": "When the beam exceeds a certain distance, it will not be emitted.",
   "settings.videoPlayerType.label": "Player",
-  "settings.videoPlayerType.tooltip": "Select the video player engine to use by default.",
   "settings.defaultPlaylistOpen.label": "Open playlist",
   "settings.defaultPlaylistOpen.desc": "Show playlist when started.",
   "settings.idleImage.label": "Idle Image",
@@ -155,6 +154,7 @@
   "playlist.import.duplicate": "\"{0}\" was imported from the same source. Update it, or add a new playlist?",
   "playlist.import.addNew": "Add new",
   "playlist.sourceUrl": "Source URL",
+  "playlist.vhubUnityAsAVPro": "In a playlist imported from VHub, tracks set to Unity play on AVPro in the world. Put a track you want played on Unity in a playlist that was not imported from VHub.",
   "playlist.panel.ytdlp": "yt-dlp is used to read YouTube playlists. It is downloaded into your temporary folder, not into the project.",
   "playlist.panel.ytdlpInstalled": "Status: installed",
   "playlist.panel.ytdlpMissing": "Status: not installed",
@@ -300,7 +300,7 @@
   "module.manager.autoplayConflict": "\"{0}\" and \"{1}\" are both enabled. Both start a video when someone joins, so which one plays depends on timing, and \"{0}\" may not play. Disable one of them.",
   "settings.ui.label": "UI Settings",
   "settings.ui.idleScreenSprite": "Idle Screen Sprite",
-  "settings.ui.idleScreenSprite.tooltip": "Set the image displayed when no video is playing.",
+  "settings.ui.idleScreenSprite.tooltip": "Set the image displayed when no video is playing. The default image shows the KawaPlayer logo and name over it; an image you choose is shown as it is.",
   "label.yamaPlayer": "KawaPlayer",
   "msg.playModeNotAvailable": "KawaPlayer is not available in play mode.",
   "msg.yamaPlayerRequired": "KawaPlayer reference is required.",
@@ -312,5 +312,7 @@
   "msg.inspectorLocked.title": "Inspector Locked",
   "msg.inspectorLocked": "The inspector is locked. Please unlock it first.",
   "sceneOverlay.front": "Front",
-  "sceneOverlay.back": "Back"
+  "sceneOverlay.back": "Back",
+  "guide.open": "User Guide",
+  "guide.open.tooltip": "Opens the KawaPlayer user guide on GitHub in your browser (in Japanese)."
 }

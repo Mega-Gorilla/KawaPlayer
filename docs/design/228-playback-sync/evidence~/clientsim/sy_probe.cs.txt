@@ -1,0 +1,85 @@
+// Play mode probe for the sync tests (#228). ACTION: dump | url | reload | errorretry | setvar | pause | play | owner-remote | owner-local
+// ARG: the URL for url, "name=value" (int/float/bool/long) for setvar.
+GameObject kp = null;
+foreach (var r in UnityEngine.SceneManagement.SceneManager.GetActiveScene().GetRootGameObjects()) if (r.name == "KawaPlayer") kp = r;
+if (kp == null) return "no KawaPlayer";
+VRC.Udon.UdonBehaviour ui = null;
+foreach (var u in kp.transform.Find("ScreenUI").GetComponents<VRC.Udon.UdonBehaviour>())
+  if (u.programSource != null && u.programSource.name == "UIController") ui = u;
+var ctlRef = ui.GetProgramVariable("_controller") as Component;
+var ctl = ctlRef as VRC.Udon.UdonBehaviour ?? UdonSharpEditor.UdonSharpEditorUtility.GetBackingUdonBehaviour((UdonSharp.UdonSharpBehaviour)ctlRef);
+string action = "ACTION", arg = @"ARG";
+var sb = new System.Text.StringBuilder();
+VRC.Udon.UdonBehaviour Backing(object o)
+{
+  if (o == null) return null;
+  if (o is VRC.Udon.UdonBehaviour ub) return ub;
+  if (o is UdonSharp.UdonSharpBehaviour usb) return UdonSharpEditor.UdonSharpEditorUtility.GetBackingUdonBehaviour(usb);
+  return null;
+}
+string Dump()
+{
+  var h = Backing(ctl.GetProgramVariable("_handler"));
+  bool fb = (bool)ctl.GetProgramVariable("_useFallback");
+  if (fb && h != null) { var f = Backing(h.GetProgramVariable("_fallbackHandler")); if (f != null) h = f; }
+  var d = new System.Text.StringBuilder();
+  d.Append($"t={Time.realtimeSinceStartup:F2} owner={VRC.SDKBase.Networking.IsOwner(ctl.gameObject)} synced={ctl.GetProgramVariable("_syncedState")} ver={ctl.GetProgramVariable("_trackVersion")} ");
+  d.Append($"st={ctl.GetProgramVariable("_syncedVideoTime")} ticks={ctl.GetProgramVariable("_networkDataTimeTicks")} reloading={ctl.GetProgramVariable("_reloading")} retry={ctl.GetProgramVariable("_errorRetryCount")} local={ctl.GetProgramVariable("_isLocal")} ");
+  var su = ctl.GetProgramVariable("_url") as VRC.SDKBase.VRCUrl;
+  d.Append($"syncedUrl='{(su == null ? "null" : su.Get())}' ");
+  if (h != null)
+  {
+    var bvp = h.GetProgramVariable("_baseVideoPlayer") as VRC.SDK3.Video.Components.Base.BaseVRCVideoPlayer;
+    d.Append($"fb={fb} handler={h.name} loading={h.GetProgramVariable("_loading")} stopped={h.GetProgramVariable("_stopped")} error={h.GetProgramVariable("_isError")} ");
+    if (bvp != null) d.Append($"playing={bvp.IsPlaying} time={bvp.GetTime():F2} dur={bvp.GetDuration():F1}");
+  }
+  return d.ToString();
+}
+switch (action)
+{
+  case "dump": break;
+  case "url":
+  {
+    var field = ui.GetProgramVariable("_urlInputField") as VRC.SDK3.Components.VRCUrlInputField;
+    field.SetUrl(new VRC.SDKBase.VRCUrl(arg));
+    ui.SendCustomEvent("PlayUrl");
+    sb.AppendLine("submitted " + arg);
+    break;
+  }
+  case "reload": ui.SendCustomEvent("Reload"); sb.AppendLine("ui Reload sent"); break;
+  case "uievent": ui.SendCustomEvent(arg); sb.AppendLine("ui " + arg + " sent"); break;
+  case "button":
+  {
+    var b = ui.GetProgramVariable("_reloadButton") as UnityEngine.UI.Button;
+    sb.AppendLine($"reloadButton active={b.gameObject.activeInHierarchy} interactable={b.interactable}");
+    break;
+  }
+  case "pause": ui.SendCustomEvent("Pause"); sb.AppendLine("ui Pause sent"); break;
+  case "play": ui.SendCustomEvent("Play"); sb.AppendLine("ui Play sent"); break;
+  case "rawpause":
+  {
+    var h = Backing(ctl.GetProgramVariable("_handler"));
+    if ((bool)ctl.GetProgramVariable("_useFallback")) h = Backing(h.GetProgramVariable("_fallbackHandler"));
+    var bvp = h.GetProgramVariable("_baseVideoPlayer") as VRC.SDK3.Video.Components.Base.BaseVRCVideoPlayer;
+    bvp.Pause();
+    sb.AppendLine("raw player paused (shared state untouched)");
+    break;
+  }
+  case "errorretry":
+    ctl.SetProgramVariable("_retryTargetTrack", ctl.GetProgramVariable("_track"));
+    ctl.SendCustomEvent("ErrorRetry");
+    sb.AppendLine("ErrorRetry sent");
+    break;
+  case "setvar":
+  {
+    var kv = arg.Split('=');
+    var cur = ctl.GetProgramVariable(kv[0]);
+    object v = cur is int ? (object)int.Parse(kv[1]) : cur is float ? (object)float.Parse(kv[1]) : cur is long ? (object)long.Parse(kv[1]) : cur is bool ? (object)bool.Parse(kv[1]) : cur is byte ? (object)byte.Parse(kv[1]) : kv[1];
+    ctl.SetProgramVariable(kv[0], v);
+    sb.AppendLine($"set {kv[0]}={v} (was {cur})");
+    break;
+  }
+  default: return "unknown action " + action;
+}
+sb.Append(Dump());
+return sb.ToString();

@@ -39,13 +39,14 @@ namespace Yamadev.YamaStream.Modules.PermissionManagement
 
     public void BeforeUserChangePlayerHandler() => CheckPermission();
     public void BeforeUserPlayTrack() => CheckPermission();
-    public void BeforeUserPlayVideo() => CheckPermission();
     public void BeforeUserPauseVideo() => CheckPermission();
     public void BeforeUserStopVideo() => CheckPermission();
     public void BeforeUserSetTime() => CheckPermission();
     public void BeforeUserBackward() => CheckPermission();
     public void BeforeUserForward() => CheckPermission();
-    public void BeforeUserReloadVideo() => CheckPermission();
+    // BeforeUserReloadVideo is not handled: a reload reloads only the
+    // presser's own screen, and a viewer whose video had stopped had no
+    // other way back until the next track (issue #233).
     public void BeforeUserChangeLoop() => CheckPermission();
     public void BeforeUserChangeShufflePlay() => CheckPermission();
     public void BeforeUserChangeSpeed() => CheckPermission();
@@ -56,6 +57,8 @@ namespace Yamadev.YamaStream.Modules.PermissionManagement
     public void BeforeUserRemoveTrackFromQueue() => CheckPermission();
     public void BeforeUserMoveTrackUp() => CheckPermission();
     public void BeforeUserMoveTrackDown() => CheckPermission();
+    // The GlobalReload module's button reloads everyone's screen (issues #236, #248).
+    public void BeforeUserGlobalReload() => CheckPermission();
 
     private void CheckPermission()
     {

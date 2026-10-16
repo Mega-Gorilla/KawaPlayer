@@ -7,13 +7,31 @@ namespace Yamadev.YamaStream
 {
   public partial class Controller
   {
-    [SerializeField, Range(1f, 10f)] private float _syncFrequency = 5.0f;
-    [SerializeField, Range(0f, 1f)] private float _syncMargin = 0.3f;
+    // Every client checks its video against the shared time once a second,
+    // and seeks only when it is 0.9 s of real time off (issue #235). The 0.9 s
+    // is VizVid's, though VizVid checks every 0.5 s and measures the 0.9 s in
+    // video time, not real time. The 0.3 s used before was less than what a
+    // seek itself costs, so a client that seeked was off again by the next
+    // check. They were fields, but no inspector showed them, and a value saved
+    // in a world would have kept the old timing.
+    private const float SYNC_INTERVAL = 1f;
+    private const float SYNC_MARGIN = 0.9f;
     [UdonSynced] private float _syncedVideoTime = 0;
-    [UdonSynced] private long _networkDataTimeTicks = 0;
+    // The server time (Networking.GetServerTimeInMilliseconds) when
+    // _syncedVideoTime was taken, or 0 while there is none. GetNetworkDateTime,
+    // used before, stays on the local clock on a client whose date sync fails,
+    // and that client played off by its clock's error for good (issue #237).
+    // The value wraps, so it is only compared through CalculateServerDeltaTime.
+    // Its type changed with it, so VRChat keeps instances of older builds apart.
+    [UdonSynced] private int _syncedServerTimeMs = 0;
     [UdonSynced] private int _trackVersion = 0;
     private int _appliedTrackVersion = 0;
     private float _lastSync = 0;
+    // Where the video was at the last check, or where it was sent by a seek.
+    private float _lastCheckedVideoTime = -1f;
+    // The shared time last placed by: a new one is the owner's seek, pause or
+    // play, and is followed exactly, while other synced changes are not.
+    private int _appliedSyncedServerTimeMs = 0;
     private float _localDelay = 0;
 
     private void ApplySyncedState()
@@ -58,31 +76,57 @@ namespace Yamadev.YamaStream
     private void UpdateSyncedVideoTime(float time)
     {
       _syncedVideoTime = Mathf.Clamp(time - _localDelay, 0f, Duration);
-      _networkDataTimeTicks = Networking.GetNetworkDateTime().Ticks;
+      int now = Networking.GetServerTimeInMilliseconds();
+      _syncedServerTimeMs = now == 0 ? 1 : now;
     }
 
     private void ResetSyncedVideoTime()
     {
       _syncedVideoTime = 0;
-      _networkDataTimeTicks = 0;
+      _syncedServerTimeMs = 0;
+    }
+
+    private bool HasSyncedVideoTime => _syncedServerTimeMs != 0;
+
+    // CalculateServerDeltaTime takes seconds, as GetServerTimeInSeconds gives.
+    private float SecondsSinceSyncedVideoTime()
+    {
+      return (float)Networking.CalculateServerDeltaTime(Networking.GetServerTimeInSeconds(), _syncedServerTimeMs * 0.001);
     }
 
     private void EnsureVideoTime(bool force = false)
     {
-      if (IsLive || Stopped || _networkDataTimeTicks == 0)
+      if (IsLive || Stopped || !HasSyncedVideoTime)
       {
         _lastSync = Time.time;
         return;
       }
 
-      float offset = Paused ? 0 : (float)(Networking.GetNetworkDateTime().Ticks - _networkDataTimeTicks) / TimeSpan.TicksPerSecond * Speed;
+      float offset = Paused ? 0 : SecondsSinceSyncedVideoTime() * Speed;
       float targetTime = Mathf.Clamp(_syncedVideoTime + offset + _localDelay, 0, Duration);
-      if (force || Mathf.Abs(VideoTime - targetTime) >= _syncMargin)
+      if (force || Mathf.Abs(VideoTime - targetTime) / Mathf.Max(Speed, 0.1f) >= SYNC_MARGIN)
       {
-        SetTime(targetTime);
+        SeekLocal(targetTime);
+        _lastCheckedVideoTime = targetTime;
       }
 
       _lastSync = Time.time;
+    }
+
+    // The check made once a second while playing. A video that has not moved
+    // since the last check is buffering, or stuck at the place a seek sent it
+    // to: seeking again would throw away what has loaded and leave it stuck.
+    private void CheckVideoTime()
+    {
+      float videoTime = VideoTime;
+      bool moving = videoTime != _lastCheckedVideoTime;
+      _lastCheckedVideoTime = videoTime;
+      if (!moving)
+      {
+        _lastSync = Time.time;
+        return;
+      }
+      EnsureVideoTime();
     }
 
     public override void OnPreSerialization()
@@ -92,19 +136,28 @@ namespace Yamadev.YamaStream
       _trackExtension = TrackUtils.GetExtension(Track);
     }
 
-    public override void OnDeserialization()
+    // The player the owner shares, or the one in use when the shared index
+    // is not one of ours.
+    private int SyncedHandlerIndex()
     {
       int handlerIndex = _handlerIndex;
-      bool syncedIndexValid = handlerIndex >= 0 && handlerIndex < _videoPlayerHandlers.Length && Utilities.IsValid(_videoPlayerHandlers[handlerIndex]);
-      if (!syncedIndexValid)
-      {
-        handlerIndex = Mathf.Max(Array.IndexOf(_videoPlayerHandlers, Handler), 0);
-      }
+      if (IsValidHandlerIndex(handlerIndex)) return handlerIndex;
+      return Mathf.Max(Array.IndexOf(_videoPlayerHandlers, Handler), 0);
+    }
 
+    // The track the owner shares, as played on the given player.
+    private object[] BuildSyncedTrack(int handlerIndex)
+    {
       bool hasSyncedExtension = _trackExtension != null && _trackExtension.Length > 0;
-      object[] track = hasSyncedExtension
+      return hasSyncedExtension
         ? TrackUtils.NewTrackWithExtension(_videoPlayerHandlers[handlerIndex].Type, _title, _url, _trackExtension)
         : TrackUtils.NewTrack(_videoPlayerHandlers[handlerIndex].Type, _title, _url);
+    }
+
+    public override void OnDeserialization()
+    {
+      int handlerIndex = SyncedHandlerIndex();
+      object[] track = BuildSyncedTrack(handlerIndex);
 
       int len = _listeners.Length;
       for (int i = 0; i < len; i++)
@@ -116,14 +169,22 @@ namespace Yamadev.YamaStream
       bool trackChanged = _trackVersion != _appliedTrackVersion;
       _appliedTrackVersion = _trackVersion;
 
+      // Switching the player tells the listeners; the same player now chosen,
+      // or now switched to by a track, has to be told on its own.
+      bool fromTrackChanged = _handlerFromTrack != _appliedHandlerFromTrack;
+      _appliedHandlerFromTrack = _handlerFromTrack;
+      bool handlerChanged = _videoPlayerHandlers[handlerIndex] != Handler;
       SwitchToHandlerIndex(handlerIndex);
+      if (fromTrackChanged && !handlerChanged) NotifyPlayerHandlerChanged();
       if (SyncedState != PlayerState.Idle && trackChanged)
       {
         LoadTrackLocal(track, false);
       }
 
       ApplySyncedState();
-      EnsureVideoTime();
+      bool newSharedTime = _syncedServerTimeMs != _appliedSyncedServerTimeMs;
+      _appliedSyncedServerTimeMs = _syncedServerTimeMs;
+      EnsureVideoTime(newSharedTime);
     }
   }
 }

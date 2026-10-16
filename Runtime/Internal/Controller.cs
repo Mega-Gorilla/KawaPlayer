@@ -32,6 +32,13 @@ namespace Yamadev.YamaStream
     [UdonSynced] private string _title = string.Empty;
     [UdonSynced] private VRCUrl _url = VRCUrl.Empty;
     [UdonSynced] private byte[] _trackExtension = new byte[0];
+    // Whether the player in use was switched to by a track -- a picture from
+    // the tablet, a URL played on the player picked for it in the URL dialog,
+    // or a track from a playlist or the queue -- rather than chosen in the
+    // settings (issue #182). A URL entered next does not keep the image
+    // viewer a picture left behind.
+    [UdonSynced] private bool _handlerFromTrack;
+    private bool _appliedHandlerFromTrack;
     private object[] _track;
     private PlayerHandler _handler;
     private bool _useFallback;
@@ -45,6 +52,17 @@ namespace Yamadev.YamaStream
     private string _uiLanguage = string.Empty;
 
     private const float SAFETY_RETRY_INTERVAL = 5.1f;
+    // A reload while loading waits this long, so a load that is only slow is
+    // not restarted: normal loads took up to 8.1 s in VRChat, resolving the
+    // URL alone 3 to 5 s (issue #232). An error can be reloaded at once. The
+    // global reload button waits as long after a send (GlobalReloadButton).
+    public const float RELOAD_WAIT_WHILE_LOADING = 15f;
+    // _RunPendingReload is scheduled: one at a time.
+    private bool _reloadPending;
+    // When a reload was last asked for; a load begun since covers it.
+    private float _reloadRequestedAt;
+    // A change of speed or resolution came while loading: reload once ready.
+    private bool _reloadAfterLoad;
 
     private void Start()
     {
@@ -65,9 +83,9 @@ namespace Yamadev.YamaStream
 
     private void Update()
     {
-      if (IsPlaying && Time.time - _lastSync > _syncFrequency)
+      if (IsPlaying && Time.time - _lastSync > SYNC_INTERVAL)
       {
-        EnsureVideoTime();
+        CheckVideoTime();
       }
     }
 
@@ -135,18 +153,24 @@ namespace Yamadev.YamaStream
         _handler = value;
         _handlerIndex = Array.IndexOf(_videoPlayerHandlers, value);
         if (Networking.IsOwner(gameObject) && !_isLocal) RequestSerialization();
-        int len = _listeners.Length;
-        for (int i = 0; i < len; i++)
-        {
-          var listener = _listeners[i];
-          if (Utilities.IsValid(listener)) listener.AfterPlayerHandlerChanged(_handler.Type);
-        }
+        NotifyPlayerHandlerChanged();
         PrintLog($"Player handler changed to {_handler.Type.GetString()}.");
       }
     }
 
-    [Obsolete("Use Handler instead")]
-    public PlayerHandler VideoPlayerHandle => Handler;
+    public bool HandlerFromTrack => _handlerFromTrack;
+
+    // Also told when the same player stops or starts counting as switched to
+    // by a track: which player a UI offers for the next URL follows that too.
+    private void NotifyPlayerHandlerChanged()
+    {
+      int len = _listeners.Length;
+      for (int i = 0; i < len; i++)
+      {
+        var listener = _listeners[i];
+        if (Utilities.IsValid(listener)) listener.AfterPlayerHandlerChanged(_handler.Type);
+      }
+    }
 
     public PlayerHandler ActiveHandler
     {
@@ -199,23 +223,62 @@ namespace Yamadev.YamaStream
       set => _allowAutoSwitchHandler = value;
     }
 
+    // Both choose the player rather than switch to it for a track: it stays
+    // for the URLs entered next, even when a track had switched to it
+    // already.
     public void SetPlayerType(VideoPlayerType playerType)
     {
-      if (Utilities.IsValid(Handler) && Handler.Type == playerType) return;
+      if (Utilities.IsValid(Handler) && Handler.Type == playerType)
+      {
+        KeepHandler();
+        return;
+      }
       Stop();
-      SwitchToHandlerIndex(FindHandlerIndexByType(playerType));
+      SwitchToChosenHandler(FindHandlerIndexByType(playerType));
     }
 
     public void SetPlayerHandler(int index)
     {
-      if (index >= 0 && index < _videoPlayerHandlers.Length && _videoPlayerHandlers[index] == Handler) return;
+      if (index >= 0 && index < _videoPlayerHandlers.Length && _videoPlayerHandlers[index] == Handler)
+      {
+        KeepHandler();
+        return;
+      }
       Stop();
+      SwitchToChosenHandler(index);
+    }
+
+    private void KeepHandler()
+    {
+      if (!_handlerFromTrack) return;
+      SetHandlerFromTrack(false);
+      if (Networking.IsOwner(gameObject) && !_isLocal) RequestSerialization();
+      NotifyPlayerHandlerChanged();
+    }
+
+    // Cleared before switching, so the listeners told of the switch see it.
+    private void SwitchToChosenHandler(int index)
+    {
+      if (IsValidHandlerIndex(index)) SetHandlerFromTrack(false);
       SwitchToHandlerIndex(index);
+    }
+
+    // The applied copy follows every change made here, so OnDeserialization
+    // notices only one that came over the network.
+    private void SetHandlerFromTrack(bool value)
+    {
+      _handlerFromTrack = value;
+      _appliedHandlerFromTrack = value;
+    }
+
+    private bool IsValidHandlerIndex(int index)
+    {
+      return index >= 0 && index < _videoPlayerHandlers.Length && Utilities.IsValid(_videoPlayerHandlers[index]);
     }
 
     private bool SwitchToHandlerIndex(int index)
     {
-      if (index < 0 || index >= _videoPlayerHandlers.Length || !Utilities.IsValid(_videoPlayerHandlers[index]))
+      if (!IsValidHandlerIndex(index))
       {
         PrintError($"Cannot switch handler: invalid handler index {index}.");
         return false;
@@ -296,9 +359,111 @@ namespace Yamadev.YamaStream
       ActiveHandler.Stop();
     }
 
+    // Whether reloading would do anything now: the video is shared as playing
+    // or paused, and this player is not in a load that may still finish.
+    public bool CanReload => SyncedState != PlayerState.Idle && !(IsLoading && Time.time - _lastLoadTime < RELOAD_WAIT_WHILE_LOADING);
+
+    // Reloads this player's video, and only this player's: it also brings
+    // back a video that stopped on an error or is stuck loading, which it did
+    // nothing for before (issue #232), and nothing is sent.
     public void Reload()
     {
-      if (!Stopped && !IsLoading) ResolveAndLoadTrack(Track, true);
+      if (!CanReload) return;
+      RequestReload();
+    }
+
+    // The reload a change of speed or of the maximum resolution needs on
+    // AVPro. A load going on is not restarted: the video is reloaded once it
+    // is ready, so the change is not lost.
+    public void ReloadForSettings()
+    {
+      if (Stopped) return;
+      if (IsLoading)
+      {
+        _reloadAfterLoad = true;
+        return;
+      }
+      RequestReload();
+    }
+
+    // A load starting now takes the speed and resolution as they are, so a
+    // reload waiting for the load before it to be ready is no longer needed:
+    // an error's retry would otherwise be loaded again once ready.
+    private void MarkLoadStarted()
+    {
+      _lastLoadTime = Time.time;
+      _reloadAfterLoad = false;
+    }
+
+    // Asks for a reload. It runs once this Controller's last load is 5.1 s
+    // old, as VRChat turns away a second load within 5 s, and requests made
+    // while it waits make one reload, of whatever is shared when it runs.
+    private void RequestReload()
+    {
+      _reloadRequestedAt = Time.time;
+      RunRequestedReload();
+    }
+
+    public void _RunPendingReload()
+    {
+      _reloadPending = false;
+      RunRequestedReload();
+    }
+
+    // A load begun after the last request -- a retry after an error, due at
+    // the same 5.1 s, or a new track -- already does what the reload would,
+    // so the request is dropped. A request made after that load still runs,
+    // 5.1 s after it: the wait is worked out again whenever it ends, as a
+    // load may have begun meanwhile.
+    private void RunRequestedReload()
+    {
+      if (_lastLoadTime >= _reloadRequestedAt || SyncedState == PlayerState.Idle) return;
+      float wait = _lastLoadTime + SAFETY_RETRY_INTERVAL - Time.time;
+      if (wait > 0)
+      {
+        if (!_reloadPending)
+        {
+          _reloadPending = true;
+          SendCustomEventDelayedSeconds(nameof(_RunPendingReload), wait);
+        }
+        return;
+      }
+      ReloadNow();
+    }
+
+    // A non-owner reloads the track it was sent. The owner, and a local
+    // player, reload their own: what the owner shares is made from it only
+    // when sent, so the synced copy can lag behind, and is empty when local.
+    // The player stays as it is (the synced one for a non-owner), so a reload
+    // never changes what is shared.
+    private void ReloadNow()
+    {
+      _errorRetryCount = 0;
+      _retryTargetTrack = null;
+
+      object[] track;
+      int handlerIndex;
+      if (Networking.IsOwner(gameObject) || _isLocal)
+      {
+        track = Track;
+        handlerIndex = Array.IndexOf(_videoPlayerHandlers, Handler);
+      }
+      else
+      {
+        handlerIndex = SyncedHandlerIndex();
+        track = BuildSyncedTrack(handlerIndex);
+        Track = track;
+      }
+      VRCUrl url = TrackUtils.GetUrl(track);
+      if (!Utilities.IsValid(url) || string.IsNullOrEmpty(url.Get())) return;
+
+      // Marked as a reload before anything stops: the fallback player, or the
+      // one switched from, reports a stop, which otherwise reads as the owner
+      // stopping the video, clearing the track and the shared time.
+      _reloading = true;
+      SetUseFallback(false);
+      if (IsValidHandlerIndex(handlerIndex) && _videoPlayerHandlers[handlerIndex] != Handler) SwitchToHandlerIndex(handlerIndex);
+      LoadTrackLocal(track, true);
     }
 
     public bool Loop
@@ -356,7 +521,7 @@ namespace Yamadev.YamaStream
         if (Utilities.IsValid(handler)) handler.Speed = _speed;
       }
       if (!Stopped && ActiveHandler.Type == VideoPlayerType.AVProVideoPlayer)
-        SendCustomEventDelayedFrames(nameof(Reload), 0);
+        SendCustomEventDelayedFrames(nameof(ReloadForSettings), 0);
       UpdateAudioPitch();
     }
 
@@ -416,13 +581,32 @@ namespace Yamadev.YamaStream
         RequestSerialization();
       }
 
+      NotifyTimeChanged(time);
+      PrintLog($"{ActiveHandler.Type.GetString()}: Set video time: {time}.");
+    }
+
+    // Places this player's video by the shared time, without sharing a time:
+    // following the shared time is not a seek by the owner. Going through
+    // SetTime made the owner send everyone the time they already had, each
+    // time its own video drifted or reloaded (issue #235).
+    private void SeekLocal(float time)
+    {
+      if (IsLive || Time.frameCount == _lastSetTimeFrame) return;
+      _lastSetTimeFrame = Time.frameCount;
+
+      ActiveHandler.Time = time;
+      NotifyTimeChanged(time);
+      PrintLog($"{ActiveHandler.Type.GetString()}: Follow the shared time: {time}.");
+    }
+
+    private void NotifyTimeChanged(float time)
+    {
       int len = _listeners.Length;
       for (int i = 0; i < len; i++)
       {
         var listener = _listeners[i];
         if (Utilities.IsValid(listener)) listener.AfterTimeChanged(time);
       }
-      PrintLog($"{ActiveHandler.Type.GetString()}: Set video time: {time}.");
     }
 
     public object[] Track
@@ -473,7 +657,12 @@ namespace Yamadev.YamaStream
       _reloading = isReload;
 
       int index = ResolveHandlerIndexForTrack(track);
-      if (index >= 0) SwitchToHandlerIndex(index);
+      if (index >= 0)
+      {
+        // Only a switch counts: a track on the player chosen leaves it chosen.
+        if (_videoPlayerHandlers[index] != Handler) SetHandlerFromTrack(true);
+        SwitchToHandlerIndex(index);
+      }
 
       LoadTrackLocal(track, isReload);
 
@@ -481,6 +670,10 @@ namespace Yamadev.YamaStream
       {
         _trackVersion++;
         _appliedTrackVersion = _trackVersion;
+        // A new track goes out with no shared time, which its owner starts
+        // when it is ready (AfterVideoReady). Stopping the last track clears
+        // it too, but a track that ended in an error was stopped without.
+        ResetSyncedVideoTime();
         RequestSerialization();
       }
     }
@@ -492,7 +685,7 @@ namespace Yamadev.YamaStream
 
       if (!isReload) Track = track;
       ActiveHandler.LoadTrack(track);
-      _lastLoadTime = Time.time;
+      MarkLoadStarted();
 
       int len = _listeners.Length;
       for (int i = 0; i < len; i++)

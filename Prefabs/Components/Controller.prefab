@@ -254,8 +254,8 @@ MonoBehaviour:
   - {fileID: 0}
   _version: 
   _videoPlayerHandlers:
-  - {fileID: 7411987779523232629}
   - {fileID: 7626724300130756598}
+  - {fileID: 7411987779523232629}
   - {fileID: 4001353197897885127}
   _useFallbackAfterErrors: 1
   _timeFormat: hh\:mm\:ss
@@ -273,8 +273,6 @@ MonoBehaviour:
   _screenTypes: 
   _screens: []
   _textureProperties: []
-  _syncFrequency: 5
-  _syncMargin: 0.3
 --- !u!114 &7561588978061558976
 MonoBehaviour:
   m_ObjectHideFlags: 0

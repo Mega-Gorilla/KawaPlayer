@@ -31,7 +31,6 @@
   "settings.disableUIDistance.label": "Distancia de operación de UI",
   "settings.disableUIDistance.desc": "Cuando el rayo excede una cierta distancia, no se emitirá.",
   "settings.videoPlayerType.label": "Reproductor",
-  "settings.videoPlayerType.tooltip": "Selecciona el motor de reproductor de video a usar por defecto.",
   "settings.defaultPlaylistOpen.label": "Abrir lista de reproducción",
   "settings.defaultPlaylistOpen.desc": "Muestra la lista de reproducción al iniciar.",
   "settings.idleImage.label": "Imagen de espera",
@@ -152,6 +151,7 @@
   "playlist.import.duplicate": "«{0}» se importó de la misma fuente. ¿Actualizarla o añadir una lista nueva?",
   "playlist.import.addNew": "Añadir nueva",
   "playlist.sourceUrl": "URL de origen",
+  "playlist.vhubUnityAsAVPro": "En una lista importada de VHub, las pistas configuradas con Unity se reproducen con AVPro en el mundo. Coloca las pistas que quieras reproducir con Unity en una lista que no se haya importado de VHub.",
   "playlist.panel.ytdlp": "yt-dlp se usa para leer listas de YouTube. Se descarga en tu carpeta temporal, no en el proyecto.",
   "playlist.panel.ytdlpInstalled": "Estado: instalado",
   "playlist.panel.ytdlpMissing": "Estado: no instalado",
@@ -312,7 +312,7 @@
   "settings.playback.maxRetry": "Máximo de reintentos",
   "settings.ui.label": "Configuración de UI",
   "settings.ui.idleScreenSprite": "Sprite de pantalla de espera",
-  "settings.ui.idleScreenSprite.tooltip": "Establece la imagen que se muestra cuando no se reproduce ningún video.",
+  "settings.ui.idleScreenSprite.tooltip": "Establece la imagen que se muestra cuando no se reproduce ningún video. Sobre la imagen predeterminada se muestran el logotipo y el nombre de KawaPlayer; la imagen que elijas se muestra tal cual.",
   "label.yamaPlayer": "KawaPlayer",
   "msg.playModeNotAvailable": "KawaPlayer no está disponible en modo de juego.",
   "msg.yamaPlayerRequired": "Se requiere la referencia de KawaPlayer.",
@@ -324,5 +324,7 @@
   "msg.inspectorLocked.title": "Inspector Bloqueado",
   "msg.inspectorLocked": "El inspector está bloqueado. Por favor, desbloquéelo primero.",
   "sceneOverlay.front": "Frente",
-  "sceneOverlay.back": "Reverso"
+  "sceneOverlay.back": "Reverso",
+  "guide.open": "Ver la guía",
+  "guide.open.tooltip": "Abre en el navegador la guía de uso de KawaPlayer en GitHub (en japonés)."
 }

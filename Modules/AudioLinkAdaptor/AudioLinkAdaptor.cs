@@ -32,8 +32,10 @@ namespace Yamadev.YamaStream.Modules.AudioLinkAdaptor
         return;
       }
 
-      _audioLink.autoSetMediaState = false;
-      AudioLinkEnabled = _defaultAudioLinkEnabled;
+      // Off by default means leaving AudioLink as the world set it: other
+      // sound in the world (a DJ booth) may be what drives it (issue #212).
+      // It is connected here only when the creator asked for it.
+      if (_defaultAudioLinkEnabled) AudioLinkEnabled = true;
     }
 
     public void AddListener(YamaPlayerListener listener)
@@ -58,18 +60,20 @@ namespace Yamadev.YamaStream.Modules.AudioLinkAdaptor
 
         if (value)
         {
+          // KawaPlayer reports its own media state while it is connected.
+          _audioLink.autoSetMediaState = false;
           _audioLink.audioSource = _controller.AudioSources[0];
           _audioLink.EnableAudioLink();
           UpdateMediaState();
-          _controller.SendCustomVideoEvent("AfterAudioLinkStateChanged");
         }
-        else
+        else if (AudioLinkEnabled)
         {
+          // Only KawaPlayer's own connection is undone: AudioLink fed by
+          // another source is not KawaPlayer's to stop (issue #212).
           _audioLink.audioSource = null;
           _audioLink.DisableAudioLink();
-          UpdateMediaState();
-          _controller.SendCustomVideoEvent("AfterAudioLinkStateChanged");
         }
+        _controller.SendCustomVideoEvent("AfterAudioLinkStateChanged");
       }
     }
 

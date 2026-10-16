@@ -23,11 +23,12 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader.Editor
     // server that stops responding would lock the window out of retrying.
     private const int RequestTimeoutSeconds = 20;
 
-    // A mode is cast straight to VideoPlayerType, but only the three types
-    // that a player actually has a handler for can play: Controller
-    // .FindHandlerIndexByType returns -1 for anything else, so a track with
-    // an unknown mode would be baked into the world and then silently refuse
-    // to load. Skipping it here keeps the failure in the Editor.
+    // A mode is cast straight to VideoPlayerType, and only the three types
+    // a player has a handler for are defined. A track with any other mode is
+    // skipped here: no handler would match it in the world, so the automatic
+    // switch (on by default) would play it on the first player that takes
+    // its URL, which nobody chose. Skipping it keeps the problem in the
+    // Editor.
     private const int MaxPlayableMode = (int)VideoPlayerType.ImageViewer;
 
     public int Order => 0;
@@ -162,8 +163,13 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader.Editor
         string slotUrl = slot == null ? string.Empty : slot.Get();
         if (string.IsNullOrEmpty(slotUrl)) { skipped++; continue; }
 
-        int mode = track["mode"]?.Type == JTokenType.Integer ? track["mode"].Value<int>() : 0;
+        // VHub names Unity Video Player (mode 0, or no mode at all) for its
+        // tracks, YouTube included, but a URL in the world plays on AVPro:
+        // Unity cannot play HLS and gets YouTube at 360p (issues #139, #166).
+        // An image (2) stays an image. The loader does the same at run time.
+        int mode = track["mode"]?.Type == JTokenType.Integer ? track["mode"].Value<int>() : (int)VideoPlayerType.AVProVideoPlayer;
         if (mode < 0 || mode > MaxPlayableMode) { skipped++; continue; }
+        if (mode == (int)VideoPlayerType.UnityVideoPlayer) mode = (int)VideoPlayerType.AVProVideoPlayer;
         string title = track["title"]?.Type == JTokenType.String ? track["title"].Value<string>() : string.Empty;
 
         tracks.Add(new PlaylistTrack

@@ -489,6 +489,12 @@ namespace Yamadev.YamaStream.Editor
           {
             EditorGUILayout.TextField(EditorLocalization.Get("playlist.sourceUrl"), _selectedPlaylist.vhubPlaylistUrl);
           }
+          // The build plays this playlist's Unity tracks on AVPro (issue #166),
+          // so a track still showing Unity here does not mean what it says.
+          if (_selectedPlaylist.tracks != null && _selectedPlaylist.tracks.Any(track => track.playerType == VideoPlayerType.UnityVideoPlayer))
+          {
+            EditorGUILayout.HelpBox(EditorLocalization.Get("playlist.vhubUnityAsAVPro"), MessageType.Info);
+          }
         }
       }
     }

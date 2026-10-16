@@ -31,7 +31,6 @@
   "settings.disableUIDistance.label": "UI操作距離",
   "settings.disableUIDistance.desc": "當光束超過一定距離時，將不會發射。",
   "settings.videoPlayerType.label": "播放器",
-  "settings.videoPlayerType.tooltip": "選擇預設使用的影片播放器引擎。",
   "settings.defaultPlaylistOpen.label": "開啟播放清單",
   "settings.defaultPlaylistOpen.desc": "啟動時顯示播放清單。",
   "settings.idleImage.label": "待機畫面",
@@ -152,6 +151,7 @@
   "playlist.import.duplicate": "《{0}》來自相同的來源。要更新它，還是新增為新的播放清單？",
   "playlist.import.addNew": "新增",
   "playlist.sourceUrl": "來源 URL",
+  "playlist.vhubUnityAsAVPro": "從 VHub 匯入的播放清單中，指定為 Unity 的曲目在世界中也會以 AVPro 播放。想以 Unity 播放的曲目，請放入不是從 VHub 匯入的播放清單。",
   "playlist.panel.ytdlp": "讀取 YouTube 播放清單時會使用 yt-dlp。它儲存在暫存資料夾中，而非專案內。",
   "playlist.panel.ytdlpInstalled": "狀態：已安裝",
   "playlist.panel.ytdlpMissing": "狀態：未安裝",
@@ -312,7 +312,7 @@
   "settings.playback.maxRetry": "最大重試次數",
   "settings.ui.label": "UI設定",
   "settings.ui.idleScreenSprite": "待機畫面精靈圖",
-  "settings.ui.idleScreenSprite.tooltip": "設定影片未播放時顯示的圖片。",
+  "settings.ui.idleScreenSprite.tooltip": "設定影片未播放時顯示的圖片。預設圖片上會疊加顯示 KawaPlayer 的標誌與名稱；你選擇的圖片會照原樣顯示。",
   "label.yamaPlayer": "KawaPlayer",
   "msg.playModeNotAvailable": "KawaPlayer在播放模式下無法使用。",
   "msg.yamaPlayerRequired": "需要KawaPlayer參照。",
@@ -324,5 +324,7 @@
   "msg.inspectorLocked.title": "檢查器已鎖定",
   "msg.inspectorLocked": "檢查器已鎖定。請先解鎖。",
   "sceneOverlay.front": "正面",
-  "sceneOverlay.back": "背面"
+  "sceneOverlay.back": "背面",
+  "guide.open": "查看使用方法",
+  "guide.open.tooltip": "在瀏覽器中開啟 GitHub 上的 KawaPlayer 使用指南（日文）。"
 }

@@ -1,5 +1,7 @@
 # YamaPlayer: YouTube URL入力からプレイヤー再生までのパイプライン解析
 
+> この文書は、2026-03 に upstream の YamaPlayer を解析した記録です。そのあとの KawaPlayer の変更は反映していません。KawaPlayer の今の再生の同期（時計・時刻合わせ・読み込み直し）は [playback-sync.md](playback-sync.md) にあります。
+
 ## 概要
 
 YamaPlayer は VRChat SDK3 (UdonSharp) 上で動作する高機能動画プレイヤーである。partial class による分割設計、Handler パターンによるプレイヤー抽象化、モジュールシステムによる拡張性を特徴とする。

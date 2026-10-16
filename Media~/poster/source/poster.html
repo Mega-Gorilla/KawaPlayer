@@ -1,0 +1,300 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>KawaPlayer クイックスタート</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700;900&family=Noto+Sans+JP:wght@400;500;700;900&display=block">
+<style>
+  @font-face { font-family: "Zen Maru Local"; font-weight: 400; src: url("../../../Assets/Fonts/ZenMaruGothic-Regular.ttf"); }
+  :root {
+    /* KawaPlayer's palette (Assets/Appearance/KawaPlayerPalette.asset) */
+    --primary: #4fc3f7;
+    --surface: rgba(42, 44, 50, 0.58);
+    --on-surface: #e4e5ea;
+    --on-surface-variant: #a3a6b0;
+    --line: rgba(255, 255, 255, 0.09);
+    /* the logo's gradient */
+    --logo-green: #6bebaa;
+    --logo-teal: #3fc4c6;
+    --logo-blue: #22a6cb;
+    --ink: #06121b;
+    /* VHub PlayList (from the site, October 2026) */
+    --vh-purple: #6a44d6;
+    --vh-purple-a: #6140d9;
+    --vh-purple-b: #8253ed;
+    --vh-ink: #1c243b;
+    --vh-grey: #8c8897;
+    --vh-soft: #f3edf9;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1448px; height: 2048px; overflow: hidden; }
+  body {
+    font-family: "Zen Maru Gothic", "Zen Maru Local", "Yu Gothic UI", "Meiryo", sans-serif;
+    color: var(--on-surface);
+    word-break: auto-phrase; line-break: strict;
+    background:
+      radial-gradient(ellipse 760px 520px at 50% 6%, rgba(38, 104, 138, 0.62) 0, rgba(38, 104, 138, 0) 100%),
+      radial-gradient(ellipse 900px 700px at 100% 100%, rgba(30, 120, 120, 0.16) 0, rgba(30, 120, 120, 0) 100%),
+      linear-gradient(180deg, #0a1720 0, #060a0f 38%, #05080c 100%);
+  }
+
+  header { position: absolute; left: 0; right: 0; top: 54px; display: flex; justify-content: center; align-items: center; gap: 44px; }
+  .logo { width: 200px; height: 200px; filter: drop-shadow(0 0 26px rgba(79, 195, 247, 0.38)); }
+  .titles { display: flex; flex-direction: column; }
+  .brand {
+    font-weight: 500; font-size: 44px; letter-spacing: 0.06em; line-height: 1.1;
+    background: linear-gradient(90deg, var(--logo-green), var(--logo-teal) 55%, var(--logo-blue));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  h1 { font-weight: 900; font-size: 84px; line-height: 1.14; color: #f3f5f8; }
+  .sub { margin-top: 10px; font-weight: 500; font-size: 31px; color: var(--on-surface-variant); letter-spacing: -0.02em; }
+  .sub b { font-weight: 700; color: var(--primary); }
+
+  main { position: absolute; left: 44px; right: 44px; top: 300px; bottom: 58px; display: flex; flex-direction: column; justify-content: space-between; }
+  .card {
+    border-radius: 26px; background: var(--surface); border: 1.5px solid var(--line);
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.35);
+    display: flex; align-items: center; gap: 40px; padding: 26px 26px 26px 40px;
+  }
+  .copy { flex: 1; min-width: 0; }
+  .head { display: flex; align-items: center; gap: 22px; }
+  .num { flex: none; font-weight: 900; font-size: 72px; line-height: 1; color: var(--primary); text-shadow: 0 0 22px rgba(79, 195, 247, 0.45); }
+  h2 { font-weight: 700; font-size: 44px; line-height: 1.3; color: #f5f6f9; letter-spacing: -0.04em; }
+  .body { margin-top: 22px; font-weight: 500; font-size: 30px; line-height: 1.65; color: #d5d8de; letter-spacing: -0.03em; }
+  .body em { font-style: normal; font-weight: 700; color: var(--primary); }
+  .note { margin-top: 14px; font-weight: 500; font-size: 26px; line-height: 1.6; color: var(--on-surface-variant); letter-spacing: -0.02em; }
+  .note em { font-style: normal; font-weight: 700; color: var(--on-surface); }
+  .url { display: inline-block; margin-top: 16px; font-weight: 700; font-size: 32px; color: var(--primary); letter-spacing: 0.01em; }
+  kbd {
+    font-family: inherit; font-weight: 700; font-size: 23px; color: var(--on-surface);
+    background: rgba(255, 255, 255, 0.07); border: 1.5px solid rgba(255, 255, 255, 0.2); border-bottom-width: 3px; border-radius: 8px; padding: 0 10px;
+  }
+
+  .shot { position: relative; flex: none; width: 750px; height: 340px; border-radius: 16px; overflow: hidden; border: 1.5px solid rgba(255, 255, 255, 0.12); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45); }
+  .shot > img { position: absolute; display: block; }
+  .mark { position: absolute; border: 4px solid var(--primary); border-radius: 14px; box-shadow: 0 0 18px rgba(79, 195, 247, 0.75), inset 0 0 10px rgba(79, 195, 247, 0.25); }
+  .tag {
+    position: absolute; padding: 5px 16px; border-radius: 999px; background: var(--primary); color: var(--ink);
+    font-family: "Zen Maru Gothic", sans-serif; font-weight: 900; font-size: 24px; line-height: 1.3; white-space: nowrap; box-shadow: 0 0 16px rgba(79, 195, 247, 0.55);
+  }
+  .cursor { position: absolute; width: 48px; height: 48px; filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5)); }
+
+  /* ---- VHub PlayList pages, redrawn 900 x 408 and zoomed into the shot ---- */
+  .site { position: absolute; left: 0; top: 0; width: 900px; height: 408px; zoom: 0.8333; background: #fff; color: var(--vh-ink); font-family: "Noto Sans JP", "Yu Gothic UI", sans-serif; overflow: hidden; word-break: normal; }
+  .bar { height: 62px; border-bottom: 1px solid #ece9f1; display: flex; align-items: center; padding: 0 26px; gap: 30px; }
+  .vh-logo { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 20px; white-space: nowrap; }
+  .vh-logo b { color: var(--vh-purple); }
+  .nav { display: flex; gap: 22px; font-size: 14px; font-weight: 700; color: #4b4658; white-space: nowrap; }
+  .nav .on { color: var(--vh-purple); box-shadow: inset 0 -3px 0 var(--vh-purple); padding-bottom: 19px; margin-bottom: -22px; }
+  .nav .dim { color: #8c8897; font-weight: 500; }
+  .bar .right { margin-left: auto; display: flex; gap: 10px; }
+  .btn-o { display: flex; align-items: center; gap: 6px; height: 36px; padding: 0 14px; border: 1px solid #ddd8e6; border-radius: 8px; font-size: 14px; font-weight: 500; color: #3a3446; background: #fff; white-space: nowrap; }
+  .btn-p { display: flex; align-items: center; height: 36px; padding: 0 16px; border-radius: 8px; font-size: 14px; font-weight: 700; color: #fff; background: var(--vh-purple); white-space: nowrap; }
+  .hero { padding: 28px 40px 0; }
+  .eyebrow { font-size: 13px; font-weight: 700; color: var(--vh-purple); }
+  .hero h3 { margin-top: 8px; font-size: 34px; font-weight: 900; line-height: 1.3; white-space: nowrap; }
+  .hero p { margin-top: 8px; font-size: 14px; color: var(--vh-grey); }
+  .search { margin-top: 20px; height: 56px; border: 1px solid #e2dcee; border-radius: 12px; display: flex; align-items: center; padding: 0 7px 0 18px; gap: 12px; box-shadow: 0 2px 10px rgba(106, 68, 214, 0.06); }
+  .search span { flex: 1; font-size: 15px; color: #9a96a6; }
+  .search .go { height: 42px; padding: 0 22px; border-radius: 9px; display: flex; align-items: center; font-weight: 700; font-size: 15px; color: #fff; background: linear-gradient(90deg, var(--vh-purple-a), var(--vh-purple-b)); }
+  .chips { margin-top: 14px; display: flex; gap: 8px; }
+  .chip { height: 32px; padding: 0 14px; display: flex; align-items: center; border: 1px solid #e4dfec; border-radius: 999px; font-size: 13px; color: #5d5868; background: #fff; white-space: nowrap; }
+  .tabs { margin-top: 22px; display: flex; gap: 30px; border-bottom: 1px solid #ebe7f1; font-size: 16px; font-weight: 700; color: #8c8897; }
+  .tabs .on { color: var(--vh-purple); box-shadow: inset 0 -3px 0 var(--vh-purple); padding-bottom: 10px; }
+  .detail { display: flex; height: 346px; }
+  .side { width: 330px; flex: none; padding: 18px 26px; background: linear-gradient(170deg, #e9e2f8, #f6f2fd 70%); }
+  .back { display: inline-flex; height: 30px; padding: 0 14px; align-items: center; border-radius: 999px; background: rgba(62, 40, 120, 0.72); color: #fff; font-size: 12px; font-weight: 500; }
+  .cover { margin-top: 14px; height: 78px; border-radius: 14px; background: var(--vh-soft); border: 1px solid #e6dcf6; display: grid; place-items: center; }
+  .side .eyebrow { margin-top: 14px; font-size: 12px; }
+  .side h4 { margin-top: 4px; font-size: 32px; font-weight: 900; line-height: 1.2; }
+  .meta { margin-top: 6px; font-size: 13px; color: #6d6879; }
+  .copybtn { margin-top: 14px; height: 52px; border-radius: 12px; display: flex; align-items: center; justify-content: center; gap: 10px; color: #fff; font-weight: 700; font-size: 16px; background: linear-gradient(90deg, var(--vh-purple-a), var(--vh-purple-b)); box-shadow: 0 8px 18px rgba(98, 64, 217, 0.3); }
+  .list { flex: 1; min-width: 0; padding: 18px 26px; }
+  .list h5 { font-size: 26px; font-weight: 900; padding-bottom: 12px; border-bottom: 1px solid #ebe7f1; }
+  .list h5 small { font-size: 14px; font-weight: 500; color: var(--vh-purple); margin-left: 6px; }
+  .row { margin-top: 10px; height: 72px; border: 1px solid #efe9f6; border-radius: 14px; display: flex; align-items: center; gap: 14px; padding: 0 12px 0 16px; }
+  .row:nth-child(2) { background: #fbf6fc; } .row:nth-child(3) { background: #f8f9fe; } .row:nth-child(4) { background: #fff7fa; }
+  .row .n { width: 20px; font-size: 12px; color: #8c8897; }
+  .row .th { width: 92px; height: 52px; flex: none; border-radius: 10px; background: var(--vh-soft); display: grid; place-items: center; }
+  .row .t { flex: 1; min-width: 0; }
+  .row .t b { display: block; font-size: 15px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .row .t i { font-style: normal; font-size: 12px; color: #6d6879; }
+  .watch { flex: none; height: 34px; padding: 0 14px; border: 1px solid #e3dcef; border-radius: 999px; display: flex; align-items: center; font-size: 13px; font-weight: 700; color: var(--vh-purple); background: #fff; white-space: nowrap; }
+</style>
+</head>
+<body>
+  <svg width="0" height="0" style="position:absolute">
+    <defs>
+      <symbol id="vh-icon" viewBox="0 0 32 32"><rect width="32" height="32" rx="8" fill="#6d47d8"/><g fill="#fff"><rect x="9" y="14" width="3.6" height="9" rx="1.8" transform="rotate(14 10.8 18.5)"/><rect x="14.4" y="11" width="3.6" height="12" rx="1.8" transform="rotate(14 16.2 17)"/><rect x="19.8" y="8" width="3.6" height="15" rx="1.8" transform="rotate(14 21.6 15.5)"/></g></symbol>
+      <symbol id="note" viewBox="0 0 24 24"><path d="M9 18.5a2.5 2.5 0 1 1-2.5-2.5c.53 0 1 .14 1.5.4V5l10-2v11.5a2.5 2.5 0 1 1-2.5-2.5c.53 0 1 .14 1.5.4V6.2l-8 1.6Z" fill="#a78bfa"/></symbol>
+      <symbol id="plus" viewBox="0 0 14 14"><path d="M7 1v12M1 7h12" stroke="#3a3446" stroke-width="1.6" stroke-linecap="round"/></symbol>
+    </defs>
+  </svg>
+
+  <header>
+    <img class="logo" src="../../logo/kawaplayer-logo-gradient.png" alt="">
+    <div class="titles">
+      <div class="brand">KawaPlayer</div>
+      <h1>クイックスタートガイド</h1>
+      <p class="sub"><b>VHub PlayList</b> のプレイリストを再生する方法</p>
+    </div>
+  </header>
+
+  <main>
+    <section class="card">
+      <div class="copy">
+        <div class="head"><div class="num">1</div><h2>サイトを開く</h2></div>
+        <p class="body">ブラウザで次のサイトを開きます。</p>
+        <span class="url">playlist.vrc-hub.com</span>
+      </div>
+      <div class="shot" id="s1">
+        <div class="site">
+          <div class="bar">
+            <div class="vh-logo"><svg width="32" height="32"><use href="#vh-icon"/></svg><span><b>VHub</b> PlayList</span></div>
+            <div class="nav"><span class="on">探す</span><span>マイライブラリ</span><span class="dim">使い方</span></div>
+            <div class="right"><div class="btn-o"><svg width="13" height="13"><use href="#plus"/></svg>作成</div><div class="btn-p">ログイン</div></div>
+          </div>
+          <div class="hero">
+            <div class="eyebrow">VRChat向けプレイリスト作成・共有</div>
+            <h3>お気に入りの動画を、みんなのワールドへ。</h3>
+            <p>プレイリストを探して、作って、共有。対応するVRChatワールドで楽しもう。</p>
+            <div class="search">
+              <svg width="19" height="19" viewBox="0 0 20 20"><circle cx="8.5" cy="8.5" r="6" fill="none" stroke="#8c8897" stroke-width="1.8"/><path d="M13 13l5 5" stroke="#8c8897" stroke-width="1.8" stroke-linecap="round"/></svg>
+              <span>曲名・アーティスト・プレイリストを検索</span>
+              <div class="go">検索 →</div>
+            </div>
+            <div class="chips"><div class="chip">#作業用</div><div class="chip">#チル・落ち着く</div><div class="chip">#盛り上がる・ノリノリ</div><div class="chip">#VRChat向け</div><div class="chip">#VTuber</div><div class="chip">#東方</div></div>
+            <div class="tabs"><span class="on">プレイリスト</span><span>曲</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="copy">
+        <div class="head"><div class="num">2</div><h2>URL をコピー</h2></div>
+        <p class="body">好きなプレイリストを開いて、<br><em>「VRChat用URLをコピー」</em>を<br>押します。</p>
+      </div>
+      <div class="shot" id="s2">
+        <div class="site">
+          <div class="bar">
+            <div class="vh-logo"><svg width="32" height="32"><use href="#vh-icon"/></svg><span><b>VHub</b> PlayList</span></div>
+            <div class="nav"><span>探す</span><span>マイライブラリ</span><span class="dim">使い方</span></div>
+            <div class="right"><div class="btn-o"><svg width="13" height="13"><use href="#plus"/></svg>作成</div><div class="btn-p">ログイン</div></div>
+          </div>
+          <div class="detail">
+            <div class="side">
+              <div class="back">← プレイリストを探す</div>
+              <div class="cover"><svg width="42" height="42"><use href="#note"/></svg></div>
+              <div class="eyebrow">VRChat向けプレイリスト</div>
+              <h4>作業用BGM</h4>
+              <div class="meta">12本</div>
+              <div class="copybtn" id="copybtn"><svg width="19" height="19" viewBox="0 0 20 20"><rect x="6.5" y="6.5" width="10" height="11" rx="2" fill="none" stroke="#fff" stroke-width="1.7"/><path d="M13.5 4.5v-.5a1.5 1.5 0 0 0-1.5-1.5H5A1.5 1.5 0 0 0 3.5 4v9A1.5 1.5 0 0 0 5 14.5h.5" fill="none" stroke="#fff" stroke-width="1.7"/></svg>VRChat用URLをコピー</div>
+            </div>
+            <div class="list">
+              <h5>動画一覧<small>12本</small></h5>
+              <div class="row"><span class="n">01</span><div class="th"><svg width="26" height="26"><use href="#note"/></svg></div><div class="t"><b>サンプル曲 01</b><i>YouTube</i></div><div class="watch">動画を見る ↗</div></div>
+              <div class="row"><span class="n">02</span><div class="th"><svg width="26" height="26"><use href="#note"/></svg></div><div class="t"><b>サンプル曲 02</b><i>YouTube</i></div><div class="watch">動画を見る ↗</div></div>
+              <div class="row"><span class="n">03</span><div class="th"><svg width="26" height="26"><use href="#note"/></svg></div><div class="t"><b>サンプル曲 03</b><i>YouTube</i></div><div class="watch">動画を見る ↗</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="copy">
+        <div class="head"><div class="num">3</div><h2>KawaPlayer に貼る</h2></div>
+        <p class="body"><em>「URLを入力」</em>を押して、<br>コピーした URL を貼り付けます。</p>
+        <p class="note">PC では <kbd>Ctrl</kbd> + <kbd>V</kbd> のあと <kbd>Enter</kbd></p>
+      </div>
+      <div class="shot" id="s3"></div>
+    </section>
+
+    <section class="card">
+      <div class="copy">
+        <div class="head"><div class="num">4</div><h2>再生！</h2></div>
+        <p class="body">プレイヤーが止まっていれば、<br>そのまま <em>1 曲目から再生</em>します。</p>
+        <p class="note">曲は右の<em>「プレイリスト」</em>から選べます。</p>
+      </div>
+      <div class="shot" id="s4"></div>
+    </section>
+  </main>
+
+<script>
+  const SHOT_W = 750, SHOT_H = 340;
+
+  // Fills a shot with one region of a picture: [x, y, w] in the picture's own pixels; the height follows the shot.
+  function crop(id, src, picW, picH, x, y, w) {
+    const el = document.getElementById(id);
+    const s = SHOT_W / w;
+    const img = document.createElement("img");
+    img.src = src;
+    img.style.width = picW * s + "px";
+    img.style.height = picH * s + "px";
+    img.style.left = -x * s + "px";
+    img.style.top = -y * s + "px";
+    el.appendChild(img);
+    return { s, x, y };
+  }
+  // Marks a region given in the picture's own pixels.
+  function mark(id, c, box) {
+    const m = document.createElement("div");
+    m.className = "mark";
+    m.style.left = (box[0] - c.x) * c.s + "px";
+    m.style.top = (box[1] - c.y) * c.s + "px";
+    m.style.width = (box[2] - box[0]) * c.s + "px";
+    m.style.height = (box[3] - box[1]) * c.s + "px";
+    document.getElementById(id).appendChild(m);
+  }
+  function tag(id, c, text, x, y) {
+    const t = document.createElement("div");
+    t.className = "tag";
+    t.textContent = text;
+    t.style.left = (x - c.x) * c.s + "px";
+    t.style.top = (y - c.y) * c.s + "px";
+    document.getElementById(id).appendChild(t);
+  }
+  function cursorAt(id, left, top) {
+    const c = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    c.setAttribute("viewBox", "0 0 24 24");
+    c.setAttribute("class", "cursor");
+    c.style.left = left + "px";
+    c.style.top = top + "px";
+    c.innerHTML = '<path d="M4 2 L4 19 L8.6 14.8 L11.6 21.4 L14.6 20 L11.7 13.6 L18 13.6 Z" fill="#4fc3f7" stroke="#fff" stroke-width="1.5" stroke-linejoin="round"/>';
+    document.getElementById(id).appendChild(c);
+  }
+
+  // 2: the copy button, marked where it sits in the zoomed page.
+  {
+    const shot = document.getElementById("s2");
+    const btn = document.getElementById("copybtn").getBoundingClientRect();
+    const base = shot.getBoundingClientRect();
+    const pad = 6;
+    const m = document.createElement("div");
+    m.className = "mark";
+    m.style.left = btn.left - base.left - pad + "px";
+    m.style.top = btn.top - base.top - pad + "px";
+    m.style.width = btn.width + pad * 2 + "px";
+    m.style.height = btn.height + pad * 2 + "px";
+    shot.appendChild(m);
+    cursorAt("s2", btn.left - base.left + btn.width * 0.74, btn.top - base.top + btn.height * 0.4);
+  }
+
+  // 3: the URL field pointed at, and the message once the playlist is in.
+  const c3 = crop("s3", "step3.png", 1920, 1080, 0, 150, 1400);
+  mark("s3", c3, [30, 214, 262, 292]);
+  cursorAt("s3", (196 - c3.x) * c3.s, (262 - c3.y) * c3.s);
+  tag("s3", c3, "ここに貼り付け", 282, 230);
+  mark("s3", c3, [528, 380, 1392, 700]);
+  tag("s3", c3, "読み込み完了！", 1010, 398);
+
+  // 4: the track list, playing.
+  const c4 = crop("s4", "step4.png", 1920, 1080, 900, 122, 1000);
+  mark("s4", c4, [1326, 226, 1868, 294]);
+  tag("s4", c4, "再生中", 1140, 238);
+</script>
+</body>
+</html>

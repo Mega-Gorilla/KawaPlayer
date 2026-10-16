@@ -12,6 +12,8 @@ namespace Yamadev.YamaStream.Editor
     private const string LogoGuid = "45177375d4933bc469e82e59e57ce065";
     private const float LogoHeight = 60f;
     private const float LogoMarginTop = 12f;
+    // The user guide (docs/guide), read on GitHub: it is not in the package.
+    private const string GuideUrl = "https://github.com/Mega-Gorilla/KawaPlayer/tree/develop/docs/guide";
 
     protected const float SpaceLarge = 16f;
     protected const float SpaceMedium = 8f;
@@ -79,22 +81,31 @@ namespace Yamadev.YamaStream.Editor
       EditorGUILayout.Space(LogoMarginTop + logoRect.height);
     }
 
+    // The language of the inspectors, and beside it the button that opens the
+    // user guide, which shows even when no language can be chosen.
     protected void DrawLanguageSelector()
     {
       var availableLanguages = EditorLocalization.AvailableLanguages;
-      if (availableLanguages == null || availableLanguages.Length == 0) return;
-
-      var languageNames = availableLanguages.Select(EditorLocalization.GetLanguageName).ToArray();
-      var currentIndex = Array.IndexOf(availableLanguages, EditorLocalization.CurrentLanguage);
-      if (currentIndex < 0) currentIndex = 0;
+      bool hasLanguages = availableLanguages != null && availableLanguages.Length > 0;
 
       using (new EditorGUILayout.HorizontalScope())
       {
         GUILayout.FlexibleSpace();
-        var selectedIndex = EditorGUILayout.Popup(currentIndex, languageNames, GUILayout.Width(200));
-        if (selectedIndex >= 0 && selectedIndex < availableLanguages.Length)
+        if (hasLanguages)
         {
-          EditorLocalization.CurrentLanguage = availableLanguages[selectedIndex];
+          var languageNames = availableLanguages.Select(EditorLocalization.GetLanguageName).ToArray();
+          var currentIndex = Array.IndexOf(availableLanguages, EditorLocalization.CurrentLanguage);
+          if (currentIndex < 0) currentIndex = 0;
+
+          var selectedIndex = EditorGUILayout.Popup(currentIndex, languageNames, GUILayout.Width(200));
+          if (selectedIndex >= 0 && selectedIndex < availableLanguages.Length)
+          {
+            EditorLocalization.CurrentLanguage = availableLanguages[selectedIndex];
+          }
+        }
+        if (GUILayout.Button(EditorLocalization.GetLayout("guide.open", "guide.open.tooltip"), GUILayout.ExpandWidth(false)))
+        {
+          Application.OpenURL(GuideUrl);
         }
         GUILayout.FlexibleSpace();
       }
