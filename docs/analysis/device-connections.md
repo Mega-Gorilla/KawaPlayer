@@ -58,7 +58,7 @@ KawaPlayer には、これからもタブレットやボタンのようなデバ
 
 ## 2. 構成
 
-本体の中心は `Controller` で、再生の状態を同期する唯一の部品である。デバイスは、自分の中の `UIController`（Sub Screen は `YamaPlayerScreen`）の参照で `Controller` を指す。本体のスクリーンの UI（`ScreenUI`）も、デバイスと同じ `UIController` でつながる。
+本体の中心は `Controller` で、再生の状態を同期する唯一の部品である（キュー・履歴・プレイリストの枠の中身は、それぞれの部品が同期する。§8）。デバイスは、自分の中の `UIController`（Sub Screen は `YamaPlayerScreen`）の参照で `Controller` を指す。本体のスクリーンの UI（`ScreenUI`）も、デバイスと同じ `UIController` でつながる。
 
 ![KawaPlayer 本体と 5 種類のデバイス。デバイスは UIController か YamaPlayerScreen で本体の Controller を指し、命令を送り、出来事を受け取る](images/device-connections/overview.svg)
 
@@ -275,7 +275,7 @@ E3 の `SendCustomVideoEvent(名前)` は、リスナー全員に `SendCustomEve
 
 ![URL 欄の URL を、UIController が PlaylistLoaderUI に渡す。VHub の URL ならプレイリストとして読み込み、結果を案内する。そうでなければ動画として再生する](images/device-connections/intercept.svg)
 
-**図 6** URL 欄の差し込み口（E7）。`PlaylistLoaderUI` は、プレイリストを読み込む前に、`BeforeUserLoadPlaylist` で前の確認も通す（図では省いた）。
+**図 6** URL 欄の差し込み口（E7）。差し込みは同期の呼び出しで、`PlaylistLoaderUI` は読み込みを始めるとその場で `interceptHandled` を返す。ダウンロードの結果は、あとから `OnLoadResult` に届く。読み込む前には、`BeforeUserLoadPlaylist` で前の確認も通す。
 
 ---
 
@@ -343,13 +343,15 @@ E3 の `SendCustomVideoEvent(名前)` は、リスナー全員に `SendCustomEve
 
 ## 8. ネットワーク
 
-本体とデバイスのうち、同期する部品は次のとおりである。`UIController` とモジュールの UI は同期しない（`None`）ので、表示や前の確認は、見ている人ごとに動く。
+本体とデバイスのうち、同期する部品は次のとおりである。再生の状態は `Controller` が、キュー・履歴・プレイリストの枠の中身はそれぞれの部品が、別々に同期する。キューと履歴は、受け取ると自分の `OnDeserialization` で曲を組み立て直し、`Controller` のリスナーに知らせる（E3）。`UIController` とモジュールの UI は同期しない（`None`）ので、表示や前の確認は、見ている人ごとに動く。
 
 **表 14** 同期する部品
 
 | 部品 | 同期の方式 | 同期するもの |
 | --- | --- | --- |
 | `Controller` | `Manual` | 再生の状態・曲・位置と時刻・速度など（[playback-sync.md](playback-sync.md)） |
+| `QueueList` | `Manual` | キューの曲（プレーヤーの種類・題・URL・拡張データ）。受け取ると曲を組み立て直し、`AfterQueueUpdated` を配る |
+| `HistoryList` | `Manual` | 履歴の曲（同じ形）。受け取ると `AfterHistoryUpdated` を配る |
 | `DynamicPlaylist` | `Manual` | 読み込んだプレイリストの枠の中身 |
 | `TabletScreen` | `Manual` | 開いているアプリ、画像の URL と一覧、画像を見ているか |
 | `TabletVisitorRecorder` | `Manual` | 訪問者の記録（ワールドに 1 つ） |
@@ -370,7 +372,7 @@ E3 の `SendCustomVideoEvent(名前)` は、リスナー全員に `SendCustomEve
 
 ここに挙げるのは、今の作りから読み取れる論点で、直し方は決めていない。
 
-1. **O1. プレイヤーを見つける方法が 3 通りある（図 10）。** 正の値は各部品の `_controller` だが、書くのは Sub Controller のインスペクターだけである。プレハブを更新して部品が増えても、欄を選び直すまでつながらない。ビルドは、それを手がかりに配線するだけで、確かめない。
+1. **O1. プレイヤーを見つける方法が 3 通りある（図 10）。** 正の値は各部品の `_controller` だが、書くのは Sub Controller のインスペクターだけである。プレハブを更新して部品が増えても、欄を選び直すまでつながらない。ビルドは、それを手がかりに配線するだけで、Sub Controller で選んだプレイヤーと合っているかは確かめ直さない。未設定だけは、`UIController.Start`・`YamaPlayerModule.Start` がログに出し、全員リロードボタンのビルド処理が警告する。
 2. **O2. 共通のインスペクターが、特定のデバイスを知っている。** `YamaPlayerSubControllerEditor` が `TabletPickup`・`TabletReturnButton`・`TabletVisitorRecorder` を直接扱う。新しいデバイスの設定を足すと、このファイルを書き換えることになる（#206 もここ）。
 3. **O3. 名前の文字列の接続口に、一覧が無い。** 前の確認の 26 個、名前の出来事、差し込み口の値と名前は、送る側と受ける側が同じ文字列を書いている。打ち間違いは、コンパイルでもビルドでも見つからない。コアがモジュールの型を参照できないので、名前で呼ぶこと自体には理由がある。
 4. **O4. 差し込みの場所が、UI の階層のパス。** `uiSlots` は `Canvas/User/Main/Pages/...` のような深いパスで写す先を決める。デバイスの側は、そのパスを用意しておく必要がある（全員リロードボタンの空の `Canvas/Modules`）。合わないパスは、何も言わずに飛ばされる。
@@ -385,8 +387,8 @@ E3 の `SendCustomVideoEvent(名前)` は、リスナー全員に `SendCustomEve
 
 - **3 段のつなぎ込み：** デバイスは、エディター（Sub Controller のインスペクター）・ビルド（`IYamaPlayerBuildProcess`）・実行時（`Start` での登録）の 3 段で本体につながる。
 - **接続口の集まり方：** 実行時の接続口は `Controller`（E1〜E4）と `UIController`（E5〜E9）に集まる。結び方は、型、名前の文字列、欄への書き込みが混ざる。
-- **デバイスの共通点：** 本体への命令は `UIController` を通し、前の確認で権限がかかる。モジュールの UI は、ビルドでパスに写され、実行時に自分の UIController を探して登録する。
-- **同期の分担：** 再生の状態は `Controller` だけが同期し、タブレットの画面や全員リロードボタンの合図は、それぞれの部品が別に送る。
+- **デバイスの共通点：** 本体への命令は `UIController` を通し、前の確認で権限がかかる。ただし Controller Bar と Playlist Panel には権限の UI が写されないので、権限はかからない（§6.1）。モジュールの UI は、ビルドでパスに写され、実行時に自分の UIController を探して登録する。
+- **同期の分担：** 再生の状態は `Controller` が、キュー・履歴・プレイリストの枠の中身はそれぞれの部品が同期する。タブレットの画面や全員リロードボタンの合図も、それぞれの部品が別に送る。
 - **整理の論点：** プレイヤーの見つけ方（O1）、デバイスを知っている共通のインスペクター（O2）、名前の一覧（O3）、パスでの差し込み（O4）、何重ものリスト（O5）、UI の中への直接の読み出し（O6）、命令の入り口（O7）、持てる・戻す・同期の作り（O8）。
 
 ---

@@ -217,7 +217,8 @@ def fig_stages():
             b.append(text(cx + 14, 146 + j * 30, row, "t1 mono" if mono and not row.startswith("→") else "t1 f12"))
         if i < 2:
             b.append(arrow([(cx + w + 2, 222), (cx + w + 20, 222)]))
-    b.append(text(24, H - 20, "書いた参照が正しいかは、②でも③でも確かめない。②の配線は、①で書いた _controller を手がかりにする。", "t2 f12"))
+    b.append(text(24, H - 28, "①で選んだプレイヤーと合っているかは、②でも③でも確かめ直さない（未設定は、Start と全員リロードボタンのビルドが知らせる）。", "t2 f12"))
+    b.append(text(24, H - 10, "②の配線は、①で書いた _controller を手がかりにする。", "t2 f12"))
     return svg(W, H, "つなぎ込みの3段",
                "エディターではSub Controllerのインスペクターが参照を書き、ビルドではビルド処理がモジュールやボタンを配線し、実行時にはStartで各部品が自分をControllerやUIControllerに登録する。", "".join(b))
 
@@ -293,16 +294,17 @@ def fig_intercept():
     steps = [
         ("msg", 0, 1, "PlayUrl"),
         ("msg", 1, 2, "interceptUrl・interceptSource を書き、OnUrlSubmitted"),
-        ("note", 2, ["VHub の VRChat用URL か？", "違えば interceptHandled = false"]),
-        ("msg", 2, 3, "LoadPlaylistFromUrlWithFeedback"),
-        ("msg", 3, 4, "文字列のダウンロード"),
+        ("note", 2, ["VHub の VRChat用URL か？", "BeforeUserLoadPlaylist も通す"]),
+        ("msg", 2, 3, "LoadPlaylistFromUrlWithFeedback（始めるだけ）"),
+        ("msg", 2, 1, "interceptHandled = true（その場で返る）", "dash"),
+        ("note", 1, ["false なら、そのまま", "動画として再生する"]),
+        ("msg", 3, 4, "文字列のダウンロード（あとで）"),
         ("msg", 4, 3, "曲の一覧（JSON）", "dash"),
-        ("msg", 3, 2, "OnLoadResult(結果)"),
+        ("msg", 3, 2, "OnLoadResult(結果)（非同期）"),
         ("msg", 2, 1, "ShowMessage（結果の案内）"),
-        ("note", 1, ["interceptHandled が false なら", "そのまま動画として再生する"]),
     ]
-    return seq(820, "URL 欄の差し込み口（E7）", "コアは VHub を知らない。ビルドで差された PlaylistLoaderUI に、欄の値と名前のイベントで URL を渡す", people, steps,
-               "URL欄で再生すると、UIControllerは_urlInterceptorのPlaylistLoaderUIにinterceptUrlとinterceptSourceを書いてOnUrlSubmittedを送る。VHubのURLならPlaylistLoaderがダウンロードし、結果をUIControllerのShowMessageで案内する。VHubのURLでなければ、UIControllerが動画として再生する。")
+    return seq(820, "URL 欄の差し込み口（E7）", "差し込みはその場で handled を返し、ダウンロードの結果はあとから OnLoadResult に届く。コアは VHub を知らない", people, steps,
+               "URL欄で再生すると、UIControllerは_urlInterceptorのPlaylistLoaderUIにinterceptUrlとinterceptSourceを書いてOnUrlSubmittedを送る。PlaylistLoaderUIはVHubのURLなら読み込みを始めてinterceptHandledをtrueにし、その場で返る。falseなら、UIControllerが動画として再生する。ダウンロードの結果はあとからOnLoadResultに届き、UIControllerのShowMessageで案内する。")
 
 
 # Figure 7: inside the tablet.
@@ -323,7 +325,7 @@ def fig_tablet():
     b.append(node(640, 206, 156, 160, ["Controller", ("本体", "t2 f11")], "go", "t1 f13", 18))
 
     b.append(arrow([(214, 137), (300, 137)]))
-    b.append(arrow([(435, 212), (435, 170)], "dash", "AddListener", (443, 196), "start", "t2 mono"))
+    b.append(arrow([(435, 168), (435, 210)], "dash", "AddListener", (443, 196), "start", "t2 mono"))
     b.append(arrow([(214, 222), (300, 232)], "blue", "PlayImageUrl", (257, 216), "middle", "t2 mono"))
     b.append(arrow([(214, 284), (300, 248)], "blue"))
     b.append(arrow([(214, 345), (250, 345), (250, 409), (300, 409)]))
