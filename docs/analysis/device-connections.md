@@ -148,7 +148,7 @@ Udon の `Start` で、各部品が自分を相手のリストに足す。リス
 | --- | --- | --- | --- | --- | --- |
 | E1 | 命令 | `Controller` の public メソッド・プロパティ（約 90） | 型（直接呼ぶ） | 外 → 本体 | UIController、モジュール（タブレットのアプリは UIController を通す） |
 | E2 | 出来事 | `YamaPlayerListener` の `AfterXxx`（29） | 型（仮想メソッド） | 本体 → 外 | UIController、モジュール、キュー・履歴 |
-| E3 | 名前の出来事 | `Controller.SendCustomVideoEvent(名前)` | 名前の文字列 | だれでも → 本体のリスナー全員 | キュー・履歴・枠、`VideoInfoDownloader`、`AudioLinkAdaptor`、言語の変更 |
+| E3 | 名前の出来事 | `Controller.SendCustomVideoEvent(名前)` | 名前の文字列 | だれでも → 本体のリスナー全員 | キュー・履歴・枠、`VideoInfoDownloader`、言語の変更 |
 | E4 | 本体への登録 | `AddListener`・`AddScreen`・`AddAudioSource`・`AddPlaylist` | 型 | 外 → 本体 | 実行時の各部品、ビルド処理 |
 | E5 | 前の確認 | `UIController.InvokeBeforeEvent("BeforeUserXxx")`・`CancelCurrentAction` | 名前の文字列 | UI → UI のリスナー | 権限、全員リロードボタン |
 | E6 | UI の知らせ | `AfterLanguageChanged` | 名前の文字列 | UI → UI のリスナー | モジュールの UI、`TabletScreen` |
@@ -197,7 +197,6 @@ E3 の `SendCustomVideoEvent(名前)` は、リスナー全員に `SendCustomEve
 | `AfterHistoryUpdated` | `HistoryList` | ある |
 | `AfterPlaylistsUpdated` | `DynamicPlaylist` | ある |
 | `AfterTrackUpdated` | `VideoInfoDownloader` | ある |
-| `AfterAudioLinkStateChanged` | `AudioLinkAdaptor` | ない。これを受けるのは `AudioLinkAdaptorUI` だが、`Controller` には登録していないので届かない（O5） |
 | `_OnUILanguageChanged` | `Controller.SetUILanguage` | ない（受けるのは `UIController`、§4.5） |
 
 ### 4.3 本体への登録（E4）
@@ -253,7 +252,7 @@ E3 の `SendCustomVideoEvent(名前)` は、リスナー全員に `SendCustomEve
 | `PermissionManagement` | `AfterPermissionChanged` | `PermissionManagementUI` |
 | `PitchShifter` | `AfterSemitonesChanged` | `PitchShifterUI` |
 | `SlideShower` | `AfterSlideModeChanged`・`AfterSlideSecondsChanged` | `SlideShowerUI` |
-| `AudioLinkAdaptor` | 無し。リストに `AudioLinkAdaptorUI` が登録されるが、何も送らない。状態の変化は E3 で `Controller` のリスナーに送る | `AudioLinkAdaptorUI`（登録だけ） |
+| `AudioLinkAdaptor` | `AfterAudioLinkStateChanged` | `AudioLinkAdaptorUI` |
 
 ---
 
@@ -376,7 +375,7 @@ E3 の `SendCustomVideoEvent(名前)` は、リスナー全員に `SendCustomEve
 2. **O2. 共通のインスペクターが、特定のデバイスを知っている。** `YamaPlayerSubControllerEditor` が `TabletPickup`・`TabletReturnButton`・`TabletVisitorRecorder` を直接扱う。新しいデバイスの設定を足すと、このファイルを書き換えることになる（#206 もここ）。
 3. **O3. 名前の文字列の接続口に、一覧が無い。** 前の確認の 26 個、名前の出来事、差し込み口の値と名前は、送る側と受ける側が同じ文字列を書いている。打ち間違いは、コンパイルでもビルドでも見つからない。コアがモジュールの型を参照できないので、名前で呼ぶこと自体には理由がある。
 4. **O4. 差し込みの場所が、UI の階層のパス。** `uiSlots` は `Canvas/User/Main/Pages/...` のような深いパスで写す先を決める。デバイスの側は、そのパスを用意しておく必要がある（全員リロードボタンの空の `Canvas/Modules`）。合わないパスは、何も言わずに飛ばされる。
-5. **O5. 配る先のリストが何重にもあり、食い違いがある。** `Controller` と `UIController` のほかに、4 つのモジュールが自前のリストを持つ（表 12）。外す口はどのリストにも無い。`AudioLinkAdaptor` は、状態の変化を `Controller` のリスナーに送る（E3）が、受ける `AudioLinkAdaptorUI` は `AudioLinkAdaptor` の自前のリストと `UIController` にしか登録していない。そのため、ある UI で AudioLink を切り替えても、ほかの UI（スクリーンとタブレットの設定アプリ）のトグルは追いつかないと読める。コードから読んだことで、実機では確かめていない。
+5. **O5. 配る先のリストが何重にもあり、食い違いやすい。** `Controller` と `UIController` のほかに、4 つのモジュールが自前のリストを持つ（表 12）。外す口はどのリストにも無い。食い違いの例が `AudioLinkAdaptor` だった。状態の変化を `Controller` のリスナーに送っていた（E3）が、受ける `AudioLinkAdaptorUI` は `AudioLinkAdaptor` の自前のリストと `UIController` にしか登録していなかった。そのため、ある UI で AudioLink を切り替えても、ほかの UI（スクリーンとタブレットの設定アプリ）のトグルは追いつかなかった。2026-10-16 に ClientSim で確かめ、自前のリストに送るように直した（#260）。
 6. **O6. 本体の UI の中を、外から直接読んでいる所がある。** `SlideShowerUI` が `UIController` の非公開の欄を読む（§4.7）。UI の作りを変えると、壊れる。
 7. **O7. 本体への命令の入り口が 2 つある。** UI を通す（前の確認と権限がかかる）道と、`Controller` を直接呼ぶ道がある。デバイスが直接呼べば、権限を通らない。今のデバイスは、どれも UI を通している。
 8. **O8. デバイスの「持てる・戻す・同期」が、デバイスごとの作り。** Sub Screen は `VRCPickup` と `VRCObjectSync`、タブレットは `TabletPickup` と `TabletReturnButton` と、似た機能を別々に持つ。

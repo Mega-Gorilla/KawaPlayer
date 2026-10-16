@@ -73,7 +73,10 @@ namespace Yamadev.YamaStream.Modules.AudioLinkAdaptor
           _audioLink.audioSource = null;
           _audioLink.DisableAudioLink();
         }
-        _controller.SendCustomVideoEvent("AfterAudioLinkStateChanged");
+        // Every AudioLink row (the screen, the tablet) registered here, so
+        // one changed on any of them shows on the others (issue #260).
+        int len = _listeners.Length;
+        for (int i = 0; i < len; i++) _listeners[i].SendCustomEvent("AfterAudioLinkStateChanged");
       }
     }
 
