@@ -39,7 +39,6 @@ namespace Yamadev.YamaStream.Modules.PermissionManagement
 
     public void BeforeUserChangePlayerHandler() => CheckPermission();
     public void BeforeUserPlayTrack() => CheckPermission();
-    public void BeforeUserPlayVideo() => CheckPermission();
     public void BeforeUserPauseVideo() => CheckPermission();
     public void BeforeUserStopVideo() => CheckPermission();
     public void BeforeUserSetTime() => CheckPermission();

@@ -407,18 +407,6 @@ namespace Yamadev.YamaStream.Editor
         Debug.LogError($"Failed to handle video error: {ex.Message}");
       }
     }
-
-    private void HandleOnVideoLoop()
-    {
-      try
-      {
-        BasePlayer?.OnVideoLoop();
-      }
-      catch (Exception ex)
-      {
-        Debug.LogError($"Failed to handle OnVideoLoop: {ex.Message}");
-      }
-    }
     #endregion
   }
 #else

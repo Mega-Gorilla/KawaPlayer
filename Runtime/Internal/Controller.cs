@@ -172,9 +172,6 @@ namespace Yamadev.YamaStream
       }
     }
 
-    [Obsolete("Use Handler instead")]
-    public PlayerHandler VideoPlayerHandle => Handler;
-
     public PlayerHandler ActiveHandler
     {
       get

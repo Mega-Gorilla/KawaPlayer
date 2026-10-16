@@ -11,8 +11,6 @@ namespace Yamadev.YamaStream.Editor
     private const float RowHeight = 36f;
 
     private ModuleManager _moduleManager;
-    private Vector2 _installedScrollPos;
-    private Vector2 _availableScrollPos;
 
     private static readonly Color ActiveColor = new Color(0.4f, 0.8f, 0.4f);
     private static Color SubTextColor => EditorGUIUtility.isProSkin ? new Color(0.55f, 0.55f, 0.55f) : new Color(0.45f, 0.45f, 0.45f);

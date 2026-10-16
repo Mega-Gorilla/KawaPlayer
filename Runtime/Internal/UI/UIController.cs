@@ -250,13 +250,15 @@ namespace Yamadev.YamaStream.UI
     public bool HasModalDialog => Utilities.IsValid(_modalDialog);
     public bool IsModalBusy => Utilities.IsValid(_modalDialog) && _modalDialog.IsAwaitingAnswer;
 
-    public void ShowMessage(string title, string message, string closeText = null)
+    // A message waits for no answer, so it is not shown while a question
+    // is up rather than put up over it; the result says whether it was.
+    public bool ShowMessage(string title, string message, string closeText = null)
     {
-      if (!Utilities.IsValid(_modalDialog)) return;
-      _modalDialog.Show(title, message, string.IsNullOrEmpty(closeText) ? GetTranslation("button.close") : closeText, "", this, null, null);
+      if (!Utilities.IsValid(_modalDialog)) return false;
+      return _modalDialog.TryShow(title, message, string.IsNullOrEmpty(closeText) ? GetTranslation("button.close") : closeText, "", this, null, null);
     }
 
-    // Asks before switching away from something that is playing. All three
+    // Asks before switching away from something that is playing. Both
     // toggles ask the same thing and differ only in what continuing runs.
     // Refused while another question is up: the toggle has already moved to
     // the player that will not be selected after all, so put it back -- the
@@ -293,9 +295,8 @@ namespace Yamadev.YamaStream.UI
       if (!Utilities.IsValid(target)) return false;
       if (string.IsNullOrEmpty(confirmEventName)) return false;
 
-      // TryShow, not Show: Show tells a refused caller by firing its cancel
-      // event, which would clear the pending question and then report back
-      // that it had been asked.
+      // A refused question sends no event: the false returned here is all
+      // the caller hears, and it lets go of what it held for the answer.
       return _modalDialog.TryShow(title, message, GetTranslation("button.cancel"), confirmText,
           target, cancelEventName, confirmEventName);
     }
@@ -499,13 +500,9 @@ namespace Yamadev.YamaStream.UI
       return type == VideoPlayerType.UnityVideoPlayer ? VideoPlayerType.AVProVideoPlayer : type;
     }
 
-    // The question carries which field it came from and which button was
-    // pressed, so all four of these names answer through one handler. The
-    // Top ones are no longer used from here; they stay because they are
-    // public and something outside may still send them.
+    // The question carries which field it came from, so both buttons answer
+    // through one handler whichever field asked.
     public void AddUrlToQueueEvent() => AnswerPendingUrl(false);
-
-    public void AddUrlTopToQueueEvent() => AnswerPendingUrl(false);
 
     public void AddUrlToQueueEventInternal(VideoPlayerType playerType, VRCUrl url)
     {
@@ -520,8 +517,6 @@ namespace Yamadev.YamaStream.UI
     }
 
     public void PlayUrlEvent() => AnswerPendingUrl(true);
-
-    public void PlayUrlTopEvent() => AnswerPendingUrl(true);
 
     // Answers with what the question was asked about, not with whatever the
     // field holds by the time it is answered. Let go of first, so the next

@@ -15,7 +15,6 @@ namespace Yamadev.YamaStream
     protected float _speed = 1f;
     protected bool _loading;
     protected YamaPlayerListener _listener;
-    protected bool _useFallbackHandler;
 
     public void SetListener(YamaPlayerListener listener)
     {
