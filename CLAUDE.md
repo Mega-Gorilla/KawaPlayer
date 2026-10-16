@@ -36,14 +36,15 @@ There is no local build command — the project is opened and compiled in the Un
 - SemVer の pre-release 識別子 (`-beta`, `-kawa` 等) を含むと VCC で「Show Pre-Release Packages」を ON にしないと表示されないため、正式リリースでは使用しない
 
 **Two changelogs, two audiences**:
-- `Assets/updatelog.txt` — **表示されるのはワールドの中**。`ScreenUI.prefab` が `UIController._updateLogTextAsset` として参照し、プレイヤーの Info パネルにそのまま出る UI テキスト。日本語のみ、1 バージョン数行、リンクや issue 番号は書かない
-- `docs/releases/<version>.md` — **GitHub Release の本文**。Releases ページを読む利用者向けの詳細版で、`updatelog.txt` の転記ではなく独立した文章として書く。作法は `docs/releases/1.2.0.md` を前例とする: VRChat のリリースノート風に、目玉を冒頭で説明し、箇条書きは一項目一文で二人称、既知の問題の列挙はせず「困ったら Discord へ」（`https://discord.gg/tkrHek6PvN`）、入手方法は VCC のみ。`vcc://vpm/addRepo?url=...` はコピー用のコードブロックで書く — GitHub の Markdown は `vcc://` の href を落とすので、リンクにしても押せない
+- `Assets/updatelog.txt` — **表示されるのはワールドの中**。`ScreenUI.prefab` と `Tablet.prefab` が `UIController._updateLogTextAsset` として参照し、プレイヤーの Info パネルとタブレットのバージョン情報にそのまま出る UI テキスト。読むのは遊ぶ人なので、**その版の変更だけ**を、遊ぶ人に見えるものに絞って数行で書く（SDK・モジュール管理・ビルドのログなど、制作者向けの話は書かない）。ワールドの KawaPlayer はビルドした版のまま固定なので、前の版は残さず、リリースのたびに中身を置き換える。日本語のみ、リンクや issue 番号は書かない。少しくだけた口調でよい
+- `docs/releases/<version>.md` — **GitHub Release の本文**。読むのはワールド制作者と、自分のスクリプトから KawaPlayer を呼ぶ開発者なので、詳しく書く。`updatelog.txt` の転記ではなく独立した文章にする。口調は VRChat のリリースノート（例：`https://docs.vrchat.com/docs/vrchat-202631`）のように、短い箇条書きに、ときどき一言の冗談を混ぜたくだけたもの。並べ方は `docs/releases/1.3.0.md` を前例とする: 目玉を冒頭で一言 → 更新する前に必ずすること（SDK・ビルドし直し・名前の変更・消した API）→ 新しいこと → 変わったこと → 直したこと → 中身の改善 → 自分のスクリプトから呼ぶ人へ → 困ったら（既知の問題の列挙はせず Discord へ、`https://discord.gg/tkrHek6PvN`）→ 入手方法（VCC のみ）→ 全部の変更（前の版との compare のリンク）→ 英語のまとめ。項目の末尾に PR の番号を付ける。`vcc://vpm/addRepo?url=...` はコピー用のコードブロックで書く — GitHub の Markdown は `vcc://` の href を落とすので、リンクにしても押せない
+- `docs/releases/README.md` — 版の一覧。1.1.2 までの版は GitHub の Release に本文がない（1.1.0・1.1.1 は Release もない）ので、ワールドの中の更新履歴にあった内容をここに残している
 - `docs/**/*.meta` は `.gitignore` 済みなので `.meta` は作らない。`docs/` はリリースの zip にも `.unitypackage` にも入らない（`release.yml` で除く）。使い方ガイドなどは GitHub で読む
 
 **Release checklist**:
 1. `package.json` の `version` を更新
-2. `Assets/updatelog.txt` の先頭に新バージョンのエントリを追加（主要な変更のみ簡潔に。軽微な修正は省略可）
-3. `docs/releases/<version>.md` を書く（上記の作法。レビューは PR で受ける）
+2. `Assets/updatelog.txt` の中身を新しい版のものに置き換える（遊ぶ人に見える主な変更だけを数行。前の版は残さない）
+3. `docs/releases/<version>.md` を書き、`docs/releases/README.md` の表に足す（上記の作法。レビューは PR で受ける。日付はリリースの日に両方へ入れる）
 4. コミット・push
 5. GitHub Actions の「Build Release」ワークフローを **`publish` にチェックを入れて**手動実行 (develop ブランチ)。チェック無しで実行すると成果物を Artifacts に上げるだけの dry run になる (ワークフロー変更の確認に使う)
 6. リリースが作られたら本文を入れる: `gh release edit <version> --repo Mega-Gorilla/KawaPlayer --notes-file docs/releases/<version>.md`（ワークフローは本文を付けない。添付資産には触れない）
