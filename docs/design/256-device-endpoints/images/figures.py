@@ -1,7 +1,9 @@
-"""Draws the SVG figures of docs/design/256-device-endpoints: those of comparison.md
-(figure 1, the layers; figure 2, how a link is settled; figure 3, adding a part; figure 4,
-how events go out; figure 5, commands and permission) and of README.md (figure 1, the
-proposed wiring), comparing KawaPlayer with VizVid (VVMW).
+"""Draws the SVG figures of docs/design/256-device-endpoints, comparing KawaPlayer with VizVid (VVMW):
+those of comparison.md (figure 1, the layers; figure 2, how a link is settled; figure 3, adding a part;
+figure 4, how events go out; figure 5, commands and permission; figure 6, the order of build-time
+processing; figure 7, who each named event goes to) and those of README.md (figure 1, the proposed
+wiring around one front door per player; figure 2, now and after; figure 3, how the front door takes
+an operation; figure 4, the device build step; figure 5, slots by name; figure 6, the plan).
 
   python figures.py            # writes the SVGs next to this script
 
@@ -281,33 +283,44 @@ def fig_permission():
                "KawaPlayerでは、ボタンを押すとUIControllerがBeforeUserXxxを送り、PermissionManagementUIが中止しなければControllerを呼ぶ。VVMWでは、外の権限の仕組みが_OnUnlockと_Lockを送り、FrontendHandlerがロック中は5つの命令を断り、UIHandlerはURL欄などを押せなくする。", "".join(b))
 
 
-# README.md, figure 1: the proposed wiring.
+# README.md, figure 1: the proposed wiring around one front door per player.
 def fig_proposal():
-    W, H = 820, 470
-    b = [text(24, 30, "整理したあとのつなぎ方（案）", "t1 f14"),
-         text(24, 50, "どのプレイヤーに従うかはデバイスの根元の 1 か所。ビルドがそこから参照を書き直す。デバイスのことはデバイスの側に置く", "t2 f12")]
-    b.append(group(24, 70, 270, 236, "デバイス", "根元に YamaPlayerSubController"))
-    b.append(node(44, 120, 230, 50, ["YamaPlayer（正の値）", ("どのプレイヤーに従うか", "t2 f11")], "go", "t1 f12", 17))
-    b.append(node(44, 186, 230, 50, ["UIController・Screen・Speaker", ("参照はビルドが書き直す", "t2 f11")], "box", "t1 f12", 17))
-    b.append(node(44, 246, 230, 50, ["デバイスの区画とビルド処理", ("デバイスの側のフォルダーに置く", "t2 f11")], "box", "t1 f12", 17))
-    b.append(node(330, 120, 220, 116, ["デバイスの処理（ビルド・新）", ("下の参照を書き直す", "t2 f11"), ("食い違いをログに出す", "t2 f11"), ("未設定のデバイスは外す", "t2 f11")], "ask", "t1 f12", 18))
-    b.append(node(586, 120, 210, 116, ["本体", ("Controller", "t1 f12"), ("モジュール", "t1 f12")], "go", "t1 f13", 20))
-    b.append(arrow([(274, 145), (330, 160)]))
-    b.append(arrow([(330, 200), (276, 211)], "dash"))
-    b.append(arrow([(274, 222), (306, 222), (306, 284), (691, 284), (691, 238)], "dash", "_controller で指す", (498, 278), "middle"))
-    b.append(group(24, 326, 380, 120, "UI の差し込み先に名前"))
-    b.append(text(44, 372, "モジュールの uiSlots は、パスでなく名前で指す", "t1 f12"))
-    b.append(text(44, 394, "UI のプレハブに、名前の印（ビルドで消える）を置く", "t1 f12"))
-    b.append(text(44, 416, "どこにも写されなかったら、ログに出す", "t1 f12"))
-    b.append(group(416, 326, 380, 120, "接続口の名前と配る仕組み"))
-    b.append(text(436, 372, "名前のイベントを 1 つの定数の一覧にする", "t1 f12"))
-    b.append(text(436, 394, "配り先の扱いを共通の補助にそろえる", "t1 f12"))
-    b.append(text(436, 416, "名前と受け手のメソッドをテストで確かめる", "t1 f12"))
-    b.append(legend(24, H - 12, [("solid", "読む"), ("dash", "書き直す・指す")]))
-    return svg(W, H, "整理したあとのつなぎ方（案）",
-               "デバイスの根元のYamaPlayerを正の値とし、ビルドのデバイスの処理が下のUIController、Screen、Speakerの参照を書き直し、食い違いをログに出し、未設定のデバイスを外す。デバイスの区画とビルド処理はデバイスの側に置く。モジュールのUIは名前の差し込み先に写し、名前のイベントは定数の一覧にまとめる。", "".join(b))
-
-
+    W, H = 820, 610
+    b = [text(24, 30, "組み直したあとのつなぎ方（案）", "t1 f14"),
+         text(24, 50, "利用者の操作は、プレイヤーごとに 1 つの窓口を通る。値を読むことと出来事は、今のまま本体から受ける", "t2 f12")]
+    b.append(group(24, 84, 240, 290, "デバイスと UI"))
+    devs = ["本体のスクリーンの UI", "タブレットのアプリ", "Controller Bar・Playlist Panel", "全員リロードボタン", "モジュールの UI"]
+    gy = [150, 193, 236, 279, 322]
+    for i, name in enumerate(devs):
+        y = 120 + i * 48
+        b.append(node(40, y, 208, 40, [name], "box", "t1 f12"))
+        b.append(arrow([(248, y + 20), (308, gy[i])], "blue"))
+    b.append(node(310, 120, 200, 232, ["窓口（新）", ("プレイヤーごとに 1 つ", "t2 f11"), ("確認のイベント（26 種類）", "t1 f12"),
+                                       ("命令の実行", "t1 f12"), ("URL の差し込み口", "t1 f12"), ("断ったときの知らせ", "t1 f12")], "go", "t1 f13 b", 26))
+    b.append(node(310, 396, 200, 48, ["権限", ("PermissionManagement", "t2 mono")], "ask", "t1 f12", 17))
+    b.append(arrow([(410, 396), (410, 354)]))
+    b.append(text(420, 380, "窓口に 1 回だけ登録", "t2 f11"))
+    b.append(node(580, 96, 216, 44, ["中の処理", ("自動再生・受信・復元・リトライ", "t2 f11")], "box", "t1 f12", 16))
+    b.append(node(580, 166, 216, 64, ["本体", ("Controller", "t2 mono")], "go", "t1 f12", 20))
+    b.append(node(580, 262, 216, 64, ["モジュール", ("全員リロード・音程・スライドショー", "t2 f11")], "go", "t1 f12", 20))
+    b.append(arrow([(688, 140), (688, 164)], "orange"))
+    b.append(text(698, 157, "窓口を通らない", "ts2 f11"))
+    b.append(arrow([(510, 214), (578, 214)], "blue"))
+    b.append(arrow([(510, 294), (578, 294)], "blue"))
+    b.append(text(544, 250, "確かめて", "t2 f11", "middle"))
+    b.append(text(544, 266, "から呼ぶ", "t2 f11", "middle"))
+    b.append(arrow([(580, 180), (548, 180), (548, 72), (144, 72), (144, 118)], "dash"))
+    b.append(text(290, 94, "値を読む・出来事を受ける（今のまま）", "t2 f11"))
+    for i, (title, l1, l2) in enumerate([("正の値と足し方", "デバイスの根元が窓口を選ぶ", "ビルドが下の部品にそろえる"),
+                                         ("デバイスのことはデバイスに", "設定はデバイスの区画に", "ビルド処理はデバイスの側に"),
+                                         ("名前を付ける", "確認と出来事の名前を一覧に", "UI の差し込み先に名前の印")]):
+        x = 24 + i * 262
+        b.append(group(x, 466, 248, 96, title))
+        b.append(text(x + 14, 514, l1, "t1 f12"))
+        b.append(text(x + 14, 538, l2, "t1 f12"))
+    b.append(legend(24, H - 16, [("blue", "命令（窓口を通る）"), ("dash", "読む・出来事"), ("orange", "中の処理")]))
+    return svg(W, H, "組み直したあとのつなぎ方（案）",
+               "本体のスクリーンのUI、タブレットのアプリ、Controller BarとPlaylist Panel、全員リロードボタン、モジュールのUIは、命令をプレイヤーごとに1つの窓口に出す。窓口は確認のイベントを配り、権限が通せば本体やモジュールを呼ぶ。権限は窓口に1回だけ登録する。自動再生などの中の処理は、窓口を通らずに本体を呼ぶ。値を読むことと出来事を受けることは、今のまま本体から。下に、正の値と足し方、デバイスのことはデバイスに、名前を付ける、の3つを並べる。", "".join(b))
 
 
 # comparison.md, figure 6: the order of build-time processing.
@@ -384,20 +397,20 @@ def fig_targets():
 # README.md, figure 2: now and after, by stage.
 def fig_before_after():
     W, H = 820, 430
-    b = [text(24, 30, "今と、整理したあと", "t1 f14"),
-         text(24, 50, "3 段のつなぎ込みのうち、エディターとビルドが変わる。実行時の登録は今のまま", "t2 f12")]
+    b = [text(24, 30, "今と、組み直したあと", "t1 f14"),
+         text(24, 50, "エディターとビルドに加えて、実行時の命令の道が変わる。値の読み方と出来事の受け方は今のまま", "t2 f12")]
     cols = ["エディター", "ビルド", "実行時"]
     x0, cw, gap = 150, 210, 12
     for i, c in enumerate(cols):
         b.append(text(x0 + i * (cw + gap) + cw / 2, 82, c, "t1 f13 b", "middle"))
     rows = [("今", "box", [
                 (["選んだときだけ、Sub Controller が", "下の部品の _controller に書く", "タブレットの欄も共通の所にある"], "box"),
-                (["デバイスごとの処理が配線する", "選んだ値と合うかは確かめない", "モジュールの UI はパスで写す"], "box"),
-                (["Start で AddListener", "名前は送る側も受ける側も", "文字列"], "box")]),
-            ("整理したあと", "go", [
-                (["置くときにプレイヤーを自動で選ぶ", "デバイスの設定は、デバイスの", "区画として描く（D4・D8）"], "go"),
-                (["デバイスの処理が、正の値から", "書き直す・確かめる・外す（D2・D3）", "モジュールの UI は名前の印に写す（D6）"], "go"),
-                (["Start で AddListener（今のまま）", "名前は 1 つの一覧の定数（D5）", "差し込み口は型付き（D5）"], "go")])]
+                (["デバイスごとの処理が配線する", "選んだ値と合うかは確かめない", "権限の部品を UI ごとに写す"], "box"),
+                (["UI ごとに確かめて、", "本体を直接呼ぶ", "写す場所の無い UI は権限なし"], "box")]),
+            ("組み直したあと", "go", [
+                (["置くときにプレイヤーを自動で選ぶ", "デバイスの設定は、デバイスの", "区画として描く（D7・D8）"], "go"),
+                (["デバイスの処理が、正の値から", "窓口の参照をそろえる（D5・D6）", "モジュールの UI は名前の印に（D10）"], "go"),
+                (["命令は窓口を通る（D1）", "権限は窓口に 1 回だけ登録", "読む・出来事は本体から（今のまま）"], "go")])]
     for r, (name, cls, cells) in enumerate(rows):
         y = 96 + r * 150
         b.append(node(24, y, 114, 130, [name], cls, "t1 f13", 18))
@@ -406,21 +419,42 @@ def fig_before_after():
             b.append(node(x, y, cw, 130, lines, ccls, "t1 f12", 21))
             if i < 2:
                 b.append(arrow([(x + cw + 1, y + 65), (x + cw + gap - 1, y + 65)]))
-    b.append(text(24, H - 20, "変えないもの：権限の確認の場所（UI、D7）、実行時の登録のしかた、同期のしかた。", "t2 f12"))
-    return svg(W, H, "今と、整理したあと",
-               "今は、エディターで選んだときだけ参照を書き、ビルドはデバイスごとに配線し、モジュールのUIをパスで写す。整理したあとは、置くときにプレイヤーを自動で選び、ビルドのデバイスの処理が正の値から参照を書き直して確かめ、モジュールのUIは名前の印に写す。実行時の登録は今のままで、名前は定数の一覧にする。", "".join(b))
+    b.append(text(24, H - 20, "変えないもの：値の読み方と出来事の受け方、中の処理（自動再生など）の呼び方、同期のしかた。", "t2 f12"))
+    return svg(W, H, "今と、組み直したあと",
+               "今は、エディターで選んだときだけ参照を書き、ビルドはデバイスごとに配線して権限の部品をUIごとに写し、実行時はUIごとに確かめて本体を直接呼ぶ。組み直したあとは、置くときにプレイヤーを自動で選び、ビルドのデバイスの処理が窓口の参照をそろえ、実行時の命令は窓口を通り、権限は窓口に1回だけ登録する。値の読み方と出来事の受け方は今のまま。", "".join(b))
 
 
-# README.md, figure 3: the device build step (D2, D3).
+# README.md, figure 3: how the front door takes an operation.
+def fig_gateway():
+    people = [("UI・デバイス", "呼んだ物"), ("窓口", "プレイヤーごとに 1 つ"), ("権限", "PermissionManagement"), ("本体・モジュール", "Controller など")]
+    steps = [("msg", 0, 1, "PlayTrack(自分, 曲)", "blue"),
+             ("msg", 1, 2, "BeforeUserPlayTrack"),
+             ("note", 2, ["足りなければ断る"]),
+             ("note", 1, ["断られたとき"]),
+             ("msg", 1, 0, "知らせ（ダイアログ。無ければ本体のスクリーン）", "orange"),
+             ("note", 1, ["通ったとき"]),
+             ("msg", 1, 3, "所有権を取って PlayTrack(曲)", "blue"),
+             ("msg", 3, 0, "AfterVideoReady など（出来事。今のまま）", "dash"),
+             ("note", 0, ["モジュールの UI のとき"]),
+             ("msg", 0, 1, "確かめてもらう", "blue"),
+             ("msg", 1, 2, "BeforeUserChangePitch"),
+             ("msg", 1, 0, "通った"),
+             ("msg", 0, 3, "自分のモジュールの設定を変える", "blue")]
+    return seq(820, "窓口が操作を受けて流すまで", "利用者の操作は、窓口が確かめてから本体を呼ぶ。断ったときは、窓口が呼んだ物に知らせる",
+               people, steps,
+               "UIやデバイスが、自分を添えて窓口のPlayTrackを呼ぶ。窓口はBeforeUserPlayTrackを権限に配る。断られたら、窓口が呼んだ物に知らせを出す（ダイアログ、無ければ本体のスクリーン）。通ったら、窓口が所有権を取って本体のPlayTrackを呼ぶ。本体の出来事は今のままUIに届く。モジュールのUIは、窓口に確かめてもらい、通ったら自分のモジュールの設定を変える。")
+
+
+# README.md, figure 4: the device build step (D5, D6).
 def fig_device_build():
     W, H = 820, 440
     b = [text(24, 30, "デバイスの処理（ビルド、新）の流れ", "t1 f14"),
-         text(24, 50, "モジュールの処理より前に、デバイスごとに 1 回動く。下の参照を正の値にそろえてから、ほかの処理に渡す", "t2 f12")]
+         text(24, 50, "モジュールの処理より前に、デバイスごとに 1 回動く。下の参照を正の値（選んだプレイヤー）にそろえてから、ほかの処理に渡す", "t2 f12")]
     b.append(node(24, 90, 170, 56, ["デバイスの根元", ("YamaPlayerSubController", "t2 mono")], "box", "t1 f12", 18))
     b.append(node(234, 84, 190, 68, ["YamaPlayer は", "選ばれているか？"], "ask", "t1 f12", 20))
     b.append(node(464, 84, 190, 68, ["下の部品の参照は、", "そのプレイヤーか？"], "ask", "t1 f12", 20))
-    b.append(node(234, 230, 190, 72, ["デバイスを外す", ("EditorOnly にして", "t2 f11"), ("ログに出す（D3）", "t2 f11")], "hot", "t1 f12", 18))
-    b.append(node(464, 230, 190, 72, ["書き直す", ("違っていた部品を", "t2 f11"), ("ログに出す（D2）", "t2 f11")], "go", "t1 f12", 18))
+    b.append(node(234, 230, 190, 72, ["デバイスを外す", ("EditorOnly にして", "t2 f11"), ("ログに出す（D6）", "t2 f11")], "hot", "t1 f12", 18))
+    b.append(node(464, 230, 190, 72, ["書き直す", ("違っていた部品を", "t2 f11"), ("ログに出す（D5）", "t2 f11")], "go", "t1 f12", 18))
     b.append(node(640, 336, 156, 64, ["モジュールの処理", ("（-3000）ほか", "t2 f11")], "box", "t1 f12", 18))
     b.append(arrow([(194, 118), (234, 118)]))
     b.append(arrow([(424, 118), (464, 118)], label="はい", at=(444, 110)))
@@ -429,15 +463,15 @@ def fig_device_build():
     b.append(arrow([(654, 118), (718, 118), (718, 336)], label="はい", at=(686, 110)))
     b.append(arrow([(559, 302), (559, 368), (640, 368)]))
     b.append(text(24, 336, "下の部品：", "t2 f12 b"))
-    b.append(text(24, 356, "UIController._controller", "t1 mono"))
+    b.append(text(24, 356, "UIController の窓口の欄", "t1 f12"))
     b.append(text(24, 374, "YamaPlayerScreen.controller", "t1 mono"))
     b.append(text(24, 392, "YamaPlayerSpeaker.controller", "t1 mono"))
     b.append(text(24, H - 16, "本体（KawaPlayer.prefab）の ScreenUI は、YamaPlayer の下にあるので、同じ決まりでそのプレイヤーにそろえる。", "t2 f12"))
     return svg(W, H, "デバイスの処理（ビルド、新）の流れ",
-               "デバイスの根元のYamaPlayerが選ばれていなければ、デバイスを外してログに出す。選ばれていれば、下のUIController、YamaPlayerScreen、YamaPlayerSpeakerの参照がそのプレイヤーかを見て、違えば書き直してログに出す。そのあと、モジュールの処理などに渡す。", "".join(b))
+               "デバイスの根元のYamaPlayerが選ばれていなければ、デバイスを外してログに出す。選ばれていれば、下のUIControllerの窓口の欄、YamaPlayerScreen、YamaPlayerSpeakerの参照がそのプレイヤーかを見て、違えば書き直してログに出す。そのあと、モジュールの処理などに渡す。", "".join(b))
 
 
-# README.md, figure 4: slots by path and by name (D6).
+# README.md, figure 5: slots by path and by name (D10).
 def fig_slot_names():
     W, H = 820, 420
     b = [text(24, 30, "UI の差し込み先：パスと名前の印", "t1 f14"),
@@ -448,44 +482,49 @@ def fig_slot_names():
     b.append(node(540, 112, 236, 80, ["UI の階層", ("作りを変えると外れる", "ts2 f11"), ("見つからなければ黙って飛ばす", "ts2 f11")], "hot", "t1 f12", 19))
     b.append(arrow([(280, 152), (320, 152)]))
     b.append(arrow([(500, 152), (540, 152)]))
-    b.append(group(24, 236, 772, 150, "整理したあと：名前で写す（D6）"))
+    b.append(group(24, 236, 772, 150, "組み直したあと：名前で写す（D10）"))
     b.append(node(44, 278, 236, 80, ["モジュールの uiSlots", ("名前：Settings.Video", "t2 mono"), ("（パスは知らない）", "t2 f11")], "box", "t1 f12", 19))
     b.append(node(320, 278, 180, 80, ["名前の印を探す", ("同じ名前の印の下に写す", "t2 f11")], "ask", "t1 f12", 20))
     b.append(node(540, 278, 236, 80, ["UI のプレハブ", ("印：Settings.Video", "t2 mono"), ("どこにも無ければログに出す", "ts1 f11")], "go", "t1 f12", 19))
     b.append(arrow([(280, 318), (320, 318)]))
     b.append(arrow([(500, 318), (540, 318)]))
-    b.append(text(24, H - 14, "印は U# でない部品で、ビルドで消える。デバイスは、受け付ける差し込み先に印を置けばよい。", "t2 f12"))
+    b.append(text(24, H - 14, "印は U# でない部品で、ビルドで消える。窓口のあとは、権限は差し込み先に頼らない。", "t2 f12"))
     return svg(W, H, "UIの差し込み先：パスと名前の印",
-               "今は、モジュールのuiSlotsがUIの階層のパスを持ち、transform.Findで探すので、UIの作りを変えると黙って外れる。整理したあとは、UIのプレハブに名前の印を置き、モジュールは名前で写す先を指し、どこにも無ければログに出す。", "".join(b))
+               "今は、モジュールのuiSlotsがUIの階層のパスを持ち、transform.Findで探すので、UIの作りを変えると黙って外れる。組み直したあとは、UIのプレハブに名前の印を置き、モジュールは名前で写す先を指し、どこにも無ければログに出す。", "".join(b))
 
 
-# README.md, figure 5: the plan over versions.
+# README.md, figure 6: the plan over versions.
 def fig_rollout():
-    W, H = 820, 330
+    W, H = 820, 410
     b = [text(24, 30, "進め方", "t1 f14"),
-         text(24, 50, "不具合と #206 は 1.3.0 で先に直し、整理は 1.3.0 のあとに子の issue 1〜4 の順で入れる（D9・D10）", "t2 f12")]
-    b.append(group(24, 72, 190, 220, "1.3.0（今）"))
-    b.append(node(40, 120, 158, 56, ["AudioLink の", "食い違い（新しい issue）"], "hot", "t1 f12", 18))
-    b.append(node(40, 196, 158, 56, ["#206", "タブレットの戻す設定"], "box", "t1 f12", 18))
-    b.append(group(234, 72, 562, 220, "1.3.0 のあと（1.4.0）"))
-    steps = [("1", "正の値と", "足し方", "D2・D3・D8"), ("2", "区画と", "ビルド処理", "D4"), ("3", "名前の一覧と", "配る仕組み", "D5"), ("4", "差し込み先の", "名前", "D6")]
-    for i, (n, l1, l2, d) in enumerate(steps):
-        x = 250 + i * 136
-        b.append(node(x, 120, 118, 92, [f"子の issue {n}", l1, l2, (d, "t2 f11")], "go", "t1 f12", 19))
-        if i < 3:
-            b.append(arrow([(x + 119, 166), (x + 135, 166)]))
-    b.append(text(250, 244, "1 が土台：ほかの子の issue が「どのプレイヤーか」を頼れるようにする", "t2 f12"))
-    b.append(text(250, 264, "子の issue ごとに、device-connections.md と図を書き直す", "t2 f12"))
-    b.append(arrow([(214, 166), (234, 166)], "dash"))
+         text(24, 50, "不具合と #206 は 1.3.0 で先に直し、組み直しは 1.3.0 のあとに子の issue 1〜6 の順で入れる（D12・D13）", "t2 f12")]
+    b.append(group(24, 72, 190, 300, "1.3.0（今）"))
+    b.append(node(40, 140, 158, 56, ["AudioLink の", "食い違い（新しい issue）"], "hot", "t1 f12", 18))
+    b.append(node(40, 220, 158, 56, ["#206", "タブレットの戻す設定"], "box", "t1 f12", 18))
+    b.append(group(234, 72, 562, 300, "1.3.0 のあと（1.4.0）"))
+    steps = [("1", "窓口と権限", "D1〜D4・#211"), ("2", "命令を窓口に", "D1・D9 の一部"), ("3", "正の値と足し方", "D5〜D7"),
+             ("4", "区画とビルド処理", "D8"), ("5", "名前の一覧と配る仕組み", "D9"), ("6", "差し込み先の名前", "D10")]
+    for i, (n, l1, d) in enumerate(steps):
+        r, c = divmod(i, 3)
+        x = 250 + c * 182
+        y = 108 + r * 118
+        cls = "go" if i < 2 else "box"
+        b.append(node(x, y, 166, 80, [f"子の issue {n}", l1, (d, "t2 f11")], cls, "t1 f12", 21))
+        if c < 2:
+            b.append(arrow([(x + 167, y + 40), (x + 181, y + 40)]))
+    b.append(arrow([(250 + 2 * 182 + 83, 188), (250 + 2 * 182 + 83, 207), (333, 207), (333, 224)]))
+    b.append(text(250, 334, "1・2 が土台：利用者の操作の道を、窓口 1 つにする", "t2 f12"))
+    b.append(text(250, 354, "子の issue ごとに、device-connections.md と図を書き直す", "t2 f12"))
+    b.append(arrow([(214, 188), (234, 188)], "dash"))
     return svg(W, H, "進め方",
-               "1.3.0では、AudioLinkの食い違いと#206を先に直す。1.3.0のあとに、子のissue1（正の値と足し方）、2（区画とビルド処理）、3（名前の一覧と配る仕組み）、4（差し込み先の名前）の順に入れる。", "".join(b))
+               "1.3.0では、AudioLinkの食い違いと#206を先に直す。1.3.0のあとに、子のissue1（窓口と権限）、2（命令を窓口に）、3（正の値と足し方）、4（区画とビルド処理）、5（名前の一覧と配る仕組み）、6（差し込み先の名前）の順に入れる。1と2が土台で、利用者の操作の道を窓口1つにする。", "".join(b))
 
 
 os.makedirs(OUT, exist_ok=True)
 for name, f in (("layers.svg", fig_layers), ("linking.svg", fig_linking), ("adding.svg", fig_adding),
                 ("events.svg", fig_events), ("permission.svg", fig_permission), ("build-order.svg", fig_build_order),
                 ("targets.svg", fig_targets), ("proposal.svg", fig_proposal), ("before-after.svg", fig_before_after),
-                ("device-build.svg", fig_device_build), ("slot-names.svg", fig_slot_names), ("rollout.svg", fig_rollout)):
+                ("device-build.svg", fig_device_build), ("slot-names.svg", fig_slot_names), ("rollout.svg", fig_rollout), ("gateway.svg", fig_gateway)):
     with open(os.path.join(OUT, name), "w", encoding="utf-8", newline="\n") as fh:
         fh.write(f())
     print("wrote", name)

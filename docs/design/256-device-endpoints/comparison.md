@@ -19,7 +19,7 @@ KawaPlayer と VizVid（VVMW）が、本体と、その横に置く部品（UI�
 - **VizVid：** 部品が自分の欄に属性（`[Locatable]`・`[Resolve]`・`[BindUdonSharpEvent]`）を付けて宣言し、ビルドの前処理がそれを読んで、参照を埋め、イベントの配り先を名前ごとに作る。
 - **KawaPlayer：** Sub Controller のインスペクターが、選んだときに参照を書く。ビルドではデバイスごとのビルド処理が配線し、実行時に各部品が自分を登録する。
 
-権限にも違いがある。VizVid は、再生の命令の 5 つを受ける側（`FrontendHandler`）が断り、URL の入力などは UI が押せなくする。KawaPlayer は、操作の前に UI が確認のイベントを送り、権限のモジュールが中止する。
+命令の受け口と権限にも違いがある。VizVid は、再生・リスト・同期の命令を、本体ごとに 1 つの `FrontendHandler` で受け、そのうち 5 つをロック中に断る。シーク・速度・音量などは `Core` が直接受け、URL の入力などは UI が押せなくする。KawaPlayer は、UI ごとの `UIController` が受け口で、操作の前に確認のイベントを送り、権限のモジュールが中止する。権限のモジュールは UI ごとに写すので、写す場所の無い UI には権限がかからない（§8.4）。
 
 用語の対応（表 2）と、KawaPlayer の接続口 E1〜E12 ごとの VVMW の対応（表 4）も並べた。VizVid の前処理と配り先の作られ方は、テスト用の Unity（ClientSim）で確かめた（付録 B）。この文書は事実の記録で、直す方針は [README.md](README.md) にまとめる。
 
@@ -122,7 +122,7 @@ VRChat のワールドの U#（UdonSharp）では、部品どうしをつなぐ�
 | イベントの配り方 | `Controller` は型付き（29）と名前（E3）、`UIController` は名前、モジュール 4 つが自前のリスト | 共通の基底クラス `UdonSharpEventSender` の `SendEvent(名前)` | §7 |
 | 購読の時 | 実行時の `Start` で `AddListener` | ビルドで `[BindUdonSharpEvent]`。受ける名前を絞れる | §7 |
 | 名前の確かめ | 送る側も受ける側も文字列 | 受ける側は `nameof` で自分のメソッドを指す | §7 |
-| 命令 | UI が `Controller` を直接呼ぶ | 再生系は UI が `FrontendHandler` を呼び、見る人ごとの設定は `Core` を呼ぶ | §8 |
+| 命令 | UI が確かめてから `Controller` を直接呼ぶ。受け口は UI の数だけある | 再生・リスト・同期は UI が `FrontendHandler` を呼び、シーク・速度・音量などは `Core` を呼ぶ。受け口は本体ごとに 1 つ | §8 |
 | 権限 | UI が操作の前に `BeforeUserXxx` を送り、権限のモジュールが中止する | 受ける側が 5 つの命令を断り、URL の入力などは UI が押せなくする。外の仕組みは `_OnUnlock`・`_Lock` を送る | §8 |
 | ビルド時の処理の置き場所 | `IYamaPlayerBuildProcess` を実装したクラス。デバイスごとのクラスもある | 汎用の前処理（属性を読む）と、部品自身の前処理（`ISelfPreProcess`） | §9 |
 | ワールドに 1 つの部品 | タブレットの訪問者の記録を、専用のビルド処理が 1 つにまとめる | `ISingleton` を付けた部品を、汎用の前処理が 1 つにまとめる | §9 |
@@ -311,11 +311,45 @@ URL を、動画として読む前に別の部品に渡す口は、両者にあ�
   - 外の人は、`InputFilterBase` を継いだ部品を作り、Core の欄に入れればよい。VVMW の中には、継いだ部品は無い。
 - **違い：** VVMW の差し込み口は型付きなので、欄やメソッドの名前の打ち間違いはコンパイルで見つかる。U# の継承は 1 本なので、差し込み口を継ぐ部品は、ほかの基底を継げない。
 
+### 8.4 命令の受け口
+
+利用者の操作が、本体に届くまでにどこを通るかを比べる。
+
+- **KawaPlayer：**
+  - 受け口は、UI ごとの `UIController` である。`UIController` は、確認のイベント（`BeforeUserXxx`）を自分のリスナーに送り、中止されなければ `Controller` を呼ぶ。
+  - 確認のイベントは 26 種類あり、`UIController`（3 つの部分クラス）・`GlobalReloadButton`・`PlaylistLoaderUI` の 38 か所で送る。権限のモジュール（`PermissionManagementUI`）が答えるのは、全員で共有する操作の 18 種類である。音量・ミュート・左右反転・明るさ・ずれの補正・解像度・言語・自分の読み込み直しの 8 種類には答えない。
+  - `UIController` が本体（`Controller` とそのキュー）を変える呼び出しは、62 か所ある。内訳は、所有権を取る呼び出し（`TakeOwnership`）25 か所、命令 21 か所（17 種類）、設定の書き込み 16 か所（10 種類）である。
+  - 権限のモジュールは、UI ごとに写される（`uiSlots`）。写す場所の無い Controller Bar と Playlist Panel では、確認のイベントは送られるが、答える物がいない。この 2 つと全員リロードボタンには、断ったことを知らせるダイアログ（`_modalDialog`）も無い。
+  - モジュールの UI のうち、`PitchShifterUI` と `SlideShowerUI` は、確認のイベントを送らずに、自分のモジュールの共有の設定を変える（#211）。`DefaultUrlSettingsUI` は、モジュール自身の決まり（インスタンスのオーナーだけ）で確かめる。
+- **VVMW：**
+  - 受け口は 2 つに分かれる。再生・リスト・リピート・同期の命令は `FrontendHandler` に、シーク・速度・音量・ずれ・範囲のループは `Core` に送る（表 9）。`FrontendHandler` が無い UI は、すべて `Core` に送る。
+  - ロック中に `FrontendHandler` が断るのは、`_Play`・`_Pause`・`_Stop`・`_Skip`・`_GlobalSync` の 5 つである（[FrontendHandler.cs L237–L297](https://github.com/JLChnToZ/VVMW/blob/834bd5ec453297b713399a5fbba1bd52a81b4f82/Packages/idv.jlchntoz.vvmw/Runtime/VVMW/FrontendHandler.cs#L237-L297)）。`PlayUrl`・`PlayAt`・リピート・シャッフルは断らず、UI が押せなくする（§8.2 の表 8）。
+  - オーバーレイ・Resync ボタン・`ActiveRegionConfig` は、`Core` を直接指す（§6 の表 6）。
+
+**表 9** VVMW の UI が命令を送る先（`FrontendHandler` があるとき）
+
+| 操作 | 送る先 | ロック中 | コード |
+| --- | --- | --- | --- |
+| 再生・一時停止・停止 | `FrontendHandler`（`_Play`・`_Pause`・`_Stop`） | 断る | [UIHandler.cs L271–L300](https://github.com/JLChnToZ/VVMW/blob/834bd5ec453297b713399a5fbba1bd52a81b4f82/Packages/idv.jlchntoz.vvmw/Runtime/VVMW/UIHandler.cs#L271-L300) |
+| 次の曲 | `FrontendHandler`（`_Skip`） | 断る | [UIHandler.cs L309](https://github.com/JLChnToZ/VVMW/blob/834bd5ec453297b713399a5fbba1bd52a81b4f82/Packages/idv.jlchntoz.vvmw/Runtime/VVMW/UIHandler.cs#L309) |
+| リピート・シャッフル | `FrontendHandler`（`NoRepeat`・`RepeatOne`・`RepeatAll`・`Shuffle`） | 断らない（UI が止める） | [UIHandler.cs L318–L368](https://github.com/JLChnToZ/VVMW/blob/834bd5ec453297b713399a5fbba1bd52a81b4f82/Packages/idv.jlchntoz.vvmw/Runtime/VVMW/UIHandler.cs#L318-L368) |
+| 自分の同期 | `FrontendHandler`（`_LocalSync`） | 断らない | [UIHandler.cs L376](https://github.com/JLChnToZ/VVMW/blob/834bd5ec453297b713399a5fbba1bd52a81b4f82/Packages/idv.jlchntoz.vvmw/Runtime/VVMW/UIHandler.cs#L376) |
+| 全員の同期 | `FrontendHandler`（`_GlobalSync`） | 断る | [UIHandler.cs L387](https://github.com/JLChnToZ/VVMW/blob/834bd5ec453297b713399a5fbba1bd52a81b4f82/Packages/idv.jlchntoz.vvmw/Runtime/VVMW/UIHandler.cs#L387) |
+| URL を入れる・リストから選ぶ・キューから消す | `FrontendHandler`（`PlayUrl`・`PlayAt`） | 断らない（UI が止める） | [UIHandler_OmniInput.cs L80–L84](https://github.com/JLChnToZ/VVMW/blob/834bd5ec453297b713399a5fbba1bd52a81b4f82/Packages/idv.jlchntoz.vvmw/Runtime/VVMW/UIHandler_OmniInput.cs#L80-L84)、[UIHandler_Playlist.cs L255–L268](https://github.com/JLChnToZ/VVMW/blob/834bd5ec453297b713399a5fbba1bd52a81b4f82/Packages/idv.jlchntoz.vvmw/Runtime/VVMW/UIHandler_Playlist.cs#L255-L268) |
+| シーク | `Core`（`Progress`） | 断らない（UI がスライダーを止める） | [UIHandler_Progress.cs L11](https://github.com/JLChnToZ/VVMW/blob/834bd5ec453297b713399a5fbba1bd52a81b4f82/Packages/idv.jlchntoz.vvmw/Runtime/VVMW/UIHandler_Progress.cs#L11) |
+| 範囲のループ | `Core`（`SetRangeLoop`） | — | [UIHandler_Progress.cs L74](https://github.com/JLChnToZ/VVMW/blob/834bd5ec453297b713399a5fbba1bd52a81b4f82/Packages/idv.jlchntoz.vvmw/Runtime/VVMW/UIHandler_Progress.cs#L74) |
+| 速度・ずれ | `Core`（`Speed`・`SyncOffset`） | — | [UIHandler_Adjustment.cs L21–L74](https://github.com/JLChnToZ/VVMW/blob/834bd5ec453297b713399a5fbba1bd52a81b4f82/Packages/idv.jlchntoz.vvmw/Runtime/VVMW/UIHandler_Adjustment.cs#L21-L74) |
+| 音量・ミュート | `Core`（`Volume`・`Muted`） | — | [UIHandler.cs L397・L404](https://github.com/JLChnToZ/VVMW/blob/834bd5ec453297b713399a5fbba1bd52a81b4f82/Packages/idv.jlchntoz.vvmw/Runtime/VVMW/UIHandler.cs#L397-L404) |
+
+- **違い：**
+  - KawaPlayer の受け口は UI の数だけあり、権限を確かめる部品も UI ごとに要る。
+  - VVMW の受け口は本体ごとに 1 つ（`FrontendHandler`）だが、すべての命令がそこを通るわけではなく、ロックで断るのも 5 つだけである。
+
 ---
 
 ## 9. ビルド時の処理
 
-**表 9** ビルド時の処理の組み立て
+**表 10** ビルド時の処理の組み立て
 
 | | KawaPlayer | VVMW |
 | --- | --- | --- |
@@ -354,7 +388,7 @@ VVMW の前処理の順番は、`Resolve` と重複のまとめが -1、部品�
 
 ## 12. 同期の分担
 
-**表 10** 同期する部品
+**表 11** 同期する部品
 
 | | KawaPlayer | VVMW |
 | --- | --- | --- |
@@ -378,6 +412,7 @@ VVMW の前処理の順番は、`Resolve` と重複のまとめが -1、部品�
 
 - つなぎ方を、部品の欄で宣言する。正の値が部品の側にあり、たどれる値はビルドで決まるので、食い違わない。
 - 部品を足すと、いちばん近い本体に結ばれる。
+- 再生・リスト・同期の命令の受け口が、本体ごとに 1 つ（`FrontendHandler`）にまとまる。ただし、シーク・速度・音量などは `Core` が直接受ける。
 - イベントの配り方が 1 つの基底クラスにまとまり、受ける名前をビルドで絞れる。受ける側の名前は、`nameof` でコンパイル時に確かめられる。
 - デバイスに固有の処理（ビルド・インスペクター）を、部品の側に置ける。前処理と Core のインスペクターは、個別の部品を知らない（部品を足すメニューは、型ごとに分かれる）。
 - 権限の仕組みとは、2 つの名前のイベント（`_OnUnlock`・`_Lock`）だけでつながる。
