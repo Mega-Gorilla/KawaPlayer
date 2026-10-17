@@ -15,9 +15,10 @@ size and reduced, so their edges are smooth.
 """
 import math
 import os
+import random
 import sys
 
-from PIL import Image, ImageDraw, ImageFilter, ImageFont
+from PIL import Image, ImageChops, ImageDraw, ImageFilter, ImageFont
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.normpath(os.path.join(HERE, "..", "..", "..", ".."))
@@ -194,34 +195,105 @@ def sfx(im, xy, s, size=64, col=(255, 236, 120)):
 
 
 def heading(im, num, title, sub=None, en=None):
-    """The chapter heading at the bottom left."""
+    """The chapter heading at the bottom left: a teal bar, the number, the feature's name, what it
+    lets you do, and the same in English, on a band that fades to the right."""
     d = ImageDraw.Draw(im)
-    x = 52
-    nw = d.textlength(num, font=font(76)) + 22 if num else 0
-    lines = [(title, 46, WHITE)]
+    x = 70
+    lines = ([(num, 26, TEAL)] if num else []) + [(title, 56, WHITE)]
     if sub:
-        lines.append((sub, 28, (222, 228, 232)))
+        lines.append((sub, 30, (228, 234, 238)))
     if en:
-        lines.append((en, 22, (160, 172, 182)))
-    widths = [d.textlength(s, font=font(z)) for s, z, _ in lines]
+        lines.append((en, 21, (165, 178, 188)))
     hgt = sum(z + 12 for _, z, _ in lines)
-    top = H - 48 - hgt
-    overlay(im, lambda o: o.rounded_rectangle((x - 22, top - 20, x + nw + max(widths) + 30, H - 28), 18,
-                                              fill=(10, 14, 20, 185)))
-    if num:
-        d.text((x, top + 2), num, font=font(76), fill=TEAL)
-        d.line((x, top + 92, x + nw - 26, top + 92), fill=TEAL, width=4)
+    top = H - 46 - hgt
+
+    def band(o):
+        for k in range(0, 960, 8):
+            o.rectangle((k, top - 34, k + 8, H), fill=(8, 12, 18, int(205 * (1 - k / 960) ** 1.4)))
+    overlay(im, band)
+    d.rounded_rectangle((x - 26, top + 2, x - 18, top + hgt - 10), 4, fill=TEAL)
     y = top
-    for s, z, c in lines:
-        d.text((x + nw, y), s, font=font(z), fill=c)
+    for t, z, c in lines:
+        bold = 1 if z >= 30 else 0
+        d.text((x, y), t, font=font(z), fill=c, stroke_width=bold, stroke_fill=c)
         y += z + 12
 
 
-def telop(im, s, size=44, y=H - 66, en=None):
+def telop(im, s, size=46, y=H - 74, en=None):
+    """A caption line at the bottom centre, with a short line in the logo's colours under it."""
+    d = ImageDraw.Draw(im)
     if en:
-        text(im, (W / 2, y + 30), en, 24, fill=(214, 222, 228), anchor="mm", stroke=4)
-        y -= 22
-    text(im, (W / 2, y), s, size, anchor="mm", stroke=6)
+        text(im, (W / 2, y + 34), en, 24, fill=(214, 222, 228), anchor="mm", stroke=4)
+        y -= 18
+    text(im, (W / 2, y), s, size, anchor="mm", stroke=7)
+    d.text((W / 2, y), s, font=font(size), fill=WHITE, anchor="mm", stroke_width=1, stroke_fill=WHITE)
+    w = min(d.textlength(s, font=font(size)), 900) * 0.5
+    bar = gradient(int(w), 6, [MINT, TEAL, BLUE], horizontal=True)
+    im.alpha_composite(bar, (int(W / 2 - w / 2), int(y + size * 0.62)))
+
+
+CHARS = {"MAO": (A_COL, "M", "まお"), "RIRIKA": (B_COL, "R", "りりか"), "ゲスト": (G_COL, "G", "GUEST")}
+
+
+def say(im, head, s, who, side="right", size=38):
+    """What someone says: their initial in their colour, their name above it, and the words in a
+    white bubble beside their head."""
+    col, ini, _ = CHARS[who]
+    d = ImageDraw.Draw(im)
+    l, t, r, b = d.textbbox((0, 0), s, font=font(size))
+    h = (b - t) + 34
+    w = (r - l) + 56
+    hx, hy = head
+    y = hy - h - 30
+    x = hx + 60 if side == "right" else hx - 60 - w - h * 0.75
+    bx = x + h * 0.75
+    overlay(im, lambda o: o.rounded_rectangle((bx + 4, y + 7, bx + w + 4, y + h + 7), h / 2, fill=(0, 0, 0, 90)))
+    d.rounded_rectangle((bx, y, bx + w, y + h), h / 2, fill=WHITE)
+    d.text((bx + h * 0.45, y + h / 2), s, font=font(size), fill=INK, anchor="lm", stroke_width=1, stroke_fill=INK)
+    d.ellipse((x, y, x + h, y + h), fill=col, outline=WHITE, width=4)
+    d.text((x + h / 2, y + h / 2), ini, font=font(int(h * 0.42)), fill=WHITE, anchor="mm", stroke_width=1, stroke_fill=WHITE)
+    text(im, (bx + h * 0.3, y - 6), who, 20, fill=WHITE, anchor="lb", stroke=3)
+
+
+def name_tag(im, who, x=130, y=22):
+    """The name tag at the top left, when someone first comes on screen."""
+    col, ini, kana = CHARS[who]
+    d = ImageDraw.Draw(im)
+    w = d.textlength(who, font=font(30)) + d.textlength(kana, font=font(16)) + 96
+    overlay(im, lambda o: o.rounded_rectangle((x, y, x + w, y + 56), 28, fill=(10, 14, 20, 200)))
+    d.rounded_rectangle((x, y, x + w, y + 56), 28, outline=col, width=3)
+    d.ellipse((x + 8, y + 8, x + 48, y + 48), fill=col)
+    d.text((x + 28, y + 28), ini, font=font(22), fill=WHITE, anchor="mm", stroke_width=1, stroke_fill=WHITE)
+    d.text((x + 60, y + 28), who, font=font(30), fill=WHITE, anchor="lm", stroke_width=1, stroke_fill=WHITE)
+    d.text((x + 66 + d.textlength(who, font=font(30)), y + 34), kana, font=font(16), fill=col, anchor="lm")
+
+
+def action(im, s, y=26):
+    """The action tag at the top centre: what someone is doing, in a few words."""
+    d = ImageDraw.Draw(im)
+    w = d.textlength(s, font=font(30)) + 86
+    box = (W / 2 - w / 2, y, W / 2 + w / 2, y + 56)
+    overlay(im, lambda o: o.rounded_rectangle(box, 28, fill=(10, 14, 20, 190)))
+    d.rounded_rectangle(box, 28, outline=WHITE, width=3)
+    d.ellipse((box[0] + 22, y + 19, box[0] + 40, y + 37), fill=TEAL)
+    d.text((box[0] + 56, y + 28), s, font=font(30), fill=WHITE, anchor="lm", stroke_width=1, stroke_fill=WHITE)
+
+
+def captions():
+    """The caption styles side by side, for the README."""
+    im = new(NIGHT["wall"])
+    room(im, screen=sample_video(), glow=True)
+    im = im.filter(ImageFilter.GaussianBlur(8))
+    name_tag(im, "RIRIKA", x=40)
+    action(im, "スクリーンに送る")
+    say(im, (520, 380), "見て見て！", "RIRIKA")
+    heading(im, "02", "タブレット", "手元で見せて、みんなのスクリーンにも", "Show it in your hands, then on the big screen")
+    telop(im, "手元の写真を、みんなのスクリーンへ", y=H - 250, en="Share a picture on the big screen")
+    for (x, y), n in (((24, 54), "②"), ((W / 2 - 230, 54), "③"), ((560, 300), "④"), ((24, H - 150), "①"), ((W / 2 - 400, H - 250), "⑤")):
+        d = ImageDraw.Draw(im)
+        d.ellipse((x - 20, y - 20, x + 20, y + 20), fill=ORANGE)
+        d.text((x, y), n, font=font(26), fill=WHITE, anchor="mm")
+    return im
 
 
 def room(im, mode=NIGHT, screen=None, glow=False, window=True, door=False):
@@ -449,6 +521,7 @@ def c01():
     text(im, (630, 600), "歩く", 30, fill=ORANGE, anchor="mm", stroke=4)
     arrow(im, (860, 120), (1060, 120))
     text(im, (960, 160), "カメラも並んで右へ", 26, fill=ORANGE, anchor="mm", stroke=4)
+    name_tag(im, "MAO")
     note(im, "寄り・横から追う")
     return im
 
@@ -573,7 +646,7 @@ def c05():
     capsule(im, btn[0] - 130, btn[1] - 64)
     bubble(im, 380, 250, "コピー！", 36, tail=(btn[0] - 70, btn[1] - 10))
     text(im, (165, 330), "ロゴから魚が泳ぎ出る", 24, fill=ORANGE, anchor="mm", stroke=4)
-    heading(im, "01", "VHub のプレイリスト", "URL ひとつで、まるごと読み込む", "VHub playlists, from one URL")
+    heading(im, "01", "VHub のプレイリスト", "VHub で作ったプレイリストを、URL ひとつで", "Your VHub playlist, from a single URL")
     note(im, "2D の空間")
     return im
 
@@ -617,7 +690,8 @@ def c07():
     d.rounded_rectangle((fx + 30, fy + 30, fx + 170, fy + 150), 50, fill=A_COL)
     d.line((fx + 60, fy + 60, fx + 6, fy + 6), fill=A_COL, width=32)
     d.ellipse((fx - 10, fy - 10, fx + 20, fy + 20), fill=A_COL)
-    note(im, "MAO の指でタップ")
+    action(im, "URL の欄をタップ", y=600)
+    note(im, "MAO の指でタップ", (W - 20, 660))
     return im
 
 
@@ -641,7 +715,7 @@ def c08():
             rr = r - k * 26
             o.ellipse((cx - rr, cy - rr, cx + rr, cy + rr), outline=(150, 235, 245, 220 - k * 60), width=8 - k * 2)
     overlay(im, rings)
-    telop(im, "曲の一覧が、そのまま並ぶ", en="The whole list, ready to play")
+    telop(im, "曲の一覧が、そのまま並ぶ", en="Every song, lined up")
     note(im, "波紋が広がり、スクリーンの一覧へ")
     return im
 
@@ -668,6 +742,7 @@ def c09():
     for (bx, by), (cx, cy) in (((x0 - 20, y0 - 20), (60, 40)), ((x1 + 20, y0 - 20), (W - 60, 40)),
                                ((x1 + 20, y1 + 20), (W - 60, H - 40)), ((x0 - 20, y1 + 20), (60, H - 40))):
         arrow(im, (bx, by), (bx + (cx - bx) * 0.7, by + (cy - by) * 0.7), width=5, head=18)
+    name_tag(im, "RIRIKA")
     note(im, "スクリーンから、2 人の後ろまで引く")
     return im
 
@@ -725,10 +800,10 @@ def c10():
         d.ellipse((x - 34, 520, x + 34, 600), fill=B_COL)
     for x, y, r in ((520, 380, 26), (1010, 360, 20), (990, 470, 14), (500, 500, 16)):
         sparkle(im, x, y, r)
-    bubble(im, 860, 120, "見て見て！", 40, tail=(hb[0] + 40, hb[1] - 120))
+    say(im, hb, "見て見て！", "RIRIKA")
     person(im, 120, 1300, 1100, A_COL)
     text(im, (760, 690), "縦の写真を、横持ちのまま", 24, fill=ORANGE, anchor="mm", stroke=4)
-    heading(im, "02", "タブレット", "手元で見せて、スクリーンにも", "Show it in your hands, or on the big screen")
+    heading(im, "02", "タブレット", "手元で見せて、みんなのスクリーンにも", "Show it in your hands, then on the big screen")
     note(im, "RIRIKA に寄る")
     return im
 
@@ -745,7 +820,7 @@ def c11():
     tab = (1000, 380, 1330, 570)
     scr = tablet_frame(im, tab, radius=26)
     fit_into(im, sample_photo_tall(), scr)
-    bubble(im, 120, 120, "縦、縦！", 40, tail=(ha[0] + 30, ha[1] - 110))
+    say(im, ha, "縦、縦！", "MAO")
     text(im, (fx, fy + 70), "くるっと回す仕草", 24, fill=ORANGE, anchor="mm", stroke=4)
     note(im, "MAO が指摘する")
     return im
@@ -768,7 +843,7 @@ def c12():
     d.arc((880, 120, 1120, 360), 250, 30, fill=ORANGE, width=8)
     arrow(im, (1100, 320), (1080, 352))
     text(im, (1000, 400), "縦に回す", 28, fill=ORANGE, anchor="mm", stroke=4)
-    telop(im, "縦に持てば、縦の画面に", en="Turn it upright, and the screen turns too")
+    telop(im, "縦に持てば、画面も縦に", en="Turn it upright, the screen turns too")
     note(im, "RIRIKA の肩越し・はずかしそうに")
     return im
 
@@ -778,7 +853,7 @@ def c13():
     room(im, glow=True)
     fit_into(im, sample_photo_tall(), SCREEN)
     ha = person(im, 1080, 690, 400, A_COL, "MAO", arm="wave")
-    bubble(im, 850, 90, "おおー！", 38, tail=(ha[0] - 70, ha[1] - 96))
+    say(im, ha, "おおー！", "MAO", side="left")
     d = ImageDraw.Draw(im)
     panel = (24, 76, 330, 560)
     d.rounded_rectangle(panel, 14, fill=(16, 18, 22), outline=B_COL, width=4)
@@ -790,7 +865,8 @@ def c13():
     d.rounded_rectangle((sb[0] - 6, sb[1] - 6, sb[2] + 6, sb[3] + 6), 14, outline=ORANGE, width=5)
     text(im, (44, 86), "RIRIKA のタブレット", 22, fill=B_COL)
     arrow(im, (330, 300), (400, 280))
-    telop(im, "手元の画像を、スクリーンへ", en="Show a picture on the big screen")
+    action(im, "スクリーンに送る")
+    telop(im, "手元の写真を、みんなのスクリーンへ", en="Share a picture on the big screen")
     return im
 
 
@@ -804,7 +880,8 @@ def c14():
     d = ImageDraw.Draw(im)
     for k in range(3):
         d.line((650 + k * 50, 668, 650 + k * 50, 700), fill=(200, 210, 220), width=4)
-    bubble(im, 760, 60, "いらっしゃーい！", 34, tail=(hb[0] + 30, hb[1] - 100))
+    say(im, hb, "いらっしゃーい！", "RIRIKA")
+    name_tag(im, "ゲスト")
     note(im, "別の場面・入ってくる人を歓迎", (W - 20, 660))
     return im
 
@@ -841,7 +918,7 @@ def c15():
     box = (230, 50, 1050, 569)
     place(im, visitors_three().crop((36, 22, 1244, 786)), box, radius=56)
     hands(im, box, col=B_COL)
-    telop(im, "誰が来たかも、ひと目で", en="See who came by")
+    telop(im, "誰が来たかも、ひと目で", en="See who's here at a glance")
     note(im, "画面転換で、RIRIKA のタブレットへ")
     return im
 
@@ -918,7 +995,7 @@ def c16():
     d.arc((cx + 90, 140, cx + 150, 200), 300, 60, fill=ORANGE, width=5)
     text(im, (cx + 170, 170), "頭をゆらゆら", 24, fill=ORANGE, anchor="lm", stroke=4)
     text(im, (480, 130), "じゅうたん", 24, fill=(235, 205, 195), anchor="mm")
-    heading(im, "03", "自動再生", "入ったときに流す動画を、タブレットで決める", "Autoplay, set from the tablet")
+    heading(im, "03", "自動再生", "入ったときに流す動画を、決めておける", "Choose what plays when you arrive")
     note(im, "タブレットから少し引く・2 人は寝そべり", (700, 18))
     return im
 
@@ -936,13 +1013,8 @@ def c17():
     d.rounded_rectangle((fx - 10, fy + 20, fx + 110, fy + 140), 40, fill=A_COL)
     d.line((fx + 20, fy + 40, fx, fy + 4), fill=A_COL, width=30)
     d.ellipse((fx - 15, fy - 12, fx + 15, fy + 18), fill=A_COL)
-    for k, step in enumerate(("ホーム", "設定", "再生")):
-        x = 820 + k * 140
-        d.rounded_rectangle((x - 60, 600, x + 60, 650), 12, fill=(16, 18, 22), outline=ORANGE, width=3)
-        d.text((x, 625), step, font=font(24), fill=WHITE, anchor="mm")
-        if k:
-            arrow(im, (x - 100, 625), (x - 64, 625), width=4, head=14)
-    note(im, "真上から・MAO の指")
+    action(im, "ホーム → 設定 → 再生")
+    note(im, "真上から・MAO の指", (W - 20, 660))
     return im
 
 
@@ -959,68 +1031,98 @@ def c18():
     y1 = scr[1] + (150 - 130 + 122 * st) * k
     d.rounded_rectangle((scr[0] + (436 - 420 + 18 * st) * k - 6, y0 - 6, scr[0] + (436 - 420 + 520 * st) * k + 6, y1 + 6),
                         10, outline=ORANGE, width=6)
-    bubble(im, 560, 360, "インスタンスを作った人が決める", 30, tail=(700, y1 + 10))
-    telop(im, "URL を決めておけば", en="Set the URL once")
-    note(im, "タブレットに寄る")
+    action(im, "流したい動画の URL を入れる", y=y1 + 40)
+    telop(im, "入ったときに流す動画を、決めておく", en="決められるのは、インスタンスを作った人")
+    note(im, "タブレットに寄る", (W - 20, 660))
     return im
 
 
-def portal(im, cx, cy, r):
-    """A portal laid out like VRChat's, drawn here from scratch: a round gate showing the world
-    it leads to, what the instance is above it, and the seconds left below it."""
-    thumb = new(NIGHT["wall"])
-    room(thumb, screen=sample_video(bar=False), glow=True)
-    thumb = thumb.crop((280, 40, 1000, 760)).resize((int(r * 2), int(r * 2)), Image.LANCZOS)
-    mask = Image.new("L", thumb.size, 0)
-    ImageDraw.Draw(mask).ellipse((0, 0, thumb.width - 1, thumb.height - 1), fill=255)
-    thumb.putalpha(mask)
 
-    def glow(o):
-        for k in range(7):
-            o.ellipse((cx - r - k * 9, cy - r - k * 9, cx + r + k * 9, cy + r + k * 9),
-                      outline=(150, 225, 255, 210 - k * 28), width=7)
-    overlay(im, glow)
-    im.alpha_composite(thumb, (int(cx - r), int(cy - r)))
-    d = ImageDraw.Draw(im)
-    for k in range(4):
-        d.arc((cx - r - 4, cy - r - 4, cx + r + 4, cy + r + 4), k * 90 + 10, k * 90 + 60, fill=WHITE, width=5)
-    lines = (("KawaPlayer Testing Chamber", 26, WHITE), ("MAO", 20, (200, 230, 245)),
-             ("Friends+ ・ 日本", 20, (170, 230, 255)), ("2 / 32", 20, (200, 230, 245)))
-    y = cy - r - 150
-    for t, z, c in lines:
-        d.text((cx, y), t, font=font(z), fill=c, anchor="mm", stroke_width=3, stroke_fill=INK)
-        y += z + 12
-    d.ellipse((cx - 26, cy + r + 24, cx + 26, cy + r + 76), outline=(150, 225, 255), width=4)
-    d.text((cx, cy + r + 50), "30", font=font(24), fill=WHITE, anchor="mm")
+
+
+
+
+
+def specks(im, layer, frac, gather=False, seed=7):
+    """The figures drawn on layer, breaking into blue specks: when leaving, the top frac of them is
+    gone, scattered up and to the right; when gathering, the bottom frac has formed and the rest
+    is still specks drawing in."""
+    rnd = random.Random(seed)
+    a = layer.getchannel("A")
+    box = a.getbbox()
+    if not box:
+        return
+    x0, y0, x1, y1 = box
+    keep = Image.new("L", layer.size, 0)
+    kd = ImageDraw.Draw(keep)
+    parts = []
+    step = 8
+    for by in range(y0, y1, step):
+        for bx in range(x0, x1, step):
+            if a.getpixel((min(bx + step // 2, x1 - 1), min(by + step // 2, y1 - 1))) == 0:
+                continue
+            t = (by - y0) / max(1, y1 - y0)
+            n = rnd.random() * 0.22
+            gone = t < frac + n - 0.11 if not gather else t < 1 - frac + n - 0.11
+            if not gone:
+                kd.rectangle((bx, by, bx + step - 1, by + step - 1), fill=255)
+                continue
+            far = (abs(frac - t) + n) * 320 + rnd.random() * 80
+            angle = rnd.uniform(-0.9, -0.2) if not gather else rnd.uniform(0, 2 * math.pi)
+            parts.append((bx + math.cos(angle) * far, by + math.sin(angle) * far, rnd.randint(3, 7)))
+    kept = Image.new("RGBA", layer.size, (0, 0, 0, 0))
+    kept.paste(layer, (0, 0), ImageChops.multiply(a, keep))
+    im.alpha_composite(kept)
+
+    def draw(o):
+        for x, y, r in parts:
+            o.ellipse((x - r * 2, y - r * 2, x + r * 2, y + r * 2), fill=(90, 190, 255, 60))
+        for x, y, r in parts:
+            o.ellipse((x - r, y - r, x + r, y + r), fill=(170, 230, 255, 230))
+    overlay(im, draw)
+
+
+def two_of_them(arm_b=None, x=820, base=700, h=380):
+    """MAO and RIRIKA standing side by side, on a clear layer."""
+    layer = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+    person(layer, x, base, h, A_COL)
+    person(layer, x + h * 0.37, base - 10, h * 0.97, B_COL, twin=True, arm=arm_b)
+    return layer
 
 
 def c19():
     im = new(NIGHT["wall"])
     room(im, screen=sample_video(), glow=True)
-    portal(im, 1030, 390, 150)
-    person(im, 780, 700, 380, A_COL, "MAO")
-    person(im, 900, 690, 370, B_COL, "RIRIKA", twin=True)
-    arrow(im, (640, 660), (930, 560))
-    telop(im, "MAO が作った、新しいインスタンスへ", en="Off to a new instance MAO opened")
-    note(im, "VRChat のポータルに寄せて、こちらで描く")
+    specks(im, two_of_them(x=600, base=640, h=470), 0.42)
+    telop(im, "MAO が作った、新しいインスタンスへ", en="Into a new instance MAO opened")
+    note(im, "2 人が青い粒子になって散る")
     return im
 
 
 def c20():
-    im = new(NIGHT["wall"])
-    room(im, screen=sample_video(time="00:03"), glow=True)
-    sofa(im)
-    join_ring(im, 960, 470, 90, 200)
-    join_ring(im, 1140, 470, 90, 200)
-    person(im, 960, 690, 380, A_COL, "MAO")
-    hb = person(im, 1140, 690, 370, B_COL, "RIRIKA", twin=True, arm="both")
-    bubble(im, 640, 60, "もう流れてる！", 34, tail=(hb[0] - 40, hb[1] - 100))
-    sfx(im, (640, 470), "♪", 64, col=WHITE)
-    telop(im, "入ったときから、決めた動画が流れる", en="It plays as soon as you arrive")
+    im = new(DAY["wall"])
+    room(im, mode=DAY, screen=sample_video(time="00:03"), glow=True)
+    sofa(im, DAY)
+    specks(im, two_of_them(), 0.45, gather=True, seed=11)
+    d = ImageDraw.Draw(im)
+    d.rounded_rectangle((140, 30, 380, 110), 16, fill=(10, 14, 20))
+    d.text((260, 70), "朝", font=font(46), fill=WHITE, anchor="mm")
+    note(im, "朝の部屋・粒子が集まって 2 人に")
     return im
 
 
 def c21():
+    im = new(DAY["wall"])
+    room(im, mode=DAY, screen=sample_video(time="00:05"), glow=True)
+    sofa(im, DAY)
+    im.alpha_composite(two_of_them(arm_b="both"))
+    say(im, (960, 690 - 370 + 370 * 0.115 * 1.1), "もう流れてる！", "RIRIKA", side="left")
+    sfx(im, (640, 470), "♪", 64, col=WHITE)
+    telop(im, "入ったとたん、決めた動画が流れる", en="It's already playing when you arrive")
+    return im
+
+
+def c22():
     im = new(NIGHT["wall"])
     room(im, screen=sample_video(), glow=True)
     person(im, 540, 800, 470, A_COL, "MAO")
@@ -1032,7 +1134,7 @@ def c21():
     return im
 
 
-def c22():
+def c23():
     im = brand_background()
     place(im, logo(170), (555, 50, 725, 220))
     text(im, (640, 280), "KawaPlayer", 84, anchor="mm")
@@ -1046,7 +1148,7 @@ def c22():
     return im
 
 
-def c23():
+def c24():
     im = new((0, 0, 0))
     d = ImageDraw.Draw(im)
     rows = (("アバター", "MAO・RIRIKA・ゲスト（作者の指定の表記）"), ("BGM", "（曲名・作者）"))
@@ -1059,12 +1161,14 @@ def c23():
 
 
 CUTS = {name: fn for name, fn in globals().items() if name[:1] == "c" and name[1:].isdigit()}
+FIGURES = {"captions": captions}
 
 
 def main(names):
-    for name in names or sorted(CUTS):
-        im = CUTS[name]()
-        tag(im, name)
+    for name in names or sorted(CUTS) + sorted(FIGURES):
+        im = CUTS[name]() if name in CUTS else FIGURES[name]()
+        if name in CUTS:
+            tag(im, name)
         im.convert("RGB").resize(OUT, Image.LANCZOS).save(os.path.join(HERE, name + ".webp"), "WEBP",
                                                          quality=82, method=6)
         print(name, os.path.getsize(os.path.join(HERE, name + ".webp")) // 1024, "KB")
