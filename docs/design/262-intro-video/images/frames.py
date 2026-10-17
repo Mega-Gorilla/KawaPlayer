@@ -390,31 +390,6 @@ def sample_photo(w=640, h=360):
     return p
 
 
-def live_frame(w=640, h=360, shift=0.0, label=None):
-    """A made-up live stream: a stage under lights, the crowd in front."""
-    v = gradient(w, h, [(30, 16, 60), (70, 20, 90)])
-
-    def beams(o):
-        for k, col in enumerate(((255, 80, 160, 70), (80, 200, 255, 70), (255, 220, 90, 60))):
-            x = w * (0.2 + 0.3 * k + shift * 0.25) % w
-            o.polygon([(x, 0), (x - w * 0.12, h * 0.8), (x + w * 0.12, h * 0.8)], fill=col)
-    overlay(v, beams)
-    d = ImageDraw.Draw(v)
-    d.rectangle((w * 0.1, h * 0.62, w * 0.9, h * 0.7), fill=(20, 12, 30))
-    px = w * (0.45 + shift * 0.12)
-    d.ellipse((px - h * 0.05, h * 0.36, px + h * 0.05, h * 0.46), fill=(10, 8, 16))
-    d.polygon([(px - h * 0.08, h * 0.62), (px - h * 0.05, h * 0.47), (px + h * 0.05, h * 0.47),
-               (px + h * 0.08, h * 0.62)], fill=(10, 8, 16))
-    for k in range(12):
-        cx = w * (k + 0.5) / 12
-        d.ellipse((cx - h * 0.05, h * 0.8, cx + h * 0.05, h * 0.92), fill=(12, 8, 20))
-        d.rectangle((cx - h * 0.07, h * 0.9, cx + h * 0.07, h), fill=(12, 8, 20))
-    fs = max(12, int(h * 0.07))
-    d.rounded_rectangle((w * 0.04, h * 0.06, w * 0.04 + fs * 3.2, h * 0.06 + fs * 1.5), 6, fill=(220, 30, 50))
-    d.text((w * 0.04 + fs * 1.6, h * 0.06 + fs * 0.75), "LIVE", font=font(fs), fill=WHITE, anchor="mm")
-    if label:
-        d.text((w * 0.96, h * 0.1), label, font=font(fs), fill=WHITE, anchor="rm")
-    return v
 
 
 def logo(size, col=WHITE):
@@ -686,90 +661,15 @@ def c17():
     return im
 
 
+
+
+
+
+
+
+
+
 def c18():
-    im = new((22, 26, 32))
-    split(im, live_frame(shift=0.0, label="2 秒おくれ"), live_frame(shift=0.9, label="7 秒おくれ"),
-          ("MAO の画面", "RIRIKA の画面"))
-    heading(im, "05", "全員リロードボタン", "ライブ配信のずれを、まとめて直す", "One press for everyone at a live event")
-    return im
-
-
-def c19():
-    im = new((60, 36, 26))
-    d = ImageDraw.Draw(im)
-    for y in range(0, H, 40):
-        d.line((0, y, W, y), fill=(70, 44, 32), width=3)
-    src = guide("screen/global-reload.webp")
-    place(im, src, (110, 70, 110 + 560, 70 + 487))
-    d.polygon([(W * 0.4, H), (W * 0.54, H), (600, 520), (540, 480)], fill=darker(A_COL, 0.8))
-    d.rounded_rectangle((520, 430, 620, 520), 40, fill=A_COL)
-    d.rounded_rectangle((480, 420, 550, 452), 16, fill=A_COL)
-    sfx(im, (600, 380), "ピッ", 64)
-    text(im, (390, 600), "RELOAD ALL → RELOADING", 26, anchor="mm", stroke=4)
-    panel = (720, 300, 1250, 640)
-    d.rounded_rectangle(panel, 14, fill=(16, 18, 22), outline=ORANGE, width=4)
-    place(im, live_frame(shift=0.4), (740, 360, 980, 495))
-    place(im, live_frame(shift=0.4), (1000, 360, 1240, 495))
-    text(im, (860, 520), "MAO", 26, fill=A_COL, anchor="mm")
-    text(im, (1120, 520), "RIRIKA", 26, fill=B_COL, anchor="mm")
-    text(im, (985, 330), "読み込み直すと", 26, anchor="mm")
-    text(im, (985, 590), "そろった！", 40, fill=(255, 236, 120), anchor="mm", stroke=5)
-    arrow(im, (680, 300), (760, 340))
-    note(im, "主催が押す")
-    return im
-
-
-def c20():
-    im = new(INK)
-    d = ImageDraw.Draw(im)
-    pw = W // 3
-    # AudioLink and LTCGI: lights that follow the music.
-    a = new(NIGHT["wall"]).crop((0, 0, pw, H))
-
-    def lights(o):
-        for k, col in enumerate(((255, 70, 140, 90), (70, 180, 255, 90), (120, 255, 140, 80))):
-            x = 60 + k * 150
-            o.polygon([(x, 0), (x - 120, H), (x + 120, H)], fill=col)
-    overlay(a, lights)
-    ImageDraw.Draw(a).rectangle((60, 200, 366, 372), fill=(14, 16, 20))
-    place(a, sample_video(bar=False), (66, 206, 360, 366))
-    im.alpha_composite(a, (0, 0))
-    # Nine languages.
-    d.rectangle((pw, 0, pw * 2, H), fill=(30, 36, 46))
-    for k, s in enumerate(("日本語", "English", "中文", "…")):
-        d.text((pw * 1.5, 190 + k * 80), s, font=font(46), fill=(220, 228, 236), anchor="mm")
-    # Speed, A-B repeat, karaoke.
-    c = guide("screen/settings-playback.webp", (300, 60, 1280, 720))
-    place(im, c, (pw * 2, 140, W, 140 + pw * c.height / c.width))
-    d.line((pw, 0, pw, H), fill=WHITE, width=6)
-    d.line((pw * 2, 0, pw * 2, H), fill=WHITE, width=6)
-    for k, s in enumerate(("AudioLink・LTCGI", "9 言語", "再生速度・区間リピート")):
-        text(im, (pw * k + pw / 2, 640), s, 32, anchor="mm", stroke=5)
-    note(im, "早いカットの重ね")
-    return im
-
-
-def c21():
-    im = new((228, 232, 236))
-    d = ImageDraw.Draw(im)
-    src = guide("vcc/listing-page.webp")
-    b1 = box_at(src, 40, 40, w=560)
-    place(im, src, b1)
-    d.rounded_rectangle(b1, 6, outline=(180, 186, 192), width=3)
-    strip = guide("vcc/add-package.webp")
-    b2 = box_at(strip, 40, b1[3] + 30, w=560)
-    place(im, strip, b2)
-    d.rounded_rectangle(b2, 6, outline=(180, 186, 192), width=3)
-    menu = guide("unity/gameobject-menu.webp")
-    b3 = box_at(menu, 680, 60, w=560)
-    place(im, menu, b3)
-    d.rounded_rectangle(b3, 6, outline=(180, 186, 192), width=3)
-    arrow(im, (600, 250), (670, 230))
-    heading(im, "", "導入は VCC から", "無料。VCC で追加して、置くだけ", "Free. Add it in VCC and drop it in")
-    return im
-
-
-def c22():
     im = new(NIGHT["wall"])
     room(im, screen=sample_video(), glow=True)
     person(im, 540, 800, 470, A_COL, "MAO")
@@ -781,7 +681,7 @@ def c22():
     return im
 
 
-def c23():
+def c19():
     im = brand_background()
     place(im, logo(170), (555, 50, 725, 220))
     text(im, (640, 280), "KawaPlayer", 84, anchor="mm")
@@ -792,7 +692,18 @@ def c23():
     d.text((470, 450), "booth.pm/ja/items/8155190", font=font(30), fill=WHITE, anchor="lm")
     d.text((290, 515), "入れ方", font=font(30), fill=WHITE, anchor="lm")
     d.text((470, 515), "playlist.vrc-hub.com/docs/developers", font=font(30), fill=WHITE, anchor="lm")
-    text(im, (640, 640), "アバター：（作者の指定の表記）　BGM：（曲名・作者）", 24, fill=(230, 245, 248), anchor="mm")
+    return im
+
+
+def c20():
+    im = new((0, 0, 0))
+    d = ImageDraw.Draw(im)
+    rows = (("アバター", "MAO・RIRIKA（作者の指定の表記）"), ("BGM", "（曲名・作者）"))
+    for k, (role, who) in enumerate(rows):
+        y = 320 + k * 70
+        d.text((600, y), role, font=font(30), fill=(150, 156, 162), anchor="rm")
+        d.text((640, y), who, font=font(30), fill=WHITE, anchor="lm")
+    note(im, "暗転してから")
     return im
 
 
