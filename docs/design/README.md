@@ -9,6 +9,7 @@ KawaPlayer の設計・計画・確認の手順の文書です。1 つの文書�
 | [url-pool/](url-pool/README.md) | なし（2026-03） | URL Pool 方式のプレイリストローダー（全体の設計、[Unity 側](url-pool/unity.md)、[サーバー側](url-pool/server.md)） | 設計 | 実装済み（PlaylistLoader モジュール） |
 | [68-release-qa/](68-release-qa/README.md) | #68 | リリースの実機 QA の進め方（ランブック）と、[Playlist Editor の Editor 検証](68-release-qa/playlist-editor-verification.md) | 確認の手順 | v1.2.0 の QA（#68）で使った |
 | [228-playback-sync/](228-playback-sync/README.md) | #228 | 再生の同期：VizVid（VVMW）との[比較](228-playback-sync/comparison.md)と、直す方針 | 方針 | 実装済み（2026-10-15）。方針は PR #229、実装は子の issue #232〜#237 と #248（PR #238〜#243・#249）。実装後の仕様は [docs/analysis/playback-sync.md](../analysis/playback-sync.md) |
+| [262-intro-video/](262-intro-video/README.md) | #262 | KawaPlayer の紹介動画の絵コンテ | 台本 | 決まった（2026-10-17、PR #263）。撮影・編集・公開は #262 で続く |
 
 ## 置き方の決まり
 
