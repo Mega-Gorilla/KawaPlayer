@@ -259,11 +259,6 @@ def sofa(im, mode=NIGHT):
     d.rounded_rectangle((880, 590, 970, 720), 26, fill=darker(mode["sofa"], 0.85))
 
 
-def desk(im, mode=NIGHT):
-    d = ImageDraw.Draw(im)
-    d.rectangle((900, 470, 1240, 488), fill=(92, 70, 56))
-    d.rectangle((920, 488, 936, 600), fill=(72, 54, 44))
-    d.rectangle((1204, 488, 1220, 600), fill=(72, 54, 44))
 
 
 def person(im, cx, base, h, col, label=None, twin=False, arm=None):
@@ -422,33 +417,87 @@ def split(im, left, right, labels, y=130):
 # --------------------------------------------------------------------- the cuts
 
 
+def leaf(d, cx, cy, length, width, angle, fill):
+    """A leaf: a pointed oval along angle (degrees)."""
+    a = math.radians(angle)
+    pts = []
+    for k in range(25):
+        t = k / 24 * math.pi * 2
+        x = math.cos(t) * length / 2
+        y = math.sin(t) * width / 2 * (1 - 0.35 * math.cos(t))
+        pts.append((cx + x * math.cos(a) - y * math.sin(a), cy + x * math.sin(a) + y * math.cos(a)))
+    d.polygon(pts, fill=fill)
+
+
+def foliage(im, spots, blur=5, fill=(18, 38, 32, 235)):
+    """Leaves close to the camera, out of focus: spots are (x, y, length, angle)."""
+    layer = Image.new("RGBA", im.size, (0, 0, 0, 0))
+    d = ImageDraw.Draw(layer)
+    for x, y, length, angle in spots:
+        leaf(d, x, y, length, length * 0.5, angle, fill)
+    im.alpha_composite(layer.filter(ImageFilter.GaussianBlur(blur)))
+
+
+def night_room_blur(im):
+    """The room behind, out of focus: the window's city lights and the dark wall screen."""
+    back = gradient(W, H, [(44, 50, 78), (62, 56, 96), (34, 34, 56)])
+    d = ImageDraw.Draw(back)
+    d.rectangle((860, 60, 1280, 520), fill=(52, 70, 110))
+    for k in range(40):
+        x = 880 + (k * 97) % 380
+        y = 300 + (k * 53) % 200
+        d.rectangle((x, y, x + 10, y + 6), fill=(230, 210, 150))
+    d.rectangle((60, 140, 420, 360), fill=(16, 18, 26))
+    im.alpha_composite(back.filter(ImageFilter.GaussianBlur(9)))
+
+
 def c01():
-    im = new(NIGHT["wall"])
-    room(im)
-    desk(im)
+    im = new((40, 44, 70))
+    night_room_blur(im)
     d = ImageDraw.Draw(im)
-    d.rounded_rectangle((1010, 458, 1110, 472), 4, fill=(150, 154, 160))
-    sofa(im)
-    person(im, 1150, 690, 380, A_COL, "MAO")
-    zoom(im, (320, 70, 960, 430))
-    note(im, "ゆっくり前へ")
+    dark = darker(A_COL, 0.55)
+    # MAO from the side, walking to the right; the head runs off the top.
+    d.polygon([(560, -40), (300, 10), (90, 120), (40, 210), (170, 190), (90, 290), (260, 250),
+               (380, 330), (470, 300), (560, 160)], fill=dark)
+    d.ellipse((520, -150, 720, 60), fill=A_COL)
+    d.polygon([(700, -10), (735, 30), (705, 45)], fill=A_COL)
+    d.polygon([(500, 90), (690, 100), (740, 430), (720, H), (440, H), (450, 420)], fill=A_COL)
+    d.line([(540, 150), (470, 330), (430, 470)], fill=darker(A_COL, 0.85), width=62, joint="curve")
+    d.ellipse((395, 440, 465, 510), fill=darker(A_COL, 0.85))
+    d.line([(660, 160), (720, 330), (790, 440)], fill=A_COL, width=62, joint="curve")
+    d.ellipse((755, 410, 825, 480), fill=A_COL)
+    foliage(im, [(40, 380, 260, 70), (130, 520, 300, 35), (40, 640, 280, -20), (210, 690, 240, 60),
+                 (1180, 560, 280, -40), (1250, 420, 260, 80), (1100, 690, 260, 10)])
+    arrow(im, (440, 640), (820, 640))
+    text(im, (630, 600), "歩く", 30, fill=ORANGE, anchor="mm", stroke=4)
+    arrow(im, (860, 120), (1060, 120))
+    text(im, (960, 160), "カメラも並んで右へ", 26, fill=ORANGE, anchor="mm", stroke=4)
+    note(im, "寄り・横から追う")
     return im
 
 
 def c02():
-    im = new((30, 34, 42))
+    im = new((40, 44, 70))
+    night_room_blur(im)
     d = ImageDraw.Draw(im)
-    d.rectangle((0, 330, W, H), fill=(84, 62, 48))
-    d.line((0, 330, W, 330), fill=(110, 84, 66), width=4)
-    d.rounded_rectangle((300, 400, 900, 640), 44, fill=(150, 155, 162), outline=(190, 194, 200), width=5)
-    place(im, logo(150, (214, 218, 224)), (525, 445, 675, 595))
-    overlay(im, lambda o: o.polygon([(380, 400), (470, 400), (330, 640), (300, 640), (300, 560)],
-                                    fill=(255, 255, 255, 40)))
-    d.polygon([(W, 470), (W, 620), (1000, 590), (960, 520)], fill=darker(A_COL, 0.8))
-    d.rounded_rectangle((850, 480, 1010, 600), 50, fill=A_COL)
-    d.rounded_rectangle((820, 520, 900, 560), 20, fill=A_COL)
-    arrow(im, (1110, 420), (1110, 250))
-    text(im, (1090, 330), "持ち上げる", 28, fill=ORANGE, anchor="rm")
+    d.polygon([(0, 420), (W, 380), (W, H), (0, H)], fill=(78, 58, 50))
+    d.line((0, 420, W, 380), fill=(110, 84, 70), width=5)
+    tab = [(330, 470), (850, 440), (900, 610), (300, 650)]
+    d.polygon(tab, fill=(12, 14, 18), outline=(130, 136, 144), width=5)
+    scr = [(352, 482), (828, 455), (870, 598), (326, 634)]
+    d.polygon(scr, fill=(22, 30, 40))
+    def ripple(o):
+        for k in range(3):
+            r = 40 + k * 42
+            o.ellipse((610 - r, 548 - r * 0.45, 610 + r, 548 + r * 0.45), outline=(140, 235, 245, 200 - k * 55), width=5)
+    overlay(im, ripple)
+    d.polygon([(760, 0), (1000, 0), (700, 470), (640, 430)], fill=darker(A_COL, 0.8))
+    d.rounded_rectangle((600, 400, 720, 500), 40, fill=A_COL)
+    d.line((640, 470, 612, 545), fill=A_COL, width=30)
+    d.ellipse((597, 530, 627, 560), fill=A_COL)
+    foliage(im, [(1170, 300, 280, -50), (1240, 470, 260, 60), (1120, 640, 300, 20)])
+    arrow(im, (520, 300), (575, 470))
+    text(im, (500, 270), "触れる", 30, fill=ORANGE, anchor="mm", stroke=4)
     note(im, "手元の大写し")
     return im
 
@@ -456,12 +505,12 @@ def c02():
 def c03():
     im = new(NIGHT["wall"])
     room(im, screen=guide("screen/controls.webp"), glow=True)
-    overlay(im, lambda o: o.ellipse((520, 520, 760, 640), fill=(120, 230, 240, 70)))
     person(im, 250, 1120, 760, A_COL)
-    d = ImageDraw.Draw(im)
-    d.rounded_rectangle((560, 560, 720, 640), 14, fill=(20, 24, 30), outline=(170, 230, 240), width=4)
+    foliage(im, [(1200, 560, 280, -40), (1260, 420, 240, 70)])
     sfx(im, (980, 470), "ポン", 56)
-    note(im, "肩越し")
+    arrow(im, (640, 690), (640, 450))
+    text(im, (700, 560), "手元から上へ", 26, fill=ORANGE, anchor="lm", stroke=4)
+    note(im, "肩越しに、点いたスクリーン")
     return im
 
 
