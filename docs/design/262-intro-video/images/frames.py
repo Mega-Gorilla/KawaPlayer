@@ -846,45 +846,167 @@ def c15():
     return im
 
 
-def c16():
-    im = new(INK)
-    place(im, guide("screen/settings-playback.webp"), (0, 0, W, H))
-    overlay(im, lambda o: o.rectangle((0, 0, W, H), fill=(0, 0, 0, 150)))
-    src = guide("screen/autoplay-owner-set.webp")
-    b = (60, 150, 1220, 150 + 1160 * src.height / src.width)
+
+
+
+
+def prone(im, cx, cy, r, col, facing="up", twin=False, label=None):
+    """Someone lying on their front, propped on their elbows, seen from above. facing "up":
+    their back to the camera, head towards the top; "down": their face towards the camera."""
     d = ImageDraw.Draw(im)
-    d.rounded_rectangle((b[0] - 8, b[1] - 8, b[2] + 8, b[3] + 8), 12, fill=(70, 80, 92))
-    place(im, src, b)
-    s = (b[2] - b[0]) / src.width
-    d.rounded_rectangle((b[0] + 20 * s, b[1] + 92 * s, b[0] + 520 * s, b[1] + 120 * s), 8, outline=ORANGE, width=5)
-    bubble(im, 700, 380, "インスタンスを作った人が決める", 30, tail=(b[0] + 400 * s, b[1] + 124 * s))
-    heading(im, "03", "自動再生", "入ったときに流す動画を、ワールドの中で決める", "Autoplay, set inside the world")
+    dark = darker(col)
+    s = -1 if facing == "up" else 1
+    d.ellipse((cx - r * 1.5, cy - s * r * 0.6 - r * 1.2, cx + r * 1.5, cy - s * r * 0.6 + r * 1.2), fill=dark)
+    if facing == "up":
+        d.rectangle((cx - r * 1.3, cy + r * 0.6, cx + r * 1.3, cy + r * 4), fill=dark)
+    else:
+        d.rectangle((cx - r * 1.3, cy - r * 4, cx + r * 1.3, cy - r * 0.6), fill=dark)
+    for side in (-1, 1):
+        ex, ey = cx + side * r * 1.35, cy - s * r * 0.5
+        hx, hy = cx + side * r * (0.9 if facing == "up" else 0.45), cy + s * r * 1.25
+        d.line((ex, ey, hx, hy), fill=col, width=int(r * 0.5))
+        d.ellipse((hx - r * 0.3, hy - r * 0.3, hx + r * 0.3, hy + r * 0.3), fill=col)
+    if twin:
+        for side in (-1, 1):
+            tx = cx + side * r * 1.25
+            d.ellipse((tx - r * 0.45, cy - r * 0.6, tx + r * 0.45, cy + r * 1.5), fill=dark)
+    d.ellipse((cx - r * 1.05, cy - r * 1.05, cx + r * 1.05, cy + r * 1.05), fill=dark if facing == "up" else col)
+    if facing != "up":
+        d.chord((cx - r * 1.05, cy - r * 1.05, cx + r * 1.05, cy + r * 1.05), 180, 360, fill=dark)
+    if label:
+        ly = cy - r * 1.05 - 30 if facing == "down" else cy + r * 1.3 + 30
+        lw = d.textlength(label, font=font(24)) / 2 + 14
+        d.rounded_rectangle((cx - lw, ly - 20, cx + lw, ly + 20), 12, fill=col, outline=WHITE, width=3)
+        d.text((cx, ly), label, font=font(24), fill=WHITE, anchor="mm")
+
+
+def settings_playback():
+    """The guide's picture of the tablet's settings app, turned to the playback category, with
+    the autoplay setting MAO has just set."""
+    shot = guide("tablet/settings.webp")
+    g = ImageDraw.Draw(shot)
+    panel = shot.getpixel((240, 600))[:3]
+    chosen = shot.getpixel((240, 190))[:3]
+    card = shot.getpixel((600, 200))[:3]
+    g.rounded_rectangle((102, 146, 385, 231), 12, fill=panel)
+    g.rounded_rectangle((128, 172, 176, 206), 6, outline=WHITE, width=3)
+    g.text((190, 189), "映像", font=font(28), fill=WHITE, anchor="lm")
+    g.rounded_rectangle((102, 346, 385, 431), 12, fill=chosen)
+    g.ellipse((130, 368, 174, 412), outline=WHITE, width=3)
+    g.polygon([(146, 378), (146, 402), (164, 390)], outline=WHITE)
+    g.text((190, 389), "再生", font=font(28), fill=WHITE, anchor="lm")
+    g.rectangle((420, 130, 1190, 600), fill=panel)
+    g.rounded_rectangle((428, 138, 1178, 330), 12, fill=card)
+    strip = guide("screen/autoplay-owner-set.webp")
+    place(shot, strip, (436, 150, 1170, 150 + 734 * strip.height / strip.width))
+    return shot
+
+
+def c16():
+    im = new((58, 50, 56))
+    d = ImageDraw.Draw(im)
+    d.rounded_rectangle((300, 60, 1240, 700), 60, fill=(120, 74, 70))
+    d.rounded_rectangle((330, 90, 1210, 670), 46, outline=(160, 104, 90), width=6)
+    cx = 860
+    tab = (cx - 190, 270, cx + 190, 500)
+    scr = tablet_frame(im, tab, radius=28)
+    place(im, settings_playback().crop((36, 22, 1244, 786)), scr)
+    prone(im, cx, 185, 64, B_COL, facing="down", twin=True, label="RIRIKA")
+    prone(im, cx, 640, 85, A_COL, facing="up")
+    text(im, (cx, 692), "MAO", 26, anchor="mm", stroke=4, sfill=A_COL)
+    d.arc((cx - 150, 140, cx - 90, 200), 120, 240, fill=ORANGE, width=5)
+    d.arc((cx + 90, 140, cx + 150, 200), 300, 60, fill=ORANGE, width=5)
+    text(im, (cx + 170, 170), "頭をゆらゆら", 24, fill=ORANGE, anchor="lm", stroke=4)
+    text(im, (480, 130), "じゅうたん", 24, fill=(235, 205, 195), anchor="mm")
+    heading(im, "03", "自動再生", "入ったときに流す動画を、タブレットで決める", "Autoplay, set from the tablet")
+    note(im, "タブレットから少し引く・2 人は寝そべり", (700, 18))
     return im
 
 
 def c17():
-    im = new(DAY["wall"])
-    room(im, mode=DAY, screen=sample_video(time="00:02"), glow=True, door=True)
-    sofa(im, DAY)
-    join_ring(im, 1130, 470, 90, 210)
-    ha = person(im, 1130, 690, 400, A_COL, "MAO")
-    bubble(im, 820, 120, "いつものやつ！", 36, tail=(ha[0] - 40, ha[1] - 100))
+    im = new((120, 74, 70))
     d = ImageDraw.Draw(im)
-    d.rounded_rectangle((140, 30, 420, 110), 16, fill=(10, 14, 20))
-    d.text((280, 70), "次の日", font=font(46), fill=WHITE, anchor="mm")
-    sfx(im, (640, 470), "♪", 64, col=WHITE)
+    tab = (140, 40, 1140, 672)
+    place(im, guide("tablet/settings.webp", (36, 22, 1244, 786)), tab, radius=60)
+    sx = (tab[2] - tab[0]) / (1244 - 36)
+    rb = (tab[0] + (102 - 36) * sx, tab[1] + (346 - 22) * sx, tab[0] + (385 - 36) * sx, tab[1] + (431 - 22) * sx)
+    d.rounded_rectangle((rb[0] - 6, rb[1] - 6, rb[2] + 6, rb[3] + 6), 16, outline=ORANGE, width=6)
+    fx, fy = (rb[0] + rb[2]) / 2 + 30, (rb[1] + rb[3]) / 2
+    d.polygon([(fx + 60, H), (fx + 220, H), (fx + 40, fy + 70), (fx, fy + 40)], fill=darker(A_COL, 0.8))
+    d.rounded_rectangle((fx - 10, fy + 20, fx + 110, fy + 140), 40, fill=A_COL)
+    d.line((fx + 20, fy + 40, fx, fy + 4), fill=A_COL, width=30)
+    d.ellipse((fx - 15, fy - 12, fx + 15, fy + 18), fill=A_COL)
+    for k, step in enumerate(("ホーム", "設定", "再生")):
+        x = 820 + k * 140
+        d.rounded_rectangle((x - 60, 600, x + 60, 650), 12, fill=(16, 18, 22), outline=ORANGE, width=3)
+        d.text((x, 625), step, font=font(24), fill=WHITE, anchor="mm")
+        if k:
+            arrow(im, (x - 100, 625), (x - 64, 625), width=4, head=14)
+    note(im, "真上から・MAO の指")
     return im
 
 
-
-
-
-
-
-
-
-
 def c18():
+    im = new((120, 74, 70))
+    tab = (50, 40, 1230, 640)
+    scr = tablet_frame(im, tab, radius=60)
+    crop = settings_playback().crop((420, 130, 1190, 600))
+    place(im, crop, scr)
+    k = (scr[2] - scr[0]) / crop.width
+    st = 734 / 1280
+    d = ImageDraw.Draw(im)
+    y0 = scr[1] + (150 - 130 + 92 * st) * k
+    y1 = scr[1] + (150 - 130 + 122 * st) * k
+    d.rounded_rectangle((scr[0] + (436 - 420 + 18 * st) * k - 6, y0 - 6, scr[0] + (436 - 420 + 520 * st) * k + 6, y1 + 6),
+                        10, outline=ORANGE, width=6)
+    bubble(im, 560, 360, "インスタンスを作った人が決める", 30, tail=(700, y1 + 10))
+    telop(im, "URL を決めておけば", en="Set the URL once")
+    note(im, "タブレットに寄る")
+    return im
+
+
+def portal(im, cx, cy, rx, ry):
+    """A portal of the video's own design: a ring of light, with where it leads above it."""
+    def draw(o):
+        for k in range(6):
+            o.ellipse((cx - rx - k * 10, cy - ry - k * 10, cx + rx + k * 10, cy + ry + k * 10),
+                      outline=(140, 220, 255, 200 - k * 30), width=6)
+        o.ellipse((cx - rx, cy - ry, cx + rx, cy + ry), fill=(170, 230, 255, 110))
+    overlay(im, draw)
+    d = ImageDraw.Draw(im)
+    d.rounded_rectangle((cx - 180, cy - ry - 110, cx + 180, cy - ry - 30), 12, fill=(16, 18, 22),
+                        outline=(140, 220, 255), width=3)
+    d.text((cx, cy - ry - 88), "KawaPlayer Testing Chamber", font=font(22), fill=WHITE, anchor="mm")
+    d.text((cx, cy - ry - 52), "Friends+（MAO）", font=font(22), fill=(170, 230, 255), anchor="mm")
+
+
+def c19():
+    im = new(NIGHT["wall"])
+    room(im, screen=sample_video(), glow=True)
+    portal(im, 1040, 430, 120, 200)
+    person(im, 800, 700, 380, A_COL, "MAO")
+    person(im, 930, 690, 370, B_COL, "RIRIKA", twin=True)
+    arrow(im, (660, 660), (960, 580))
+    telop(im, "MAO が作った、新しいインスタンスへ", en="Off to a new instance MAO opened")
+    note(im, "ポータルは動画だけの演出")
+    return im
+
+
+def c20():
+    im = new(NIGHT["wall"])
+    room(im, screen=sample_video(time="00:03"), glow=True)
+    sofa(im)
+    join_ring(im, 960, 470, 90, 200)
+    join_ring(im, 1140, 470, 90, 200)
+    person(im, 960, 690, 380, A_COL, "MAO")
+    hb = person(im, 1140, 690, 370, B_COL, "RIRIKA", twin=True, arm="both")
+    bubble(im, 640, 60, "もう流れてる！", 34, tail=(hb[0] - 40, hb[1] - 100))
+    sfx(im, (640, 470), "♪", 64, col=WHITE)
+    telop(im, "入ったときから、決めた動画が流れる", en="It plays as soon as you arrive")
+    return im
+
+
+def c21():
     im = new(NIGHT["wall"])
     room(im, screen=sample_video(), glow=True)
     person(im, 540, 800, 470, A_COL, "MAO")
@@ -896,7 +1018,7 @@ def c18():
     return im
 
 
-def c19():
+def c22():
     im = brand_background()
     place(im, logo(170), (555, 50, 725, 220))
     text(im, (640, 280), "KawaPlayer", 84, anchor="mm")
@@ -910,7 +1032,7 @@ def c19():
     return im
 
 
-def c20():
+def c23():
     im = new((0, 0, 0))
     d = ImageDraw.Draw(im)
     rows = (("アバター", "MAO・RIRIKA・ゲスト（作者の指定の表記）"), ("BGM", "（曲名・作者）"))
