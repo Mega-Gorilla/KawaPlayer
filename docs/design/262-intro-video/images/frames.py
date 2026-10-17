@@ -522,58 +522,154 @@ def c04():
     return im
 
 
-def c05():
-    im = new((228, 232, 236))
+
+
+
+
+
+
+def fish(im, cx, cy, size, angle, col=WHITE):
+    """The logo's fish, swimming towards angle (degrees)."""
     d = ImageDraw.Draw(im)
-    d.rounded_rectangle((110, 40, 1240, 640), 18, fill=WHITE, outline=(190, 196, 202), width=3)
-    d.rounded_rectangle((110, 40, 1240, 96), 18, fill=(236, 239, 242))
-    d.rectangle((110, 76, 1240, 96), fill=(236, 239, 242))
-    for k, c in enumerate(((240, 100, 90), (240, 190, 70), (110, 200, 110))):
-        d.ellipse((136 + k * 30, 58, 154 + k * 30, 76), fill=c)
-    d.rounded_rectangle((250, 52, 900, 84), 16, fill=WHITE)
-    d.text((270, 68), "playlist.vrc-hub.com", font=font(22), fill=(100, 108, 116), anchor="lm")
+    a = math.radians(angle)
+    leaf(d, cx, cy, size, size * 0.42, angle, col)
+    bx, by = cx - math.cos(a) * size * 0.45, cy - math.sin(a) * size * 0.45
+    for s_ in (-1, 1):
+        tx = bx - math.cos(a + s_ * 0.5) * size * 0.35
+        ty = by - math.sin(a + s_ * 0.5) * size * 0.35
+        d.polygon([(bx, by), (tx, ty), (bx - math.cos(a) * size * 0.12, by - math.sin(a) * size * 0.12)], fill=col)
+    ex, ey = cx + math.cos(a) * size * 0.28 - math.sin(a) * size * 0.06, cy + math.sin(a) * size * 0.28 + math.cos(a) * size * 0.06
+    d.ellipse((ex - size * 0.03, ey - size * 0.03, ex + size * 0.03, ey + size * 0.03), fill=INK)
+
+
+def trail(im, pts, col=(255, 255, 255, 150)):
+    """The dotted path something has swum along."""
+    def draw(o):
+        for (x0, y0), (x1, y1) in zip(pts, pts[1:]):
+            n = int(math.hypot(x1 - x0, y1 - y0) // 26)
+            for k in range(n):
+                t = k / max(1, n)
+                x, y = x0 + (x1 - x0) * t, y0 + (y1 - y0) * t
+                o.ellipse((x - 4, y - 4, x + 4, y + 4), fill=col)
+    overlay(im, draw)
+
+
+def capsule(im, x, y, s="…/r/default/…"):
+    """The copied URL, carried as a little tag."""
+    d = ImageDraw.Draw(im)
+    w = d.textlength(s, font=font(22)) + 28
+    d.rounded_rectangle((x, y, x + w, y + 36), 18, fill=TEAL, outline=WHITE, width=3)
+    d.text((x + w / 2, y + 18), s, font=font(22), fill=WHITE, anchor="mm")
+
+
+TABLET_APP = (36, 22, 1244, 786)  # The tablet in the guide's picture of the KawaPlayer app.
+
+
+def tablet_app_box(x, y, w):
+    return (x, y, x + w, y + w * (TABLET_APP[3] - TABLET_APP[1]) / (TABLET_APP[2] - TABLET_APP[0]))
+
+
+def at(box, px, py):
+    """Where a point of the guide's tablet picture lands in box."""
+    s = (box[2] - box[0]) / (TABLET_APP[2] - TABLET_APP[0])
+    return (box[0] + (px - TABLET_APP[0]) * s, box[1] + (py - TABLET_APP[1]) * s)
+
+
+def c05():
+    im = Image.new("RGBA", (W, H))
+    im.alpha_composite(gradient(W, H, [(12, 26, 44), (16, 58, 78), (22, 96, 116)], horizontal=True))
+    d = ImageDraw.Draw(im)
+    place(im, logo(190, (200, 230, 236)), (70, 110, 260, 300))
+    card = (640, 40, 1240, 470)
+    d.rounded_rectangle(card, 18, fill=WHITE)
+    d.rounded_rectangle((card[0], card[1], card[2], card[1] + 46), 18, fill=(236, 239, 242))
+    d.rectangle((card[0], card[1] + 26, card[2], card[1] + 46), fill=(236, 239, 242))
+    d.text((card[0] + 24, card[1] + 23), "playlist.vrc-hub.com", font=font(22), fill=(100, 108, 116), anchor="lm")
     src = guide("vhub/detail.webp")
-    b = box_at(src, 650, 110, h=470)
+    b = box_at(src, card[0] + 40, card[1] + 56, h=card[3] - card[1] - 66)
     place(im, src, b)
-    s = (b[2] - b[0]) / src.width
-    btn = (b[0] + 18 * s - 8, b[1] + 432 * s - 8, b[0] + 610 * s + 8, b[1] + 503 * s + 8)
-    d.rounded_rectangle(btn, 26, outline=ORANGE, width=7)
-    bubble(im, 380, 380, "コピー！", 40, tail=(btn[0] + 6, btn[1] + 24))
+    sc = (b[2] - b[0]) / src.width
+    btn = (b[0] + 18 * sc, b[1] + 432 * sc, b[0] + 610 * sc, b[1] + 503 * sc)
+    d.rounded_rectangle((btn[0] - 6, btn[1] - 6, btn[2] + 6, btn[3] + 6), 24, outline=ORANGE, width=6)
+    trail(im, [(170, 210), (330, 260), (480, 420), (btn[0] - 40, btn[1] + 30)])
+    fish(im, btn[0] - 14, btn[1] + 30, 110, 10)
+    capsule(im, btn[0] - 130, btn[1] - 64)
+    bubble(im, 380, 250, "コピー！", 36, tail=(btn[0] - 70, btn[1] - 10))
+    text(im, (165, 330), "ロゴから魚が泳ぎ出る", 24, fill=ORANGE, anchor="mm", stroke=4)
     heading(im, "01", "VHub のプレイリスト", "URL ひとつで、まるごと読み込む", "VHub playlists, from one URL")
+    note(im, "2D の空間")
     return im
 
 
 def c06():
-    im = new(INK)
-    place(im, guide("screen/controls.webp"), (0, 0, W, H))
-    overlay(im, lambda o: o.rectangle((0, 0, W, H), fill=(0, 0, 0, 90)))
+    im = new((40, 44, 70))
+    night_room_blur(im)
+    box = tablet_app_box(470, 120, 700)
+    place(im, guide("tablet/kawaplayer.webp", TABLET_APP), box, radius=50)
+    hands(im, box)
+    lx, ly = at(box, 115, 295)
+    trail(im, [(1240, 60), (1000, 150), (lx + 40, ly - 30)])
+    fish(im, lx + 26, ly - 16, 70, 150)
+    capsule(im, lx + 60, ly - 70)
     d = ImageDraw.Draw(im)
-    d.rounded_rectangle((260, 270, 1180, 360), 16, fill=(40, 44, 50), outline=(110, 190, 230), width=4)
-    url = "https://playlist.vrc-hub.com/r/default/…"
-    d.text((294, 315), url, font=font(34), fill=WHITE, anchor="lm")
-    cx = 304 + d.textlength(url, font=font(34))
-    d.line((cx, 290, cx, 340), fill=WHITE, width=4)
-    text(im, (260, 236), "URL を貼り付けて Enter", 30, fill=(200, 232, 245))
-    person(im, 40, 1500, 1250, A_COL)
-    note(im, "UI の大写し（斜めから）")
+    d.ellipse((60, 230, 420, 620), fill=darker(A_COL, 0.55))
+    d.ellipse((110, 250, 380, 560), fill=darker(A_COL, 0.7))
+    d.polygon([(0, H), (0, 560), (200, 520), (460, 600), (520, H)], fill=A_COL)
+    zoom(im, (box[0] + 30, box[1] + 30, box[2] - 30, box[3] - 60), inward=False)
+    text(im, (240, 200), "MAO", 30, fill=A_COL, anchor="mm", stroke=4, sfill=WHITE)
+    note(im, "タブレットの画面から、肩越しまで引く")
     return im
 
 
 def c07():
-    im = new(INK)
-    place(im, guide("screen/playlist-tracks.webp"), (0, 0, W, H))
+    im = new((40, 44, 70))
+    night_room_blur(im)
+    box = tablet_app_box(150, 40, 980)
+    place(im, guide("tablet/kawaplayer.webp", TABLET_APP), box, radius=60)
     d = ImageDraw.Draw(im)
-    inset = (300, 40, 780, 310)
-    d.rounded_rectangle((inset[0] - 6, inset[1] - 6, inset[2] + 6, inset[3] + 6), 10, fill=ORANGE)
-    place(im, guide("screen/playlist-loaded.webp"), inset)
-    text(im, (540, 336), "はじめに「追加しました」→ 一覧へ", 26, fill=ORANGE, anchor="mm", stroke=4)
-    arrow(im, (1262, 170), (1262, 560), width=6)
-    telop(im, "曲の一覧が、そのまま並ぶ", en="The whole list, ready to play")
-    note(im, "一覧に沿って下へ")
+    fx, fy = at(box, 300, 160)
+    d.rounded_rectangle((fx - 60, fy - 40, fx + 640, fy + 40), 14, fill=(40, 44, 50), outline=(110, 190, 230), width=4)
+    d.text((fx - 36, fy), "https://playlist.vrc-hub.com/r/default/…", font=font(30), fill=WHITE, anchor="lm")
+
+    def ripple(o):
+        for k in range(4):
+            r = 40 + k * 55
+            o.ellipse((fx - r, fy - r, fx + r, fy + r), outline=(150, 235, 245, 210 - k * 45), width=6)
+    overlay(im, ripple)
+    d.polygon([(W, H), (W, H - 160), (fx + 120, fy + 60), (fx + 60, fy + 120)], fill=darker(A_COL, 0.8))
+    d.rounded_rectangle((fx + 30, fy + 30, fx + 170, fy + 150), 50, fill=A_COL)
+    d.line((fx + 60, fy + 60, fx + 6, fy + 6), fill=A_COL, width=32)
+    d.ellipse((fx - 10, fy - 10, fx + 20, fy + 20), fill=A_COL)
+    note(im, "MAO の指でタップ")
     return im
 
 
 def c08():
+    back = new((40, 44, 70))
+    night_room_blur(back)
+    box = tablet_app_box(640, 300, 760)
+    place(back, guide("tablet/kawaplayer.webp", TABLET_APP), box, radius=50)
+    hands(back, box)
+    cx, cy = at(box, 300, 160)
+    im = back.copy()
+    front = new(INK)
+    place(front, guide("screen/playlist-tracks.webp"), (0, 0, W, H))
+    mask = Image.new("L", (W, H), 0)
+    r = 600
+    ImageDraw.Draw(mask).ellipse((cx - r, cy - r, cx + r, cy + r), fill=255)
+    im.paste(front, (0, 0), mask)
+
+    def rings(o):
+        for k in range(3):
+            rr = r - k * 26
+            o.ellipse((cx - rr, cy - rr, cx + rr, cy + rr), outline=(150, 235, 245, 220 - k * 60), width=8 - k * 2)
+    overlay(im, rings)
+    telop(im, "曲の一覧が、そのまま並ぶ", en="The whole list, ready to play")
+    note(im, "波紋が広がり、スクリーンの一覧へ")
+    return im
+
+
+def c09():
     im = new(NIGHT["wall"])
     room(im, screen=sample_video(), glow=True)
     sofa(im)
@@ -582,7 +678,7 @@ def c08():
     return im
 
 
-def c09():
+def c10():
     im = new(NIGHT["wall"])
     room(im, screen=sample_video(), glow=True, door=True)
     join_ring(im, 1130, 470, 90, 210)
@@ -593,7 +689,7 @@ def c09():
     return im
 
 
-def c10():
+def c11():
     im = new((22, 26, 32))
     split(im, sample_video(time="01:23"), sample_video(time="01:23"), ("MAO の画面", "RIRIKA の画面（入ったばかり）"))
     d = ImageDraw.Draw(im)
@@ -604,7 +700,30 @@ def c10():
     return im
 
 
-def c11():
+def c12():
+    im = new(NIGHT["wall"])
+    d = ImageDraw.Draw(im)
+    d.rectangle((0, 600, W, H), fill=NIGHT["floor"])
+    shot = guide("screen/playlist-list.webp")
+    g = ImageDraw.Draw(shot)
+    g.rounded_rectangle((892, 224, 916, 246), 4, outline=(210, 214, 218), width=2)
+    g.text((930, 228), "夜のおすすめ", font=font(22), fill=WHITE, anchor="lm")
+    g.text((930, 248), "合計 8 トラック", font=font(13), fill=(190, 196, 202), anchor="lm")
+    g.rounded_rectangle((880, 212, 1110, 262), 10, outline=ORANGE, width=5)
+    screen = (330, 50, 1230, 556)
+    d.rectangle((screen[0] - 14, screen[1] - 14, screen[2] + 14, screen[3] + 14), fill=(10, 12, 16))
+    place(im, shot, screen)
+    overlay(im, lambda o: o.polygon([(screen[0], screen[3]), (screen[2], screen[3]), (W, H), (0, H)],
+                                    fill=(150, 210, 230, 30)))
+    hb = person(im, 190, 790, 560, B_COL, "RIRIKA", twin=True, arm="wave")
+    sfx(im, (520, 320), "ポン", 44)
+    bubble(im, 20, 90, "わたしのも入れよ！", 32, tail=(hb[0] + 20, hb[1] - 110))
+    text(im, (1030, 268), "2 つ目のプレイリスト", 24, fill=ORANGE, anchor="mm", stroke=4)
+    telop(im, "プレイリストは、みんなで足せる", en="Anyone can add a playlist")
+    return im
+
+
+def c13():
     im = new(NIGHT["wall"])
     room(im, screen=sample_video(), glow=True)
     ha = person(im, 540, 800, 470, A_COL, "MAO")
@@ -616,7 +735,7 @@ def c11():
     return im
 
 
-def c12():
+def c14():
     im = new(NIGHT["wall"])
     room(im, screen=sample_video(), glow=True)
     im = im.filter(ImageFilter.GaussianBlur(10))
@@ -628,7 +747,7 @@ def c12():
     return im
 
 
-def c13():
+def c15():
     im = new(NIGHT["wall"])
     room(im, screen=sample_video(), glow=True)
     im = im.filter(ImageFilter.GaussianBlur(10))
@@ -646,7 +765,7 @@ def c13():
     return im
 
 
-def c14():
+def c16():
     im = new(NIGHT["wall"])
     room(im, screen=sample_photo(), glow=True)
     hb = person(im, 1080, 690, 400, B_COL, "RIRIKA", twin=True, arm="wave")
@@ -668,7 +787,7 @@ def c14():
     return im
 
 
-def c15():
+def c17():
     im = new(NIGHT["wall"])
     room(im, screen=sample_video(), glow=True)
     im = im.filter(ImageFilter.GaussianBlur(10))
@@ -680,7 +799,7 @@ def c15():
     return im
 
 
-def c16():
+def c18():
     im = new(INK)
     place(im, guide("screen/settings-playback.webp"), (0, 0, W, H))
     overlay(im, lambda o: o.rectangle((0, 0, W, H), fill=(0, 0, 0, 150)))
@@ -696,7 +815,7 @@ def c16():
     return im
 
 
-def c17():
+def c19():
     im = new(DAY["wall"])
     room(im, mode=DAY, screen=sample_video(time="00:02"), glow=True, door=True)
     sofa(im, DAY)
@@ -718,7 +837,7 @@ def c17():
 
 
 
-def c18():
+def c20():
     im = new(NIGHT["wall"])
     room(im, screen=sample_video(), glow=True)
     person(im, 540, 800, 470, A_COL, "MAO")
@@ -730,7 +849,7 @@ def c18():
     return im
 
 
-def c19():
+def c21():
     im = brand_background()
     place(im, logo(170), (555, 50, 725, 220))
     text(im, (640, 280), "KawaPlayer", 84, anchor="mm")
@@ -744,7 +863,7 @@ def c19():
     return im
 
 
-def c20():
+def c22():
     im = new((0, 0, 0))
     d = ImageDraw.Draw(im)
     rows = (("アバター", "MAO・RIRIKA（作者の指定の表記）"), ("BGM", "（曲名・作者）"))
