@@ -372,19 +372,6 @@ def sample_video(w=640, h=360, time="01:23", bar=True):
     return v
 
 
-def sample_photo(w=640, h=360):
-    """A made-up picture: mountains under a blue sky."""
-    p = gradient(w, h, [(120, 180, 240), (200, 230, 250)])
-    d = ImageDraw.Draw(p)
-    d.ellipse((w * 0.72, h * 0.12, w * 0.84, h * 0.33), fill=(255, 246, 200))
-    d.polygon([(0, h), (0, h * 0.62), (w * 0.22, h * 0.36), (w * 0.42, h * 0.6), (w * 0.6, h * 0.3),
-               (w * 0.86, h * 0.64), (w, h * 0.52), (w, h)], fill=(70, 130, 110))
-    d.polygon([(w * 0.6, h * 0.3), (w * 0.53, h * 0.4), (w * 0.58, h * 0.38), (w * 0.62, h * 0.42),
-               (w * 0.66, h * 0.37)], fill=(245, 250, 255))
-    d.rectangle((0, h * 0.84, w, h), fill=(110, 160, 90))
-    return p
-
-
 
 
 def logo(size, col=WHITE):
@@ -680,59 +667,129 @@ def c09():
     return im
 
 
+
+
+
+
+
+
+def sample_photo_tall(w=360, h=640):
+    """A made-up 9:16 picture: a lighthouse at dusk."""
+    p = gradient(w, h, [(60, 90, 170), (240, 150, 140), (250, 200, 150)])
+    d = ImageDraw.Draw(p)
+    d.rectangle((0, h * 0.78, w, h), fill=(40, 70, 120))
+    d.polygon([(w * 0.42, h * 0.3), (w * 0.58, h * 0.3), (w * 0.63, h * 0.8), (w * 0.37, h * 0.8)], fill=(245, 245, 240))
+    for k in range(3):
+        y = h * (0.42 + k * 0.12)
+        d.rectangle((w * 0.38, y, w * 0.62, y + h * 0.05), fill=(220, 70, 70))
+    d.rectangle((w * 0.44, h * 0.24, w * 0.56, h * 0.3), fill=(255, 230, 140))
+    d.polygon([(w * 0.4, h * 0.24), (w * 0.6, h * 0.24), (w * 0.5, h * 0.18)], fill=(200, 60, 60))
+    return p
+
+
+def fit_into(im, src, box, bg=(0, 0, 0)):
+    """src inside box, keeping its shape, with bars on the sides or the top."""
+    x0, y0, x1, y1 = box
+    ImageDraw.Draw(im).rectangle(box, fill=bg)
+    s = min((x1 - x0) / src.width, (y1 - y0) / src.height)
+    w, h = src.width * s, src.height * s
+    place(im, src, ((x0 + x1 - w) / 2, (y0 + y1 - h) / 2, (x0 + x1 + w) / 2, (y0 + y1 + h) / 2))
+
+
+def sparkle(im, x, y, r, col=(255, 240, 160)):
+    ImageDraw.Draw(im).polygon([(x, y - r), (x + r * 0.25, y - r * 0.25), (x + r, y), (x + r * 0.25, y + r * 0.25),
+                                (x, y + r), (x - r * 0.25, y + r * 0.25), (x - r, y), (x - r * 0.25, y - r * 0.25)], fill=col)
+
+
+def sweat(im, x, y, r=16):
+    d = ImageDraw.Draw(im)
+    d.polygon([(x, y - r * 1.6), (x + r, y), (x - r, y)], fill=(150, 210, 250))
+    d.ellipse((x - r, y - r, x + r, y + r), fill=(150, 210, 250))
+
+
 def c10():
     im = new(NIGHT["wall"])
     room(im, screen=sample_video(), glow=True)
-    im = im.filter(ImageFilter.GaussianBlur(10))
-    box = (230, 60, 1050, 579)
-    tablet_home(im, box)
-    hands(im, box)
-    heading(im, "02", "タブレット", "手元で、プレイヤーを操作", "A tablet in your hands")
-    note(im, "MAO の目線")
+    im = im.filter(ImageFilter.GaussianBlur(6))
+    hb = person(im, 760, 900, 760, B_COL, "RIRIKA", twin=True)
+    tab = (560, 430, 960, 660)
+    scr = tablet_frame(im, tab, radius=30)
+    fit_into(im, sample_photo_tall(), scr)
+    d = ImageDraw.Draw(im)
+    for x in (tab[0] - 6, tab[2] + 6):
+        d.ellipse((x - 34, 520, x + 34, 600), fill=B_COL)
+    for x, y, r in ((520, 380, 26), (1010, 360, 20), (990, 470, 14), (500, 500, 16)):
+        sparkle(im, x, y, r)
+    bubble(im, 860, 120, "見て見て！", 40, tail=(hb[0] + 40, hb[1] - 120))
+    person(im, 120, 1300, 1100, A_COL)
+    text(im, (760, 690), "縦の写真を、横持ちのまま", 24, fill=ORANGE, anchor="mm", stroke=4)
+    heading(im, "02", "タブレット", "手元で見せて、スクリーンにも", "Show it in your hands, or on the big screen")
+    note(im, "RIRIKA に寄る")
     return im
 
 
 def c11():
     im = new(NIGHT["wall"])
     room(im, screen=sample_video(), glow=True)
-    im = im.filter(ImageFilter.GaussianBlur(10))
-    src = guide("tablet/rotate.webp", (797, 20, 1227, 700))
-    box = box_at(src, 0, 40, h=620)
-    box = (640 - (box[2] - box[0]) / 2, 40, 640 + (box[2] - box[0]) / 2, 660)
-    place(im, src, box, radius=40)
-    hands(im, box)
+    im = im.filter(ImageFilter.GaussianBlur(6))
+    ha = person(im, 420, 860, 700, A_COL, "MAO", arm="reach")
     d = ImageDraw.Draw(im)
-    d.arc((150, 150, 390, 390), 200, 340, fill=ORANGE, width=8)
-    arrow(im, (360, 195), (388, 250))
-    text(im, (270, 430), "縦に持つと", 30, fill=ORANGE, anchor="mm", stroke=4)
-    text(im, (270, 472), "画面も縦に", 30, fill=ORANGE, anchor="mm", stroke=4)
-    note(im, "MAO の目線")
+    fx, fy = 420 + 700 * 0.15 * 2.5, 860 - 700 + 700 * 0.115 * 1.1 + 700 * 0.115 * 1.35 + 700 * 0.02
+    d.arc((fx - 50, fy - 90, fx + 50, fy + 10), 200, 520, fill=ORANGE, width=6)
+    arrow(im, (fx + 44, fy - 30), (fx + 30, fy - 2), width=5, head=16)
+    tab = (1000, 380, 1330, 570)
+    scr = tablet_frame(im, tab, radius=26)
+    fit_into(im, sample_photo_tall(), scr)
+    bubble(im, 120, 120, "縦、縦！", 40, tail=(ha[0] + 30, ha[1] - 110))
+    text(im, (fx, fy + 70), "くるっと回す仕草", 24, fill=ORANGE, anchor="mm", stroke=4)
+    note(im, "MAO が指摘する")
     return im
 
 
 def c12():
     im = new(NIGHT["wall"])
-    room(im, screen=sample_photo(), glow=True)
-    hb = person(im, 1080, 690, 400, B_COL, "RIRIKA", twin=True, arm="wave")
-    bubble(im, 850, 90, "おおー！", 38, tail=(hb[0] - 70, hb[1] - 96))
+    room(im, screen=sample_video(), glow=True)
+    im = im.filter(ImageFilter.GaussianBlur(8))
+    tab = (520, 40, 880, 640)
+    scr = tablet_frame(im, tab, radius=40, portrait=True)
+    place(im, sample_photo_tall(), scr)
+    hands(im, tab, col=B_COL)
     d = ImageDraw.Draw(im)
-    panel = (24, 76, 470, 382)
-    d.rounded_rectangle(panel, 14, fill=(16, 18, 22), outline=A_COL, width=4)
-    scr = tablet_frame(im, (44, 120, 450, 370))
-    place(im, sample_photo(), scr)
-    d.rounded_rectangle((scr[0] + 8, scr[1] + 8, scr[0] + 44, scr[1] + 44), 10, fill=(0, 0, 0, 160))
-    d.text((scr[0] + 26, scr[1] + 26), "<", font=font(26), fill=WHITE, anchor="mm")
-    sb = (scr[2] - 160, scr[1] + 8, scr[2] - 8, scr[1] + 46)
-    d.rounded_rectangle(sb, 12, fill=(30, 60, 80), outline=(110, 200, 240), width=3)
-    d.text(((sb[0] + sb[2]) / 2, (sb[1] + sb[3]) / 2), "KawaPlayer へ", font=font(20), fill=WHITE, anchor="mm")
-    d.rounded_rectangle((sb[0] - 6, sb[1] - 6, sb[2] + 6, sb[3] + 6), 14, outline=ORANGE, width=5)
-    text(im, (44, 86), "MAO のタブレット", 22, fill=A_COL)
-    arrow(im, (470, 240), (560, 260))
-    telop(im, "手元の画像を、スクリーンへ", en="Show a picture on the big screen")
+    d.ellipse((60, 260, 420, 680), fill=darker(B_COL, 0.6))
+    d.ellipse((20, 360, 120, 720), fill=darker(B_COL, 0.6))
+    d.ellipse((360, 360, 460, 720), fill=darker(B_COL, 0.6))
+    sweat(im, 440, 260)
+    sweat(im, 470, 330, 12)
+    d.arc((880, 120, 1120, 360), 250, 30, fill=ORANGE, width=8)
+    arrow(im, (1100, 320), (1080, 352))
+    text(im, (1000, 400), "縦に回す", 28, fill=ORANGE, anchor="mm", stroke=4)
+    telop(im, "縦に持てば、縦の画面に", en="Turn it upright, and the screen turns too")
+    note(im, "RIRIKA の肩越し・はずかしそうに")
     return im
 
 
 def c13():
+    im = new(NIGHT["wall"])
+    room(im, glow=True)
+    fit_into(im, sample_photo_tall(), SCREEN)
+    ha = person(im, 1080, 690, 400, A_COL, "MAO", arm="wave")
+    bubble(im, 850, 90, "おおー！", 38, tail=(ha[0] - 70, ha[1] - 96))
+    d = ImageDraw.Draw(im)
+    panel = (24, 76, 330, 560)
+    d.rounded_rectangle(panel, 14, fill=(16, 18, 22), outline=B_COL, width=4)
+    scr = tablet_frame(im, (54, 120, 300, 540), radius=30, portrait=True)
+    place(im, sample_photo_tall(), scr)
+    sb = (scr[0] + 10, scr[3] - 50, scr[2] - 10, scr[3] - 12)
+    d.rounded_rectangle(sb, 12, fill=(30, 60, 80), outline=(110, 200, 240), width=3)
+    d.text(((sb[0] + sb[2]) / 2, (sb[1] + sb[3]) / 2), "KawaPlayer へ", font=font(20), fill=WHITE, anchor="mm")
+    d.rounded_rectangle((sb[0] - 6, sb[1] - 6, sb[2] + 6, sb[3] + 6), 14, outline=ORANGE, width=5)
+    text(im, (44, 86), "RIRIKA のタブレット", 22, fill=B_COL)
+    arrow(im, (330, 300), (400, 280))
+    telop(im, "手元の画像を、スクリーンへ", en="Show a picture on the big screen")
+    return im
+
+
+def c14():
     im = new(NIGHT["wall"])
     room(im, screen=sample_video(), glow=True)
     im = im.filter(ImageFilter.GaussianBlur(10))
@@ -744,7 +801,7 @@ def c13():
     return im
 
 
-def c14():
+def c15():
     im = new(INK)
     place(im, guide("screen/settings-playback.webp"), (0, 0, W, H))
     overlay(im, lambda o: o.rectangle((0, 0, W, H), fill=(0, 0, 0, 150)))
@@ -760,7 +817,7 @@ def c14():
     return im
 
 
-def c15():
+def c16():
     im = new(DAY["wall"])
     room(im, mode=DAY, screen=sample_video(time="00:02"), glow=True, door=True)
     sofa(im, DAY)
@@ -782,7 +839,7 @@ def c15():
 
 
 
-def c16():
+def c17():
     im = new(NIGHT["wall"])
     room(im, screen=sample_video(), glow=True)
     person(im, 540, 800, 470, A_COL, "MAO")
@@ -794,7 +851,7 @@ def c16():
     return im
 
 
-def c17():
+def c18():
     im = brand_background()
     place(im, logo(170), (555, 50, 725, 220))
     text(im, (640, 280), "KawaPlayer", 84, anchor="mm")
@@ -808,7 +865,7 @@ def c17():
     return im
 
 
-def c18():
+def c19():
     im = new((0, 0, 0))
     d = ImageDraw.Draw(im)
     rows = (("アバター", "MAO・RIRIKA（作者の指定の表記）"), ("BGM", "（曲名・作者）"))
