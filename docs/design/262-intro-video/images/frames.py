@@ -1,7 +1,8 @@
 """Draws the storyboard's frames (c01.webp, c02.webp, ...) for README.md.
 
 The frames are sketches. The people are silhouettes: MAO (teal), who runs the player,
-and RIRIKA (pink, with twin tails), the friend who watches with her. What KawaPlayer shows is cut from
+RIRIKA (pink, with twin tails), the friend who watches with her, and the guest
+(lavender) who joins the world. What KawaPlayer shows is cut from
 the guide's own pictures (docs/guide/images/original/), and the videos and pictures
 on its screen are drawn here. Frames taken in Unity are not put in this repository:
 they show the avatars, whose terms do not allow it. After changing a cut, run:
@@ -35,6 +36,7 @@ TEAL = (63, 196, 198)
 BLUE = (34, 166, 203)
 A_COL = (46, 170, 180)  # MAO
 B_COL = (226, 120, 166)  # RIRIKA
+G_COL = (150, 132, 226)  # The guest who joins
 NIGHT = dict(wall=(36, 42, 52), floor=(26, 30, 38), line=(70, 80, 94), sofa=(52, 58, 70))
 DAY = dict(wall=(214, 220, 226), floor=(186, 192, 198), line=(150, 158, 166), sofa=(150, 156, 166))
 SCREEN = (380, 110, 900, 403)  # The wall screen, 16:9.
@@ -262,7 +264,7 @@ def sofa(im, mode=NIGHT):
 
 
 def person(im, cx, base, h, col, label=None, twin=False, arm=None):
-    """A standing figure, base at its feet and h tall. arm: None, 'up', 'wave' or 'reach'."""
+    """A standing figure, base at its feet and h tall. arm: None, 'up', 'wave', 'reach' or 'both'."""
     d = ImageDraw.Draw(im)
     dark = darker(col)
     r = h * 0.115
@@ -291,6 +293,9 @@ def person(im, cx, base, h, col, label=None, twin=False, arm=None):
         right = [(cx + sw * 0.92, sh + h * 0.04), (cx + sw * 1.5, sh - h * 0.06), (cx + sw * 1.95, sh - h * 0.26)]
     elif arm == "reach":
         right = [(cx + sw * 0.92, sh + h * 0.04), (cx + sw * 1.7, sh + h * 0.08), (cx + sw * 2.5, sh + h * 0.02)]
+    elif arm == "both":
+        left = [(cx - sw * 0.92, sh + h * 0.04), (cx - sw * 1.3, sh - h * 0.08), (cx - sw * 1.6, sh - h * 0.27)]
+        right = [(cx + sw * 0.92, sh + h * 0.04), (cx + sw * 1.3, sh - h * 0.08), (cx + sw * 1.6, sh - h * 0.27)]
     for pts in (left, right):
         d.line(pts, fill=col, width=aw, joint="curve")
         ex, ey = pts[-1]
@@ -791,17 +796,57 @@ def c13():
 
 def c14():
     im = new(NIGHT["wall"])
-    room(im, screen=sample_video(), glow=True)
-    im = im.filter(ImageFilter.GaussianBlur(10))
-    box = (230, 50, 1050, 569)
-    place(im, guide("tablet/visitors.webp", (36, 22, 1244, 786)), box, radius=56)
-    hands(im, box)
-    telop(im, "誰が来たかも、ひと目で", en="See who came by")
-    note(im, "MAO の目線")
+    room(im, screen=sample_video(), glow=True, door=True)
+    join_ring(im, 1130, 470, 90, 210)
+    hg = person(im, 1130, 690, 400, G_COL, "ゲスト")
+    ha = person(im, 330, 700, 420, A_COL, "MAO", arm="wave")
+    hb = person(im, 700, 640, 400, B_COL, "RIRIKA", twin=True, arm="both")
+    d = ImageDraw.Draw(im)
+    for k in range(3):
+        d.line((650 + k * 50, 668, 650 + k * 50, 700), fill=(200, 210, 220), width=4)
+    bubble(im, 760, 60, "いらっしゃーい！", 34, tail=(hb[0] + 30, hb[1] - 100))
+    note(im, "別の場面・入ってくる人を歓迎", (W - 20, 660))
     return im
 
 
+def visitors_three():
+    """The guide's picture of the visitors app, with MAO, RIRIKA and the guest who just came."""
+    shot = guide("tablet/visitors.webp")
+    g = ImageDraw.Draw(shot)
+    bg = shot.getpixel((640, 500))[:3]
+    g.rectangle((96, 140, 1184, 690), fill=bg)
+    g.text((108, 166), "今いる人 3 人", font=font(22), fill=(190, 194, 200), anchor="lm")
+    rows = (("MAO", A_COL, "20:58", "オーナー"), ("RIRIKA", B_COL, "21:02", None), ("ゲスト", G_COL, "21:10", None))
+    for k, (name, col, t, badge) in enumerate(rows):
+        y = 190 + k * 100
+        g.rounded_rectangle((102, y, 1178, y + 87), 10, fill=(44, 46, 52))
+        g.ellipse((114, y + 10, 180, y + 76), fill=col)
+        g.text((200, y + 30), name, font=font(28), fill=WHITE, anchor="lm")
+        g.text((232, y + 66), "PC・キーボード", font=font(18), fill=(170, 176, 182), anchor="lm")
+        if badge:
+            g.rounded_rectangle((300, y + 14, 400, y + 46), 16, fill=(40, 90, 120))
+            g.text((350, y + 30), badge, font=font(18), fill=WHITE, anchor="mm")
+        g.text((868, y + 25), "入室", font=font(18), fill=(170, 176, 182), anchor="lm")
+        g.text((868, y + 59), t, font=font(26), fill=WHITE, anchor="lm")
+    y = 190 + 2 * 100
+    g.rounded_rectangle((96, y - 6, 1184, y + 93), 14, outline=ORANGE, width=6)
+    g.text((560, y + 44), "NEW", font=font(30), fill=ORANGE, anchor="mm")
+    return shot
+
+
 def c15():
+    im = new(NIGHT["wall"])
+    room(im, screen=sample_video(), glow=True)
+    im = im.filter(ImageFilter.GaussianBlur(10))
+    box = (230, 50, 1050, 569)
+    place(im, visitors_three().crop((36, 22, 1244, 786)), box, radius=56)
+    hands(im, box, col=B_COL)
+    telop(im, "誰が来たかも、ひと目で", en="See who came by")
+    note(im, "画面転換で、RIRIKA のタブレットへ")
+    return im
+
+
+def c16():
     im = new(INK)
     place(im, guide("screen/settings-playback.webp"), (0, 0, W, H))
     overlay(im, lambda o: o.rectangle((0, 0, W, H), fill=(0, 0, 0, 150)))
@@ -817,7 +862,7 @@ def c15():
     return im
 
 
-def c16():
+def c17():
     im = new(DAY["wall"])
     room(im, mode=DAY, screen=sample_video(time="00:02"), glow=True, door=True)
     sofa(im, DAY)
@@ -839,7 +884,7 @@ def c16():
 
 
 
-def c17():
+def c18():
     im = new(NIGHT["wall"])
     room(im, screen=sample_video(), glow=True)
     person(im, 540, 800, 470, A_COL, "MAO")
@@ -851,7 +896,7 @@ def c17():
     return im
 
 
-def c18():
+def c19():
     im = brand_background()
     place(im, logo(170), (555, 50, 725, 220))
     text(im, (640, 280), "KawaPlayer", 84, anchor="mm")
@@ -865,10 +910,10 @@ def c18():
     return im
 
 
-def c19():
+def c20():
     im = new((0, 0, 0))
     d = ImageDraw.Draw(im)
-    rows = (("アバター", "MAO・RIRIKA（作者の指定の表記）"), ("BGM", "（曲名・作者）"))
+    rows = (("アバター", "MAO・RIRIKA・ゲスト（作者の指定の表記）"), ("BGM", "（曲名・作者）"))
     for k, (role, who) in enumerate(rows):
         y = 320 + k * 70
         d.text((600, y), role, font=font(30), fill=(150, 156, 162), anchor="rm")
