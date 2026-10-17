@@ -1,7 +1,7 @@
 """Draws the storyboard's frames (c01.webp, c02.webp, ...) for README.md.
 
 The frames are sketches. The people are silhouettes: MAO (teal), who runs the player,
-and RIRIKA (pink, with twin tails), the friend who joins. What KawaPlayer shows is cut from
+and RIRIKA (pink, with twin tails), the friend who watches with her. What KawaPlayer shows is cut from
 the guide's own pictures (docs/guide/images/original/), and the videos and pictures
 on its screen are drawn here. Frames taken in Unity are not put in this repository:
 they show the avatars, whose terms do not allow it. After changing a cut, run:
@@ -400,21 +400,6 @@ def brand_background():
     return g
 
 
-def split(im, left, right, labels, y=130):
-    """Two people's screens side by side."""
-    d = ImageDraw.Draw(im)
-    pw, ph = 590, 332
-    for k, (src, lab) in enumerate(zip((left, right), labels)):
-        x = 34 + k * (pw + 32)
-        d.rounded_rectangle((x - 6, y - 6, x + pw + 6, y + ph + 6), 10, fill=(70, 78, 90))
-        place(im, src, (x, y, x + pw, y + ph))
-        col = A_COL if k == 0 else B_COL
-        tw = d.textlength(lab, font=font(28))
-        d.rounded_rectangle((x, y - 58, x + tw + 30, y - 14), 12, fill=col)
-        d.text((x + 15, y - 36), lab, font=font(28), fill=WHITE, anchor="lm")
-
-
-# --------------------------------------------------------------------- the cuts
 
 
 def leaf(d, cx, cy, length, width, angle, fill):
@@ -669,85 +654,45 @@ def c08():
     return im
 
 
+
+
+
+
+
+
+
+
+
+
 def c09():
     im = new(NIGHT["wall"])
     room(im, screen=sample_video(), glow=True)
+    ha = person(im, 560, 800, 470, A_COL, "MAO")
+    hb = person(im, 730, 805, 460, B_COL, "RIRIKA", twin=True)
     sofa(im)
-    head = person(im, 1060, 700, 420, A_COL, "MAO", arm="up")
-    bubble(im, 1080, 96, "きたー！", 40, tail=(head[0] + 62, head[1] - 96))
+    sfx(im, (645, 300), "♪", 56, col=WHITE)
+    x0, y0, x1, y1 = SCREEN
+    dashed(im, (x0 - 20, y0 - 20, x1 + 20, y1 + 20))
+    for (bx, by), (cx, cy) in (((x0 - 20, y0 - 20), (60, 40)), ((x1 + 20, y0 - 20), (W - 60, 40)),
+                               ((x1 + 20, y1 + 20), (W - 60, H - 40)), ((x0 - 20, y1 + 20), (60, H - 40))):
+        arrow(im, (bx, by), (bx + (cx - bx) * 0.7, by + (cy - by) * 0.7), width=5, head=18)
+    note(im, "スクリーンから、2 人の後ろまで引く")
     return im
 
 
 def c10():
-    im = new(NIGHT["wall"])
-    room(im, screen=sample_video(), glow=True, door=True)
-    join_ring(im, 1130, 470, 90, 210)
-    hb = person(im, 1130, 690, 400, B_COL, "RIRIKA", twin=True)
-    ha = person(im, 760, 690, 400, A_COL, "MAO", arm="wave")
-    bubble(im, 860, 130, "もう始まってる？", 34, tail=(hb[0] - 50, hb[1] - 100))
-    heading(im, "02", "みんなで同じ映像", "あとから来ても、同じ場面から", "Everyone on the same moment")
-    return im
-
-
-def c11():
-    im = new((22, 26, 32))
-    split(im, sample_video(time="01:23"), sample_video(time="01:23"), ("MAO の画面", "RIRIKA の画面（入ったばかり）"))
-    d = ImageDraw.Draw(im)
-    for x in (34, 34 + 622):
-        d.rounded_rectangle((x + 4, 418, x + 96, 460), 10, outline=ORANGE, width=5)
-    text(im, (640, 510), "どちらも 01:23", 34, fill=ORANGE, anchor="mm", stroke=4)
-    telop(im, "入ったばかりでも、同じところから", en="Join late, watch from the same point")
-    return im
-
-
-def c12():
-    im = new(NIGHT["wall"])
-    d = ImageDraw.Draw(im)
-    d.rectangle((0, 600, W, H), fill=NIGHT["floor"])
-    shot = guide("screen/playlist-list.webp")
-    g = ImageDraw.Draw(shot)
-    g.rounded_rectangle((892, 224, 916, 246), 4, outline=(210, 214, 218), width=2)
-    g.text((930, 228), "夜のおすすめ", font=font(22), fill=WHITE, anchor="lm")
-    g.text((930, 248), "合計 8 トラック", font=font(13), fill=(190, 196, 202), anchor="lm")
-    g.rounded_rectangle((880, 212, 1110, 262), 10, outline=ORANGE, width=5)
-    screen = (330, 50, 1230, 556)
-    d.rectangle((screen[0] - 14, screen[1] - 14, screen[2] + 14, screen[3] + 14), fill=(10, 12, 16))
-    place(im, shot, screen)
-    overlay(im, lambda o: o.polygon([(screen[0], screen[3]), (screen[2], screen[3]), (W, H), (0, H)],
-                                    fill=(150, 210, 230, 30)))
-    hb = person(im, 190, 790, 560, B_COL, "RIRIKA", twin=True, arm="wave")
-    sfx(im, (520, 320), "ポン", 44)
-    bubble(im, 20, 90, "わたしのも入れよ！", 32, tail=(hb[0] + 20, hb[1] - 110))
-    text(im, (1030, 268), "2 つ目のプレイリスト", 24, fill=ORANGE, anchor="mm", stroke=4)
-    telop(im, "プレイリストは、みんなで足せる", en="Anyone can add a playlist")
-    return im
-
-
-def c13():
-    im = new(NIGHT["wall"])
-    room(im, screen=sample_video(), glow=True)
-    ha = person(im, 540, 800, 470, A_COL, "MAO")
-    hb = person(im, 750, 800, 470, B_COL, "RIRIKA", twin=True)
-    sofa(im)
-    bubble(im, 840, 180, "ここ好き！", 36, tail=(hb[0] + 50, hb[1] - 100))
-    bubble(im, 250, 180, "わかる〜", 36, tail=(ha[0] - 50, ha[1] - 100))
-    note(im, "2 人の後ろから")
-    return im
-
-
-def c14():
     im = new(NIGHT["wall"])
     room(im, screen=sample_video(), glow=True)
     im = im.filter(ImageFilter.GaussianBlur(10))
     box = (230, 60, 1050, 579)
     tablet_home(im, box)
     hands(im, box)
-    heading(im, "03", "タブレット", "手元で、プレイヤーを操作", "A tablet in your hands")
+    heading(im, "02", "タブレット", "手元で、プレイヤーを操作", "A tablet in your hands")
     note(im, "MAO の目線")
     return im
 
 
-def c15():
+def c11():
     im = new(NIGHT["wall"])
     room(im, screen=sample_video(), glow=True)
     im = im.filter(ImageFilter.GaussianBlur(10))
@@ -765,7 +710,7 @@ def c15():
     return im
 
 
-def c16():
+def c12():
     im = new(NIGHT["wall"])
     room(im, screen=sample_photo(), glow=True)
     hb = person(im, 1080, 690, 400, B_COL, "RIRIKA", twin=True, arm="wave")
@@ -787,7 +732,7 @@ def c16():
     return im
 
 
-def c17():
+def c13():
     im = new(NIGHT["wall"])
     room(im, screen=sample_video(), glow=True)
     im = im.filter(ImageFilter.GaussianBlur(10))
@@ -799,7 +744,7 @@ def c17():
     return im
 
 
-def c18():
+def c14():
     im = new(INK)
     place(im, guide("screen/settings-playback.webp"), (0, 0, W, H))
     overlay(im, lambda o: o.rectangle((0, 0, W, H), fill=(0, 0, 0, 150)))
@@ -811,11 +756,11 @@ def c18():
     s = (b[2] - b[0]) / src.width
     d.rounded_rectangle((b[0] + 20 * s, b[1] + 92 * s, b[0] + 520 * s, b[1] + 120 * s), 8, outline=ORANGE, width=5)
     bubble(im, 700, 380, "インスタンスを作った人が決める", 30, tail=(b[0] + 400 * s, b[1] + 124 * s))
-    heading(im, "04", "自動再生", "入ったときに流す動画を、ワールドの中で決める", "Autoplay, set inside the world")
+    heading(im, "03", "自動再生", "入ったときに流す動画を、ワールドの中で決める", "Autoplay, set inside the world")
     return im
 
 
-def c19():
+def c15():
     im = new(DAY["wall"])
     room(im, mode=DAY, screen=sample_video(time="00:02"), glow=True, door=True)
     sofa(im, DAY)
@@ -837,19 +782,19 @@ def c19():
 
 
 
-def c20():
+def c16():
     im = new(NIGHT["wall"])
     room(im, screen=sample_video(), glow=True)
     person(im, 540, 800, 470, A_COL, "MAO")
     person(im, 750, 800, 470, B_COL, "RIRIKA", twin=True)
     sofa(im)
     zoom(im, (200, 60, 1080, 560), inward=False)
-    telop(im, "同じ映像を、同じ瞬間に。（仮）", 50, y=H - 90)
+    telop(im, "URL ひとつで、みんなの上映会。（仮）", 50, y=H - 90)
     note(im, "ゆっくり引く")
     return im
 
 
-def c21():
+def c17():
     im = brand_background()
     place(im, logo(170), (555, 50, 725, 220))
     text(im, (640, 280), "KawaPlayer", 84, anchor="mm")
@@ -863,7 +808,7 @@ def c21():
     return im
 
 
-def c22():
+def c18():
     im = new((0, 0, 0))
     d = ImageDraw.Draw(im)
     rows = (("アバター", "MAO・RIRIKA（作者の指定の表記）"), ("BGM", "（曲名・作者）"))
