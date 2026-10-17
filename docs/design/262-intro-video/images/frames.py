@@ -965,30 +965,44 @@ def c18():
     return im
 
 
-def portal(im, cx, cy, rx, ry):
-    """A portal of the video's own design: a ring of light, with where it leads above it."""
-    def draw(o):
-        for k in range(6):
-            o.ellipse((cx - rx - k * 10, cy - ry - k * 10, cx + rx + k * 10, cy + ry + k * 10),
-                      outline=(140, 220, 255, 200 - k * 30), width=6)
-        o.ellipse((cx - rx, cy - ry, cx + rx, cy + ry), fill=(170, 230, 255, 110))
-    overlay(im, draw)
+def portal(im, cx, cy, r):
+    """A portal laid out like VRChat's, drawn here from scratch: a round gate showing the world
+    it leads to, what the instance is above it, and the seconds left below it."""
+    thumb = new(NIGHT["wall"])
+    room(thumb, screen=sample_video(bar=False), glow=True)
+    thumb = thumb.crop((280, 40, 1000, 760)).resize((int(r * 2), int(r * 2)), Image.LANCZOS)
+    mask = Image.new("L", thumb.size, 0)
+    ImageDraw.Draw(mask).ellipse((0, 0, thumb.width - 1, thumb.height - 1), fill=255)
+    thumb.putalpha(mask)
+
+    def glow(o):
+        for k in range(7):
+            o.ellipse((cx - r - k * 9, cy - r - k * 9, cx + r + k * 9, cy + r + k * 9),
+                      outline=(150, 225, 255, 210 - k * 28), width=7)
+    overlay(im, glow)
+    im.alpha_composite(thumb, (int(cx - r), int(cy - r)))
     d = ImageDraw.Draw(im)
-    d.rounded_rectangle((cx - 180, cy - ry - 110, cx + 180, cy - ry - 30), 12, fill=(16, 18, 22),
-                        outline=(140, 220, 255), width=3)
-    d.text((cx, cy - ry - 88), "KawaPlayer Testing Chamber", font=font(22), fill=WHITE, anchor="mm")
-    d.text((cx, cy - ry - 52), "Friends+（MAO）", font=font(22), fill=(170, 230, 255), anchor="mm")
+    for k in range(4):
+        d.arc((cx - r - 4, cy - r - 4, cx + r + 4, cy + r + 4), k * 90 + 10, k * 90 + 60, fill=WHITE, width=5)
+    lines = (("KawaPlayer Testing Chamber", 26, WHITE), ("MAO", 20, (200, 230, 245)),
+             ("Friends+ ・ 日本", 20, (170, 230, 255)), ("2 / 32", 20, (200, 230, 245)))
+    y = cy - r - 150
+    for t, z, c in lines:
+        d.text((cx, y), t, font=font(z), fill=c, anchor="mm", stroke_width=3, stroke_fill=INK)
+        y += z + 12
+    d.ellipse((cx - 26, cy + r + 24, cx + 26, cy + r + 76), outline=(150, 225, 255), width=4)
+    d.text((cx, cy + r + 50), "30", font=font(24), fill=WHITE, anchor="mm")
 
 
 def c19():
     im = new(NIGHT["wall"])
     room(im, screen=sample_video(), glow=True)
-    portal(im, 1040, 430, 120, 200)
-    person(im, 800, 700, 380, A_COL, "MAO")
-    person(im, 930, 690, 370, B_COL, "RIRIKA", twin=True)
-    arrow(im, (660, 660), (960, 580))
+    portal(im, 1030, 390, 150)
+    person(im, 780, 700, 380, A_COL, "MAO")
+    person(im, 900, 690, 370, B_COL, "RIRIKA", twin=True)
+    arrow(im, (640, 660), (930, 560))
     telop(im, "MAO が作った、新しいインスタンスへ", en="Off to a new instance MAO opened")
-    note(im, "ポータルは動画だけの演出")
+    note(im, "VRChat のポータルに寄せて、こちらで描く")
     return im
 
 
