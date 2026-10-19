@@ -36,14 +36,14 @@ There is no local build command — the project is opened and compiled in the Un
 - SemVer の pre-release 識別子 (`-beta`, `-kawa` 等) を含むと VCC で「Show Pre-Release Packages」を ON にしないと表示されないため、正式リリースでは使用しない
 
 **Two changelogs, two audiences**:
-- `Assets/updatelog.txt` — **表示されるのはワールドの中**。`ScreenUI.prefab` と `Tablet.prefab` が `UIController._updateLogTextAsset` として参照し、プレイヤーの Info パネルとタブレットのバージョン情報にそのまま出る UI テキスト。読むのは遊ぶ人なので、**その版の変更だけ**を、遊ぶ人に見えるものに絞って数行で書く（SDK・モジュール管理・ビルドのログなど、制作者向けの話は書かない）。ワールドの KawaPlayer はビルドした版のまま固定なので、前の版は残さず、リリースのたびに中身を置き換える。日本語のみ、リンクや issue 番号は書かない。少しくだけた口調でよい
+- `Assets/updatelog.txt` — **表示されるのはワールドの中**。`ScreenUI.prefab` と `Tablet.prefab` が `UIController._updateLogTextAsset` として参照し、プレイヤーの Info パネルとタブレットのバージョン情報にそのまま出る UI テキスト。読むのは遊ぶ人なので、**直近 3 回の版の変更**を、新しい版から順に、遊ぶ人に見えるものに絞って版ごとに数行で書く（SDK・モジュール管理・ビルドのログなど、制作者向けの話は書かない）。リリースのたびに新しい版を先頭に足し、4 つ目より古い版は消す（2026-10-19 に、その版だけから直近 3 回に変えた）。遊ぶ人に見える変更がない版は「不具合を直しました」の 1 行でよい。日本語のみ、リンクや issue 番号は書かない。少しくだけた口調でよい
 - `docs/releases/<version>.md` — **GitHub Release の本文**。読むのはワールド制作者と、自分のスクリプトから KawaPlayer を呼ぶ開発者なので、詳しく書く。`updatelog.txt` の転記ではなく独立した文章にする。口調は VRChat のリリースノート（例：`https://docs.vrchat.com/docs/vrchat-202631`）のように、短い箇条書きに、ときどき一言の冗談を混ぜたくだけたもの。並べ方は `docs/releases/1.3.0.md` を前例とする: 目玉を冒頭で一言 → 更新する前に必ずすること（SDK・ビルドし直し・名前の変更・消した API）→ 新しいこと → 変わったこと → 直したこと → 中身の改善 → 自分のスクリプトから呼ぶ人へ → 困ったら（既知の問題の列挙はせず Discord へ、`https://discord.gg/tkrHek6PvN`）→ 入手方法（VCC のみ）→ 全部の変更（前の版との compare のリンク）→ 英語のまとめ。項目の末尾に PR の番号を付ける。`vcc://vpm/addRepo?url=...` はコピー用のコードブロックで書く — GitHub の Markdown は `vcc://` の href を落とすので、リンクにしても押せない
 - `docs/releases/README.md` — 版の一覧。1.1.2 までの版は GitHub の Release に本文がない（1.1.0・1.1.1 は Release もない）ので、ワールドの中の更新履歴にあった内容をここに残している
 - `docs/**/*.meta` は `.gitignore` 済みなので `.meta` は作らない。`docs/` はリリースの zip にも `.unitypackage` にも入らない（`release.yml` で除く）。使い方ガイドなどは GitHub で読む
 
 **Release checklist**:
 1. `package.json` の `version` を更新
-2. `Assets/updatelog.txt` の中身を新しい版のものに置き換える（遊ぶ人に見える主な変更だけを数行。前の版は残さない）
+2. `Assets/updatelog.txt` の先頭に新しい版を足し、直近 3 回の版だけを残す（遊ぶ人に見える主な変更だけを版ごとに数行）
 3. `docs/releases/<version>.md` を書き、`docs/releases/README.md` の表に足す（上記の作法。レビューは PR で受ける。日付はリリースの日に両方へ入れる）
 4. コミット・push
 5. GitHub Actions の「Build Release」ワークフローを **`publish` にチェックを入れて**手動実行 (develop ブランチ)。チェック無しで実行すると成果物を Artifacts に上げるだけの dry run になる (ワークフロー変更の確認に使う)
