@@ -16,11 +16,5 @@
   },
   "vpmDependencies": {
     "com.vrchat.worlds": ">=3.10.2"
-  },
-  "samples": [
-    {
-      "displayName": "AVProHelper",
-      "path": "Samples~/AVProHelper"
-    }
-  ]
+  }
 }
