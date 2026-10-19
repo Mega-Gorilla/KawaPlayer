@@ -33,6 +33,7 @@
         "System.Collections.Immutable.dll",
         "VRCSDK3.dll",
         "VRCSDKBase.dll",
+        "VRC.Udon.Common.dll",
         "VRC.Utility.dll",
         "Newtonsoft.Json.dll",
         "vpm-core-lib.dll",
