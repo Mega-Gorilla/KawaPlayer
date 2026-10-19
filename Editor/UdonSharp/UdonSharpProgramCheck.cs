@@ -88,7 +88,7 @@ namespace Yamadev.YamaStream.Editor
         var programs = FindProgramsToCompile();
         sound = programs.Count == 0;
         if (sound) SessionState.SetBool(FailedKey, false);
-        else LogStillBroken(programs);
+        else LogStillBroken(programs, true);
       }
       else return;
 
@@ -115,13 +115,14 @@ namespace Yamadev.YamaStream.Editor
       }
 
       SessionState.SetBool(FailedKey, true);
-      LogStillBroken(programs);
+      LogStillBroken(programs, EditorApplication.isPlayingOrWillChangePlaymode);
       return false;
     }
 
-    private static void LogStillBroken(List<string> programs)
+    private static void LogStillBroken(List<string> programs, bool playStopped)
     {
-      Debug.LogError($"[KawaPlayer] {programs.Count} of KawaPlayer's U# programs are still missing, empty or out of date ({Names(programs)}), so Play was stopped. Fix the U# errors in the Console if there are any, then select one of KawaPlayer's U# program assets (such as Runtime/Internal/Controller) and press Compile All UdonSharp Programs in the Inspector.");
+      string what = playStopped ? "so Play was stopped" : "and Play will be stopped until they are compiled";
+      Debug.LogError($"[KawaPlayer] {programs.Count} of KawaPlayer's U# programs are still missing, empty or out of date ({Names(programs)}), {what}. Fix the U# errors in the Console if there are any, then select one of KawaPlayer's U# program assets (such as Runtime/Internal/Controller) and press Compile All UdonSharp Programs in the Inspector.");
     }
 
     private static string Names(List<string> programs)
