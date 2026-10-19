@@ -67,6 +67,33 @@ Unity の中からも確かめられます。KawaPlayer のインスペクター
 
 KawaPlayer の更新をワールドに反映するには、Unity で **Build & Publish Your World Online** を実行してください（[クイックスタートの 5.](quickstart.md#5-ビルドして確かめる)）。PC と Quest の両方に公開しているときは、両方で実行します。
 
+### 更新したあと、Play でタブレットなどが動かないとき
+
+更新したあと、Unity の Play でタブレットや全員リロードボタンが動かず、Console に次のような行が出ることがあります。
+
+```
+[UdonBehaviour] Could not load the program; the UdonBehaviour on 'Canvas' will not run.
+```
+
+KawaPlayer の動きを書いた U#（UdonSharp）のプログラムが、新しい版に作り直されていないためです。Library フォルダーを消したあとや、プロジェクトを別の場所に写したあとに開くと、起きることがあります。KawaPlayer は Unity を開いたときにこれを調べ、見つけると自動で作り直します（Console に `[KawaPlayer]` で始まる行が出ます）。それでも直らないときは、次の手順で作り直してください。
+
+1. Project ウィンドウで、**Packages** > **KawaPlayer** > **Runtime** > **Internal**（①）を開きます。
+2. **Controller** が 2 つ並んでいます。U# のアイコンのほう（②）を選びます。**#** のアイコンのほうは、C# のスクリプトです。
+
+   ![Project ウィンドウ。① Packages > KawaPlayer > Runtime の中の Internal、② U# のアイコンの Controller に印がある。その下に # のアイコンの Controller がある](images/unity/project-udonsharp-program.webp)
+
+3. Inspector の **Compile All UdonSharp Programs**（③）を押します。
+
+   ![Controller（Udon Sharp Program Asset）の Inspector。③ Compile All UdonSharp Programs のボタンに印がある](images/unity/inspector-compile-all.webp)
+
+4. Console に次の行が出れば終わりです。もう一度 Play してください。
+
+   ![Console の、[UdonSharp] Compile of 57 scripts finished の行に印がある](images/unity/console-compile-finished.webp)
+
+- **数は変わる:** 「57」は、プロジェクトに入っている U# のプログラムの数です。プロジェクトによって変わります。
+- **赤いエラーが出るとき:** Console に赤いエラーが出て、この行が出ないときは、エラーを直してから、もう一度押してください。KawaPlayer のエラーなら、その画面を撮って [Discord サーバー](https://discord.gg/tkrHek6PvN) で聞いてください。
+- **公開するワールド:** ワールドのビルドでは、VRChat SDK が U# のプログラムを作り直します（初めの設定のとき）。この手順は、Unity の Play で確かめるためのものです。
+
 ## シーンに置く
 
 置き方は A・B・C の 3 つあり、どれでも同じものが置かれます。
