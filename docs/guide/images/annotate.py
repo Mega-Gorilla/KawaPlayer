@@ -160,6 +160,16 @@ MARKS = {
     "unity/module-persistence": dict(crop=(6, 368, 840, 542), scale=0.72, marks=[]),
     "unity/module-slideshow": dict(crop=(6, 398, 840, 473), scale=0.72, marks=[]),
     "unity/module-timeline-sync": dict(crop=(6, 368, 840, 602), scale=0.72, marks=[]),
+    "unity/project-udonsharp-program": dict(scale=0.72, marks=[
+        dict(box=(66, 620, 200, 644), n=1),
+        dict(box=(398, 183, 520, 208), n=2, cap="U# のアイコンのほう", at=(760, 196)),
+    ]),
+    "unity/inspector-compile-all": dict(crop=(0, 0, 690, 245), scale=0.72, pad=dict(bottom=56), marks=[
+        dict(box=(28, 148, 683, 173), n=3, cap="押す", at=(345, 268)),
+    ]),
+    "unity/console-compile-finished": dict(scale=0.72, pad=dict(top=8, bottom=56, right=60), marks=[
+        dict(box=(150, 6, 650, 29), cap="これが出れば終わり", at=(400, 86)),
+    ]),
     "vrchat/quick-menu": dict(scale=0.8, pad=dict(bottom=64), marks=[
         dict(box=(736, 522, 796, 582), n=1, cap="歯車を押す", at=(600, 640)),
     ]),
