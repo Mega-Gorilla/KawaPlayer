@@ -1,7 +1,7 @@
 # Repository Guidelines
 
 ## Project Structure & Module Organization
-This repository is a Unity/VPM package for VRChat. Core runtime code lives in `Runtime/`, with public scene components in `Runtime/Components/` and the main UdonSharp controller split across partials in `Runtime/Internal/`. Editor-only tooling lives in `Editor/`. Optional features are isolated under `Modules/`, typically with separate runtime/editor `.asmdef` files. Reusable prefabs are in `Prefabs/`, package assets and localization data are in `Assets/`, reference docs are in `docs/`, and `Samples~/` contains importable samples.
+This repository is a Unity/VPM package for VRChat. Core runtime code lives in `Runtime/`, with public scene components in `Runtime/Components/` and the main UdonSharp controller split across partials in `Runtime/Internal/`. Editor-only tooling lives in `Editor/`. Optional features are isolated under `Modules/`, typically with separate runtime/editor `.asmdef` files. Reusable prefabs are in `Prefabs/`, package assets and localization data are in `Assets/`, and reference docs are in `docs/`.
 
 ## Build, Test, and Development Commands
 There is no standalone CLI build for the package; open it in Unity `2022.3` with the VRChat Worlds SDK installed.

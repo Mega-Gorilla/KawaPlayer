@@ -3,13 +3,14 @@ using System.IO;
 using System.Linq;
 using UnityEditor;
 using UnityEditor.Build;
-using UnityEditor.PackageManager.UI;
 using UnityEngine;
 using UnityEngine.Networking;
 
 namespace Yamadev.YamaStream.Editor
 {
-  [InitializeOnLoad]
+  // Debug > Enable AVPro Debug: downloads AVPro's trial and defines
+  // AVPRO_DEBUG, so the editor plays URLs on AVPro. Without it, a stand-in
+  // reports an error and the video falls back to Unity Video Player (#139).
   public static class AVProPlayerHelper
   {
     private static readonly NamedBuildTarget[] TargetGroups =
@@ -22,29 +23,7 @@ namespace Yamadev.YamaStream.Editor
     private const string AVProDebugSymbol = "AVPRO_DEBUG";
     private const string AVProReleaseUrl = "https://github.com/RenderHeads/UnityPlugin-AVProVideo/releases/download/3.2.9/UnityPlugin-AVProVideo-v3.2.9-Trial.unitypackage";
 
-    private static bool AVProHelperImported => EditorUtils.FindType("RenderHeads.Media.AVProVideo.MediaPlayer", true) != null;
     private static bool AVProImported => EditorUtils.FindType("RenderHeads.Media.AVProVideo.VideoTrack", true) != null;
-
-    static AVProPlayerHelper()
-    {
-      EditorApplication.delayCall += InitializeAVProHelper;
-    }
-
-    private static void InitializeAVProHelper()
-    {
-      if (AVProHelperImported || PackageManager.PackageInfo == null) return;
-
-      foreach (Sample sample in Sample.FindByPackage(PackageManager.PackageName, PackageManager.Version))
-      {
-        if (sample.displayName == "AVProHelper")
-        {
-          Debug.Log("AVPro not imported, add AVPro helper to project...");
-          if (CopyFilesRecursively(sample.resolvedPath, Application.dataPath))
-            AssetDatabase.Refresh();
-          return;
-        }
-      }
-    }
 
     [MenuItem("Debug/Enable AVPro Debug")]
     public static async UniTask AVProDebug()
@@ -152,23 +131,6 @@ namespace Yamadev.YamaStream.Editor
           File.Delete(tempPath);
         }
       }
-    }
-
-    public static bool CopyFilesRecursively(string sourcePath, string targetPath)
-    {
-      if (!Directory.Exists(sourcePath))
-      {
-        Debug.LogError($"Source directory does not exist: {sourcePath}");
-        return false;
-      }
-
-      foreach (string dirPath in Directory.GetDirectories(sourcePath, "*", SearchOption.AllDirectories))
-        Directory.CreateDirectory(dirPath.Replace(sourcePath, targetPath));
-
-      foreach (string filePath in Directory.GetFiles(sourcePath, "*.*", SearchOption.AllDirectories))
-        File.Copy(filePath, filePath.Replace(sourcePath, targetPath), true);
-
-      return true;
     }
   }
 }
