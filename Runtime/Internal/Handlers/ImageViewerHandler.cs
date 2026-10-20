@@ -17,9 +17,12 @@ namespace Yamadev.YamaStream
     private string _errorDetail = string.Empty;
     private VRCImageDownloader _imageDownloader;
 
-    private void Start()
+    // The downloader holds every picture it fetched, and the copies live on
+    // the graphics card. Stop lets them go; a picture still up when the world
+    // closes goes with the player, as in the tablet's image app (issue #266).
+    private void OnDestroy()
     {
-      _imageDownloader = new VRCImageDownloader();
+      if (Utilities.IsValid(_imageDownloader)) _imageDownloader.Dispose();
     }
 
     public override bool IsLoading => _loading;
@@ -43,6 +46,7 @@ namespace Yamadev.YamaStream
     // folds several of them together (InvalidImage becomes Unknown).
     public override string ErrorDetail => _errorDetail;
 
+    // Made when a picture is first asked for, and again after Stop.
     public VRCImageDownloader ImageDownloader
     {
       get
