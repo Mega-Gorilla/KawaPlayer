@@ -43,10 +43,14 @@ namespace Yamadev.YamaStream.Editor
       if (prefab == null) return;
 
       Transform parent = Selection.activeTransform;
+      // Named before it is placed: once placed, it counts itself as a sibling
+      // of the same name, and the first one became "KawaPlayer (1)" (issue
+      // #268). Now it is "KawaPlayer", and the next "KawaPlayer (1)".
+      string name = GameObjectUtility.GetUniqueNameForSibling(parent, prefab.name);
       GameObject obj = PrefabUtility.InstantiatePrefab(prefab, parent) as GameObject;
       if (obj == null) return;
 
-      obj.name = GameObjectUtility.GetUniqueNameForSibling(parent, prefab.name);
+      obj.name = name;
       Undo.RegisterCreatedObjectUndo(obj, $"Create {obj.name}");
       Selection.activeGameObject = obj;
     }
