@@ -59,8 +59,8 @@ namespace Yamadev.YamaStream.Modules.LightVolumeAdaptor
 
     // Writing Color is all a volume needs: Light Volumes (2.0 to 3.0) hears
     // the change itself, works out the point light's range again and updates
-    // the light, so the manager's AutoUpdateVolumes, which only follows moving
-    // volumes, is left as the world set it (issue #195).
+    // the light. The manager's AutoUpdateVolumes is not needed for the colour,
+    // so it is left as the world set it (issue #195).
     private void SetColor(Color color)
     {
       for (int i = 0; i < _lightVolumes.Length; i++)
