@@ -230,7 +230,7 @@ def fig_endpoints():
          text(24, 50, "実行時の接続口は Controller と UIController に集まり、エディターとビルドの接続口が配線する", "t2 f12")]
     ctl = [("E1 命令", "public メソッド・プロパティ（約 90）"), ("E2 出来事", "AfterXxx（型付き 29）"),
            ("E3 名前の出来事", "SendCustomVideoEvent(名前)"), ("E4 登録", "AddListener・AddScreen など")]
-    ui = [("E5 前の確認", "BeforeUserXxx（名前 26）と中止"), ("E6 UI の知らせ", "AfterLanguageChanged"),
+    ui = [("E5 前の確認", "BeforeUserXxx（名前 27）と中止"), ("E6 UI の知らせ", "AfterLanguageChanged"),
           ("E7 差し込み口", "_urlInterceptor・_playlistRefreshHandler"), ("E8 窓口", "ShowMessage・PlayImageUrl など"),
           ("E9 登録", "AddListener(UdonSharpBehaviour)")]
     b.append(f'<rect class="go" x="24" y="72" width="360" height="232" rx="8"/>' + text(40, 96, "Controller（本体に 1 つ・同期する）", "t1 f13 b"))

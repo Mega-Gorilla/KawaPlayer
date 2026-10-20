@@ -207,13 +207,13 @@ E3 の `SendCustomVideoEvent(名前)` は、リスナー全員に `SendCustomEve
 
 `UIController` は、操作の前に `InvokeBeforeEvent("BeforeUserXxx")` で、登録したリスナー全員に名前のイベントを送る。受けた部品が `CancelCurrentAction()` を呼ぶと、残りのリスナーには送らず、`false` を返し、操作をやめる（§5.2）。
 
-**表 10** 前の確認のイベント（26 個）と、権限（PermissionManagement）が見るか
+**表 10** 前の確認のイベント（27 個）と、権限（PermissionManagement）が見るか
 
-| 権限が見る（18 個） | 権限が見ない（8 個。自分だけの設定） |
+| 権限が見る（19 個） | 権限が見ない（8 個。自分だけの設定） |
 | --- | --- |
-| `BeforeUserPlayTrack`・`BeforeUserPauseVideo`・`BeforeUserStopVideo`・`BeforeUserSetTime`・`BeforeUserForward`・`BeforeUserBackward`・`BeforeUserChangeLoop`・`BeforeUserChangeShufflePlay`・`BeforeUserChangeSpeed`・`BeforeUserChangeRepeat`・`BeforeUserChangePlayerHandler`・`BeforeUserAddTrackToQueue`・`BeforeUserRemoveTrackFromQueue`・`BeforeUserMoveTrackUp`・`BeforeUserMoveTrackDown`・`BeforeUserLoadPlaylist`・`BeforeUserDeletePlaylist`・`BeforeUserGlobalReload` | `BeforeUserChangeVolume`・`BeforeUserChangeMute`・`BeforeUserChangeMirrorFlip`・`BeforeUserChangeBrightness`・`BeforeUserChangeMaxResolution`・`BeforeUserChangeLocalDelay`・`BeforeUserChangeLanguage`・`BeforeUserReloadVideo` |
+| `BeforeUserPlayTrack`・`BeforeUserPauseVideo`・`BeforeUserStopVideo`・`BeforeUserSetTime`・`BeforeUserForward`・`BeforeUserBackward`・`BeforeUserChangeLoop`・`BeforeUserChangeShufflePlay`・`BeforeUserChangeSpeed`・`BeforeUserChangeRepeat`・`BeforeUserChangePlayerHandler`・`BeforeUserAddTrackToQueue`・`BeforeUserRemoveTrackFromQueue`・`BeforeUserMoveTrackUp`・`BeforeUserMoveTrackDown`・`BeforeUserLoadPlaylist`・`BeforeUserDeletePlaylist`・`BeforeUserGlobalReload`・`BeforeUserChangeSyncedSetting` | `BeforeUserChangeVolume`・`BeforeUserChangeMute`・`BeforeUserChangeMirrorFlip`・`BeforeUserChangeBrightness`・`BeforeUserChangeMaxResolution`・`BeforeUserChangeLocalDelay`・`BeforeUserChangeLanguage`・`BeforeUserReloadVideo` |
 
-送るのは `UIController`（`UIController.cs`・`.Localization.cs`・`.Playlist.cs`）のほか、`GlobalReloadButton` と `PlaylistLoaderUI` で、どちらも自分の UIController の `InvokeBeforeEvent` を使う。イベント名の一覧はコードのどこにもなく、送る側と受ける側が同じ文字列を書いている。
+送るのは `UIController`（`UIController.cs`・`.Localization.cs`・`.Playlist.cs`）のほか、`GlobalReloadButton`・`PlaylistLoaderUI`・`PitchShifterUI`・`SlideShowerUI` で、どれも自分の UIController の `InvokeBeforeEvent` を使う。`BeforeUserChangeSyncedSetting` は、モジュールの設定のうち全員に効くもの（ピッチシフターの音程、スライドショーのスライドモードと秒数）を変える前に送る（issue #211）。イベント名の一覧はコードのどこにもなく、送る側と受ける側が同じ文字列を書いている。
 
 ### 4.5 UI の知らせ（E6）と、UI どうしの調整
 
@@ -373,7 +373,7 @@ E3 の `SendCustomVideoEvent(名前)` は、リスナー全員に `SendCustomEve
 
 1. **O1. プレイヤーを見つける方法が 3 通りある（図 10）。** 正の値は各部品の `_controller` だが、書くのは Sub Controller のインスペクターだけである。プレハブを更新して部品が増えても、欄を選び直すまでつながらない。ビルドは、それを手がかりに配線するだけで、Sub Controller で選んだプレイヤーと合っているかは確かめ直さない。未設定だけは、`UIController.Start`・`YamaPlayerModule.Start` がログに出し、全員リロードボタンのビルド処理が警告する。
 2. **O2. 共通のインスペクターが、特定のデバイスを知っている。** `YamaPlayerSubControllerEditor` が `TabletPickup`・`TabletReturnButton`・`TabletVisitorRecorder` を直接扱う。新しいデバイスの設定を足すと、このファイルを書き換えることになる（#206 もここ）。
-3. **O3. 名前の文字列の接続口に、一覧が無い。** 前の確認の 26 個、名前の出来事、差し込み口の値と名前は、送る側と受ける側が同じ文字列を書いている。打ち間違いは、コンパイルでもビルドでも見つからない。コアがモジュールの型を参照できないので、名前で呼ぶこと自体には理由がある。
+3. **O3. 名前の文字列の接続口に、一覧が無い。** 前の確認の 27 個、名前の出来事、差し込み口の値と名前は、送る側と受ける側が同じ文字列を書いている。打ち間違いは、コンパイルでもビルドでも見つからない。コアがモジュールの型を参照できないので、名前で呼ぶこと自体には理由がある。
 4. **O4. 差し込みの場所が、UI の階層のパス。** `uiSlots` は `Canvas/User/Main/Pages/...` のような深いパスで写す先を決める。デバイスの側は、そのパスを用意しておく必要がある（全員リロードボタンの空の `Canvas/Modules`）。合わないパスは、何も言わずに飛ばされる。
 5. **O5. 配る先のリストが何重にもあり、食い違いやすい。** `Controller` と `UIController` のほかに、4 つのモジュールが自前のリストを持つ（表 12）。外す口はどのリストにも無い。食い違いの例が `AudioLinkAdaptor` だった。状態の変化を `Controller` のリスナーに送っていた（E3）が、受ける `AudioLinkAdaptorUI` は `AudioLinkAdaptor` の自前のリストと `UIController` にしか登録していなかった。そのため、ある UI で AudioLink を切り替えても、ほかの UI（スクリーンとタブレットの設定アプリ）のトグルは追いつかなかった。2026-10-16 に ClientSim で確かめ、自前のリストに送るように直した（#260）。
 6. **O6. 本体の UI の中を、外から直接読んでいる所がある。** `SlideShowerUI` が `UIController` の非公開の欄を読む（§4.7）。UI の作りを変えると、壊れる。
