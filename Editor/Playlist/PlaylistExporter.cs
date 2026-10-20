@@ -18,26 +18,28 @@ namespace Yamadev.YamaStream.Editor
 
     public static void Export(List<PlaylistItem> playlists)
     {
-      var exportData = new PlaylistsJson
+      string jsonStr = Serialize(playlists.Where(p => p != null).Select(p => new PlaylistData
       {
-        playlists = playlists.Where(p => p != null).Select(p => new PlaylistData
-        {
-          active = p.gameObject.activeSelf,
-          name = p.playlistName,
-          tracks = p.tracks?.ToList() ?? new List<PlaylistTrack>(),
-          youtubeListId = p.youtubePlaylistId,
-          vhubPlaylistUrl = p.vhubPlaylistUrl
-        }).ToList()
-      };
+        active = p.gameObject.activeSelf,
+        name = p.playlistName,
+        tracks = p.tracks?.ToList() ?? new List<PlaylistTrack>(),
+        youtubeListId = p.youtubePlaylistId,
+        vhubPlaylistUrl = p.vhubPlaylistUrl
+      }).ToList());
+      string filePath = EditorUtility.SaveFilePanel("Export playlists", Application.dataPath, "playlists", "json");
+      if (!string.IsNullOrEmpty(filePath)) File.WriteAllText(filePath, jsonStr);
+    }
 
+    // What Export writes, without the file panel, so that tests can read it
+    // back with TryParse.
+    public static string Serialize(List<PlaylistData> playlists)
+    {
       var settings = new JsonSerializerSettings
       {
         Formatting = Formatting.Indented,
         ContractResolver = new Newtonsoft.Json.Serialization.CamelCasePropertyNamesContractResolver()
       };
-      string jsonStr = JsonConvert.SerializeObject(exportData, settings);
-      string filePath = EditorUtility.SaveFilePanel("Export playlists", Application.dataPath, "playlists", "json");
-      if (!string.IsNullOrEmpty(filePath)) File.WriteAllText(filePath, jsonStr);
+      return JsonConvert.SerializeObject(new PlaylistsJson { playlists = playlists }, settings);
     }
 
     // Asks for a file and reads every playlist in it. Null when the file
@@ -72,10 +74,20 @@ namespace Yamadev.YamaStream.Editor
       playlists = new List<PlaylistData>();
       error = null;
 
+      // Strings stay strings: by default Newtonsoft reads one that looks like
+      // a date ("2026-10-20T04:00:00Z") as a date, and a playlist or track
+      // named so would be refused as not a string. Reading on to the end
+      // refuses anything after the root, as JToken.Parse does.
       JToken root;
       try
       {
-        root = JToken.Parse(json);
+        using (var reader = new JsonTextReader(new StringReader(json)) { DateParseHandling = DateParseHandling.None })
+        {
+          root = JToken.Load(reader);
+          while (reader.Read())
+          {
+          }
+        }
       }
       catch (JsonReaderException ex)
       {

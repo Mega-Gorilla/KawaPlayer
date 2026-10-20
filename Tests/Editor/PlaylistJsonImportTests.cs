@@ -90,6 +90,51 @@ namespace Yamadev.YamaStream.Editor.Tests
     }
 
     [Test]
+    public void DateLikeTextStaysText()
+    {
+      // Newtonsoft reads such strings as dates by default, and they were refused as not strings (PR #278, F1).
+      var playlist = Read(@"{ ""playlists"": [ { ""name"": ""2026-10-20T04:00:00Z"",
+        ""tracks"": [ { ""title"": ""2026-10-20T04:00:00+09:00"", ""url"": ""https://example.com/video.mp4"" }, { ""title"": ""\/Date(1198908717056)\/"" } ] } ] }")[0];
+      Assert.AreEqual("2026-10-20T04:00:00Z", playlist.name);
+      Assert.AreEqual("2026-10-20T04:00:00+09:00", playlist.tracks[0].title);
+      Assert.AreEqual("/Date(1198908717056)/", playlist.tracks[1].title);
+    }
+
+    [Test]
+    public void ReadsBackWhatExportWrites()
+    {
+      var written = new List<PlaylistData>
+      {
+        new PlaylistData
+        {
+          active = false, name = "2026-10-20T04:00:00Z", youtubeListId = "y", vhubPlaylistUrl = "v",
+          tracks = new List<PlaylistTrack>
+          {
+            new PlaylistTrack { playerType = VideoPlayerType.UnityVideoPlayer, title = "2026-10-20", url = "https://example.com/a.mp4" },
+            new PlaylistTrack { playerType = VideoPlayerType.ImageViewer, title = "picture", url = "https://example.com/b.png" },
+          }
+        },
+        new PlaylistData { active = true, name = "empty", tracks = new List<PlaylistTrack>() },
+      };
+      var read = Read(PlaylistExporter.Serialize(written));
+      Assert.AreEqual(written.Count, read.Count);
+      for (int i = 0; i < written.Count; i++)
+      {
+        Assert.AreEqual(written[i].active, read[i].active);
+        Assert.AreEqual(written[i].name, read[i].name);
+        Assert.AreEqual(written[i].youtubeListId ?? "", read[i].youtubeListId);
+        Assert.AreEqual(written[i].vhubPlaylistUrl ?? "", read[i].vhubPlaylistUrl);
+        Assert.AreEqual(written[i].tracks.Count, read[i].tracks.Count);
+        for (int j = 0; j < written[i].tracks.Count; j++)
+        {
+          Assert.AreEqual(written[i].tracks[j].playerType, read[i].tracks[j].playerType);
+          Assert.AreEqual(written[i].tracks[j].title, read[i].tracks[j].title);
+          Assert.AreEqual(written[i].tracks[j].url, read[i].tracks[j].url);
+        }
+      }
+    }
+
+    [Test]
     public void AnEmptyListIsRead()
     {
       Assert.IsEmpty(Read(@"{ ""playlists"": [] }"));
