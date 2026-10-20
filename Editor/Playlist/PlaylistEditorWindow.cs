@@ -876,9 +876,18 @@ namespace Yamadev.YamaStream.Editor
       }
 
       int firstImported = _playlists.Count;
-      var imported = PlaylistExporter.Import();
-      // Cancelled, or a file with nothing in it: the selection stays put.
-      if (imported.Count == 0) return;
+      var imported = PlaylistExporter.Import(out string error);
+      // Cancelled: nothing to say, and the selection stays put.
+      if (imported == null) return;
+      // A file that cannot be read adds nothing, and says why (issue #208).
+      if (error != null || imported.Count == 0)
+      {
+        string message = error != null
+          ? string.Format(EditorLocalization.Get("playlist.json.failed"), error)
+          : EditorLocalization.Get("playlist.json.empty");
+        EditorUtility.DisplayDialog(EditorLocalization.Get("playlist.import.title"), message, EditorLocalization.Get("button.ok"));
+        return;
+      }
 
       _playlists.AddRange(imported);
       IsDirty = true;

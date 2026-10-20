@@ -169,7 +169,7 @@ public class Playlist : YamaPlayerListener
 PlaylistExporter.Export(playlists)
     │
     ├── PlaylistItem[] → PlaylistData[] に変換
-    ├── JsonConvert.SerializeObject (camelCase)
+    ├── Serialize(): JsonConvert.SerializeObject (camelCase)。テストもこれで書き出して読み戻す
     └── EditorUtility.SaveFilePanel → File.WriteAllText
 ```
 
@@ -177,19 +177,25 @@ PlaylistExporter.Export(playlists)
 
 ```csharp
 // PlaylistExporter.cs (Import メソッド)
-PlaylistExporter.Import()
+PlaylistExporter.Import(out error)
     │
-    ├── EditorUtility.OpenFilePanel → JSON ファイル選択
-    ├── JObject.Parse(jsonStr)
-    ├── "playlists" 配列を取得
-    └── 各要素を ParsePlaylistData():
-        ├── active, name, youtubeListId を抽出
-        │   (camelCase / PascalCase 両対応)
-        └── tracks[] を ParsePlaylistTrack():
-            ├── mode → VideoPlayerType
-            ├── title → string
-            └── url → string
+    ├── EditorUtility.OpenFilePanel → JSON ファイル選択（キャンセルなら null）
+    └── TryParse(json): ファイル全体を先に読み、どこかが読めなければ 1 つも返さない
+        ├── JsonTextReader（DateParseHandling.None）と JToken.Load で読む
+        │   (日時の形の文字列も文字列のまま。ルートの後ろに余計な文字があれば拒む。
+        │    読めなければ、行と文字の位置を error に)
+        ├── "playlists" 配列を取得（なければ error）
+        └── 各要素を TryReadPlaylist():
+            ├── active (bool), name / youtubeListId / vhubPlaylistUrl (文字列) を型を確かめて抽出
+            │   (camelCase / 先頭が大文字の両対応。null は省いたのと同じ)
+            └── tracks[] を TryReadTrack():
+                ├── playerType（なければ mode）→ VideoPlayerType
+                │   数字か名前（大文字・小文字は問わない）。省くと AVProVideoPlayer
+                ├── title → string
+                └── url → string
 ```
+
+読めなかった理由（「2 番目のプレイリストの 3 曲目の playerType が読めません」など）は翻訳済みの文で返り、`PlaylistEditorWindow` がダイアログに出す（issue #207・#208）。
 
 ### 他プレイヤーからの移行 (PlaylistImporter)
 
