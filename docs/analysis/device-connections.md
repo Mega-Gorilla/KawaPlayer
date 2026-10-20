@@ -116,7 +116,7 @@ KawaPlayer には、これからもタブレットやボタンのようなデバ
 | -2000 | `TabletVisitorsBuildProcess` | ワールドに 1 つの `TabletVisitorRecorder` を残し、シーンの一番上へ移し、すべての訪問者アプリをそこへ向ける | シーン全体 |
 | -1 | `YamaPlayerPostProcess` | `Controller` に版の番号を入れ、`Controller` をシーンの一番上へ移す | 各 `YamaPlayer` |
 
-このほかに、翻訳（-10000）、プレイリスト（-9000）、`[RegisterEvent]` の配線（-8000）、配色（-2000）、プレーヤーの並び（-2000）、AudioLink・LTCGI・PitchShifter・Persistence のモジュールのビルド処理がある。
+このほかに、翻訳（-10000）、プレイリスト（-9000）、`[RegisterEvent]` の配線（-8000）、配色（-2000）、プレーヤーの並び（-2000）、AudioLink・LTCGI・PitchShifter・Persistence のモジュールのビルド処理と、AutoPlay の From Playlist のプレイリストの番号を、ワールドに入るプレイリストの中の番号に直す処理（-2900、issue #209）がある。
 
 ### 3.3 実行時：登録する
 

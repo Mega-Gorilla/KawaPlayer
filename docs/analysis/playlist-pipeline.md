@@ -658,6 +658,9 @@ AutoPlayMode:
     Off         - 無効
     FromTrack   - 指定トラックを再生
     FromPlaylist - プレイリストから再生 (ランダム or 指定インデックス)
+                   インスペクターの番号は Playlists の下の全 PlaylistItem の中の番号。
+                   ビルド時に AutoPlayBuildProcess が、ワールドに入る Playlist の中の
+                   番号に直す（無効・曲なしで入らなければ -1、ログに警告。issue #209）
 
 トリガー条件: Master or ローカルプレイヤー
 遅延: 設定可能な delay 後に PlayDefaultTrack() 実行
