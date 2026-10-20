@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
+using UdonSharp;
 using UdonSharpEditor;
 using UnityEngine;
 using VRC.SDKBase;
@@ -46,6 +48,33 @@ namespace Yamadev.YamaStream.Editor
         : track.playerType;
     }
 
+    // U#'s own setup of a new behaviour (RunBehaviourSetup), found by name as
+    // U# keeps it internal. The minimum SDK (3.10.2) has it with the same
+    // signature; Tests/Editor checks it is there.
+    private static readonly MethodInfo _runBehaviourSetup = typeof(UdonSharpEditorUtility).GetMethod(
+      "RunBehaviourSetup", BindingFlags.Static | BindingFlags.NonPublic, null, new[] { typeof(UdonSharpBehaviour) }, null);
+    private static bool _warnedNoSetup;
+
+    // AddUdonSharpComponent, without initializing the new UdonBehaviour there
+    // and then, as it does in Play. The SDK initializes every UdonBehaviour of
+    // a loaded scene after giving it networking, and throws on one already
+    // initialized: that stopped it at the world's first playlist, and the rest
+    // of the Controller ran without networking (issue #164). Left alone, the
+    // playlist is initialized with the others, from what is set here. Outside
+    // Play the two do the same, so a built world does not change.
+    private static T AddUdonSharpComponentUninitialized<T>(GameObject gameObject) where T : UdonSharpBehaviour
+    {
+      if (_runBehaviourSetup == null)
+      {
+        if (!_warnedNoSetup) Debug.LogWarning("[KawaPlayer] UdonSharp's RunBehaviourSetup was not found, so the world's playlists are added as before, and in Play some of the player's UdonBehaviours run without networking (issue #164).");
+        _warnedNoSetup = true;
+        return gameObject.AddUdonSharpComponent<T>();
+      }
+      var behaviour = gameObject.AddComponent<T>();
+      _runBehaviourSetup.Invoke(null, new object[] { behaviour });
+      return behaviour;
+    }
+
     private static List<Playlist> CreatePlaylistComponents(List<PlaylistItem> playlistItems)
     {
       var results = new List<Playlist>();
@@ -55,7 +84,7 @@ namespace Yamadev.YamaStream.Editor
 
         try
         {
-          var udonPlaylist = item.gameObject.AddUdonSharpComponent<Playlist>();
+          var udonPlaylist = AddUdonSharpComponentUninitialized<Playlist>(item.gameObject);
 
           udonPlaylist.SetProgramVariable("_playlistName", item.playlistName);
 
