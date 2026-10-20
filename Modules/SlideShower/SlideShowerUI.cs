@@ -140,9 +140,20 @@ namespace Yamadev.YamaStream.Modules.SlideShower
       if (Utilities.IsValid(_slide3sText)) _slide3sText.text = _uiController.GetTranslation("module.slideshower.slideSeconds.3s");
     }
 
+    // The slide mode and seconds reach everyone, so PermissionManagement may
+    // refuse them, and the toggles go back (issue #211).
+    private bool MayChangeSetting()
+    {
+      if (!Utilities.IsValid(_uiController) || _uiController.InvokeBeforeEvent("BeforeUserChangeSyncedSetting")) return true;
+      UpdateSlideModeDisplay();
+      UpdateSlideSecondsDisplay();
+      return false;
+    }
+
     public void SlideModeOn()
     {
       if (!Utilities.IsValid(_slideShower) || !Utilities.IsValid(_slideModeOn) || !_slideModeOn.isOn) return;
+      if (!MayChangeSetting()) return;
       _slideShower.TakeOwnership();
       _slideShower.SlideMode = true;
     }
@@ -150,6 +161,7 @@ namespace Yamadev.YamaStream.Modules.SlideShower
     public void SlideModeOff()
     {
       if (!Utilities.IsValid(_slideShower) || !Utilities.IsValid(_slideModeOff) || !_slideModeOff.isOn) return;
+      if (!MayChangeSetting()) return;
       _slideShower.TakeOwnership();
       _slideShower.SlideMode = false;
     }
@@ -157,6 +169,7 @@ namespace Yamadev.YamaStream.Modules.SlideShower
     public void SetSlideSeconds(int seconds)
     {
       if (!Utilities.IsValid(_slideShower)) return;
+      if (!MayChangeSetting()) return;
       _slideShower.TakeOwnership();
       _slideShower.SlideSeconds = seconds;
     }

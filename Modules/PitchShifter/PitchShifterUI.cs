@@ -57,6 +57,13 @@ namespace Yamadev.YamaStream.Modules.PitchShifter
     public void OnSliderValueChanged()
     {
       if (!Utilities.IsValid(_pitchShifter) || !Utilities.IsValid(_semitonesSlider)) return;
+      // The pitch reaches everyone, so PermissionManagement may refuse it,
+      // and the slider goes back (issue #211).
+      if (Utilities.IsValid(_uiController) && !_uiController.InvokeBeforeEvent("BeforeUserChangeSyncedSetting"))
+      {
+        UpdateSemitonesDisplay();
+        return;
+      }
       _pitchShifter.TakeOwnership();
       _pitchShifter.Semitones = _semitonesSlider.value;
     }

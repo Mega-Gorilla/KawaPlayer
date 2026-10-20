@@ -59,6 +59,9 @@ namespace Yamadev.YamaStream.Modules.PermissionManagement
     public void BeforeUserMoveTrackDown() => CheckPermission();
     // The GlobalReload module's button reloads everyone's screen (issues #236, #248).
     public void BeforeUserGlobalReload() => CheckPermission();
+    // A module's setting that reaches everyone: PitchShifter's pitch and
+    // SlideShower's slide mode and seconds (issue #211).
+    public void BeforeUserChangeSyncedSetting() => CheckPermission();
 
     private void CheckPermission()
     {
