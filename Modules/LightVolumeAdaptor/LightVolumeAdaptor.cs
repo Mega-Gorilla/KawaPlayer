@@ -4,6 +4,11 @@ using VRC.SDKBase;
 using VRC.SDK3.Rendering;
 using VRC.Udon.Common.Interfaces;
 
+// VRC_LIGHT_VOLUMES is the project-wide define Light Volumes adds when its
+// editor code loads. It has to be a project-wide one: U# compiles every
+// program with the project's defines only, so a define from this assembly's
+// versionDefines would reach the C# assembly but not the Udon program, and
+// the two would disagree on the fields (issue #195).
 #if VRC_LIGHT_VOLUMES
 using VRCLightVolumes;
 #endif
