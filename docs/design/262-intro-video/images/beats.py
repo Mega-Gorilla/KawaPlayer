@@ -147,38 +147,42 @@ def desk(im, x0, x1, y):
 
 
 def c01():
-    p1 = F.new(NIGHT["wall"])
-    F.room(p1)
-    desk(p1, 760, 1180, 470)
-    F.person(p1, 560, 600, 420, (24, 40, 46))
-    F.foliage(p1, [(140, 520, 260, 30), (220, 640, 300, -20), (90, 690, 240, 60)], blur=7)
+    """The opening as filmed (v3.1): one take from her feet, out to her left rear, round to her right side; C02b
+    goes on from there to the taps."""
+    p1 = F.new(NIGHT["floor"])
+    d = ImageDraw.Draw(p1)
+    d.rectangle((0, 0, W, 300), fill=NIGHT["wall"])
+    for k in range(3):
+        x = 220 + k * 330
+        F.overlay(p1, lambda o, x=x: o.polygon([(x, 430), (x + 210, 430), (x + 330, 720), (x + 90, 720)], fill=(150, 170, 230, 70)))
+    for (x, top, lift) in ((520, -40, 0), (700, -40, 40)):
+        d.rounded_rectangle((x - 46, top, x + 46, 560 - lift), 30, fill=(28, 38, 50))
+        d.rounded_rectangle((x - 70, 540 - lift, x + 90, 600 - lift), 26, fill=(232, 236, 240))
+    F.foliage(p1, [(90, 520, 260, 30), (160, 650, 300, -20)], blur=8)
     letterbox(p1)
-    F.note(p1, "カメラは固定、向きだけ追う", (W - 20, 104))
-    band(p1, 1, "C01 0.0〜2.8", "窓を背に、机へ歩く（顔はまだ影）")
+    F.note(p1, "床から 10 cm・左前から歩きに合わせて", (W - 20, 104))
+    band(p1, 1, "C01 0.0〜1.5", "窓の光の縞を歩く足もと")
     p2 = F.new(NIGHT["wall"])
     F.room(p2)
-    desk(p2, 300, 1100, 520)
-    tab = (470, 300, 830, 500)
-    F.tablet_frame(p2, tab, radius=26)
-    d = ImageDraw.Draw(p2)
-    d.ellipse((618, 368, 682, 432), outline=(170, 240, 255), width=6)
-    d.ellipse((-160, 120, 380, 900), fill=(24, 40, 46))
-    d.ellipse((60, -60, 420, 330), fill=(30, 48, 56))
-    F.note(p2, "肩越し・固定", (W - 20, 104))
+    desk(p2, 70, 470, 470)
+    F.person(p2, 640, 660, 380, A_COL, "MAO")
+    curve_arrow(p2, 640, 520, 330, 205, 345)
+    F.note(p2, "左後ろへ引き、背中越しを通って右横へ", (W - 20, 104))
     letterbox(p2)
-    band(p2, 2, "C02 1.2〜1.75", "持ち上げて 0.4 秒止め → 真ん中を押す")
+    band(p2, 2, "C01 1.5〜3.1", "引きながら回る（全身と机・窓が見える）")
     p3 = F.new(NIGHT["wall"])
-    F.room(p3, screen=F.logo(200, WHITE).resize((200, 200)), glow=True)
-    x0, y0, x1, y1 = SCREEN
-    ImageDraw.Draw(p3).rectangle(SCREEN, fill=(18, 40, 60))
-    F.place(p3, F.logo(200, WHITE), ((x0 + x1) / 2 - 100, (y0 + y1) / 2 - 100, (x0 + x1) / 2 + 100, (y0 + y1) / 2 + 100))
-    F.person(p3, 640, 820, 400, A_COL, "MAO")
-    letterbox(p3, 0.4)
-    for y, s in ((60, -1), (H - 150, 1)):
-        F.arrow(p3, (120, y + 40 * s), (120, y - 40 * s), width=6, head=20)
-        F.arrow(p3, (W - 120, y + 40 * s), (W - 120, y - 40 * s), width=6, head=20)
-    F.note(p3, "黒帯が開く・回り込んで減速", (W - 20, 70))
-    band(p3, 3, "C03 0.3〜1.5", "振り向く → 照らされた顔を初めて見せる")
+    F.room(p3, window=False)
+    d = ImageDraw.Draw(p3)
+    d.ellipse((-220, 80, 330, 900), fill=(24, 40, 46))
+    d.ellipse((-60, -120, 340, 300), fill=(150, 120, 150))
+    box = (430, 180, 1010, 520)
+    tilted(p3, lambda layer, b: F.tablet_home(layer, b), box, -8)
+    tx, ty = 512, 432
+    d.line((330, 640, tx - 6, ty + 18), fill=(40, 52, 60), width=46)
+    d.ellipse((tx - 34, ty - 34, tx + 34, ty + 34), outline=(170, 240, 255), width=6)
+    F.note(p3, "右横・固定 → 押したあと画面へ寄る", (W - 20, 104))
+    letterbox(p3)
+    band(p3, 3, "C01 3.4〜 / C02b 1.25", "持ち上げる → 起こす → KawaPlayer を押す")
     return [p1, p2, p3]
 
 
@@ -193,8 +197,8 @@ def c06():
     F.capsule(p1, 560, 230, "…/r/default/…")
     F.fish(p1, 860, 190, 120, 200)
     F.trail(p1, [(1240, 80), (1050, 140), (900, 190)])
-    F.note(p1, "広角 21 mm・ピントは指先")
-    band(p1, 1, "C06 1.2〜1.85", "指を上げる → 札が指先に乗る（1 cm 沈む）")
+    F.note(p1, "画面いっぱいから肩越しへ引いたあと")
+    band(p1, 1, "C06 1.2〜1.85", "指を立てる（沈んで上がり、行き過ぎて戻る）→ 札が指先に")
     p2 = F.new((20, 22, 28))
     box = (140, 60, 1140, 620)
     F.tablet_frame(p2, box, radius=40)
@@ -205,8 +209,8 @@ def c06():
         d.line((780, 170 + k * 70, 1060, 170 + k * 70), fill=(150, 160, 170), width=10)
     d.polygon([(250, H), (300, 290), (340, 280), (370, 300), (360, H)], fill=(238, 214, 200))
     d.ellipse((296, 252, 376, 312), fill=(242, 220, 206))
-    F.note(p2, "止め 0.6 秒", (620, 250))
-    band(p2, 2, "C07 0.6〜1.2", "URL のボタンの上で止め → 押す")
+    F.note(p2, "MAO の目線", (620, 250))
+    band(p2, 2, "C07 0.85", "URL のボタン（リンクの印）を押す → URL が入る")
     p3 = F.new((20, 22, 28))
     d = ImageDraw.Draw(p3)
     d.rectangle((0, 0, W, H), fill=(26, 30, 38))
@@ -219,26 +223,26 @@ def c06():
         d.ellipse((640 - r * 4, 382 - r, 640 + r * 4, 382 + r), outline=(170, 250, 220), width=4)
     F.sfx(p3, (1060, 230), "ポン", 70)
     F.zoom(p3, (180, 150, 1100, 560))
-    band(p3, 3, "C07 2.2", "拍で 1 コマ 2 倍に寄る：一覧にポン")
+    band(p3, 3, "C07 1.55〜", "「プレイリストを追加しました」→ 一覧にポン")
     return [p1, p2, p3]
 
 
 def c09():
     p1 = lofi_frame()
     F.note(p1, "スクリーンの正面・画面いっぱい")
-    band(p1, 1, "C09 0.0〜1.0", "よふかしスタディだけが映る")
+    band(p1, 1, "C09 0.0〜0.45", "よふかしスタディの中の MAO から")
     p2 = F.new(NIGHT["wall"])
     F.room(p2, screen=lofi_frame(520, 293, ui=True), glow=True)
     F.zoom(p2, (380, 110, 900, 403), inward=False)
-    F.note(p2, "引いて減速・1.0 で UI が出る")
-    band(p2, 2, "C09 1.0〜3.2", "KawaPlayer の画面だったと分かる")
+    F.note(p2, "2 人の頭の上を越えて引く・UI は出したまま")
+    band(p2, 2, "C09 0.45〜2.7", "KawaPlayer の画面だったと分かる")
     p3 = F.new(NIGHT["wall"])
     F.room(p3, screen=lofi_frame(520, 293, ui=True), glow=True)
     F.person(p3, 330, 760, 360, A_COL, "MAO")
     hb = F.person(p3, 450, 760, 330, B_COL, "RIRIKA", twin=True)
     F.sfx(p3, (420, 330), "ひそひそ", 40, col=WHITE)
     F.note(p3, "2 人は左寄り：映像の MAO を隠さない")
-    band(p3, 3, "C09 2.6〜4.0", "RIRIKA が顔を寄せてささやく、MAO がうなずく")
+    band(p3, 3, "C09 2.3〜3.5", "RIRIKA が身を寄せてささやき、MAO が応える")
     return [p1, p2, p3]
 
 
@@ -252,8 +256,8 @@ def c10():
     F.person(p1, 640, 980, 760, B_COL, twin=True)
     tilted(p1, tablet_with(land), (300, 300, 980, 680), 0)
     F.arrow(p1, (640, 700), (640, 640), width=6)
-    F.note(p1, "広角 23 mm・タブレットが手前で大きい")
-    band(p1, 1, "C10 0.3〜0.7", "レンズへ差し出す（2 cm 行き過ぎて戻る）")
+    F.note(p1, "C10a：MAO の目線・広角で少し傾ける")
+    band(p1, 1, "C10a", "少し引いてから、MAO の目の前へ突き出す")
     p2 = F.new(NIGHT["wall"])
     F.room(p2)
     p2 = p2.filter(ImageFilter.GaussianBlur(6))
@@ -261,8 +265,8 @@ def c10():
     tilted(p2, tablet_with(land), (300, 300, 980, 680), 0)
     star(p2, 760, 150, 44)
     F.bubble(p2, 840, 60, "見て見て！", 40, tail=(720, 190))
-    F.note(p2, "止め 0.8 秒 → ウインク", (W - 20, 210))
-    band(p2, 2, "C10 0.7〜1.5", "得意げに止め → ウインクと星")
+    F.note(p2, "C10f の笑顔の寄りのあと、C10b の肩越し", (W - 20, 210))
+    band(p2, 2, "C10f・C10b", "笑顔 → 胸もとに戻してウインクと星")
     p3 = F.new(NIGHT["wall"])
     F.room(p3)
     p3 = p3.filter(ImageFilter.GaussianBlur(6))
@@ -271,8 +275,8 @@ def c10():
     d.line((760, 560, 820, 330), fill=A_COL, width=36)
     curve_arrow(p3, 820, 290, 60, 200, 520)
     F.bubble(p3, 880, 120, "縦、縦！", 40, tail=(820, 260))
-    F.note(p3, "無表情で 0.6 秒止めてから")
-    band(p3, 3, "C11 0.6〜1.7", "指でくるっと 2 回")
+    F.note(p3, "目をぎゅっとつぶって笑いながら")
+    band(p3, 3, "C11 1.35", "指をくるくる → 顔の横で 2 回突き上げ、拍で寄る")
     return [p1, p2, p3]
 
 
@@ -293,15 +297,15 @@ def c12():
     shoulder(p1)
     curve_arrow(p1, 700, 380, 300, -60, -20)
     F.note(p1, "溜め：逆へ 10°")
-    band(p1, 1, "C12 0.2〜0.35", "気づいて固まる → 溜める")
+    band(p1, 1, "C12", "回す前に逆へ引く（0.15 秒）")
     p2 = F.new(NIGHT["wall"])
     F.room(p2)
     p2 = p2.filter(ImageFilter.GaussianBlur(5))
     tilted(p2, tablet_with(land), (420, 220, 980, 540), -8)
     shoulder(p2)
     curve_arrow(p2, 700, 380, 300, -10, -40)
-    F.note(p2, "8° 行き過ぎて戻る")
-    band(p2, 2, "C12 0.35〜0.9", "額縁を返すように自分へ向ける")
+    F.note(p2, "8° 行き過ぎて、0.3 秒で戻る")
+    band(p2, 2, "C12", "額縁を返すように自分へ向ける")
     p3 = F.new(NIGHT["wall"])
     F.room(p3)
     p3 = p3.filter(ImageFilter.GaussianBlur(5))
@@ -313,33 +317,47 @@ def c12():
     tilted(p3, portrait, (560, 90, 840, 600), 0)
     shoulder(p3)
     F.sweat(p3, 380, 120, 20)
-    F.note(p3, "手が長い辺へ移る")
-    band(p3, 3, "C12 1.4〜2.8", "汗 → 縦に回す → 写真が大きく")
+    F.note(p3, "手のひらは縁、指は画面の裏、親指は表の縁")
+    band(p3, 3, "C12 1.5〜", "汗 → 縦に回す → 写真が大きく")
     return [p1, p2, p3]
 
 
 def c13():
+    """C13 as filmed (v3.1): one take over RIRIKA's right shoulder, closing in on the tablet first; she taps the
+    picture and "KawaPlayer に送る", and the camera pulls back round to the screen for MAO's double take."""
     photo = F.sample_photo_tall()
     shot = Image.new("RGBA", (520, 293), (14, 16, 20, 255))
     F.fit_into(shot, photo, (0, 0, 520, 293), bg=(14, 16, 20))
 
-    def scene(look):
-        im = F.new(NIGHT["wall"])
-        F.room(im, screen=shot, glow=True)
-        hx, hy = F.person(im, 520, 760, 380, A_COL, "MAO")
-        F.person(im, 800, 760, 350, B_COL, "RIRIKA", twin=True)
-        if look == "screen":
-            F.arrow(im, (hx + 10, hy - 30), (hx + 60, hy - 200))
-        elif look == "back":
-            F.arrow(im, (hx + 30, hy), (hx + 210, hy + 10))
-        return im, (hx, hy)
+    def tablet(im, box):
+        scr = F.tablet_frame(im, box, radius=30, portrait=True)
+        F.fit_into(im, photo, scr, bg=(14, 16, 20))
+        d = ImageDraw.Draw(im)
+        bx = (scr[2] - 210, scr[1] + 14, scr[2] - 14, scr[1] + 62)
+        d.rounded_rectangle(bx, 16, fill=(16, 20, 26), outline=(200, 206, 214), width=2)
+        d.text(((bx[0] + bx[2]) / 2, (bx[1] + bx[3]) / 2), "KawaPlayer に送る", font=F.font(22), fill=WHITE, anchor="mm")
+        return scr, bx
 
-    p1, _ = scene("screen")
-    F.note(p1, "0.3 秒")
-    band(p1, 1, "C13 0.9〜1.2", "MAO がスクリーンを見る")
-    p2, _ = scene("back")
-    F.note(p2, "戻って 0.2 秒止め")
-    band(p2, 2, "C13 1.2〜1.7", "RIRIKA へ戻る（気づかない）")
+    p1 = F.new(NIGHT["wall"])
+    F.room(p1, window=False)
+    tablet(p1, (560, 110, 860, 640))
+    d = ImageDraw.Draw(p1)
+    d.ellipse((60, 40, 470, 520), fill=(214, 186, 170))
+    for x in (110, 410):
+        d.rounded_rectangle((x - 50, 260, x + 50, 720), 46, fill=(214, 186, 170))
+    d.rounded_rectangle((330, 520, 640, 720), 80, fill=B_COL)
+    F.zoom(p1, (500, 80, 920, 680))
+    F.note(p1, "背中越し・まずタブレットへ寄る")
+    band(p1, 1, "C13 0.0〜0.55", "背中越しにタブレットへ寄る")
+    p2 = F.new((20, 22, 28))
+    scr, bx = tablet(p2, (380, 30, 900, 660))
+    d = ImageDraw.Draw(p2)
+    fx, fy = bx[0] + 60, (bx[1] + bx[3]) / 2
+    d.line((1060, H + 40, 960, 520, fx + 30, fy + 40), fill=B_COL, width=70, joint="curve")
+    d.line((fx + 30, fy + 40, fx, fy), fill=(240, 214, 200), width=22)
+    d.ellipse((fx - 30, fy - 30, fx + 30, fy + 30), outline=(170, 240, 255), width=6)
+    F.note(p2, "押す腕は画面の右の縁に沿わせる")
+    band(p2, 2, "C13 0.9〜1.35", "写真をタップ → KawaPlayer に送る")
     p3 = F.new(NIGHT["wall"])
     F.room(p3, screen=shot, glow=True)
     p3 = p3.filter(ImageFilter.GaussianBlur(4))
@@ -347,8 +365,8 @@ def c13():
     burst(p3, hx, hy, 170, 260)
     F.bubble(p3, 820, 90, "おおー！", 44, tail=(hx + 90, hy - 60))
     F.zoom(p3, (200, 60, 1080, 560))
-    F.note(p3, "3 コマで振り向く・1.8 倍に寄る")
-    band(p3, 3, "C13 1.7〜3.0", "振り向いて驚く（二度見）")
+    F.note(p3, "引きながらスクリーンへ回る → 二度見で寄る")
+    band(p3, 3, "C13 1.55〜3.05", "スクリーンに写真、MAO の二度見")
     return [p1, p2, p3]
 
 
@@ -364,40 +382,45 @@ def c14():
         return im
 
     p1 = scene(300, 700, None)
-    F.note(p1, "左右対称・固定")
-    band(p1, 1, "C14 0.6〜0.8", "RIRIKA がしゃがんで溜める、MAO は手を振る")
+    F.note(p1, "固定・1 秒に 1.5% 寄る")
+    band(p1, 1, "C14", "ゲストが入る。RIRIKA がしゃがんで溜め、MAO は手を振る")
     p2 = scene(380, 600, "both")
     d = ImageDraw.Draw(p2)
     for k in range(3):
         d.line((620 + k * 60, 640, 620 + k * 60, 700), fill=WHITE, width=5)
     F.bubble(p2, 760, 120, "いらっしゃーい！", 40, tail=(700, 240))
-    band(p2, 2, "C14 0.8〜1.2", "両手を上げて跳ぶ（髪は遅れて追う）")
+    band(p2, 2, "C14", "両手を上げて跳ぶ（頂点で目をぎゅっと）")
     p3 = scene(350, 700, "both")
     d = ImageDraw.Draw(p3)
     d.arc((560, 660, 800, 740), 200, 340, fill=WHITE, width=5)
-    F.note(p3, "沈んで約 1 秒で落ち着く → 0.5 秒止め")
-    band(p3, 3, "C14 1.2〜2.9", "着地 → 落ち着く → 止めてから切る")
+    F.note(p3, "着地で沈んで、もう 1 回小さく弾む")
+    band(p3, 3, "C14", "着地 → 小さく弾む → 落ち着く")
     return [p1, p2, p3]
 
 
 def c16():
     p1 = F.new((40, 32, 30))
     d = ImageDraw.Draw(p1)
-    d.rounded_rectangle((180, 90, 1100, 630), 30, fill=(150, 120, 110))
-    for (cx, col, ang) in ((520, A_COL, 15), (780, B_COL, -15)):
-        layer = Image.new("RGBA", (W, H), (0, 0, 0, 0))
-        ld = ImageDraw.Draw(layer)
-        ld.rounded_rectangle((cx - 70, 300, cx + 70, 640), 60, fill=col)
-        ld.ellipse((cx - 70, 180, cx + 70, 320), fill=F.darker(col))
-        p1.alpha_composite(layer.rotate(ang, center=(cx, 360)))
-    F.tablet_frame(p1, (580, 160, 720, 240), radius=12)
-    F.arrow(p1, (1130, 580), (1230, 580))
-    F.note(p1, "真上・ほぼ固定（ゆっくり寄りながら流れる）")
-    band(p1, 1, "C16", "寝そべって、頭をゆらす・足をパタパタ")
+    d.polygon([(0, 250), (W, 250), (W, H), (0, H)], fill=(150, 120, 110))
+    # RIRIKA across the tablet, on her elbows, her feet up behind her and kicking in turn
+    for x0, x1 in ((610, 560), (670, 735)):
+        d.line((x0, 250, x1, 120), fill=F.darker(B_COL, 0.7), width=30)
+    d.arc((520, 80, 600, 160), 200, 320, fill=ORANGE, width=5)
+    d.arc((700, 80, 780, 160), 220, 340, fill=ORANGE, width=5)
+    d.rounded_rectangle((520, 250, 760, 340), 46, fill=F.darker(B_COL, 0.8))
+    d.ellipse((570, 150, 710, 280), fill=B_COL)
+    # the tablet on the carpet between them
+    d.polygon([(500, 380), (780, 380), (830, 470), (450, 470)], fill=(14, 16, 20), outline=(130, 136, 144))
+    # MAO from behind, in the foreground
+    d.rounded_rectangle((180, 560, 840, 800), 120, fill=F.darker(A_COL, 0.7))
+    d.ellipse((390, 420, 630, 660), fill=F.darker(A_COL, 0.55))
+    F.zoom(p1, (420, 340, 860, 500), inward=False)
+    F.note(p1, "タブレットから MAO の背中越しへ引く")
+    band(p1, 1, "C16", "寝そべってのぞく・RIRIKA の足がパタパタ")
     p2 = F.new((20, 22, 28))
     box = (240, 80, 1040, 530)
     F.tablet_home(p2, box)
-    F.note(p2, "タブレットは同じ位置、中だけ変わる")
+    F.note(p2, "真上から")
     d = ImageDraw.Draw(p2)
     for k, s in enumerate(("ホーム", "設定", "再生")):
         x = 330 + k * 230
@@ -405,7 +428,7 @@ def c16():
         d.text((x + 95, 585), s, font=F.font(28), fill=WHITE, anchor="mm")
         if k < 2:
             F.arrow(p2, (x + 196, 585), (x + 226, 585), width=5, head=16)
-    band(p2, 2, "C17 0.0〜3.0", "押す前に 0.3 秒ずつ止める")
+    band(p2, 2, "C17 0.65・1.45・2.25", "ホーム → 設定 → 再生")
     return [p1, p2]
 
 
@@ -422,8 +445,8 @@ def c19():
             r = 4 + (k % 5) * 3
             o.ellipse((x - r, y - r, x + r, y + r), fill=(120, 200, 255, 150))
     F.overlay(p1, dots)
-    F.note(p1, "粒子の雲がレンズを横切る → C20 へ")
-    band(p1, 1, "C19 1.8〜2.3", "散った粒子のワイプ")
+    F.note(p1, "光の粒がレンズの前を上る → 白い光で朝へ")
+    band(p1, 1, "C19", "頭から粒子になって消える → 光の粒のワイプ")
     day = F.sample_video(520, 293)
 
     def morning(look, joy=False):
@@ -436,36 +459,39 @@ def c19():
     p2, _, (rx, ry) = morning("screen")
     F.arrow(p2, (rx, ry - 40), (rx - 60, ry - 200))
     F.arrow(p2, (rx - 40, ry + 20), (rx - 200, ry + 30))
-    F.note(p2, "見る → MAO → 止め → 振り向く")
-    band(p2, 2, "C21 0.0〜1.0", "RIRIKA の二度見")
+    F.note(p2, "スクリーン → MAO → スクリーンへ戻る")
+    band(p2, 2, "C21 0.0〜0.95", "RIRIKA の二度見")
     p3, (hx, hy), _ = morning("screen", joy=True)
     d = ImageDraw.Draw(p3)
     d.rounded_rectangle((hx - 80, hy + 90, hx + 80, hy + 130), 18, fill=F.darker(A_COL, 0.85))
     star(p3, hx + 90, hy - 80, 36)
     F.bubble(p3, 840, 80, "もう流れてる！", 40, tail=(810, 300))
-    band(p3, 3, "C21 1.0〜2.4", "跳ねて喜ぶ、MAO は得意げに 1 秒止め")
+    band(p3, 3, "C21 1.0〜", "跳んで喜ぶ、MAO は腰に手を当てて胸を張る")
     return [p1, p2, p3]
 
 
 def c22():
+    """C22 as filmed (v3.1): the two on the sofa from behind; they turn round from the hips, MAO with a peace sign
+    and RIRIKA waving, with sparkles in their colours; the iris closes on them and opens on the end card's logo."""
     p1 = F.new(NIGHT["wall"])
     F.room(p1, screen=F.sample_video(520, 293), glow=True)
-    F.person(p1, 560, 720, 300, (30, 40, 46))
-    F.person(p1, 720, 720, 280, (46, 34, 40), twin=True)
+    F.person(p1, 540, 720, 280, (46, 34, 40), twin=True)
+    F.person(p1, 720, 720, 300, (30, 40, 46))
     F.sofa(p1)
-    F.telop(p1, "URL ひとつで、みんなの上映会。", 44, y=H - 140)
-    F.note(p1, "逆光・ほぼ固定（4 秒で 1° 寄る）")
-    band(p1, 1, "C22 0.0〜3.0", "ソファの 2 人、キャッチコピー")
+    F.note(p1, "ソファの後ろ・ゆっくり引いて止まる")
+    band(p1, 1, "C22 0.0〜1.9", "2 人でスクリーンを観る")
     p2 = F.new(NIGHT["wall"])
     F.room(p2, screen=F.sample_video(520, 293), glow=True)
+    mx, my = F.person(p2, 720, 720, 300, A_COL, "MAO", arm="wave")
+    rx, ry = F.person(p2, 540, 720, 280, B_COL, "RIRIKA", twin=True, arm="wave")
     F.sofa(p2)
-    hole = Image.new("L", (W, H), 255)
-    ImageDraw.Draw(hole).ellipse((440, 90, 840, 420), fill=0)
-    black = Image.new("RGBA", (W, H), (0, 0, 0, 255))
-    black.putalpha(hole)
-    p2.alpha_composite(black)
-    F.note(p2, "スクリーンを中心に閉じる（0.6 秒）")
-    band(p2, 2, "C22 3.2〜3.8", "アイリス")
+    for (cx, cy, col) in ((mx, my, (150, 236, 236)), (rx, ry, (255, 186, 214))):
+        for k in range(7):
+            a = math.radians(200 + k * 24)
+            F.sparkle(p2, cx + 92 * math.cos(a), cy - 20 + 92 * math.sin(a), 12 + (k % 3) * 6, col)
+    F.telop(p2, "URL ひとつで、みんなの上映会。", 44, y=H - 140)
+    F.note(p2, "腰から振り向く・キラキラと専用の効果音")
+    band(p2, 2, "C22 1.9〜2.9", "振り向いて、ピースと手を振る")
     p3 = F.new((0, 0, 0))
     F.overlay(p3, lambda o: o.ellipse((340, 40, 940, 600), fill=(255, 255, 255, 255)))
     p3c = F.brand_background()
@@ -473,8 +499,8 @@ def c22():
     ImageDraw.Draw(mask).ellipse((340, 40, 940, 600), fill=255)
     p3.paste(p3c, (0, 0), mask)
     F.place(p3, F.logo(260, WHITE), (510, 190, 770, 450))
-    F.note(p3, "穴からロゴが開く（0.4 秒）")
-    band(p3, 3, "C23 0.0〜0.4", "終わりの画面へ")
+    F.note(p3, "2 人を中心に閉じ、穴からロゴが開く")
+    band(p3, 3, "C22 3.15〜 / C23", "アイリスで終わりの画面へ")
     return [p1, p2, p3]
 
 
