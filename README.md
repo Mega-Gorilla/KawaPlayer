@@ -1,136 +1,44 @@
 # KawaPlayer
 
-VRChat の動画プレイヤー [YamaPlayer](https://github.com/koorimizuw/YamaPlayer) のフォーク。**ワールド作成者が VRChat 内から直接プレイリストや自動再生する動画 URL を設定できる**機能を追加しています。
+VRChat のワールドに置く、無料の動画プレイヤーです。[VHub Playlist](https://playlist.vrc-hub.com) のプレイリストを URL ひとつで読み込め、手に持つタブレットからも操作できます。[YamaPlayer](https://github.com/koorimizuw/YamaPlayer) のフォークで、YamaPlayer の機能もそのまま使えます。
 
-> **YamaPlayer を置き換えて使用するパッケージです。** 同時インストール不可。既存 YamaPlayer ユーザは [移行手順](#yamaplayer-からの移行) を参照してください。
+[![KawaPlayer の紹介動画（1 分 24 秒）を YouTube で観る](https://raw.githubusercontent.com/Mega-Gorilla/KawaPlayer/develop/docs/images/readme/video-card.webp)](https://youtu.be/6Lwdvkbyp14)
 
-**▶ 紹介動画（1 分 24 秒）：[YouTube で観る](https://youtu.be/6Lwdvkbyp14)・[X の投稿](https://x.com/Mega_Gorilla_/status/2112364799049044427)** — VHub のプレイリスト、タブレット、自動再生を 3 つの章で紹介しています。
+紹介動画：[YouTube](https://youtu.be/6Lwdvkbyp14)・[X](https://x.com/Mega_Gorilla_/status/2112364799049044427)
 
----
+## できること
 
-## YamaPlayer との違い
+- **VHub のプレイリスト：** VHub で作ったプレイリストを、ワールドの中で URL を貼るだけで読み込めます。
+- **タブレット：** 手元で動画を操作し、写真を見せたり、スクリーンに送ったりできます。誰が来たかも分かります。
+- **自動再生(Owner)：** インスタンスを作った人が、入ったときに流す動画を VRChat の中で決めておけます（自分で作った Invite・Friends などのインスタンスで使えます）。
+- **全員リロードボタン：** ライブ配信のイベントで、全員の動画を一度に読み込み直せます。
+- **YamaPlayer の機能：** YouTube・Twitch・ライブ配信の再生、キューと履歴、カラオケ、AudioLink・LTCGI・Light Volume、9 言語など。
 
-| 機能 | YamaPlayer | KawaPlayer |
-|---|---|---|
-| 動画再生 (YouTube / Twitch / HLS / 直リンク) | ✓ | ✓ (継承) |
-| カラオケ / 区間リピート / 再生速度 / 最大解像度 | ✓ | ✓ (継承) |
-| AudioLink / LTCGI / Light Volume 連携 | ✓ | ✓ (継承) |
-| 多言語対応 (9 言語) | ✓ | ✓ (継承) |
-| **外部プレイリスト URL の読込** (`playlist.vrc-hub.com`) | — | ✅ NEW |
-| **入室時に自動再生する動画 URL を VRChat 内から設定** (自動再生 (Owner)) | — | ✅ NEW |
-| **自動再生する URL の永続化** (再 join で自動復元) | — | ✅ NEW |
+## 入れ方
 
-KawaPlayer は YamaPlayer の全機能を継承しつつ、**ワールド作成者が VRChat 内で動画/プレイリストを直接管理できる**機能を追加しています。
+VRChat Worlds SDK 3.10.2 以上のワールドのプロジェクトに、VCC で入れます。
 
----
+1. [KawaPlayer の VCC 用のページ](https://mega-gorilla.github.io/vpm-repos/) を開き、**Add to VCC** を押します。
+2. VCC の **Manage Project** で、KawaPlayer の **Add** を押します。
+3. Unity で **GameObject > KawaPlayer > Main** を選ぶと、シーンに KawaPlayer が置かれます。
 
-## クイックスタート (VCC 推奨)
+画像付きの手順は [クイックスタート](https://github.com/Mega-Gorilla/KawaPlayer/blob/develop/docs/guide/quickstart.md) にあります。VHub のプレイリストを Public・Group Public のインスタンスで流すには、VRChat.com でワールドの Video Player Allowed Domains に `playlist.vrc-hub.com` を足します。更新も VCC から行えます。VCC を使わない入れ方は [インストールと更新](https://github.com/Mega-Gorilla/KawaPlayer/blob/develop/docs/guide/install.md) にあります。
 
-1. VCC にリポジトリを追加 — 以下のいずれかの方法で:
-   - **VCC を直接開く**: 下記 URL をブラウザのアドレスバーに貼り付けて Enter (VCC の Add Repository ダイアログが起動)
+## 使い方
 
-     ```
-     vcc://vpm/addRepo?url=https://mega-gorilla.github.io/vpm-repos/index.json
-     ```
-
-   - **手動追加**: VCC の **Settings > Packages > Add Repository** に下記 URL を入力
-
-     ```
-     https://mega-gorilla.github.io/vpm-repos/index.json
-     ```
-2. **Manage Project** で対象プロジェクトを開き、**KawaPlayer** の **Add** をクリック
-3. Unity で `KawaPlayer.prefab` をシーンにドラッグ (または **GameObject > KawaPlayer > Main** メニュー)
-
-これで KawaPlayer の全機能 (PlaylistLoader / DefaultUrl 含む) が **追加設定なしで** 使えます。
-
-画像付きの手順は、[クイックスタート](https://github.com/Mega-Gorilla/KawaPlayer/blob/develop/docs/guide/quickstart.md) を見てください。インストール・設定・プレイリスト・モジュール・タブレット・ワールドの中での使い方は、[使い方ガイド](https://github.com/Mega-Gorilla/KawaPlayer/blob/develop/docs/guide/README.md) にカテゴリーごとのページがあります。
-
-> アップデートも VCC からワンクリックで実行できます。
-
----
-
-## 主要機能 (KawaPlayer 独自)
-
-### 外部プレイリスト読込 (PlaylistLoader)
-
-[playlist.vrc-hub.com](https://playlist.vrc-hub.com) で作成したプレイリストを、VRChat 内から動画プレイヤーに読み込む機能です。
-
-**使い方:**
-1. ワールド内の KawaPlayer UI の URL 欄に、VHub の共有 URL を入力 (動画 URL と同じ欄)
-2. プレイリストが**プレイリスト一覧に 1 件として追加**される (キューには入りません。最後まで再生すると先頭に戻ってループ)
-3. 停止中なら自動再生開始
-
-- 一覧に置けるのは**標準 5 件**まで。一杯のときに新しいプレイリストを読み込むと、最も古いものを削除してよいか確認が出ます
-- 一覧は**追加した順**に並びます。プレイリスト名の横のボタンで更新・削除できます
-- 読み込めるのは再生権限 (PermissionManagement) を持つ人だけです
-
-外部プレイリストを世界の事前ビルドに焼き込む必要なく、**VRChat に居ながら好みのプレイリストを切替できます**。
-
-### 自動再生 (Owner)（DefaultUrl）
-
-**Instance Owner が、自分のインスタンスで自動再生する動画 / プレイリスト URL** を VRChat 内から設定できる機能です。ワールドの中の設定では「**自動再生**」、エディタのモジュール管理では「**自動再生(Owner)**」と表示されます (以前の名前は「デフォルト URL」)。
-
-> YamaPlayer から引き継いだ **自動再生(World)** (AutoPlay モジュール) は、ワールド制作者が**エディタで決めた**動画 / プレイリストを、どのインスタンスでも再生します。自動再生(Owner) は、**Instance Owner が VRChat の中で決めた**ものを、その人のインスタンスで再生します。両方を同じプレイヤーで有効にすると (自動再生(World) のモードが「オフ」のときを除く)、どちらが再生されるかが入室のタイミングで決まるため、モジュール管理・KawaPlayer のインスペクター・ビルドのログにエラーが出ます (ビルドは止まりません)。どちらか一方を使ってください。
-
-> **⚠ 利用できるインスタンス種別が限られます。**`isInstanceOwner` は **Invite / Invite+ / Friends / Friends+ で、そのインスタンスを作成した本人にのみ true** を返します。**Public / Group インスタンスと SDK の Build & Test では常に false** です ([VRChat 公式ドキュメント](https://creators.vrchat.com/worlds/udon/networking/network-components/))。
->
-> したがって **Public / Group では誰も設定できず、保存した URL も復元されません。****自分で作成した Invite / Invite+ / Friends / Friends+ インスタンス**でお使いください。**Build & Test でも Owner 側の動作は確認できません。**
-
-**使い方 (Owner として):**
-1. ワールドに Instance Owner として入室
-2. KawaPlayer UI を開く → **Settings → Playback** タブ
-3. 末尾の **自動再生** セクションで **「URLを入力」** を押す → **VRChat の入力画面**が開くので URL を入力して確定する
-4. 確定した時点で保存され、**「設定値:」の行**に反映されます (保存ボタンはありません)
-5. プレイヤーが停止中であれば即時再生開始 (再生中の場合は中断しません。そのときは再生されず、次に自分のインスタンスへ入室したときに再生されます)
-6. 保存した URL は、**次に自分で作ったインスタンスへ入室したとき**にも自動で復元され、停止中なら再生が始まります
-
-> 入力をキャンセルした場合や、空のまま確定した場合は**保存されません**。設定を消すときは **「クリア」** を押してください。
->
-> プレイヤーが停止中で、プレイリストの読み込み先 (標準 5 件) が一杯のときに、**まだ読み込んでいない** VHub プレイリストの URL を確定すると、保存する前に**最も古いプレイリストを削除してよいか確認が出ます** (保存するとすぐ読み込まれるため)。キャンセルすると保存されません。読み込み済みのプレイリストの URL なら、その場で更新されるだけなので確認は出ません。
-
-**機能特性:**
-- **動画 URL / プレイリスト URL の自動判定** — `playlist.vrc-hub.com` を含めばプレイリスト経路、それ以外は動画再生経路
-- **Owner 限定編集** — Instance Owner 以外には、設定欄も現在の URL も表示されず、**利用できない旨の案内のみ**が出ます
-- **マルチプレイヤー同期** — Owner の設定は instance 内全 player に同期。**あとから入室した人は、その時点の再生に同期します。**プレイヤーが停止している場合、誰かが入室しただけでは再生は始まりません
-- **永続化** — Owner の VRChat アカウントに紐づき、**Owner が自分で作ったインスタンスに入室したとき**に自動復元。ほかの人が作ったインスタンスでは使われません
-
----
+[使い方ガイド](https://github.com/Mega-Gorilla/KawaPlayer/blob/develop/docs/guide/README.md) に、設定・プレイリスト・モジュール・タブレット・全員リロードボタン・ワールドの中での使い方を、画像付きでまとめています。困ったときは [Discord](https://discord.gg/tkrHek6PvN) で気軽に聞いてください。
 
 ## YamaPlayer からの移行
 
-KawaPlayer は YamaPlayer と同じアセンブリ定義を使用しているため、**両方を同時にインストールすると C# コンパイルエラーが発生**します。下記手順で置き換えてください。
+YamaPlayer と KawaPlayer は、同じプロジェクトに一緒には入れられません（コンパイルエラーになります）。
 
-1. **Unity を閉じる**
-2. **YamaPlayer を削除**
-   - **VCC で導入の場合:** VCC の **Manage Project** から YamaPlayer の **Remove Package**
-   - **.unitypackage で導入の場合:** Unity **Window > Package Manager** で YamaPlayer を選択 → **Remove**
-3. `Packages/net.kwxxw.yama-stream/` フォルダが残っていないことを確認
-4. **Unity を開き直し**、コンパイルエラーがないことを確認
-5. 上記の [クイックスタート](#クイックスタート-vcc-推奨) で KawaPlayer を導入
-6. シーン内の YamaPlayer プレハブを `KawaPlayer.prefab` に置き換え
-
----
-
-## YamaPlayer 機能 (継承)
-
-YamaPlayer の動画プレイヤーとしての全機能 — YouTube/Twitch/HLS 再生、カラオケモード、再生キュー / 履歴 / プレイリスト、ネットワーク同期、AudioLink / LTCGI 連携、多言語対応 (9 言語)、再生速度 / 区間リピート / 最大解像度設定 等 — をすべて継承しています。
-
-詳細は [本家 YamaPlayer](https://github.com/koorimizuw/YamaPlayer) を参照してください。
-
----
-
-## .unitypackage で導入 (VCC を使わない場合)
-
-1. VRChat Worlds SDK (>=3.10.2) 導入済みの Unity プロジェクトを用意
-2. [Releases ページ](https://github.com/Mega-Gorilla/KawaPlayer/releases) から `com.vhub.kawaplayer-x.x.x.unitypackage` をダウンロード
-3. Unity メニュー **Assets > Import Package > Custom Package** でインポート
-4. **GameObject > KawaPlayer > Main** または `KawaPlayer.prefab` をシーンにドラッグ
-
----
+1. Unity を閉じ、YamaPlayer を外します（VCC で入れたなら **Manage Project** の **Remove Package**、.unitypackage なら Package Manager の **Remove**）。`Packages/net.kwxxw.yama-stream/` が残っていないことを確かめます。
+2. Unity を開いてエラーがないことを確かめてから、上の手順で KawaPlayer を入れます。
+3. シーンの YamaPlayer を `KawaPlayer.prefab` に置き換えます。
 
 ## 利用規約
 
-本家 YamaPlayer の利用規約に準じます。ロゴやポスターなどの素材は、この利用規約とは別の条件です（下の「素材」）。
+本家 YamaPlayer の利用規約に準じます。
 
 許可:
 - 改変
@@ -139,15 +47,7 @@ YamaPlayer の動画プレイヤーとしての全機能 — YouTube/Twitch/HLS 
 
 クレジット記載は任意ですが、**販売ワールドアセットに取り組む場合はクレジット記載が必須**です。
 
-## 素材
-
-KawaPlayer のロゴと、クイックスタートガイドのポスターを [`Media~/`](Media~/) に置いています。KawaPlayer を置いたワールドへの掲示（販売するワールドへの同梱を含む）や、KawaPlayer の紹介に使えます。
-
-著作権フリーではありません。使うときは [KawaPlayer 素材ライセンス](Media~/LICENSE.md) に従ってください。パッケージの中のロゴ（`Assets/Images/kawaplayer-logo.png`）も同じ条件です。
-
-- 改変、自作発言、KawaPlayer が公認していると誤解させる使い方はできません
-- 素材だけを配ったり売ったり、グッズにしたりはできません
-- クレジットは任意です（販売するワールドに同梱するときも）
+ロゴとクイックスタートのポスター（[`Media~/`](Media~/)）は、この利用規約とは別の [KawaPlayer 素材ライセンス](Media~/LICENSE.md) に従います。KawaPlayer を置いたワールドへの掲示（販売するワールドへの同梱を含む）や紹介に使えますが、著作権フリーではありません。パッケージの中のロゴ（`Assets/Images/kawaplayer-logo.png`）も同じ条件です。
 
 ## クレジット
 
