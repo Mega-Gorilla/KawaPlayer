@@ -85,6 +85,11 @@ namespace Yamadev.YamaStream.Tablet
     private int[] _listRowItems = new int[0];
     private RectTransform[] _logRows = new RectTransform[0];
     private int[] _logRowItems = new int[0];
+    // The rows of the other orientation, kept hidden once made: making them
+    // again on every turn held the frame for about 17 ms of Udon on a PC,
+    // where filling rows already made takes about 1 ms (issue #195).
+    private RectTransform[] _otherListRows = new RectTransform[0];
+    private RectTransform[] _otherLogRows = new RectTransform[0];
 
     // The language is set before the app first opens, so it takes its texts
     // here; AfterLanguageChanged reaches it after that.
@@ -126,29 +131,31 @@ namespace Yamadev.YamaStream.Tablet
     }
 
     // TabletScreen calls this when the tablet turns between landscape and
-    // portrait: the rows are made again from the other templates, as many as
-    // the view's new height needs.
+    // portrait: the views swap to the rows of the other templates, made the
+    // first time that orientation is shown, as many as its height needs.
     public void SetPortrait(bool portrait)
     {
       if (portrait == _portrait) return;
       _portrait = portrait;
-      DestroyRows(_listRows);
-      DestroyRows(_logRows);
-      _listRows = new RectTransform[0];
-      _listRowItems = new int[0];
-      _logRows = new RectTransform[0];
-      _logRowItems = new int[0];
+      HideRows(_listRows);
+      HideRows(_logRows);
+      RectTransform[] rows = _listRows;
+      _listRows = _otherListRows;
+      _otherListRows = rows;
+      rows = _logRows;
+      _logRows = _otherLogRows;
+      _otherLogRows = rows;
+      _listRowItems = new int[_listRows.Length];
+      _logRowItems = new int[_logRows.Length];
       _dirty = true;
       if (gameObject.activeInHierarchy) Refresh();
     }
 
-    private void DestroyRows(RectTransform[] rows)
+    private void HideRows(RectTransform[] rows)
     {
       foreach (RectTransform row in rows)
       {
-        if (!Utilities.IsValid(row)) continue;
-        row.gameObject.SetActive(false);
-        Destroy(row.gameObject);
+        if (Utilities.IsValid(row)) row.gameObject.SetActive(false);
       }
     }
 
