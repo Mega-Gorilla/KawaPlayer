@@ -169,7 +169,7 @@ public class Playlist : YamaPlayerListener
 PlaylistExporter.Export(playlists)
     │
     ├── PlaylistItem[] → PlaylistData[] に変換
-    ├── JsonConvert.SerializeObject (camelCase)
+    ├── Serialize(): JsonConvert.SerializeObject (camelCase)。テストもこれで書き出して読み戻す
     └── EditorUtility.SaveFilePanel → File.WriteAllText
 ```
 
@@ -181,7 +181,9 @@ PlaylistExporter.Import(out error)
     │
     ├── EditorUtility.OpenFilePanel → JSON ファイル選択（キャンセルなら null）
     └── TryParse(json): ファイル全体を先に読み、どこかが読めなければ 1 つも返さない
-        ├── JToken.Parse(json)（読めなければ、行と文字の位置を error に）
+        ├── JsonTextReader（DateParseHandling.None）と JToken.Load で読む
+        │   (日時の形の文字列も文字列のまま。ルートの後ろに余計な文字があれば拒む。
+        │    読めなければ、行と文字の位置を error に)
         ├── "playlists" 配列を取得（なければ error）
         └── 各要素を TryReadPlaylist():
             ├── active (bool), name / youtubeListId / vhubPlaylistUrl (文字列) を型を確かめて抽出
