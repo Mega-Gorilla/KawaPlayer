@@ -4,6 +4,8 @@ VRChat の動画プレイヤー [YamaPlayer](https://github.com/koorimizuw/YamaP
 
 > **YamaPlayer を置き換えて使用するパッケージです。** 同時インストール不可。既存 YamaPlayer ユーザは [移行手順](#yamaplayer-からの移行) を参照してください。
 
+**▶ 紹介動画（1 分 24 秒）：[X の投稿で観る](https://x.com/Mega_Gorilla_/status/2112364799049044427)** — VHub のプレイリスト、タブレット、自動再生を 3 つの章で紹介しています。
+
 ---
 
 ## YamaPlayer との違い

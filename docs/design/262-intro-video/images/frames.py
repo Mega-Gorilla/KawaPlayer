@@ -343,18 +343,48 @@ def action(im, s, at, side="right", rise=80):
     d.text((ex + sgn * 56, ey), s, font=font(30), fill=WHITE, anchor=anchor, stroke_width=1, stroke_fill=WHITE)
 
 
+def thing_label(im, x, y, title, sub):
+    """⑥ A label on a thing: a dot on it, a thin line, a diamond and the label."""
+    d = ImageDraw.Draw(im)
+    ex, ey = x + 120, y - 120
+    d.line((x, y, ex, ey), fill=WHITE, width=3)
+    d.ellipse((x - 7, y - 7, x + 7, y + 7), fill=WHITE)
+    diamond(d, ex, ey, 9, MINT)
+    text(im, (ex + 22, ey - 18), title, 30, anchor="lm", stroke=6)
+    text(im, (ex + 22, ey + 20), sub, 22, anchor="lm", stroke=5)
+
+
+def now_card(im, x, y, num, name, step, done, parts):
+    """⑦ The card at the top left: the chapter, what it shows now, and how far into the chapter it is."""
+    overlay(im, lambda o: o.rounded_rectangle((x, y, x + 330, y + 118), 16, fill=(8, 22, 30, 200)))
+    d = ImageDraw.Draw(im)
+    diamond(d, x + 34, y + 36, 20, TEAL, outline=WHITE)
+    d.text((x + 34, y + 36), num, font=font(20), fill=WHITE, anchor="mm")
+    d.text((x + 66, y + 36), name, font=font(26), fill=WHITE, anchor="lm")
+    d.text((x + 24, y + 78), step, font=font(22), fill=(200, 236, 236), anchor="lm")
+    x0, x1, by = x + 24, x + 306, y + 104
+    d.line((x0, by, x1, by), fill=(70, 90, 100), width=4)
+    d.line((x0, by, x0 + (x1 - x0) * done / parts, by), fill=MINT, width=4)
+    for k in range(parts):
+        cx = x0 + (x1 - x0) * k / parts
+        diamond(d, cx, by, 6, MINT if k < done else (70, 90, 100))
+
+
 def captions():
     """The caption styles together, for the README."""
     im = new(NIGHT["wall"])
     room(im, screen=sample_video(), glow=True)
     im = im.filter(ImageFilter.GaussianBlur(8))
-    name_tag(im, "RIRIKA", (110, 110))
+    now_card(im, 24, 24, "02", "タブレット", "スクリーンに送る", 3, 4)
+    name_tag(im, "ゲスト", (1010, 150))
     action(im, "スクリーンに送る", (840, 300))
     say(im, (430, 420), "見て見て！", "RIRIKA")
-    heading(im, "02", "タブレット", "手元で見せて、みんなのスクリーンにも", "Show it in your hands, then on the big screen")
+    thing_label(im, 470, 210, "KawaPlayer タブレット", "手もとで、動画も写真も操作できる")
+    heading(im, "02", "タブレット", "手元で見せて、みんなのスクリーンにも", "Show it in your hands, then on everyone's screen")
     telop(im, "手元の写真を、みんなのスクリーンへ", y=H - 330)
     d = ImageDraw.Draw(im)
-    for (x, y), n in (((80, 180), "②"), ((840, 360), "③"), ((560, 250), "④"), ((70, 470), "①"), ((260, 360), "⑤")):
+    for (x, y), n in (((965, 150), "②"), ((840, 360), "③"), ((560, 250), "④"), ((70, 470), "①"), ((260, 360), "⑤"),
+                      ((430, 215), "⑥"), ((190, 165), "⑦")):
         d.ellipse((x - 20, y - 20, x + 20, y + 20), fill=ORANGE)
         d.text((x, y), n, font=font(26), fill=WHITE, anchor="mm")
     return im
@@ -565,66 +595,50 @@ def night_room_blur(im):
 
 
 def c01():
-    im = new((40, 44, 70))
-    night_room_blur(im)
+    im = new(NIGHT["wall"])
+    room(im)
     d = ImageDraw.Draw(im)
-    dark = darker(A_COL, 0.55)
-    # MAO from the side, walking to the right; the head runs off the top.
-    d.polygon([(560, -40), (300, 10), (90, 120), (40, 210), (170, 190), (90, 290), (260, 250),
-               (380, 330), (470, 300), (560, 160)], fill=dark)
-    d.ellipse((520, -150, 720, 60), fill=A_COL)
-    d.polygon([(700, -10), (735, 30), (705, 45)], fill=A_COL)
-    d.polygon([(500, 90), (690, 100), (740, 430), (720, H), (440, H), (450, 420)], fill=A_COL)
-    d.line([(540, 150), (470, 330), (430, 470)], fill=darker(A_COL, 0.85), width=62, joint="curve")
-    d.ellipse((395, 440, 465, 510), fill=darker(A_COL, 0.85))
-    d.line([(660, 160), (720, 330), (790, 440)], fill=A_COL, width=62, joint="curve")
-    d.ellipse((755, 410, 825, 480), fill=A_COL)
-    foliage(im, [(40, 380, 260, 70), (130, 520, 300, 35), (40, 640, 280, -20), (210, 690, 240, 60),
-                 (1180, 560, 280, -40), (1250, 420, 260, 80), (1100, 690, 260, 10)])
-    arrow(im, (440, 640), (820, 640))
-    text(im, (630, 600), "歩く", 30, fill=ORANGE, anchor="mm", stroke=4)
-    arrow(im, (860, 120), (1060, 120))
-    text(im, (960, 160), "カメラも並んで右へ", 26, fill=ORANGE, anchor="mm", stroke=4)
-    name_tag(im, "MAO", (800, 210))
-    note(im, "寄り・横から追う")
+    # the desk by the window, the tablet on it
+    d.rectangle((70, 470, 470, 486), fill=(120, 86, 64))
+    for x in (90, 440):
+        d.rectangle((x, 486, x + 14, 640), fill=(80, 58, 44))
+    d.rounded_rectangle((300, 452, 380, 470), 4, fill=(20, 22, 26))
+    person(im, 640, 660, 380, A_COL, "MAO")
+    # the camera: low at her feet, out to her left rear, round to her right side
+    pts = [(640 + 310 * math.cos(math.radians(a)), 445 + 240 * math.sin(math.radians(a))) for a in range(205, 346, 4)]
+    d.line(pts, fill=ORANGE, width=7, joint="curve")
+    arrow(im, pts[-3], pts[-1])
+    text(im, (pts[0][0] - 10, pts[0][1] + 40), "足もとから", 26, fill=ORANGE, anchor="mm", stroke=4)
+    text(im, (pts[-1][0] + 20, pts[-1][1] + 40), "右横へ", 26, fill=ORANGE, anchor="mm", stroke=4)
+    foliage(im, [(1180, 560, 280, -40), (1250, 420, 260, 80)])
+    d.rectangle((0, 0, W, 88), fill=(0, 0, 0))
+    d.rectangle((0, H - 88, W, H), fill=(0, 0, 0))
+    note(im, "長回し：足もと → 左後ろへ引く → 右横へ回る", (W - 20, 104))
     return im
 
 
 def c02():
-    im = new((40, 44, 70))
-    night_room_blur(im)
+    im = new(NIGHT["wall"])
+    room(im, window=False)
     d = ImageDraw.Draw(im)
-    d.polygon([(0, 420), (W, 380), (W, H), (0, H)], fill=(78, 58, 50))
-    d.line((0, 420, W, 380), fill=(110, 84, 70), width=5)
-    tab = [(330, 470), (850, 440), (900, 610), (300, 650)]
-    d.polygon(tab, fill=(12, 14, 18), outline=(130, 136, 144), width=5)
-    scr = [(352, 482), (828, 455), (870, 598), (326, 634)]
-    d.polygon(scr, fill=(22, 30, 40))
+    # her right shoulder and arm at the left edge; the tablet raised and turned up
+    d.ellipse((-220, 80, 330, 900), fill=darker(A_COL, 0.55))
+    layer = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+    box = (430, 170, 1010, 510)
+    tablet_home(layer, box)
+    im.alpha_composite(layer.rotate(-8, resample=Image.BICUBIC, center=((box[0] + box[2]) / 2, (box[1] + box[3]) / 2)))
+    tx, ty = 512, 422
+    d.line((330, 640, tx - 6, ty + 18), fill=A_COL, width=46)
+
     def ripple(o):
         for k in range(3):
-            r = 40 + k * 42
-            o.ellipse((610 - r, 548 - r * 0.45, 610 + r, 548 + r * 0.45), outline=(140, 235, 245, 200 - k * 55), width=5)
+            r = 26 + k * 22
+            o.ellipse((tx - r, ty - r, tx + r, ty + r), outline=(150, 235, 245, 210 - k * 55), width=5)
     overlay(im, ripple)
-    d.polygon([(760, 0), (1000, 0), (700, 470), (640, 430)], fill=darker(A_COL, 0.8))
-    d.rounded_rectangle((600, 400, 720, 500), 40, fill=A_COL)
-    d.line((640, 470, 612, 545), fill=A_COL, width=30)
-    d.ellipse((597, 530, 627, 560), fill=A_COL)
-    foliage(im, [(1170, 300, 280, -50), (1240, 470, 260, 60), (1120, 640, 300, 20)])
-    arrow(im, (520, 300), (575, 470))
-    text(im, (500, 270), "触れる", 30, fill=ORANGE, anchor="mm", stroke=4)
-    note(im, "手元の大写し")
-    return im
-
-
-def c03():
-    im = new(NIGHT["wall"])
-    room(im, screen=guide("screen/controls.webp"), glow=True)
-    person(im, 250, 1120, 760, A_COL)
-    foliage(im, [(1200, 560, 280, -40), (1260, 420, 240, 70)])
-    sfx(im, (980, 470), "ポン", 56)
-    arrow(im, (640, 690), (640, 450))
-    text(im, (700, 560), "手元から上へ", 26, fill=ORANGE, anchor="lm", stroke=4)
-    note(im, "肩越しに、点いたスクリーン")
+    d.rectangle((0, 0, W, 88), fill=(0, 0, 0))
+    d.rectangle((0, H - 88, W, H), fill=(0, 0, 0))
+    thing_label(im, 760, 300, "KawaPlayer タブレット", "手もとで、動画も写真も操作できる")
+    note(im, "右横から・押したあと画面へ寄る", (W - 20, 580))
     return im
 
 
@@ -710,7 +724,7 @@ def c05():
     capsule(im, btn[0] - 130, btn[1] - 64)
     bubble(im, 380, 250, "コピー！", 36, tail=(btn[0] - 70, btn[1] - 10))
     text(im, (165, 330), "ロゴから魚が泳ぎ出る", 24, fill=ORANGE, anchor="mm", stroke=4)
-    heading(im, "01", "VHub のプレイリスト", "VHub で作ったプレイリストを、URL ひとつで", "Your VHub playlist, from a single URL")
+    heading(im, "01", "VHub のプレイリスト", "VHub で作ったプレイリストを、URL ひとつで", "Play a whole VHub playlist from a single URL")
     note(im, "2D の空間")
     return im
 
@@ -754,7 +768,7 @@ def c07():
     d.rounded_rectangle((fx + 30, fy + 30, fx + 170, fy + 150), 50, fill=A_COL)
     d.line((fx + 60, fy + 60, fx + 6, fy + 6), fill=A_COL, width=32)
     d.ellipse((fx - 10, fy - 10, fx + 20, fy + 20), fill=A_COL)
-    action(im, "URL の欄をタップ", (fx, fy))
+    action(im, "URL のボタンをタップ", (fx, fy))
     note(im, "MAO の指でタップ", (W - 20, 660))
     return im
 
@@ -779,7 +793,7 @@ def c08():
             rr = r - k * 26
             o.ellipse((cx - rr, cy - rr, cx + rr, cy + rr), outline=(150, 235, 245, 220 - k * 60), width=8 - k * 2)
     overlay(im, rings)
-    telop(im, "曲の一覧が、そのまま並ぶ", en="Every song, lined up")
+    telop(im, "URL ひとつで、プレイリストを追加", en="One URL adds the whole playlist")
     note(im, "波紋が広がり、スクリーンの一覧へ")
     return im
 
@@ -867,7 +881,7 @@ def c10():
     say(im, hb, "見て見て！", "RIRIKA")
     person(im, 120, 1300, 1100, A_COL)
     text(im, (760, 690), "縦の写真を、横持ちのまま", 24, fill=ORANGE, anchor="mm", stroke=4)
-    heading(im, "02", "タブレット", "手元で見せて、みんなのスクリーンにも", "Show it in your hands, then on the big screen")
+    heading(im, "02", "タブレット", "手元で見せて、みんなのスクリーンにも", "Show it in your hands, then on everyone's screen")
     note(im, "RIRIKA に寄る")
     return im
 
@@ -907,7 +921,7 @@ def c12():
     d.arc((880, 120, 1120, 360), 250, 30, fill=ORANGE, width=8)
     arrow(im, (1100, 320), (1080, 352))
     text(im, (1000, 400), "縦に回す", 28, fill=ORANGE, anchor="mm", stroke=4)
-    telop(im, "縦に持てば、画面も縦に", en="Turn it upright, the screen turns too")
+    telop(im, "横向きでも縦向きでも、画面がついてくる", en="Sideways or upright, the screen turns with it")
     note(im, "RIRIKA の肩越し・はずかしそうに")
     return im
 
@@ -916,21 +930,23 @@ def c13():
     im = new(NIGHT["wall"])
     room(im, glow=True)
     fit_into(im, sample_photo_tall(), SCREEN)
-    ha = person(im, 1080, 690, 400, A_COL, "MAO", arm="wave")
-    say(im, ha, "おおー！", "MAO", side="left")
+    ha = person(im, 1000, 690, 400, A_COL, "MAO", arm="wave")
     d = ImageDraw.Draw(im)
-    panel = (24, 76, 330, 560)
-    d.rounded_rectangle(panel, 14, fill=(16, 18, 22), outline=B_COL, width=4)
-    scr = tablet_frame(im, (54, 120, 300, 540), radius=30, portrait=True)
+    for k in range(9):
+        a = math.radians(-150 + k * 15)
+        d.line((ha[0] + 80 * math.cos(a), ha[1] - 30 + 80 * math.sin(a), ha[0] + 130 * math.cos(a), ha[1] - 30 + 130 * math.sin(a)),
+               fill=WHITE, width=5)
+    say(im, ha, "おおー！", "MAO", side="left")
+    # RIRIKA from behind at the lower left, the tablet in her left hand
+    d.ellipse((60, 380, 380, 760), fill=darker(B_COL, 0.6))
+    d.ellipse((20, 470, 110, 760), fill=darker(B_COL, 0.6))
+    d.ellipse((330, 470, 420, 760), fill=darker(B_COL, 0.6))
+    scr = tablet_frame(im, (400, 440, 560, 700), radius=20, portrait=True)
     place(im, sample_photo_tall(), scr)
-    sb = (scr[0] + 10, scr[3] - 50, scr[2] - 10, scr[3] - 12)
-    d.rounded_rectangle(sb, 12, fill=(30, 60, 80), outline=(110, 200, 240), width=3)
-    d.text(((sb[0] + sb[2]) / 2, (sb[1] + sb[3]) / 2), "KawaPlayer へ", font=font(20), fill=WHITE, anchor="mm")
-    d.rounded_rectangle((sb[0] - 6, sb[1] - 6, sb[2] + 6, sb[3] + 6), 14, outline=ORANGE, width=5)
-    text(im, (44, 86), "RIRIKA のタブレット", 22, fill=B_COL)
-    arrow(im, (330, 300), (400, 280))
-    action(im, "スクリーンに送る", ((sb[0] + sb[2]) / 2, (sb[1] + sb[3]) / 2))
-    telop(im, "手元の写真を、みんなのスクリーンへ", en="Share a picture on the big screen")
+    action(im, "スクリーンに送る", ((scr[0] + scr[2]) / 2, scr[1] + 20))
+    arrow(im, (560, 470), (640, 420))
+    telop(im, "手元の写真を、みんなのスクリーンへ", en="From your hands to everyone's screen")
+    note(im, "1 本で撮る：背中越しのタップ → 引いてスクリーンへ")
     return im
 
 
@@ -1059,7 +1075,7 @@ def c16():
     d.arc((cx + 90, 140, cx + 150, 200), 300, 60, fill=ORANGE, width=5)
     text(im, (cx + 170, 170), "頭をゆらゆら", 24, fill=ORANGE, anchor="lm", stroke=4)
     text(im, (480, 130), "じゅうたん", 24, fill=(235, 205, 195), anchor="mm")
-    heading(im, "03", "自動再生", "入ったときに流す動画を、決めておける", "Choose what plays when you arrive")
+    heading(im, "03", "自動再生", "インスタンスに入ったときに流す動画を、決めておける", "Choose the video that plays when people join")
     note(im, "タブレットから少し引く・2 人は寝そべり", (700, 18))
     return im
 
@@ -1096,7 +1112,7 @@ def c18():
     d.rounded_rectangle((scr[0] + (436 - 420 + 18 * st) * k - 6, y0 - 6, scr[0] + (436 - 420 + 520 * st) * k + 6, y1 + 6),
                         10, outline=ORANGE, width=6)
     action(im, "流したい動画の URL を入れる", (scr[0] + (436 - 420 + 90 * st) * k, (y0 + y1) / 2 + 30), rise=-110)
-    telop(im, "入ったときに流す動画を、決めておく", en="決められるのは、インスタンスを作った人")
+    telop(im, "インスタンスに入ったときに流す動画を、決めておく", en="決められるのは、インスタンスを作った人")
     note(im, "タブレットに寄る", (W - 20, 660))
     return im
 
@@ -1158,7 +1174,6 @@ def c19():
     im = new(NIGHT["wall"])
     room(im, screen=sample_video(), glow=True)
     specks(im, two_of_them(x=600, base=640, h=470), 0.42)
-    telop(im, "MAO が作った、新しいインスタンスへ", en="Into a new instance MAO opened")
     note(im, "2 人が青い粒子になって散る")
     return im
 
@@ -1168,9 +1183,6 @@ def c20():
     room(im, mode=DAY, screen=sample_video(time="00:03"), glow=True)
     sofa(im, DAY)
     specks(im, two_of_them(), 0.45, gather=True, seed=11)
-    d = ImageDraw.Draw(im)
-    d.rounded_rectangle((140, 30, 380, 110), 16, fill=(10, 14, 20))
-    d.text((260, 70), "朝", font=font(46), fill=WHITE, anchor="mm")
     note(im, "朝の部屋・粒子が集まって 2 人に")
     return im
 
@@ -1182,19 +1194,22 @@ def c21():
     im.alpha_composite(two_of_them(arm_b="both"))
     say(im, (960, 690 - 370 + 370 * 0.115 * 1.1), "もう流れてる！", "RIRIKA", side="left")
     sfx(im, (640, 470), "♪", 64, col=WHITE)
-    telop(im, "入ったとたん、決めた動画が流れる", en="It's already playing when you arrive")
+    telop(im, "入ったとたん、決めた動画が流れる", en="Step in, and it's already playing")
     return im
 
 
 def c22():
     im = new(NIGHT["wall"])
     room(im, screen=sample_video(), glow=True)
-    person(im, 540, 800, 470, A_COL, "MAO")
-    person(im, 750, 800, 470, B_COL, "RIRIKA", twin=True)
+    hb = person(im, 540, 800, 440, B_COL, "RIRIKA", twin=True, arm="wave")
+    ha = person(im, 740, 800, 470, A_COL, "MAO", arm="wave")
     sofa(im)
-    zoom(im, (200, 60, 1080, 560), inward=False)
-    telop(im, "URL ひとつで、みんなの上映会。（仮）", 50, y=H - 90)
-    note(im, "ゆっくり引く")
+    for (cx, cy), col in ((hb, (255, 186, 214)), (ha, (150, 236, 236))):
+        for k in range(7):
+            a = math.radians(200 + k * 24)
+            sparkle(im, cx + 100 * math.cos(a), cy - 20 + 100 * math.sin(a), 12 + (k % 3) * 6, col)
+    telop(im, "URL ひとつで、みんなの上映会。", 50, y=H - 90, en="One URL. Movie night for everyone.")
+    note(im, "腰から振り向く → 2 人を中心にアイリスで閉じる")
     return im
 
 
@@ -1215,9 +1230,14 @@ def c23():
 def c24():
     im = new((0, 0, 0))
     d = ImageDraw.Draw(im)
-    rows = (("アバター", "MAO・RIRIKA・ゲスト（作者の指定の表記）"), ("BGM", "（曲名・作者）"))
+    rows = (("アバター", "（作者の指定の表記）"), ("ワールド・小物", "（購入した素材の名前と作者）"),
+            ("シェーダー・フォント", "（名前と作者）"), ("BGM・効果音", "この動画のために作ったもの"),
+            ("", "KawaPlayer は YamaPlayer（koorimizuw）を元にフォーク開発しています"))
     for k, (role, who) in enumerate(rows):
-        y = 320 + k * 70
+        y = 220 + k * 70 + (30 if not role else 0)
+        if not role:
+            d.text((640, y), who, font=font(30), fill=WHITE, anchor="mm")
+            continue
         d.text((600, y), role, font=font(30), fill=(150, 156, 162), anchor="rm")
         d.text((640, y), who, font=font(30), fill=WHITE, anchor="lm")
     note(im, "暗転してから")
