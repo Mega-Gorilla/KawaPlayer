@@ -207,14 +207,17 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
       }
     }
 
-    // The clear button needs no equivalent: nothing on it claims a layout
-    // size, so its own layout group already sizes it from its contents.
+    // The label's width at its scale: the screen draws it at fontSize 32 and
+    // scale 0.5, as the card's other text, so its letters are as sharp
+    // (issue #122); the tablet's is at scale 1. The clear button needs no
+    // equivalent: nothing on it claims a layout size, so its own layout group,
+    // which counts its children's scale, sizes it from its contents.
     private void ResizeEnterUrlButton()
     {
       if (_enterUrlButtonLayout == null) return;
       if (_enterUrlButtonLabel == null) return;
 
-      float width = _enterUrlButtonChrome + _enterUrlButtonLabel.preferredWidth;
+      float width = _enterUrlButtonChrome + _enterUrlButtonLabel.preferredWidth * _enterUrlButtonLabel.transform.localScale.x;
       _enterUrlButtonLayout.minWidth = width;
       _enterUrlButtonLayout.preferredWidth = width;
     }
