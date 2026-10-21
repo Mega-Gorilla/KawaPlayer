@@ -37,6 +37,15 @@ namespace Yamadev.YamaStream.Modules.SlideShower
     private bool _slideModeShown;
     private int _shownPage = int.MinValue;
     private int _shownPageCount = int.MinValue;
+    // A page turn waiting for the end of the frame (see TakeSeek), and the
+    // page a seek chose.
+    private const int TurnNone = 0;
+    private const int TurnToPage = 1;
+    private const int TurnPrevious = 2;
+    private const int TurnNext = 3;
+    private int _pendingTurn = TurnNone;
+    private int _pendingTurnPage;
+    private bool _askingTurn;
 
     private void Start()
     {
@@ -94,10 +103,11 @@ namespace Yamadev.YamaStream.Modules.SlideShower
       int pageCount = _slideShower.SlidePageCount;
       bool pageChanged = page != _shownPage || pageCount != _shownPageCount;
       // The slider can be off the page while the page is not: a drag let go of
-      // and then cancelled, as a permission does before this UI is asked, or a
-      // page SetSlidePage would not move to. It goes back to the page.
+      // and then cancelled, as a permission does, or a page SetSlidePage would
+      // not move to. It goes back to the page, but not while the drag is still
+      // waiting to be turned to.
       float sliderPage = Mathf.Clamp(page, _progressSlider.minValue, _progressSlider.maxValue);
-      if (!pageChanged && _progressSlider.value == sliderPage) return;
+      if (!pageChanged && (_progressSlider.value == sliderPage || _pendingTurn != TurnNone)) return;
 
       // Not while the slider is being dragged: that is the page being chosen.
       if ((bool)_uiController.GetProgramVariable("_progressDrag")) return;
@@ -194,29 +204,43 @@ namespace Yamadev.YamaStream.Modules.SlideShower
 
     public void BeforeUserSetTime()
     {
-      if (!Utilities.IsValid(_slideShower) || !_slideShower.SlideMode || !Utilities.IsValid(_uiController)) return;
-      _uiController.CancelCurrentAction();
-
-      _slideShower.TakeOwnership();
-      _slideShower.SetSlidePage((int)_progressSlider.value);
+      if (TakeSeek(TurnToPage)) _pendingTurnPage = (int)_progressSlider.value;
     }
 
-    public void BeforeUserBackward()
-    {
-      if (!Utilities.IsValid(_slideShower) || !_slideShower.SlideMode || !Utilities.IsValid(_uiController)) return;
-      _uiController.CancelCurrentAction();
+    public void BeforeUserBackward() => TakeSeek(TurnPrevious);
+    public void BeforeUserForward() => TakeSeek(TurnNext);
 
-      _slideShower.TakeOwnership();
-      _slideShower.PreviousSlide();
+    // In slide mode a seek, back or forward turns the page instead, which
+    // moves everyone's video, so it must pass the same checks. Cancelling the
+    // seek here also keeps it from the listeners after this one, such as
+    // PermissionManagement, in an order Start decides (issue #283). So the
+    // turn waits for the end of the frame and asks every listener again, this
+    // one letting it pass; InvokeBeforeEvent cannot be called from inside
+    // itself.
+    private bool TakeSeek(int turn)
+    {
+      if (_askingTurn || !Utilities.IsValid(_slideShower) || !_slideShower.SlideMode || !Utilities.IsValid(_uiController)) return false;
+      _uiController.CancelCurrentAction();
+      _pendingTurn = turn;
+      SendCustomEventDelayedFrames(nameof(_TurnPage), 0, EventTiming.LateUpdate);
+      return true;
     }
 
-    public void BeforeUserForward()
+    public void _TurnPage()
     {
-      if (!Utilities.IsValid(_slideShower) || !_slideShower.SlideMode || !Utilities.IsValid(_uiController)) return;
-      _uiController.CancelCurrentAction();
+      int turn = _pendingTurn;
+      _pendingTurn = TurnNone;
+      if (turn == TurnNone || !Utilities.IsValid(_slideShower) || !_slideShower.SlideMode) return;
+
+      _askingTurn = true;
+      bool allowed = _uiController.InvokeBeforeEvent(turn == TurnToPage ? "BeforeUserSetTime" : turn == TurnPrevious ? "BeforeUserBackward" : "BeforeUserForward");
+      _askingTurn = false;
+      if (!allowed) return;
 
       _slideShower.TakeOwnership();
-      _slideShower.NextSlide();
+      if (turn == TurnToPage) _slideShower.SetSlidePage(_pendingTurnPage);
+      else if (turn == TurnPrevious) _slideShower.PreviousSlide();
+      else _slideShower.NextSlide();
     }
 
     public void AfterLanguageChanged() => UpdateTranslation();

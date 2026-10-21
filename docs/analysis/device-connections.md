@@ -215,6 +215,8 @@ E3 の `SendCustomVideoEvent(名前)` は、リスナー全員に `SendCustomEve
 
 送るのは `UIController`（`UIController.cs`・`.Localization.cs`・`.Playlist.cs`）のほか、`GlobalReloadButton`・`PlaylistLoaderUI`・`PitchShifterUI`・`SlideShowerUI` で、どれも自分の UIController の `InvokeBeforeEvent` を使う。`BeforeUserChangeSyncedSetting` は、モジュールの設定のうち全員に効くもの（ピッチシフターの音程、スライドショーのスライドモードと秒数）を変える前に送る（issue #211）。イベント名の一覧はコードのどこにもなく、送る側と受ける側が同じ文字列を書いている。
 
+止めた受け手で確認が終わるので、受け手の順（登録した順、つまり `Start` の順）で、ほかの受け手に届くかが変わる。`SlideShowerUI` は、スライドモードのあいだ、シーク・前・次（`BeforeUserSetTime`・`BeforeUserBackward`・`BeforeUserForward`）を受けて止め、ページ送りに替える。そのため、そのフレームの終わり（`LateUpdate`）に同じイベントを全員にもう一度送り、誰も止めなかったときだけページを送る。このとき自分は通す。こうすると、権限がこの UI より後に登録されていても、ページ送りに届く（issue #283）。`InvokeBeforeEvent` の中から `InvokeBeforeEvent` を呼べないので、フレームの終わりに回している。
+
 ### 4.5 UI の知らせ（E6）と、UI どうしの調整
 
 同じプレイヤーの UI は、言語を共有する（#159）。ある UI で言語を選ぶと、`Controller.SetUILanguage` が `_OnUILanguageChanged` を本体のリスナー全員に配り（E3）、受けた各 `UIController` が訳を直してから、自分のリスナーに `AfterLanguageChanged` を送る（E6）。UI どうしは直接つながらず、`Controller` を通して調整する。
