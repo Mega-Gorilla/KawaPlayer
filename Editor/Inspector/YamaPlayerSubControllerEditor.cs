@@ -33,6 +33,8 @@ namespace Yamadev.YamaStream.Editor
     private TabletPickup _tabletPickup;
     private SerializedObject _tabletPickupSerializedObject;
     private SerializedProperty _idleReturnSeconds;
+    private const float DefaultIdleReturnMinutes = 5f;
+    private const float MinIdleReturnMinutes = 1f;
     private TabletReturnButton _tabletReturnButton;
     private SerializedObject _visitorRecorderSerializedObject;
     private SerializedProperty _visitorPhotosEnabled;
@@ -256,12 +258,29 @@ namespace Yamadev.YamaStream.Editor
     }
 
     // The tablet's two ways back to where it was placed (issue #108, D1).
+    // Going back when left alone is a toggle and a time in minutes, drawn
+    // over the one value TabletPickup keeps, in seconds, where 0 is off
+    // (issue #206). A world that set seconds before shows them in minutes,
+    // unchanged until edited.
     private void DrawTabletReturnSettings()
     {
       if (_idleReturnSeconds != null)
       {
         _tabletPickupSerializedObject.Update();
-        EditorGUILayout.PropertyField(_idleReturnSeconds, EditorLocalization.GetLayout("settings.idleReturn.label", "settings.idleReturn.tooltip"));
+        float seconds = _idleReturnSeconds.floatValue;
+        bool on = EditorGUILayout.Toggle(EditorLocalization.GetLayout("settings.idleReturn.label", "settings.idleReturn.tooltip"), seconds > 0f);
+        if (!on) seconds = 0f;
+        else
+        {
+          if (seconds <= 0f) seconds = DefaultIdleReturnMinutes * 60f;
+          using (new EditorGUI.IndentLevelScope())
+          using (var check = new EditorGUI.ChangeCheckScope())
+          {
+            float minutes = EditorGUILayout.FloatField(EditorLocalization.GetLayout("settings.idleReturnMinutes.label", "settings.idleReturnMinutes.tooltip"), seconds / 60f);
+            if (check.changed) seconds = Mathf.Max(MinIdleReturnMinutes, minutes) * 60f;
+          }
+        }
+        if (seconds != _idleReturnSeconds.floatValue) _idleReturnSeconds.floatValue = seconds;
       }
 
       if (_tabletReturnButton == null) return;
