@@ -137,7 +137,9 @@ VHub のデータには、プレイリストの名前を検索用に正規化し
 | --- | --- |
 | `PlaylistLoader` | URL 欄の `VRCUrl` で resolve を読み、曲の番号を `_redirectPool[index]` で `VRCUrl` に変えて、曲を足す |
 | URL の見分け | `PlaylistUrlUtils` が `/r/{pool}/{id}` の形かを見る。`/playlists/{id}`（Web のページ）には「VRChat用URL」を使うよう案内する |
-| 同じプレイリストの見分け | 出どころのキーを `default/{id}` でそろえる |
+| 同じプレイリストの見分け | 取得に使った URL から重複のキーを作る（`PlaylistUrlUtils.GetSourceKey`）。`/r/{pool}/{id}` は `{pool}/{id}` に、それ以外の URL はパスのままにする |
+| プレイリストの枠 | `DynamicPlaylist` が同期するのは、取得に使った URL（`SourceUrl`）と名前と曲。どのプレイリストかの識別は、別に持たない。満杯のときの確認と削除の確認は、`SourceUrl` の文字列で「確認したときと同じ中身か」を比べる |
+| 更新 | 更新ボタンは、枠の `SourceUrl` を読み直す。`PlaylistLoaderUI` は、`/r/default/{id}` の形でない URL を更新に受け付けない |
 | 権限 | 読み込む前に `BeforeUserLoadPlaylist` を送る（権限管理が止められる） |
 | 焼き込み | `_redirectPool` に `/vrcurl/default/{i}` を 100,000 個。Editor の **Generate Pool** で、`_validate` で確かめてから作る |
 
