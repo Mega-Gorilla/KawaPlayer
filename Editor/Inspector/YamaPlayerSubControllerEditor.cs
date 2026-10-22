@@ -173,7 +173,8 @@ namespace Yamadev.YamaStream.Editor
 
       using (new EditorGUILayout.HorizontalScope())
       {
-        AppearanceSettingsEditor.DrawColorSetPopup(_appearanceSettings, _defaultColorSet, EditorLocalization.Get("appearance.defaultColorSet"));
+        AppearanceSettingsEditor.DrawColorSetPopup(_appearanceSettings, _defaultColorSet, EditorLocalization.Get("appearance.defaultColorSet"),
+          EditorLocalization.Get("appearance.noColorSetsToChoose"));
 
         if (GUILayout.Button(EditorLocalization.Get("button.edit"), GUILayout.Width(60)))
         {

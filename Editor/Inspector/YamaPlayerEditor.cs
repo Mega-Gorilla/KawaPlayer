@@ -157,7 +157,7 @@ namespace Yamadev.YamaStream.Editor
 
       if (Application.isPlaying)
       {
-        EditorGUILayout.HelpBox("KawaPlayer is not available in the play mode.", MessageType.Info);
+        EditorGUILayout.HelpBox(EditorLocalization.Get("msg.playModeNotAvailable"), MessageType.Info);
         return;
       }
 
@@ -189,7 +189,8 @@ namespace Yamadev.YamaStream.Editor
 
       using (new EditorGUILayout.HorizontalScope())
       {
-        AppearanceSettingsEditor.DrawColorSetPopup(_appearanceSettings, _defaultColorSet, EditorLocalization.Get("appearance.defaultColorSet"));
+        AppearanceSettingsEditor.DrawColorSetPopup(_appearanceSettings, _defaultColorSet, EditorLocalization.Get("appearance.defaultColorSet"),
+          EditorLocalization.Get("appearance.noColorSetsToChoose"));
 
         if (GUILayout.Button(EditorLocalization.Get("button.edit"), GUILayout.Width(60)))
         {
@@ -282,7 +283,8 @@ namespace Yamadev.YamaStream.Editor
       using (new EditorGUILayout.HorizontalScope())
       {
         EditorGUILayout.PropertyField(_forwardInterval, EditorLocalization.GetLayout("settings.playlist.interval", "settings.playlist.interval.tooltip"));
-        EditorGUILayout.LabelField("秒", GUILayout.Width(20));
+        var unit = new GUIContent(EditorLocalization.Get("settings.playlist.interval.unit"));
+        EditorGUILayout.LabelField(unit, GUILayout.Width(EditorStyles.label.CalcSize(unit).x));
       }
       if (GUILayout.Button(EditorLocalization.Get("settings.playlist.edit")))
       {
@@ -421,7 +423,7 @@ namespace Yamadev.YamaStream.Editor
         EditorUtility.DisplayDialog(
           EditorLocalization.Get("update.noNewVersion"),
           EditorLocalization.Get("update.youUseNewest"),
-          "OK");
+          EditorLocalization.Get("button.ok"));
       }
     }
 #endif

@@ -44,13 +44,15 @@ namespace Yamadev.YamaStream.Editor
     }
 
     // The default colour set, from every set the UI can take: the palette's,
-    // then the ones added here. Also drawn by the player inspectors.
-    public static void DrawColorSetPopup(AppearanceSettings settings, SerializedProperty defaultColorSet, string label)
+    // then the ones added here. Also drawn by the player inspectors, which
+    // have no Add button, so each caller says where a set can come from when
+    // there is none (issue #163).
+    public static void DrawColorSetPopup(AppearanceSettings settings, SerializedProperty defaultColorSet, string label, string noColorSetsMessage)
     {
       var names = settings.ColorSetNames;
       if (names.Length == 0)
       {
-        EditorGUILayout.LabelField(EditorLocalization.Get("appearance.noColorSets"));
+        EditorGUILayout.LabelField(noColorSetsMessage, EditorStyles.wordWrappedLabel);
         return;
       }
       // A name no set has shows the first set, which is what the build falls back to.
@@ -74,7 +76,8 @@ namespace Yamadev.YamaStream.Editor
     private void DrawDefaultColorSetSection()
     {
       EditorGUILayout.LabelField(EditorLocalization.Get("appearance.defaultColorSet"), EditorStyles.boldLabel);
-      DrawColorSetPopup((AppearanceSettings)target, _defaultColorSet, EditorLocalization.Get("appearance.defaultColorSet.label"));
+      DrawColorSetPopup((AppearanceSettings)target, _defaultColorSet, EditorLocalization.Get("appearance.defaultColorSet.label"),
+        EditorLocalization.Get("appearance.noColorSets"));
     }
 
     private void DrawColorSetListSection()
