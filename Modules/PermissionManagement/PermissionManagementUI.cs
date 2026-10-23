@@ -211,12 +211,20 @@ namespace Yamadev.YamaStream.Modules.PermissionManagement
       if (Utilities.IsValid(_toggleLabelText)) _toggleLabelText.text = _uiController.GetTranslation("module.permissionManagement.toggleLabelText");
       if (Utilities.IsValid(_descriptionText))
       {
-        _descriptionText.text = $"<color=#64B5F6>{_uiController.GetTranslation("module.permissionManagement.owner")}</color>\t\t\t{_uiController.GetTranslation("module.permissionManagement.ownerDesc")}\r\n" +
-          $"<color=#BA68C8>{_uiController.GetTranslation("module.permissionManagement.admin")}</color>\t\t\t{_uiController.GetTranslation("module.permissionManagement.adminDesc")}\r\n" +
-          $"<color=#81C784>{_uiController.GetTranslation("module.permissionManagement.editor")}</color>\t\t\t{_uiController.GetTranslation("module.permissionManagement.editorDesc")}\r\n" +
-          $"<color=#FFB74D>{_uiController.GetTranslation("module.permissionManagement.viewer")}</color>\t\t\t{_uiController.GetTranslation("module.permissionManagement.viewerDesc")}";
+        _descriptionText.text = $"<color=#{ToHex(_ownerColor)}>{_uiController.GetTranslation("module.permissionManagement.owner")}</color>\t\t\t{_uiController.GetTranslation("module.permissionManagement.ownerDesc")}\r\n" +
+          $"<color=#{ToHex(_adminColor)}>{_uiController.GetTranslation("module.permissionManagement.admin")}</color>\t\t\t{_uiController.GetTranslation("module.permissionManagement.adminDesc")}\r\n" +
+          $"<color=#{ToHex(_editorColor)}>{_uiController.GetTranslation("module.permissionManagement.editor")}</color>\t\t\t{_uiController.GetTranslation("module.permissionManagement.editorDesc")}\r\n" +
+          $"<color=#{ToHex(_viewerColor)}>{_uiController.GetTranslation("module.permissionManagement.viewer")}</color>\t\t\t{_uiController.GetTranslation("module.permissionManagement.viewerDesc")}";
       }
     }
+
+    // A role's name in the description takes the colour its mark has, so a
+    // colour changed in the inspector reaches both (issue #163). Udon has no
+    // ColorUtility, so the hex is put together here.
+    private string ToHex(Color color) =>
+      Mathf.RoundToInt(Mathf.Clamp01(color.r) * 255f).ToString("X2") +
+      Mathf.RoundToInt(Mathf.Clamp01(color.g) * 255f).ToString("X2") +
+      Mathf.RoundToInt(Mathf.Clamp01(color.b) * 255f).ToString("X2");
 
     public void AfterLanguageChanged() => UpdateTranslation();
     public void AfterPermissionChanged() => GeneratePermissionView();

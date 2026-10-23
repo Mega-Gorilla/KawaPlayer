@@ -57,6 +57,11 @@ namespace Yamadev.YamaStream.UI
     private int _pendingDeletePlaylistIndex = -1;
     private DynamicPlaylist _pendingDeleteSlot;
     private string _pendingDeleteSourceUrl = string.Empty;
+    // The colour a track's title has while it is not playing: the one the
+    // build gave the row (its role's colour, with the prefab's alpha), read
+    // off the first title before any of them is recoloured (issue #163).
+    private Color _trackTitleColor;
+    private bool _trackTitleColorRead;
 
     private bool IsQueuePage => Utilities.IsValid(_queueTabToggle) && _queueTabToggle.isOn;
     private bool IsHistoryPage => Utilities.IsValid(_historyTabToggle) && _historyTabToggle.isOn;
@@ -439,8 +444,13 @@ namespace Yamadev.YamaStream.UI
             var title = ti.GetComponent<Text>();
             if (Utilities.IsValid(title))
             {
+              if (!_trackTitleColorRead)
+              {
+                _trackTitleColor = title.color;
+                _trackTitleColorRead = true;
+              }
               title.text = string.IsNullOrEmpty(trackTitle) ? trackUrl.Get() : trackTitle;
-              title.color = isPlaying ? _primaryColor : Color.white;
+              title.color = isPlaying ? _primaryColor : _trackTitleColor;
             }
           }
           var u = info.Find("Url");

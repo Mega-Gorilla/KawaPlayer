@@ -21,13 +21,17 @@ namespace Yamadev.YamaStream.Editor
     private void ProcessAppearanceSetting(AppearanceSettings appearanceSetting)
     {
       if (appearanceSetting == null) return;
-      var uiController = appearanceSetting.GetComponent<UIController>();
-      if (uiController == null) return;
       var defaultColorSet = appearanceSetting.DefaultColorSet;
       if (defaultColorSet == null) return;
 
-      uiController.SetProgramVariable("_primaryColor", defaultColorSet.primaryColor);
-      uiController.SetProgramVariable("_secondaryColor", defaultColorSet.secondaryColor);
+      // A UI of the creator's own may have no UIController; its graphics still
+      // take their roles' colours, as "apply now" already gives them.
+      var uiController = appearanceSetting.GetComponent<UIController>();
+      if (uiController != null)
+      {
+        uiController.SetProgramVariable("_primaryColor", defaultColorSet.primaryColor);
+        uiController.SetProgramVariable("_secondaryColor", defaultColorSet.secondaryColor);
+      }
       ApplyColors(appearanceSetting, defaultColorSet, false);
     }
 
