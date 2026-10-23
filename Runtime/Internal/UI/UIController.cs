@@ -16,9 +16,8 @@ namespace Yamadev.YamaStream.UI
 
     [Header("Core")]
     [SerializeField] private Controller _controller;
-    // KawaPlayer's colour set (issue #161); the build sets these from the UI's AppearanceSettings.
+    // KawaPlayer's primary colour (issue #161); the build sets it from the UI's AppearanceSettings.
     [SerializeField, HideInInspector] private Color _primaryColor = new Color(0x4F / 255f, 0xC3 / 255f, 0xF7 / 255f, 1f);
-    [SerializeField, HideInInspector] private Color _secondaryColor = new Color(0xB3 / 255f, 0xE5 / 255f, 0xFC / 255f, 0.25f);
 
     [Header("Appearance - Idle Screen")]
     [SerializeField] private Image _idleScreenImage;

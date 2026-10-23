@@ -30,7 +30,6 @@ namespace Yamadev.YamaStream.Editor
       if (uiController != null)
       {
         uiController.SetProgramVariable("_primaryColor", defaultColorSet.primaryColor);
-        uiController.SetProgramVariable("_secondaryColor", defaultColorSet.secondaryColor);
       }
       ApplyColors(appearanceSetting, defaultColorSet, false);
     }
@@ -48,7 +47,6 @@ namespace Yamadev.YamaStream.Editor
       {
         var so = new SerializedObject(uiController);
         so.FindProperty("_primaryColor").colorValue = defaultColorSet.primaryColor;
-        so.FindProperty("_secondaryColor").colorValue = defaultColorSet.secondaryColor;
         so.ApplyModifiedProperties();
       }
       ApplyColors(appearanceSetting, defaultColorSet, true);

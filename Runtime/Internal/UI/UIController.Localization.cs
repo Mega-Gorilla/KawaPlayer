@@ -24,7 +24,7 @@ namespace Yamadev.YamaStream.UI
     [SerializeField, RegisterEvent(nameof(Toggle.onValueChanged), nameof(SetLanguageToTraditionalChinese))] private Toggle _languageTraditionalChineseToggle;
     [SerializeField, RegisterEvent(nameof(Toggle.onValueChanged), nameof(SetLanguageToKorean))] private Toggle _languageKoreanToggle;
     [SerializeField, RegisterEvent(nameof(Toggle.onValueChanged), nameof(SetLanguageToSpanish))] private Toggle _languageSpanishToggle;
-    [SerializeField, RegisterEvent(nameof(Toggle.onValueChanged), nameof(SetLanguageToUkranian))] private Toggle _languageUkranianToggle;
+    [SerializeField, RegisterEvent(nameof(Toggle.onValueChanged), nameof(SetLanguageToUkrainian))] private Toggle _languageUkrainianToggle;
     [SerializeField, RegisterEvent(nameof(Toggle.onValueChanged), nameof(SetLanguageToRussian))] private Toggle _languageRussianToggle;
     [SerializeField, RegisterEvent(nameof(Toggle.onValueChanged), nameof(SetLanguageToItalian))] private Toggle _languageItalianToggle;
 
@@ -34,7 +34,6 @@ namespace Yamadev.YamaStream.UI
     [SerializeField] private Text _loopLabel2;
     [SerializeField] private Text _shuffleLabel;
     [SerializeField] private Text _shuffleLabel2;
-    [SerializeField] private Text _reloadLabel; // 現在使用してない
     [SerializeField] private Text _settingsLabel;
     [SerializeField] private Text _versionLabel;
     [SerializeField] private Text _lockUiLabel;
@@ -53,7 +52,6 @@ namespace Yamadev.YamaStream.UI
     [Header("Localization - Playback Settings")]
     [SerializeField] private Text _videoPlayerTitleLabel;
     [SerializeField] private Text _videoPlayerDescLabel;
-    [SerializeField] private Text _avproVideoPlayerLabel; // 現在使用してない
     [SerializeField] private Text _imageViewerLabel;
     [SerializeField] private Text _playbackSpeedTitleLabel;
     [SerializeField] private Text _playbackSpeedDescLabel;
@@ -83,7 +81,6 @@ namespace Yamadev.YamaStream.UI
     [SerializeField] private Text _unlockUiMessageLabel;
 
     [Header("Localization - Modal Dialog")]
-    [SerializeField] private Text _modalAVProVideoPlayerLabel; // 現在使用してない
     [SerializeField] private Text _modalImageViewerLabel;
 
     #endregion
@@ -192,9 +189,9 @@ namespace Yamadev.YamaStream.UI
       if (!Utilities.IsValid(_languageSpanishToggle) || !_languageSpanishToggle.isOn) return;
       SetLanguage("es");
     }
-    public void SetLanguageToUkranian()
+    public void SetLanguageToUkrainian()
     {
-      if (!Utilities.IsValid(_languageUkranianToggle) || !_languageUkranianToggle.isOn) return;
+      if (!Utilities.IsValid(_languageUkrainianToggle) || !_languageUkrainianToggle.isOn) return;
       SetLanguage("uk");
     }
     public void SetLanguageToRussian()
@@ -280,7 +277,7 @@ namespace Yamadev.YamaStream.UI
       if (Utilities.IsValid(_languageTraditionalChineseToggle)) _languageTraditionalChineseToggle.SetIsOnWithoutNotify(_currentLanguage == "zh-HK");
       if (Utilities.IsValid(_languageKoreanToggle)) _languageKoreanToggle.SetIsOnWithoutNotify(_currentLanguage == "ko");
       if (Utilities.IsValid(_languageSpanishToggle)) _languageSpanishToggle.SetIsOnWithoutNotify(_currentLanguage == "es");
-      if (Utilities.IsValid(_languageUkranianToggle)) _languageUkranianToggle.SetIsOnWithoutNotify(_currentLanguage == "uk");
+      if (Utilities.IsValid(_languageUkrainianToggle)) _languageUkrainianToggle.SetIsOnWithoutNotify(_currentLanguage == "uk");
       if (Utilities.IsValid(_languageRussianToggle)) _languageRussianToggle.SetIsOnWithoutNotify(_currentLanguage == "ru");
       if (Utilities.IsValid(_languageItalianToggle)) _languageItalianToggle.SetIsOnWithoutNotify(_currentLanguage == "it");
     }
