@@ -67,7 +67,7 @@ VCC の **Manage Project** でワールドのプロジェクトを開き、パ�
 
 ![VCC の Confirm Project Changes。KawaPlayer が 1.2.1 から 1.3.3 に、その下の VRChat SDK - Worlds と Base が 3.8.2 から 3.10.5 に上がる行が並び、① で SDK の 2 行、② で Confirm に印がある](images/vcc/update-confirm-sdk.webp)
 
-SDK は、そのとき出ているいちばん新しい版まで上がります。SDK の版で変わったことは、VRChat の [SDK のリリースノート](https://creators.vrchat.com/releases) で確かめられます。
+SDK は、確認の画面に出た版に上がります（画像では 3.10.5）。SDK の版で変わったことは、VRChat の [SDK のリリースノート](https://creators.vrchat.com/releases) で確かめられます。
 
 Unity の中からも確かめられます。KawaPlayer のインスペクターの一番下の **バージョン** で **アップデート確認** を押すと、新しい版があるか調べ、あれば **アップデート** で更新できます（[KawaPlayer の設定](settings.md#バージョン)）。この機能は、VCC で入れたプロジェクトでだけ動きます。
 
