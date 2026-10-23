@@ -11,7 +11,7 @@
   * 3.10.5 で、VRCWorld に UdonBehaviour（WorldQualitySettings）が 1 つ増えたためです。シーンに記録されたネットワーク ID の部品の数と、合わなくなります。
   * **VRChat SDK > Utilities > Network ID Import and Export Utility** で、VRCWorld の記録を今の部品に合わせると直ります。ID は変えなくて大丈夫です。
   * KawaPlayer と一緒に SDK を上げた人が多そうなので、念のため書いておきます。
-* **自分の U# スクリプトから、ウクライナ語に切り替えるイベントを呼んでいる人は、下の「自分のスクリプトから KawaPlayer を呼んでいる人へ」を見てください。** 名前のつづりを直しました。（#296）
+* **自分の U# スクリプトから、ウクライナ語に切り替えるイベントを呼んでいる人と、KawaPlayer の本体の文言を借りている人は、下の「自分のスクリプトから KawaPlayer を呼んでいる人へ」を見てください。** イベントの名前のつづりを直し、使われていない文言のキーを消しました。（#296・#298）
 
 ## 変わったこと
 
@@ -43,12 +43,14 @@
 ## 中身の改善（見た目は変わりません）
 
 * **UI の、どこからも使われていなかった欄を 4 つ消しました。** 配色の副色と、ReSync・AVPro の文字を指していた欄です。色も文字も、これまでどおりです。（#296）
+* **どこからも使われていない文言のキーを 139 個消しました。** YamaPlayer の古いインスペクターの文言や、KawaPlayer にない機能（カラオケ・動画の検索など）の文言です。画面の文字は 9 言語とも変わらないことを、VRChat の中で前後を比べて確かめました。翻訳ファイルが 1,215 行やせました。（#298）
 
 ## 自分のスクリプトから KawaPlayer を呼んでいる人へ
 
 * **ウクライナ語に切り替えるイベントのつづりを直しました。** `SetLanguageToUkranian` は `SetLanguageToUkrainian` になりました。`SendCustomEvent` で呼んでいるときは、名前を書き換えてください。古い名前は残していないので、そのままだと何も起きません。（#296）
   * トグルの欄も、`_languageUkranianToggle` から `_languageUkrainianToggle` になりました。同梱のプレハブは直してあります。
   * 自作の UI や、シーンでこの欄に別のトグルを入れていたときは、その設定は外れます。`UIController` のインスペクターで、**Language Ukrainian Toggle** にトグルを選び直してください。
+* **本体の文言を借りていた人へ：** 自作の UI やモジュールで、KawaPlayer の本体の文言のキー（`msg.loading` など）を `GetTranslation` や `EditorLocalization.Get` で読んでいたら、消えていないか確かめてください。消えたキーは、実行時は空の文字、エディターではキーの名前のまま出ます。本体の文言は KawaPlayer の画面のためのものなので、自分の文言ファイル（モジュールの `Localization.Runtime.json` など）に移してください。（#298）
 
 ## 困ったら
 
@@ -78,7 +80,7 @@ A small update right after 1.3.2: the track list now follows your colour set, an
 
 **Read this before you update:**
 
-* If your own scripts switch the language to Ukrainian, the event's name has changed (see For your own scripts).
+* If your own scripts switch the language to Ukrainian, or read KawaPlayer's own translation keys, see For your own scripts.
 * Rebuild your world to get the track list's new title colour (see What's fixed). Without a rebuild, the world keeps working as on 1.3.2. No synced fields changed, so PC and Quest builds on 1.3.2 still play together.
 * **Updating the VRChat SDK to 3.10.5?** This is not a KawaPlayer change. A world with the SDK's sample **VRCWorld** may stop at `AssignSceneNetworkIDs` (`Failed to assign network IDs`) before upload. 3.10.5 adds an UdonBehaviour (WorldQualitySettings) to VRCWorld, so it no longer matches the network IDs recorded in the scene. Bring VRCWorld's record up to date in **VRChat SDK > Utilities > Network ID Import and Export Utility**; the IDs can stay the same.
 
@@ -98,9 +100,11 @@ A small update right after 1.3.2: the track list now follows your colour set, an
 **Under the hood:**
 
 * Four UIController fields that nothing read are gone. Colours and text look the same.
+* 139 translation keys that nothing read are gone: YamaPlayer's old inspector text and text for features KawaPlayer does not have. Every text looks the same in all nine languages, checked in VRChat before and after.
 
 **For your own scripts:**
 
 * `SetLanguageToUkranian` is now `SetLanguageToUkrainian`, with no old name kept, and the toggle's field `_languageUkranianToggle` is now `_languageUkrainianToggle`. The bundled prefabs are updated; on a UI of your own, or where a scene set that field, choose the toggle again in the UIController's inspector.
+* If a UI or module of your own read KawaPlayer's own translation keys (such as `msg.loading`), check they are still there: a removed key reads as an empty string at run time and as its own name in the editor. Keep your text in your own translation file.
 
 Anything odd? Tell us on our [Discord server](https://discord.gg/tkrHek6PvN).
