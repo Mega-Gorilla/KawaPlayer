@@ -11,7 +11,7 @@
 
 ## 要旨
 
-KawaPlayer の本体（`KawaPlayer.prefab`）の横には、Controller Bar・Playlist Panel・Sub Screen・タブレット・全員リロードボタンの 5 種類のデバイスを置ける。この文書は、デバイスが本体とどうつながり、どんな流れで命令や出来事をやりとりしているかを、コードの名前と図で記録する。つなぎ込みは 3 段に分かれる。エディターでは Sub Controller のインスペクターが参照を書き、ビルドではビルド処理がモジュールやボタンを配線し、実行時には各部品が `Start` で自分を登録する。実行時の接続口は `Controller` と `UIController` に集まり、型の決まった呼び出し、名前の文字列で送るイベント、欄に値を書いて呼ぶ差し込み口が混ざっている。部品が「どのプレイヤーに従うか」を見つける方法は 3 通りあり、タブレットにしかない設定が共通のインスペクターに入っている。最後に、接続口を整理するときの論点を 8 つ挙げる。
+KawaPlayer の本体（`KawaPlayer.prefab`）の横には、Controller Bar・Playlist Panel・Sub Screen・タブレット・全員リロードボタンの 5 種類のデバイスを置ける。この文書は、デバイスが本体とどうつながり、どんな流れで命令や出来事をやりとりしているかを、コードの名前と図で記録する。つなぎ込みは 3 段に分かれる。エディターでは Sub Controller のインスペクターと、デバイスを置くメニューが参照を書き、ビルドではビルド処理がモジュールやボタンを配線し、実行時には各部品が `Start` で自分を登録する。実行時の接続口は `Controller` と `UIController` に集まり、型の決まった呼び出し、名前の文字列で送るイベント、欄に値を書いて呼ぶ差し込み口が混ざっている。部品が「どのプレイヤーに従うか」を見つける方法は 3 通りあり、タブレットにしかない設定が共通のインスペクターに入っている。最後に、接続口を整理するときの論点を 8 つ挙げる。
 
 **キーワード：** デバイス、接続口、Controller、UIController、YamaPlayerSubController、リスナー、ビルド処理、モジュール
 
@@ -82,15 +82,17 @@ KawaPlayer には、これからもタブレットやボタンのようなデバ
 
 デバイスと本体のつながりは、エディター・ビルド・実行時の 3 段で作られる。
 
-![エディターでは Sub Controller のインスペクターが参照を書き、ビルドではビルド処理が配線し、実行時には Start で登録する](images/device-connections/stages.svg)
+![エディターでは Sub Controller のインスペクターと置くメニューが参照を書き、ビルドではビルド処理が配線し、実行時には Start で登録する](images/device-connections/stages.svg)
 
 **図 2** つなぎ込みの 3 段。
 
 ### 3.1 エディター：参照を書く
 
-`YamaPlayerSubControllerEditor`（`Editor/Inspector/YamaPlayerSubControllerEditor.cs`）は、インスペクターで `YamaPlayer` が選ばれた瞬間に、根元の下の部品へ本体の `Controller` を書く（`ProcessYamaPlayerChange`）。
+`YamaPlayerSubControllerEditor`（`Editor/Inspector/YamaPlayerSubControllerEditor.cs`）は、インスペクターで `YamaPlayer` が選ばれた瞬間に、根元の下の部品へ本体の `Controller` を書く（`ProcessYamaPlayerChange` から `LinkParts`）。
 
-**表 3** インスペクターが書く参照
+**GameObject > KawaPlayer** のメニュー（`Editor/Menu/YamaPlayerMenu.cs`）も、デバイスを置いたときにプレイヤーが決まれば、`YamaPlayer` に入れて、同じ `LinkParts` で書く（#267）。決め方は、置いた場所の親をたどって最も近い KawaPlayer、それが無ければ、置いたシーンにある KawaPlayer が 1 つだけのときのそれである。どちらでもなければ空のままにし、理由をログに出す。プレハブをドラッグして置いたデバイスは、メニューを通らないので空のままである。
+
+**表 3** インスペクターと置くメニューが書く参照
 
 | 書く先 | 欄 | 数 |
 | --- | --- | --- |
@@ -156,7 +158,7 @@ Udon の `Start` で、各部品が自分を相手のリストに足す。リス
 | E7 | 差し込み口 | `UIController._urlInterceptor`・`_playlistRefreshHandler` | 欄に値を書き、名前で呼ぶ | UI → モジュール | PlaylistLoader |
 | E8 | 窓口 | `ShowMessage`・`ShowConfirm`・`GetTranslation`・`PlayImageUrl` など | 型 | 外 → UI | モジュールの UI、タブレットのアプリ |
 | E9 | UI への登録 | `UIController.AddListener(UdonSharpBehaviour)` | 型 | 外 → UI | モジュールの UI、`TabletScreen` |
-| E10 | インスペクター | `YamaPlayerSubControllerEditor` | 参照を書く | エディター | デバイスの UI・画面・音 |
+| E10 | インスペクター・置くメニュー | `YamaPlayerSubControllerEditor`・`YamaPlayerMenu` | 参照を書く | エディター | デバイスの UI・画面・音 |
 | E11 | ビルド処理 | `IYamaPlayerBuildProcess`（`callbackOrder` の順） | 型（インターフェース） | ビルド | 本体とモジュールの Editor |
 | E12 | UI の差し込み | `YamaPlayerModuleDefinition.uiSlots` | パスの文字列 | ビルド | モジュール（§7） |
 
@@ -374,7 +376,7 @@ E3 の `SendCustomVideoEvent(名前)` は、リスナー全員に `SendCustomEve
 
 ここに挙げるのは、今の作りから読み取れる論点で、直し方は決めていない。
 
-1. **O1. プレイヤーを見つける方法が 3 通りある（図 10）。** 正の値は各部品の `_controller` だが、書くのは Sub Controller のインスペクターだけである。プレハブを更新して部品が増えても、欄を選び直すまでつながらない。ビルドは、それを手がかりに配線するだけで、Sub Controller で選んだプレイヤーと合っているかは確かめ直さない。未設定だけは、ビルドが置いた部品ごとに警告し（`DeviceLinkBuildProcess`。全員リロードボタンは自分のビルド処理）、`UIController.Start`・`YamaPlayerModule.Start` がログに出す（#294）。
+1. **O1. プレイヤーを見つける方法が 3 通りある（図 10）。** 正の値は各部品の `_controller` だが、書くのはエディター（Sub Controller のインスペクターと、デバイスを置くメニュー）だけである。置くメニューは、親かシーンに 1 つだけの KawaPlayer を選ぶ（#267）。プレハブを更新して部品が増えても、欄を選び直すまでつながらない。ビルドは、それを手がかりに配線するだけで、Sub Controller で選んだプレイヤーと合っているかは確かめ直さない。未設定だけは、ビルドが置いた部品ごとに警告し（`DeviceLinkBuildProcess`。全員リロードボタンは自分のビルド処理）、`UIController.Start`・`YamaPlayerModule.Start` がログに出す（#294）。
 2. **O2. 共通のインスペクターが、特定のデバイスを知っている。** `YamaPlayerSubControllerEditor` が `TabletPickup`・`TabletReturnButton`・`TabletVisitorRecorder` を直接扱う。新しいデバイスの設定を足すと、このファイルを書き換えることになる（#206 もここ）。
 3. **O3. 名前の文字列の接続口に、一覧が無い。** 前の確認の 27 個、名前の出来事、差し込み口の値と名前は、送る側と受ける側が同じ文字列を書いている。打ち間違いは、コンパイルでもビルドでも見つからない。コアがモジュールの型を参照できないので、名前で呼ぶこと自体には理由がある。
 4. **O4. 差し込みの場所が、UI の階層のパス。** `uiSlots` は `Canvas/User/Main/Pages/...` のような深いパスで写す先を決める。デバイスの側は、そのパスを用意しておく必要がある（全員リロードボタンの空の `Canvas/Modules`）。合わないパスは、何も言わずに飛ばされる。
@@ -387,7 +389,7 @@ E3 の `SendCustomVideoEvent(名前)` は、リスナー全員に `SendCustomEve
 
 ## 10. まとめ
 
-- **3 段のつなぎ込み：** デバイスは、エディター（Sub Controller のインスペクター）・ビルド（`IYamaPlayerBuildProcess`）・実行時（`Start` での登録）の 3 段で本体につながる。
+- **3 段のつなぎ込み：** デバイスは、エディター（Sub Controller のインスペクターと置くメニュー）・ビルド（`IYamaPlayerBuildProcess`）・実行時（`Start` での登録）の 3 段で本体につながる。
 - **接続口の集まり方：** 実行時の接続口は `Controller`（E1〜E4）と `UIController`（E5〜E9）に集まる。結び方は、型、名前の文字列、欄への書き込みが混ざる。
 - **デバイスの共通点：** 本体への命令は `UIController` を通し、前の確認で権限がかかる。ただし Controller Bar と Playlist Panel には権限の UI が写されないので、権限はかからない（§6.1）。モジュールの UI は、ビルドでパスに写され、実行時に自分の UIController を探して登録する。
 - **同期の分担：** 再生の状態は `Controller` が、キュー・履歴・プレイリストの枠の中身はそれぞれの部品が同期する。タブレットの画面や全員リロードボタンの合図も、それぞれの部品が別に送る。

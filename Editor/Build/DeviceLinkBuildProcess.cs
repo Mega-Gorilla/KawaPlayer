@@ -8,8 +8,9 @@ namespace Yamadev.YamaStream.Editor
 {
   // Names each device that is not connected to a player, and says how to
   // connect it (issue #294). A device learns its player only when one is
-  // chosen in its Sub Controller's inspector, which writes it into the parts
-  // under it (YamaPlayerSubControllerEditor), so a device left without one,
+  // chosen in its Sub Controller's inspector, or by the GameObject > KawaPlayer
+  // menu that placed it (issue #267), which write it into the parts under it
+  // (YamaPlayerSubControllerEditor.LinkParts), so a device left without one,
   // or a part added to it by a prefab update after the player was chosen,
   // does nothing in the world. Before, only the parts said so, at run time
   // and each under its own name ("UI"). One warning is given per device, at

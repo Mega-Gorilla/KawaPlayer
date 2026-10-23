@@ -143,9 +143,10 @@ MARKS = {
         dict(box=(28, 423, 834, 537), n=1),
         dict(box=(746, 615, 828, 1222), n=2),
     ]),
-    # The quickstart only fills in the KawaPlayer field; the tablet page explains the rest.
+    # The quickstart only looks at the KawaPlayer field, which placing it fills in with one
+    # player in the scene (#267); the tablet page explains the rest.
     "unity/tablet-player-field": dict(src="unity/tablet-inspector", scale=0.72, pad=dict(right=270), marks=[
-        dict(box=(274, 430, 664, 456), cap="KawaPlayer を入れる", at=(826, 443)),
+        dict(box=(274, 430, 664, 456), cap="操作する KawaPlayer", at=(826, 443)),
     ]),
     "unity/build": dict(scale=0.72, pad=dict(left=16), marks=[
         dict(box=(9, 257, 404, 288), n=1),

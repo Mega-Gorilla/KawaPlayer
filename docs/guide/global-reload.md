@@ -30,7 +30,7 @@ KawaPlayer のスクリーンとタブレットには、自分の画面だけを
 
    ![Unity の GameObject メニュー。① GameObject、② KawaPlayer、③ Global Reload Button に印がある](images/unity/gameobject-menu-global-reload.webp)
 
-4. 置かれたボタンを選び、インスペクターの **KawaPlayer** に、読み込み直すプレイヤーを入れます。
+4. 置かれたボタンのインスペクターの **KawaPlayer** を見ます。シーンに KawaPlayer が 1 つだけなら、置いたときに、その KawaPlayer が入っています。2 つ以上あるときは空なので、読み込み直すプレイヤーを入れます。
 5. ステージや配信卓の近くなど、主催者が押せる所に動かします。
 
 表示は英語だけです（**RELOAD ALL** など）。
