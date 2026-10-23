@@ -2,7 +2,7 @@
 
 置き忘れたタブレットに、門限ができました（設定すれば、ですが）。
 
-1.3.2 のすぐあとの、小さな改善の版です。曲の一覧の色が配色になじむようになったほかは、Unity のインスペクターとビルドのログの改善です。
+1.3.2 のすぐあとの、小さな改善の版です。曲の一覧の色が配色になじむようになったほかは、Unity のインスペクター・置くメニュー・ビルドのログの改善です。
 
 ## 更新する前に、これだけは読んでね
 
@@ -25,6 +25,11 @@
   * 欄は入っているのに、中の一部がつながっていないとき（プレハブの更新で部品が増えたときなど）：どこが空かと、「いったん空にしてから選び直して」が出ます。同じ KawaPlayer を選び直すだけでは直らないので、ご注意を。
   * Play や VRChat のログのエラーにも、部品のパスが出ます。
   * 全員リロードボタンは、これまでどおり自分の警告を出します。
+* **GameObject > KawaPlayer で置いたデバイスが、最初から KawaPlayer を選んでいるようになりました。** タブレット・Sub Screen・Controller Bar・Playlist Panel・全員リロードボタンです。「置いたタブレットが動かない！」の、いちばんよくある原因がひとつ減りました。（#297）
+  * KawaPlayer の中に置いたときは、その KawaPlayer。そうでなく、シーンに KawaPlayer が 1 つだけなら、その KawaPlayer です。
+  * シーンに KawaPlayer がないときや 2 つ以上あるときは、これまでどおり空のままで、ログが理由を教えてくれます。インスペクターの **KawaPlayer** の欄で選んでください。
+  * プレハブをドラッグして置いたときと、もう置いてあるデバイスは、これまでどおりです。
+  * 使い方ガイド（[タブレット](https://github.com/Mega-Gorilla/KawaPlayer/blob/develop/docs/guide/tablet.md)・クイックスタート・全員リロードボタン・インストール）の「置く」も合わせました。
 
 ## 直したこと
 
@@ -69,7 +74,7 @@ VCC が開かない場合は、**Settings > Packages > Add Repository** に `htt
 
 *English:*
 
-A small update right after 1.3.2: the track list now follows your colour set, and the Unity inspector and build log got friendlier.
+A small update right after 1.3.2: the track list now follows your colour set, and the Unity inspector, the placing menu and the build log got friendlier.
 
 **Read this before you update:**
 
@@ -81,6 +86,7 @@ A small update right after 1.3.2: the track list now follows your colour set, an
 
 * The tablet's "Return when idle (s)", where 0 meant off, is now a **Return when left alone** toggle with a **Time before return (min)** field under it. It starts off, and turning it on starts at 5 minutes (1 or more). Seconds you set before show up as minutes and work as before.
 * A device not connected to a player (its **KawaPlayer** field left empty, or a part added after the player was chosen) is now named in the build log, once per device, with its path and how to fix it. The nameless `Controller not found on UIController` warning is gone, and the run-time error shows the UI's path.
+* Devices placed from **GameObject > KawaPlayer** (tablet, Sub Screen, Controller Bar, Playlist Panel, Global Reload Button) now come with their player chosen: the KawaPlayer they are placed inside, or else the scene's only one. With none or several, the field stays empty and the log says why. Devices dragged in from their prefabs, and those already placed, are unchanged.
 
 **What's fixed:**
 
