@@ -63,12 +63,10 @@ namespace Yamadev.YamaStream.Editor
     {
       var translationFiles = new List<TextAsset>();
 
+      // A UI with no player has no modules to translate. DeviceLinkBuildProcess
+      // names it in the build log (issue #294).
       var controller = uiController.GetProgramVariable("_controller") as Controller;
-      if (controller == null)
-      {
-        Debug.LogWarning("[LocalizationBuildProcess] Controller not found on UIController");
-        return translationFiles;
-      }
+      if (controller == null) return translationFiles;
 
       var moduleManager = controller.GetComponentInParent<Transform>()?.parent?.GetComponentInChildren<ModuleManager>();
       if (moduleManager == null)

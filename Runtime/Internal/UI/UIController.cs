@@ -158,7 +158,7 @@ namespace Yamadev.YamaStream.UI
     {
       if (!_controller)
       {
-        PrintError($"Controller is not assigned to UIController:{name}");
+        PrintError($"{GetHierarchyPath()} has no player set, so it does nothing. Choose the player in the inspector of the device it is part of.");
         return;
       }
       _controller.AddListener(this);
@@ -179,6 +179,16 @@ namespace Yamadev.YamaStream.UI
         _repeatRangeSlider.SetUp(this, nameof(SetRepeatStart), nameof(SetRepeatEnd));
       }
       if (Utilities.IsValid(_userUIAnimator) && _defaultPlaylistOpen) _userUIAnimator.SetTrigger("TogglePlaylist");
+    }
+
+    // The UI's path in the Hierarchy, so that the log names the device it is
+    // part of, not only the UI inside it ("UI"). The build names the device
+    // too (DeviceLinkBuildProcess, issue #294).
+    private string GetHierarchyPath()
+    {
+      string path = name;
+      for (Transform parent = transform.parent; parent != null; parent = parent.parent) path = $"{parent.name}/{path}";
+      return path;
     }
 
     private void Update()

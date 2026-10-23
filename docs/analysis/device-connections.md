@@ -98,7 +98,7 @@ KawaPlayer には、これからもタブレットやボタンのようなデバ
 | `YamaPlayerScreen` | `controller` | 下にあるすべて |
 | `YamaPlayerSpeaker` | `controller` | 下にあるすべて |
 
-書いた値は、シーンのプレハブの上書きとして保存される。`YamaPlayerSubController.YamaPlayer` そのものは、ビルドでも実行時でも読まれない。インスペクターは、ほかに色の組・既定の言語・待ち受け画像を下の UI にそろえ、持てるデバイスには持つ・同期の欄、タブレットには戻す設定と訪問者の顔写真の欄を出す。
+書いた値は、シーンのプレハブの上書きとして保存される。`YamaPlayerSubController.YamaPlayer` そのものは、配線には使われない（実行時にも読まれない）。ビルドは、つながっていない部品の警告の文に使うだけである（#294）。インスペクターは、ほかに色の組・既定の言語・待ち受け画像を下の UI にそろえ、持てるデバイスには持つ・同期の欄、タブレットには戻す設定と訪問者の顔写真の欄を出す。
 
 ### 3.2 ビルド：配線する
 
@@ -110,6 +110,7 @@ KawaPlayer には、これからもタブレットやボタンのようなデバ
 | --- | --- | --- | --- |
 | -3000 | `YamaPlayerModuleBuildProcess` | 有効なモジュールに `_controller` を入れる。モジュールの `uiSlots` を、同じ `Controller` を指す UIController に写す（§7）。無効なモジュールは `EditorOnly` にする | モジュール：親をたどって `Controller`。UI：シーン全体から `_controller` が同じ物。写す先は `transform.Find(targetPath)` |
 | -2900 | `GlobalReloadBuildProcess` | ボタンに、そのプレイヤーの `GlobalReload` を入れる。見つからないボタンは外してログに出す | ボタンの親の `UIController` の `_controller` |
+| -2800 | `DeviceLinkBuildProcess` | 本体を指していない部品（`_controller`・`controller` が空）を、置いた部品ごとに 1 件、パスと直し方を付けてログに出す。ワールドから外される物（`EditorOnly`）は見ない。配線はしない | シーン全体の `UIController`・`YamaPlayerScreen`・`YamaPlayerSpeaker`。置いた部品は、親をたどった Sub Controller |
 | -2600 | `DynamicPlaylistBuildProcess` | 各 UIController に、有効な動的プレイリストの枠の一覧（`_dynamicPlaylists`）を入れる | UIController の `_controller` |
 | -2500 | `PlaylistLoaderBuildProcess` | URL 欄のある UIController に `_urlInterceptor` と `_urlHintKey` を、すべての UIController に `_playlistRefreshHandler` を入れる。`PlaylistLoaderUI` に `_uiController` を入れる | シーン全体から `_controller` が同じ UIController |
 | -2000 | `YamaPlayerComponentBuildProcess` | `YamaPlayerScreen`・`YamaPlayerSpeaker` を、`Controller.AddScreen`・`AddAudioSource` で本体の配列に足す | 各部品の `controller` |
@@ -373,7 +374,7 @@ E3 の `SendCustomVideoEvent(名前)` は、リスナー全員に `SendCustomEve
 
 ここに挙げるのは、今の作りから読み取れる論点で、直し方は決めていない。
 
-1. **O1. プレイヤーを見つける方法が 3 通りある（図 10）。** 正の値は各部品の `_controller` だが、書くのは Sub Controller のインスペクターだけである。プレハブを更新して部品が増えても、欄を選び直すまでつながらない。ビルドは、それを手がかりに配線するだけで、Sub Controller で選んだプレイヤーと合っているかは確かめ直さない。未設定だけは、`UIController.Start`・`YamaPlayerModule.Start` がログに出し、全員リロードボタンのビルド処理が警告する。
+1. **O1. プレイヤーを見つける方法が 3 通りある（図 10）。** 正の値は各部品の `_controller` だが、書くのは Sub Controller のインスペクターだけである。プレハブを更新して部品が増えても、欄を選び直すまでつながらない。ビルドは、それを手がかりに配線するだけで、Sub Controller で選んだプレイヤーと合っているかは確かめ直さない。未設定だけは、ビルドが置いた部品ごとに警告し（`DeviceLinkBuildProcess`。全員リロードボタンは自分のビルド処理）、`UIController.Start`・`YamaPlayerModule.Start` がログに出す（#294）。
 2. **O2. 共通のインスペクターが、特定のデバイスを知っている。** `YamaPlayerSubControllerEditor` が `TabletPickup`・`TabletReturnButton`・`TabletVisitorRecorder` を直接扱う。新しいデバイスの設定を足すと、このファイルを書き換えることになる（#206 もここ）。
 3. **O3. 名前の文字列の接続口に、一覧が無い。** 前の確認の 27 個、名前の出来事、差し込み口の値と名前は、送る側と受ける側が同じ文字列を書いている。打ち間違いは、コンパイルでもビルドでも見つからない。コアがモジュールの型を参照できないので、名前で呼ぶこと自体には理由がある。
 4. **O4. 差し込みの場所が、UI の階層のパス。** `uiSlots` は `Canvas/User/Main/Pages/...` のような深いパスで写す先を決める。デバイスの側は、そのパスを用意しておく必要がある（全員リロードボタンの空の `Canvas/Modules`）。合わないパスは、何も言わずに飛ばされる。

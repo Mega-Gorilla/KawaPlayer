@@ -194,6 +194,7 @@ def fig_stages():
                 "モジュールに _controller を入れる",
                 "モジュールの UI を各 UIController に写す",
                 "ボタンに GlobalReload を入れる",
+                "つながっていない部品をログに出す",
                 "URL 欄に PlaylistLoaderUI を差す",
                 "Screen・Speaker を Controller に登録",
                 "Controller をシーンの一番上へ移す",
@@ -217,7 +218,7 @@ def fig_stages():
             b.append(text(cx + 14, 146 + j * 30, row, "t1 mono" if mono and not row.startswith("→") else "t1 f12"))
         if i < 2:
             b.append(arrow([(cx + w + 2, 222), (cx + w + 20, 222)]))
-    b.append(text(24, H - 28, "①で選んだプレイヤーと合っているかは、②でも③でも確かめ直さない（未設定は、Start と全員リロードボタンのビルドが知らせる）。", "t2 f12"))
+    b.append(text(24, H - 28, "①で選んだプレイヤーと合っているかは、②でも③でも確かめ直さない（未設定は、ビルドと Start が知らせる）。", "t2 f12"))
     b.append(text(24, H - 10, "②の配線は、①で書いた _controller を手がかりにする。", "t2 f12"))
     return svg(W, H, "つなぎ込みの3段",
                "エディターではSub Controllerのインスペクターが参照を書き、ビルドではビルド処理がモジュールやボタンを配線し、実行時にはStartで各部品が自分をControllerやUIControllerに登録する。", "".join(b))
@@ -421,7 +422,7 @@ def fig_find():
         x = 24 + i * (w + 22)
         b.append(card(x, 72, w, 230, head, rows, cls, step=26, title_cls="t1 f13 b"))
     b.append(text(24, 336, "正の値は各部品の _controller だが、それを書くのは (a) のインスペクターだけで、(b)・(c) はそれを読む側である。", "t2 f12"))
-    b.append(text(24, 358, "YamaPlayerSubController.YamaPlayer は、選んだときに使われるだけで、ビルドでも実行時でも読まれない。", "t2 f12"))
+    b.append(text(24, 358, "YamaPlayerSubController.YamaPlayer は、選んだときに使われるだけで、配線には使われない（ビルドは警告の文に使う）。", "t2 f12"))
     return svg(W, H, "部品がプレイヤーを見つける3つの方法",
                "エディターで書く方法、親をたどる方法、シーン全体を探す方法がある。正の値は各部品の_controllerで、書くのはSub Controllerのインスペクターだけである。", "".join(b))
 
