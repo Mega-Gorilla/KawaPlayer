@@ -552,7 +552,6 @@ MonoBehaviour:
   _udonSharpBackingUdonBehaviour: {fileID: 5410650232229842185}
   _controller: {fileID: 0}
   _primaryColor: {r: 0.30980393, g: 0.7647059, b: 0.96862745, a: 1}
-  _secondaryColor: {r: 0.7019608, g: 0.8980392, b: 0.9882353, a: 0.25}
   _idleScreenImage: {fileID: 0}
   _idleScreenSprite: {fileID: 0}
   _defaultIdleScreenSprite: {fileID: 0}
@@ -634,7 +633,7 @@ MonoBehaviour:
   _languageTraditionalChineseToggle: {fileID: 0}
   _languageKoreanToggle: {fileID: 0}
   _languageSpanishToggle: {fileID: 0}
-  _languageUkranianToggle: {fileID: 0}
+  _languageUkrainianToggle: {fileID: 0}
   _languageRussianToggle: {fileID: 0}
   _languageItalianToggle: {fileID: 0}
   _inputUrlLabel: {fileID: 0}
@@ -642,7 +641,6 @@ MonoBehaviour:
   _loopLabel2: {fileID: 0}
   _shuffleLabel: {fileID: 0}
   _shuffleLabel2: {fileID: 0}
-  _reloadLabel: {fileID: 0}
   _settingsLabel: {fileID: 0}
   _versionLabel: {fileID: 0}
   _lockUiLabel: {fileID: 0}
@@ -655,7 +653,6 @@ MonoBehaviour:
   _tabUiLabel: {fileID: 0}
   _videoPlayerTitleLabel: {fileID: 0}
   _videoPlayerDescLabel: {fileID: 0}
-  _avproVideoPlayerLabel: {fileID: 0}
   _imageViewerLabel: {fileID: 0}
   _playbackSpeedTitleLabel: {fileID: 0}
   _playbackSpeedDescLabel: {fileID: 0}
@@ -677,7 +674,6 @@ MonoBehaviour:
   _maxResolutionDescLabel: {fileID: 0}
   _languageSelectTitleLabel: {fileID: 0}
   _unlockUiMessageLabel: {fileID: 0}
-  _modalAVProVideoPlayerLabel: {fileID: 0}
   _modalImageViewerLabel: {fileID: 0}
   _lockDetectionRect: {fileID: 0}
   _unlockProgressText: {fileID: 0}
