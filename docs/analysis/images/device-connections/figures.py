@@ -183,8 +183,9 @@ def fig_stages():
     W, H = 820, 420
     b = [text(24, 30, "つなぎ込みの 3 段", "t1 f14"),
          text(24, 50, "参照はエディターで書き、ビルドで足し、実行時の Start で登録する", "t2 f12")]
-    cols = [("① エディター", "インスペクターで選んだとき", [
+    cols = [("① エディター", "選んだとき・メニューで置いたとき", [
                 "Sub Controller の YamaPlayer を選ぶ",
+                "（置くメニューは、親か 1 つだけの本体）",
                 "→ 下の UIController の _controller",
                 "→ YamaPlayerScreen の controller",
                 "→ YamaPlayerSpeaker の controller",
@@ -221,7 +222,7 @@ def fig_stages():
     b.append(text(24, H - 28, "①で選んだプレイヤーと合っているかは、②でも③でも確かめ直さない（未設定は、ビルドと Start が知らせる）。", "t2 f12"))
     b.append(text(24, H - 10, "②の配線は、①で書いた _controller を手がかりにする。", "t2 f12"))
     return svg(W, H, "つなぎ込みの3段",
-               "エディターではSub Controllerのインスペクターが参照を書き、ビルドではビルド処理がモジュールやボタンを配線し、実行時にはStartで各部品が自分をControllerやUIControllerに登録する。", "".join(b))
+               "エディターではSub Controllerのインスペクターと置くメニューが参照を書き、ビルドではビルド処理がモジュールやボタンを配線し、実行時にはStartで各部品が自分をControllerやUIControllerに登録する。", "".join(b))
 
 
 # Figure 3: the endpoints.
@@ -245,7 +246,7 @@ def fig_endpoints():
     b.append(arrow([(436, 150), (386, 150)], "blue"))
     b.append(arrow([(386, 190), (436, 190)], "orange"))
     b.append(f'<rect class="box" x="24" y="368" width="772" height="104" rx="8"/>' + text(40, 392, "エディター・ビルドの接続口（ワールドを作るときだけ）", "t1 f13 b"))
-    eb = [("E10", "Sub Controller のインスペクター", "下の部品に _controller を書く"),
+    eb = [("E10", "インスペクター・置くメニュー", "下の部品に _controller を書く"),
           ("E11", "IYamaPlayerBuildProcess", "番号の順に動くビルド処理"),
           ("E12", "uiSlots", "パスで UIController の下に写す")]
     for i, (k, v, s) in enumerate(eb):
@@ -398,7 +399,8 @@ def fig_find():
          text(24, 50, "同じ「どのプレイヤーに従うか」を、場所ごとに別の方法で決めている", "t2 f12")]
     cols = [("(a) エディターで書く", "box", [
                 ("YamaPlayerSubControllerEditor", "t1 mono"),
-                "選んだときに、下の UIController・",
+                "選んだとき・メニューで置いたときに、",
+                "下の UIController・",
                 "Screen・Speaker へ書く",
                 ("使う：デバイスの UI・画面・音", "t2 f11"),
                 ("選び直さないと、後で足した物は", "ts2 f11"),
@@ -421,10 +423,10 @@ def fig_find():
     for i, (head, cls, rows) in enumerate(cols):
         x = 24 + i * (w + 22)
         b.append(card(x, 72, w, 230, head, rows, cls, step=26, title_cls="t1 f13 b"))
-    b.append(text(24, 336, "正の値は各部品の _controller だが、それを書くのは (a) のインスペクターだけで、(b)・(c) はそれを読む側である。", "t2 f12"))
+    b.append(text(24, 336, "正の値は各部品の _controller で、書くのは (a) だけ（インスペクターと置くメニュー）。(b)・(c) は読む側である。", "t2 f12"))
     b.append(text(24, 358, "YamaPlayerSubController.YamaPlayer は、選んだときに使われるだけで、配線には使われない（ビルドは警告の文に使う）。", "t2 f12"))
     return svg(W, H, "部品がプレイヤーを見つける3つの方法",
-               "エディターで書く方法、親をたどる方法、シーン全体を探す方法がある。正の値は各部品の_controllerで、書くのはSub Controllerのインスペクターだけである。", "".join(b))
+               "エディターで書く方法、親をたどる方法、シーン全体を探す方法がある。正の値は各部品の_controllerで、書くのはエディター（Sub Controllerのインスペクターと置くメニュー）だけである。", "".join(b))
 
 
 os.makedirs(OUT, exist_ok=True)

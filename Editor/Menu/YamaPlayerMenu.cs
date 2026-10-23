@@ -1,3 +1,4 @@
+using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
@@ -52,7 +53,38 @@ namespace Yamadev.YamaStream.Editor
 
       obj.name = name;
       Undo.RegisterCreatedObjectUndo(obj, $"Create {obj.name}");
+      ChoosePlayer(obj, parent);
       Selection.activeGameObject = obj;
+    }
+
+    // A device placed here follows a player at once, as if it had been chosen
+    // in the device's inspector (issue #267): the nearest KawaPlayer it is
+    // placed inside, or else the only one in its scene. With none, or more
+    // than one to choose from, the field is left empty and the log says why.
+    static void ChoosePlayer(GameObject obj, Transform parent)
+    {
+      var device = obj.GetComponentInChildren<YamaPlayerSubController>(true);
+      if (device == null) return;
+
+      var player = parent != null ? parent.GetComponentInParent<YamaPlayer>(true) : null;
+      if (player == null)
+      {
+        var players = obj.scene.GetRootGameObjects().SelectMany(root => root.GetComponentsInChildren<YamaPlayer>(true)).ToArray();
+        if (players.Length != 1)
+        {
+          var path = YamaPlayerModuleBuildProcess.GetPath(obj.transform);
+          Debug.Log(players.Length == 0
+            ? $"[KawaPlayer] {path} has no player set, as the scene has no KawaPlayer. Add one, then choose it in the inspector of {path}."
+            : $"[KawaPlayer] {path} has no player set, as the scene has {players.Length} KawaPlayers. Choose the one it follows in its inspector.", obj);
+          return;
+        }
+        player = players[0];
+      }
+
+      var so = new SerializedObject(device);
+      so.FindProperty("YamaPlayer").objectReferenceValue = player;
+      so.ApplyModifiedProperties();
+      YamaPlayerSubControllerEditor.LinkParts(device, player);
     }
   }
 }

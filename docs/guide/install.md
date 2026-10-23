@@ -106,3 +106,10 @@ KawaPlayer の動きを書いた U#（UdonSharp）のプログラムが、新し
 - **C. プレハブから:** Project の **Packages > KawaPlayer** にある `KawaPlayer.prefab` を、シーンにドラッグします。
 
 同じメニューには、タブレット（**Tablet**、[タブレット](tablet.md)）のほかに、スクリーンや操作パネルを足すための部品（**SubScreen**・**Controller Bar**・**Playlist Panel**）と、全員リロードボタン（**Global Reload Button**、[全員リロードボタン](global-reload.md)。同じ名前のモジュールと一緒に使います）もあります。
+
+これらの部品は、操作する KawaPlayer をインスペクターの **KawaPlayer** の欄で選びます。メニューで置くと、次の KawaPlayer が、もう入っています。
+
+- KawaPlayer の中に置いたときは、その KawaPlayer。
+- そうでなく、シーンに KawaPlayer が 1 つだけなら、その KawaPlayer。
+
+シーンに KawaPlayer がないときや 2 つ以上あるときと、プレハブをドラッグして置いたときは、欄が空なので、自分で選びます。

@@ -12,7 +12,7 @@
 
    ![Unity の GameObject メニュー。① GameObject、② KawaPlayer、③ Tablet に印がある](images/unity/gameobject-menu-tablet.webp)
 
-3. インスペクターの **KawaPlayer** の欄に、操作する KawaPlayer を入れます。
+3. インスペクターの **KawaPlayer** の欄を見ます。シーンに KawaPlayer が 1 つだけなら、置いたときに、その KawaPlayer が入っています。2 つ以上あるときは空なので、操作する KawaPlayer を入れます。
 
    ![タブレットのインスペクター。一番上の、操作する KawaPlayer を入れる欄に印がある](images/unity/tablet-player-field.webp)
 

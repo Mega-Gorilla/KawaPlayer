@@ -133,36 +133,31 @@ namespace Yamadev.YamaStream.Editor
 
     private void ProcessYamaPlayerChange()
     {
-      var yamaPlayer = _yamaPlayer.objectReferenceValue as YamaPlayer;
+      LinkParts(_target, _yamaPlayer.objectReferenceValue as YamaPlayer);
+      _uiControllerSerializedObject?.Update();
+    }
+
+    // Points the parts under a device at the player's Controller. Every
+    // UIController under it follows the same player: the tablet has its own
+    // for the home screen beside the player's ScreenUI. Placing a device from
+    // the GameObject > KawaPlayer menu does the same (issue #267).
+    internal static void LinkParts(YamaPlayerSubController device, YamaPlayer yamaPlayer)
+    {
       if (yamaPlayer == null) return;
 
       var controller = yamaPlayer.GetComponentInChildren<Controller>(true);
       if (controller == null) return;
 
-      // Every UIController under this object follows the same player: the
-      // tablet has its own for the home screen beside the player's ScreenUI.
-      foreach (var uiController in _target.GetComponentsInChildren<UIController>(true))
-      {
-        var so = uiController == _uiController ? _uiControllerSerializedObject : new SerializedObject(uiController);
-        so.FindProperty("_controller").objectReferenceValue = controller;
-        so.ApplyModifiedProperties();
-      }
+      foreach (var uiController in device.GetComponentsInChildren<UIController>(true)) SetReference(uiController, "_controller", controller);
+      foreach (var screen in device.GetComponentsInChildren<YamaPlayerScreen>(true)) SetReference(screen, "controller", controller);
+      foreach (var speaker in device.GetComponentsInChildren<YamaPlayerSpeaker>(true)) SetReference(speaker, "controller", controller);
+    }
 
-      var screens = _target.GetComponentsInChildren<YamaPlayerScreen>(true);
-      foreach (var screen in screens)
-      {
-        var so = new SerializedObject(screen);
-        so.FindProperty("controller").objectReferenceValue = controller;
-        so.ApplyModifiedProperties();
-      }
-
-      var speakers = _target.GetComponentsInChildren<YamaPlayerSpeaker>(true);
-      foreach (var speaker in speakers)
-      {
-        var so = new SerializedObject(speaker);
-        so.FindProperty("controller").objectReferenceValue = controller;
-        so.ApplyModifiedProperties();
-      }
+    private static void SetReference(Object target, string propertyName, Object value)
+    {
+      var so = new SerializedObject(target);
+      so.FindProperty(propertyName).objectReferenceValue = value;
+      so.ApplyModifiedProperties();
     }
 
     private void DrawAppearanceSettings()
