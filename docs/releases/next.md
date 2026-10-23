@@ -2,7 +2,7 @@
 
 置き忘れたタブレットに、門限ができました（設定すれば、ですが）。
 
-1.3.2 のすぐあとの、小さな改善の版です。今のところ、変わったのは Unity のインスペクターだけです。
+1.3.2 のすぐあとの、小さな改善の版です。今のところ、変わったのは Unity のインスペクターとビルドのログだけです。
 
 ## 更新する前に、これだけは読んでね
 
@@ -19,6 +19,11 @@
   * **戻すまでの時間 (分)：** オンのときだけ出ます。オンにしたときは 5 分で、1 分以上にできます。
   * 前に秒で入れていた値は、そのまま分で表示されます（たとえば 120 秒は 2 分）。動きも変わりません。
   * 9 言語の文言と、使い方ガイドの[タブレット](https://github.com/Mega-Gorilla/KawaPlayer/blob/develop/docs/guide/tablet.md)のページも合わせました。
+* **KawaPlayer につながっていない部品があると、ビルドのログが、どの部品かと直し方を教えてくれます。** これまでは `Controller not found on UIController` と、犯人の名前を伏せた警告でした。（#295）
+  * Sub Screen・Playlist Panel・Controller Bar・タブレットのインスペクターで、**KawaPlayer** の欄を空のままにしたとき：部品ごとに 1 件、Hierarchy のパスと「インスペクターで KawaPlayer を選んで」が出ます。
+  * 欄は入っているのに、中の一部がつながっていないとき（プレハブの更新で部品が増えたときなど）：どこが空かと、「いったん空にしてから選び直して」が出ます。同じ KawaPlayer を選び直すだけでは直らないので、ご注意を。
+  * Play や VRChat のログのエラーにも、部品のパスが出ます。
+  * 全員リロードボタンは、これまでどおり自分の警告を出します。
 
 ## 困ったら
 
@@ -44,7 +49,7 @@ VCC が開かない場合は、**Settings > Packages > Add Repository** に `htt
 
 *English:*
 
-A small update right after 1.3.2. So far, only the Unity inspector changed.
+A small update right after 1.3.2. So far, only the Unity inspector and the build log changed.
 
 **Read this before you update:**
 
@@ -54,5 +59,6 @@ A small update right after 1.3.2. So far, only the Unity inspector changed.
 **What's changed:**
 
 * The tablet's "Return when idle (s)", where 0 meant off, is now a **Return when left alone** toggle with a **Time before return (min)** field under it. It starts off, and turning it on starts at 5 minutes (1 or more). Seconds you set before show up as minutes and work as before.
+* A device not connected to a player (its **KawaPlayer** field left empty, or a part added after the player was chosen) is now named in the build log, once per device, with its path and how to fix it. The nameless `Controller not found on UIController` warning is gone, and the run-time error shows the UI's path.
 
 Anything odd? Tell us on our [Discord server](https://discord.gg/tkrHek6PvN).
