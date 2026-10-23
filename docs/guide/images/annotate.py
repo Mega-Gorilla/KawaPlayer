@@ -52,6 +52,11 @@ MARKS = {
     "vcc/update-package": dict(scale=0.8, pad=dict(bottom=70), marks=[
         dict(box=(691, 9, 1009, 55), cap="押すと更新", at=(560, 104)),
     ]),
+    # Updating KawaPlayer in a project on an older SDK: VCC lists the SDK too (#193).
+    "vcc/update-confirm-sdk": dict(crop=(0, 10, 900, 496), scale=0.8, pad=dict(right=290), marks=[
+        dict(box=(39, 261, 849, 390), n=1, cap="SDK もいっしょに上がる", at=(1050, 325)),
+        dict(box=(719, 411, 863, 459), n=2, cap="押すと更新", at=(1050, 435)),
+    ]),
     "unity/gameobject-menu": dict(scale=0.7, pad=dict(top=24, left=24, right=12), marks=[
         dict(box=(2, 1, 118, 27), n=1),
         dict(box=(8, 242, 447, 276), n=2),

@@ -7,7 +7,7 @@ YamaPlayer を使っていたプロジェクトは、先に [README の移行手
 ## 用意するもの
 
 - VRChat Creator Companion（VCC）で作った、ワールドのプロジェクト
-- VRChat SDK - Worlds 3.10.2 以上。古いときは、先に VCC の **Manage Project** で SDK を新しくしてください。
+- VRChat SDK - Worlds 3.10.2 以上。古いときは、先に VCC の **Manage Project** で SDK を新しくしてください。入っている KawaPlayer を更新するときは、VCC が SDK もいっしょに新しくします（[更新する](#更新する)）。
 
 ## リポジトリを追加する
 
@@ -62,6 +62,12 @@ VCC の **Manage Project** でワールドのプロジェクトを開き、パ�
 ![VCC のパッケージの一覧の KawaPlayer の行。入っている版は 1.1.2 で、↑ 1.2.1 のボタンに印がある](images/vcc/update-package.webp)
 
 画像の版の数字は、撮ったときのものです。
+
+**SDK が古いプロジェクトのとき:** KawaPlayer が求める VRChat SDK（[用意するもの](#用意するもの)）より古い SDK のプロジェクトで更新すると、VCC の確認の画面（**Confirm Project Changes**）に、**VRChat SDK - Worlds** と **VRChat SDK - Base** の行も並びます（①）。KawaPlayer といっしょに、SDK も新しい版に上がるということです。先に SDK を上げておく必要はありません。そのまま **Confirm**（②）を押してください。
+
+![VCC の Confirm Project Changes。KawaPlayer が 1.2.1 から 1.3.3 に、その下の VRChat SDK - Worlds と Base が 3.8.2 から 3.10.5 に上がる行が並び、① で SDK の 2 行、② で Confirm に印がある](images/vcc/update-confirm-sdk.webp)
+
+SDK は、そのとき出ているいちばん新しい版まで上がります。SDK の版で変わったことは、VRChat の [SDK のリリースノート](https://creators.vrchat.com/releases) で確かめられます。
 
 Unity の中からも確かめられます。KawaPlayer のインスペクターの一番下の **バージョン** で **アップデート確認** を押すと、新しい版があるか調べ、あれば **アップデート** で更新できます（[KawaPlayer の設定](settings.md#バージョン)）。この機能は、VCC で入れたプロジェクトでだけ動きます。
 
