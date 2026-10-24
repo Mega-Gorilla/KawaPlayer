@@ -8,6 +8,7 @@ KawaPlayer の設計・計画・確認の手順の文書です。1 つの文書�
 | --- | --- | --- | --- | --- |
 | [url-pool/](url-pool/README.md) | なし（2026-03） | URL Pool 方式のプレイリストローダー（全体の設計、[Unity 側](url-pool/unity.md)、[サーバー側](url-pool/server.md)） | 設計 | 実装済み（PlaylistLoader モジュール） |
 | [68-release-qa/](68-release-qa/README.md) | #68 | リリースの実機 QA の進め方（ランブック）と、[Playlist Editor の Editor 検証](68-release-qa/playlist-editor-verification.md) | 確認の手順 | v1.2.0 の QA（#68）で使った |
+| [145-vhub-search/](145-vhub-search/README.md) | #145 | VHub のプレイリスト検索：VHub の公開 API の[今の記録](145-vhub-search/current-api.md)と、作る API と KawaPlayer の計画 | 計画 | 判断待ち（2026-10-21）。PR #292 |
 | [228-playback-sync/](228-playback-sync/README.md) | #228 | 再生の同期：VizVid（VVMW）との[比較](228-playback-sync/comparison.md)と、直す方針 | 方針 | 実装済み（2026-10-15）。方針は PR #229、実装は子の issue #232〜#237 と #248（PR #238〜#243・#249）。実装後の仕様は [docs/analysis/playback-sync.md](../analysis/playback-sync.md) |
 | [262-intro-video/](262-intro-video/README.md) | #262 | KawaPlayer の紹介動画の絵コンテ、見た目の案の[比較](262-intro-video/look.md)、カットごとの[撮影台本](262-intro-video/script.md) | 台本 | 作った。v3.1（84.5 秒）を X と YouTube で公開した（2026-10-20）。絵コンテは PR #263、v1 のレビュー・見た目の比較・撮影台本と公開した版への書き直しは PR #264 |
 
