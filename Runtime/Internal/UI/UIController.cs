@@ -52,7 +52,6 @@ namespace Yamadev.YamaStream.UI
     [SerializeField, HideInInspector] private string _urlHintKey;
 
     [Header("Track Info Display (Top Bar)")]
-    [SerializeField, RegisterEvent(nameof(VRCUrlInputField.onEndEdit), nameof(PlayUrlTop))] private VRCUrlInputField _urlInputFieldTop;
     [SerializeField] private Text _trackTitleText;
     [SerializeField] private Text _trackUrlText;
 
@@ -360,8 +359,6 @@ namespace Yamadev.YamaStream.UI
     }
 
     public void PlayUrl() => PlayUrlField(_urlInputField);
-
-    public void PlayUrlTop() => PlayUrlField(_urlInputFieldTop);
 
     private void PlayUrlField(VRCUrlInputField urlInputField)
     {

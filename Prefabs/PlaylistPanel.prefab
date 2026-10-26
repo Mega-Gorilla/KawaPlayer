@@ -5661,7 +5661,6 @@ MonoBehaviour:
   _urlInterceptor: {fileID: 0}
   _urlHintText: {fileID: 0}
   _urlHintKey: 
-  _urlInputFieldTop: {fileID: 0}
   _trackTitleText: {fileID: 0}
   _trackUrlText: {fileID: 0}
   _urlInputField: {fileID: 0}
