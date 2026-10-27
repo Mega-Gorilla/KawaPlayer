@@ -79,6 +79,12 @@ namespace Yamadev.YamaStream.UI
     [SerializeField] private SliderHelper _volumeSliderHelper;
     [SerializeField, RegisterEvent(nameof(Button.onClick), nameof(SetVolumeByHelper))] private Button _volumeTooltipButton;
     [SerializeField] private Text _volumeTooltipText;
+    // The volume panel above the bar's volume button (issue #258) shows the
+    // volume as a percentage, and the button shows one of its two icons by
+    // whether the sound is muted.
+    [SerializeField] private Text _volumePercentText;
+    [SerializeField] private GameObject _volumeIcon;
+    [SerializeField] private GameObject _mutedIcon;
     [SerializeField]
     [RegisterEventTrigger(EventTriggerType.BeginDrag, nameof(BeginProgressDrag))]
     [RegisterEventTrigger(EventTriggerType.EndDrag, nameof(SetTime))]
@@ -1077,6 +1083,9 @@ namespace Yamadev.YamaStream.UI
       if (Utilities.IsValid(_muteButton)) _muteButton.gameObject.SetActive(!_controller.Mute);
       if (Utilities.IsValid(_unmuteButton)) _unmuteButton.gameObject.SetActive(_controller.Mute);
       if (Utilities.IsValid(_volumeSlider)) _volumeSlider.SetValueWithoutNotify(_controller.Volume);
+      if (Utilities.IsValid(_volumePercentText)) _volumePercentText.text = $"{Mathf.RoundToInt(_controller.Volume * 100)}%";
+      if (Utilities.IsValid(_volumeIcon)) _volumeIcon.SetActive(!_controller.Mute);
+      if (Utilities.IsValid(_mutedIcon)) _mutedIcon.SetActive(_controller.Mute);
     }
 
     private void UpdateScreenView()
