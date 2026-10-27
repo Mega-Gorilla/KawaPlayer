@@ -41,12 +41,24 @@ namespace Yamadev.YamaStream.UI
         return;
       }
 
-      float localX = localPosition.x + (_rect.rect.width * _rect.pivot.x);
-      _percent = Mathf.Clamp01(localX / _rect.rect.width);
+      // A bar taller than it is wide (the volume bar in its panel, issue
+      // #258) runs from the bottom up; any other, from left to right.
+      bool vertical = _rect.rect.height > _rect.rect.width;
+      if (vertical)
+      {
+        float localY = localPosition.y + (_rect.rect.height * _rect.pivot.y);
+        _percent = Mathf.Clamp01(localY / _rect.rect.height);
+      }
+      else
+      {
+        float localX = localPosition.x + (_rect.rect.width * _rect.pivot.x);
+        _percent = Mathf.Clamp01(localX / _rect.rect.width);
+      }
 
       _tooltip.gameObject.SetActive(true);
       Vector3 pos = _tooltip.localPosition;
-      pos.x = localPosition.x;
+      if (vertical) pos.y = localPosition.y;
+      else pos.x = localPosition.x;
       _tooltip.localPosition = pos;
     }
 
