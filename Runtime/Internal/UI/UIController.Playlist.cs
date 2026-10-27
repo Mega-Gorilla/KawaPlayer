@@ -267,8 +267,19 @@ namespace Yamadev.YamaStream.UI
 
       _playlistTracksPage.SetActive(false);
       _playlistListPage.SetActive(true);
-      // Takes the title bar -- name, delete, refresh -- away with it.
-      if (Utilities.IsValid(_userUIAnimator)) _userUIAnimator.SetTrigger("HidePlaylistTitle");
+      HidePlaylistHeader();
+    }
+
+    // Leaving a playlist's tracks -- back, the queue or history tab, or the
+    // playlist taken away -- closes its header (name, count, "…") and the
+    // strip of its actions. The tabs stay in view over the header (issue
+    // #258), so a tab can be pressed while they show. The animator's layers
+    // let a hide sent while closed pass, so sending it again does no harm.
+    private void HidePlaylistHeader()
+    {
+      if (!Utilities.IsValid(_userUIAnimator)) return;
+      _userUIAnimator.SetTrigger("HidePlaylistTitle");
+      _userUIAnimator.SetTrigger("HideListActions");
     }
 
     public void DeletePlaylist()
@@ -384,6 +395,7 @@ namespace Yamadev.YamaStream.UI
     {
       UpdatePlaylistActionButtons();
       if (!IsQueuePage || !Utilities.IsValid(_playlistTracksScroll)) return;
+      HidePlaylistHeader();
       _playlistTracksScroll.SetUp(_controller.Queue.TrackCount, this, nameof(UpdatePlaylistTracksContent));
     }
 
@@ -391,6 +403,7 @@ namespace Yamadev.YamaStream.UI
     {
       UpdatePlaylistActionButtons();
       if (!IsHistoryPage || !Utilities.IsValid(_playlistTracksScroll)) return;
+      HidePlaylistHeader();
       _playlistTracksScroll.SetUp(_controller.History.TrackCount, this, nameof(UpdatePlaylistTracksContent));
     }
 
