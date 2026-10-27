@@ -1,0 +1,108 @@
+<!doctype html><html lang="ja"><head><meta charset="utf-8">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700&display=swap">
+<style>
+body{margin:0}
+a{color:#4FC3F7}a:hover{color:#B3E5FC}
+button{font-family:inherit;color:inherit;border:0;margin:0;cursor:pointer}
+.ic{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.ic .f{fill:currentColor;stroke:none}
+.cb{width:84px;height:84px;border-radius:42px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.1);padding:0;flex-shrink:0}
+.cb svg{width:40px;height:40px}
+.pill{height:84px;padding:0 30px;border-radius:42px;display:flex;align-items:center;gap:12px;font-size:26px;font-weight:700;flex-shrink:0;background:rgba(255,255,255,0.1)}
+.cat{height:84px;padding:0 28px;border-radius:42px;display:flex;align-items:center;gap:16px;font-size:28px;font-weight:700;background:transparent;color:#A3A6B0;text-align:left}
+.cat svg{width:36px;height:36px}
+.set{display:flex;align-items:center;justify-content:space-between;gap:32px;min-height:116px;border-top:1px solid rgba(255,255,255,0.12)}
+.lab{display:flex;flex-direction:column;gap:6px;min-width:0}
+.lab b{font-size:30px}
+.lab span{font-size:22px;color:#A3A6B0}
+</style>
+</head><body style="margin:0">
+
+<div style="width: 1600px; height: 900px; position: relative; overflow: hidden; background: #15171C; font-family: 'Zen Maru Gothic', 'Hiragino Maru Gothic ProN', 'Meiryo', sans-serif; color: #E4E5EA">
+  <svg viewBox="0 0 1600 900" style="position: absolute; left: 0; top: 0; width: 100%; height: 100%; display: block" aria-hidden="true">
+    <defs>
+      <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" style="stop-color: #E9A982"></stop>
+        <stop offset="0.55" style="stop-color: #F4D3A4"></stop>
+        <stop offset="1" style="stop-color: #A8CFDF"></stop>
+      </linearGradient>
+    </defs>
+    <rect x="0" y="0" width="1600" height="900" fill="url(#sky)"></rect>
+    <circle cx="1120" cy="290" r="88" fill="#FFF3DC"></circle>
+    <polygon points="0,520 220,380 420,500 640,340 900,520 1100,420 1340,540 1600,400 1600,900 0,900" fill="#7896AB"></polygon>
+    <polygon points="0,630 300,510 560,610 820,490 1080,620 1360,530 1600,610 1600,900 0,900" fill="#557489"></polygon>
+    <path d="M0 750 C 400 690 800 820 1600 710 L1600 900 L0 900 Z" fill="#86BCD3"></path>
+    <path d="M0 820 C 500 780 1000 880 1600 800 L1600 900 L0 900 Z" fill="#B7DCEA"></path>
+  </svg>
+  <div aria-hidden="true" style="position: absolute; left: 0; top: 0; width: 1600px; height: 900px; background: rgba(16,18,22,0.84); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px)"></div>
+
+  <header style="position: absolute; left: 48px; right: 48px; top: 36px; display: flex; align-items: center; gap: 20px">
+    <button class="cb" aria-label="設定を閉じて戻る">
+      <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg>
+    </button>
+    <span style="font-size: 38px; font-weight: 700">設定</span>
+  </header>
+
+  <nav aria-label="設定の分類" style="position: absolute; left: 48px; top: 156px; width: 300px; display: flex; flex-direction: column; gap: 12px">
+    <button class="cat" aria-pressed="true" style="background: rgba(255,255,255,0.14); color: #FFFFFF">
+      <svg class="ic" viewBox="0 0 24 24" style="color: #4FC3F7" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path class="f" d="M10 8.5v7l6-3.5z"></path></svg>再生
+    </button>
+    <button class="cat">
+      <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="6" width="13" height="12" rx="2"></rect><path d="M16 10l5-3v10l-5-3"></path></svg>映像・音声
+    </button>
+    <button class="cat">
+      <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle class="f" cx="5" cy="12" r="1.8"></circle><circle class="f" cx="12" cy="12" r="1.8"></circle><circle class="f" cx="19" cy="12" r="1.8"></circle></svg>その他
+    </button>
+  </nav>
+
+  <section aria-label="再生の設定" style="position: absolute; left: 396px; right: 84px; top: 140px; display: flex; flex-direction: column">
+    <div class="set" style="border-top: 0">
+      <div class="lab"><b>動画プレイヤー</b><span>全員に反映（Global）</span></div>
+      <div style="display: flex; padding: 6px; border-radius: 48px; background: rgba(255,255,255,0.08)">
+        <button aria-pressed="true" style="height: 84px; padding: 0 34px; border-radius: 42px; background: rgba(255,255,255,0.18); font-size: 26px; font-weight: 700">AVPro</button>
+        <button style="height: 84px; padding: 0 34px; border-radius: 42px; background: transparent; font-size: 26px; font-weight: 700; color: #A3A6B0">画像</button>
+      </div>
+    </div>
+    <div class="set">
+      <div class="lab"><b>再生速度</b><span>全員に反映（Global）・変えると読み込み直します</span></div>
+      <div style="display: flex; align-items: center; gap: 16px">
+        <button class="cb" aria-label="遅くする">
+          <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 12h12"></path></svg>
+        </button>
+        <span style="width: 120px; text-align: center; font-size: 34px; font-weight: 700; font-variant-numeric: tabular-nums">1.00x</span>
+        <button class="cb" aria-label="速くする">
+          <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 12h12"></path><path d="M12 6v12"></path></svg>
+        </button>
+      </div>
+    </div>
+    <div class="set">
+      <div class="lab"><b>区間リピート再生</b><span>全員に反映（Global）・動画が変わると戻ります</span></div>
+      <button aria-label="区間リピート再生" aria-pressed="false" style="width: 104px; height: 60px; border-radius: 30px; background: rgba(255,255,255,0.22); position: relative; padding: 0">
+        <span style="position: absolute; left: 6px; top: 6px; width: 48px; height: 48px; border-radius: 24px; background: #FFFFFF"></span>
+      </button>
+    </div>
+    <div class="set">
+      <div class="lab"><b>ローカル再生遅延</b><span>自分の画面だけ</span></div>
+      <div style="display: flex; align-items: center; gap: 16px">
+        <button class="cb" aria-label="遅らせる量を減らす">
+          <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 12h12"></path></svg>
+        </button>
+        <span style="width: 120px; text-align: center; font-size: 34px; font-weight: 700; font-variant-numeric: tabular-nums">0.0 秒</span>
+        <button class="cb" aria-label="遅らせる量を増やす">
+          <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 12h12"></path><path d="M12 6v12"></path></svg>
+        </button>
+      </div>
+    </div>
+    <div class="set">
+      <div class="lab"><b>自動再生</b><span>入ったときに流す（Global）・設定値：未設定</span></div>
+      <button class="pill" style="padding: 0 22px 0 32px">設定する
+        <svg class="ic" viewBox="0 0 24 24" style="width: 30px; height: 30px" aria-hidden="true"><path d="M9 5l7 7-7 7"></path></svg>
+      </button>
+    </div>
+  </section>
+
+  <div aria-hidden="true" style="position: absolute; right: 48px; top: 150px; width: 8px; height: 640px; border-radius: 4px; background: rgba(255,255,255,0.1)">
+    <div style="width: 8px; height: 420px; border-radius: 4px; background: rgba(255,255,255,0.4)"></div>
+  </div>
+</div>
+</body></html>
