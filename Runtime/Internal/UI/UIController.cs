@@ -1052,7 +1052,13 @@ namespace Yamadev.YamaStream.UI
       bool branding = empty && Utilities.IsValid(_trackInfoLogo);
       if (Utilities.IsValid(_trackInfoLogo)) _trackInfoLogo.SetActive(empty);
       if (Utilities.IsValid(_trackTitleText)) _trackTitleText.text = branding ? $"KawaPlayer v{_controller.Version}" : !string.IsNullOrEmpty(title) ? title : url;
-      if (Utilities.IsValid(_trackUrlText)) _trackUrlText.text = !string.IsNullOrEmpty(title) ? url : string.Empty;
+      if (Utilities.IsValid(_trackUrlText))
+      {
+        // Hidden while empty, so the title card, sized to what it shows,
+        // keeps no room for it.
+        _trackUrlText.text = !string.IsNullOrEmpty(title) ? url : string.Empty;
+        _trackUrlText.gameObject.SetActive(!string.IsNullOrEmpty(_trackUrlText.text));
+      }
       UpdateUrlHintView(empty);
     }
 
