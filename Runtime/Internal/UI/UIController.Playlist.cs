@@ -13,6 +13,8 @@ namespace Yamadev.YamaStream.UI
 
     [Header("Playlist - UI Components")]
     [SerializeField] private Text _currentPlaylistNameText;
+    // Beside the name: how many tracks the open playlist has (issue #258).
+    [SerializeField] private Text _currentPlaylistTrackCountText;
     [SerializeField] private LoopScroll _playlistsListScroll;
     [SerializeField] private LoopScroll _playlistTracksScroll;
     // The two halves of the panel where one replaces the other. Not the
@@ -46,6 +48,11 @@ namespace Yamadev.YamaStream.UI
     [SerializeField] private Text _playlistRefreshButtonLabel;
     [SerializeField, RegisterEvent(nameof(Button.onClick), nameof(DeletePlaylist))] private Button _playlistDeleteButton;
     [SerializeField] private Text _playlistDeleteButtonLabel;
+    // The "…" that opens the strip of these actions under the header (issue
+    // #258), shown only when one of them can be used.
+    [SerializeField] private GameObject _playlistActionsButton;
+    // Shows the URL a playlist loaded in the world came from, to copy.
+    [SerializeField, RegisterEvent(nameof(Button.onClick), nameof(ShowPlaylistUrl))] private Button _playlistUrlButton;
 
     private int _playlistIndex = -1;
     private int _playlistTrackIndex = -1;
@@ -168,6 +175,21 @@ namespace Yamadev.YamaStream.UI
       if (Utilities.IsValid(_playlistDeleteButton)) _playlistDeleteButton.gameObject.SetActive(isDynamic);
       if (Utilities.IsValid(_playlistRefreshButton))
         _playlistRefreshButton.gameObject.SetActive(isDynamic && Utilities.IsValid(_playlistRefreshHandler) && slot.CanRefresh);
+      if (Utilities.IsValid(_playlistUrlButton)) _playlistUrlButton.gameObject.SetActive(isDynamic && slot.CanRefresh);
+      // Delete shows with any of them, so the strip is never empty.
+      if (Utilities.IsValid(_playlistActionsButton)) _playlistActionsButton.SetActive(isDynamic);
+    }
+
+    // A playlist baked into the world keeps no URL at run time, so the
+    // button shows only for one loaded in the world, whose source is the
+    // URL it was loaded from (the VRChat URL VHub gives it).
+    public void ShowPlaylistUrl()
+    {
+      var slot = FindDynamicPlaylist(_playlistIndex);
+      if (!Utilities.IsValid(slot) || slot.IsEmpty || !slot.CanRefresh || !Utilities.IsValid(_modalDialog)) return;
+      string title = Utilities.IsValid(_currentPlaylistNameText) ? _currentPlaylistNameText.text : string.Empty;
+      if (!_modalDialog.TryShow(title, string.Empty, GetTranslation("button.close"), "", this, null, null)) return;
+      _modalDialog.ShowCopyField(slot.SourceUrl.Get(), GetTranslation("button.copyUrl"));
     }
 
     public void RefreshPlaylist()
@@ -209,6 +231,7 @@ namespace Yamadev.YamaStream.UI
       _playlistIndex = -1;
       _playlistTrackIndex = -1;
       if (Utilities.IsValid(_currentPlaylistNameText)) _currentPlaylistNameText.text = string.Empty;
+      if (Utilities.IsValid(_currentPlaylistTrackCountText)) _currentPlaylistTrackCountText.text = string.Empty;
       // GeneratePlaylistTracks returns early with no selection, so the rows
       // have to be dropped here. The queue and history pages feed the same
       // scroll and are redrawn right after, so leave them alone.
@@ -401,6 +424,8 @@ namespace Yamadev.YamaStream.UI
         {
           _currentPlaylistNameText.text = playlist.PlaylistName;
         }
+        if (Utilities.IsValid(_currentPlaylistTrackCountText))
+          _currentPlaylistTrackCountText.text = $"{playlist.TrackCount} {GetTranslation("label.tracks")}";
       }
       else return;
 
