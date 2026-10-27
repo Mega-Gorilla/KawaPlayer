@@ -13,6 +13,8 @@ namespace Yamadev.YamaStream.UI
 
     [Header("Playlist - UI Components")]
     [SerializeField] private Text _currentPlaylistNameText;
+    // Beside the name: how many tracks the open playlist has (issue #258).
+    [SerializeField] private Text _currentPlaylistTrackCountText;
     [SerializeField] private LoopScroll _playlistsListScroll;
     [SerializeField] private LoopScroll _playlistTracksScroll;
     // The two halves of the panel where one replaces the other. Not the
@@ -27,7 +29,7 @@ namespace Yamadev.YamaStream.UI
     [SerializeField] private GameObject _playlistTracksPage;
     [SerializeField, RegisterEvent(nameof(Toggle.onValueChanged), nameof(GenerateQueueView))] private Toggle _queueTabToggle;
     [SerializeField, RegisterEvent(nameof(Toggle.onValueChanged), nameof(GenerateHistoryView))] private Toggle _historyTabToggle;
-    [SerializeField] private Toggle _playlistsTabToggle;
+    [SerializeField, RegisterEvent(nameof(Toggle.onValueChanged), nameof(OpenPlaylistsTab))] private Toggle _playlistsTabToggle;
 
     [Header("Playlist - Actions")]
     // Back to the playlist list. Wired the way the delete and refresh
@@ -46,6 +48,11 @@ namespace Yamadev.YamaStream.UI
     [SerializeField] private Text _playlistRefreshButtonLabel;
     [SerializeField, RegisterEvent(nameof(Button.onClick), nameof(DeletePlaylist))] private Button _playlistDeleteButton;
     [SerializeField] private Text _playlistDeleteButtonLabel;
+    // The "…" that opens the strip of these actions under the header (issue
+    // #258), shown only when one of them can be used.
+    [SerializeField] private GameObject _playlistActionsButton;
+    // Shows the URL a playlist loaded in the world came from, to copy.
+    [SerializeField, RegisterEvent(nameof(Button.onClick), nameof(ShowPlaylistUrl))] private Button _playlistUrlButton;
 
     private int _playlistIndex = -1;
     private int _playlistTrackIndex = -1;
@@ -168,6 +175,21 @@ namespace Yamadev.YamaStream.UI
       if (Utilities.IsValid(_playlistDeleteButton)) _playlistDeleteButton.gameObject.SetActive(isDynamic);
       if (Utilities.IsValid(_playlistRefreshButton))
         _playlistRefreshButton.gameObject.SetActive(isDynamic && Utilities.IsValid(_playlistRefreshHandler) && slot.CanRefresh);
+      if (Utilities.IsValid(_playlistUrlButton)) _playlistUrlButton.gameObject.SetActive(isDynamic && slot.CanRefresh);
+      // Delete shows with any of them, so the strip is never empty.
+      if (Utilities.IsValid(_playlistActionsButton)) _playlistActionsButton.SetActive(isDynamic);
+    }
+
+    // A playlist baked into the world keeps no URL at run time, so the
+    // button shows only for one loaded in the world, whose source is the
+    // URL it was loaded from (the VRChat URL VHub gives it).
+    public void ShowPlaylistUrl()
+    {
+      var slot = FindDynamicPlaylist(_playlistIndex);
+      if (!Utilities.IsValid(slot) || slot.IsEmpty || !slot.CanRefresh || !Utilities.IsValid(_modalDialog)) return;
+      string title = Utilities.IsValid(_currentPlaylistNameText) ? _currentPlaylistNameText.text : string.Empty;
+      if (!_modalDialog.TryShow(title, string.Empty, GetTranslation("button.close"), "", this, null, null)) return;
+      _modalDialog.ShowCopyField(slot.SourceUrl.Get(), GetTranslation("button.copyUrl"));
     }
 
     public void RefreshPlaylist()
@@ -209,6 +231,7 @@ namespace Yamadev.YamaStream.UI
       _playlistIndex = -1;
       _playlistTrackIndex = -1;
       if (Utilities.IsValid(_currentPlaylistNameText)) _currentPlaylistNameText.text = string.Empty;
+      if (Utilities.IsValid(_currentPlaylistTrackCountText)) _currentPlaylistTrackCountText.text = string.Empty;
       // GeneratePlaylistTracks returns early with no selection, so the rows
       // have to be dropped here. The queue and history pages feed the same
       // scroll and are redrawn right after, so leave them alone.
@@ -244,8 +267,30 @@ namespace Yamadev.YamaStream.UI
 
       _playlistTracksPage.SetActive(false);
       _playlistListPage.SetActive(true);
-      // Takes the title bar -- name, delete, refresh -- away with it.
-      if (Utilities.IsValid(_userUIAnimator)) _userUIAnimator.SetTrigger("HidePlaylistTitle");
+      HidePlaylistHeader();
+    }
+
+    // The playlist tab goes back to the playlist list the way the back button
+    // does, so its page and the header never part. Pressed again while a
+    // playlist's tracks show it reports on again (a toggle on in its group
+    // still calls back); leaving it for the queue or history reports off,
+    // which must leave their page alone.
+    public void OpenPlaylistsTab()
+    {
+      if (!Utilities.IsValid(_playlistsTabToggle) || !_playlistsTabToggle.isOn) return;
+      ReturnToPlaylistList();
+    }
+
+    // Leaving a playlist's tracks -- back, the queue or history tab, or the
+    // playlist taken away -- closes its header (name, count, "…") and the
+    // strip of its actions. The tabs stay in view over the header (issue
+    // #258), so a tab can be pressed while they show. The animator's layers
+    // let a hide sent while closed pass, so sending it again does no harm.
+    private void HidePlaylistHeader()
+    {
+      if (!Utilities.IsValid(_userUIAnimator)) return;
+      _userUIAnimator.SetTrigger("HidePlaylistTitle");
+      _userUIAnimator.SetTrigger("HideListActions");
     }
 
     public void DeletePlaylist()
@@ -361,6 +406,7 @@ namespace Yamadev.YamaStream.UI
     {
       UpdatePlaylistActionButtons();
       if (!IsQueuePage || !Utilities.IsValid(_playlistTracksScroll)) return;
+      HidePlaylistHeader();
       _playlistTracksScroll.SetUp(_controller.Queue.TrackCount, this, nameof(UpdatePlaylistTracksContent));
     }
 
@@ -368,6 +414,7 @@ namespace Yamadev.YamaStream.UI
     {
       UpdatePlaylistActionButtons();
       if (!IsHistoryPage || !Utilities.IsValid(_playlistTracksScroll)) return;
+      HidePlaylistHeader();
       _playlistTracksScroll.SetUp(_controller.History.TrackCount, this, nameof(UpdatePlaylistTracksContent));
     }
 
@@ -401,6 +448,8 @@ namespace Yamadev.YamaStream.UI
         {
           _currentPlaylistNameText.text = playlist.PlaylistName;
         }
+        if (Utilities.IsValid(_currentPlaylistTrackCountText))
+          _currentPlaylistTrackCountText.text = $"{playlist.TrackCount} {GetTranslation("label.tracks")}";
       }
       else return;
 

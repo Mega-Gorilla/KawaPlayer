@@ -86,7 +86,15 @@ namespace Yamadev.YamaStream.UI
 
       if (_lineHeight <= 0) return;
 
-      int count = Mathf.CeilToInt(_scrollRect.GetComponent<RectTransform>().rect.height / _lineHeight);
+      // Enough lines for the scroll at its tallest. One whose height a layout
+      // group sets (the screen's list panel, issue #258) can be 0 before its
+      // first layout pass, and grows and shrinks as the panel's header and
+      // strip come and go, so its height now is not the most it will need;
+      // the canvas it is on bounds that.
+      float height = _scrollRect.GetComponent<RectTransform>().rect.height;
+      Canvas canvas = GetComponentInParent<Canvas>();
+      if (Utilities.IsValid(canvas)) height = Mathf.Max(height, canvas.GetComponent<RectTransform>().rect.height);
+      int count = Mathf.CeilToInt(height / _lineHeight);
       for (int i = 0; i < count; i++)
       {
         GameObject obj = Instantiate(_template);
