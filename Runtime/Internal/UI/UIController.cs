@@ -43,18 +43,20 @@ namespace Yamadev.YamaStream.UI
     // Wired at build time by PlaylistLoaderBuildProcess when the module is
     // present; see the contract in PlayUrlField.
     [SerializeField] private UdonSharpBehaviour _urlInterceptor;
-    // Line shown in the (otherwise empty) track info bar while nothing is
-    // loaded: the player name and version, optionally followed by what the
-    // URL input accepts. The trailing sentence's key is supplied by an
-    // interceptor module's build process (issue #84); empty means the
-    // branding shows on its own.
+    // Line shown under the player's name in the (otherwise empty) title card
+    // while nothing is loaded: what the URL input accepts. Its key is
+    // supplied by an interceptor module's build process (issue #84); empty
+    // means the name shows on its own.
     [SerializeField] private Text _urlHintText;
     [SerializeField, HideInInspector] private string _urlHintKey;
 
     [Header("Track Info Display (Top Bar)")]
-    [SerializeField, RegisterEvent(nameof(VRCUrlInputField.onEndEdit), nameof(PlayUrlTop))] private VRCUrlInputField _urlInputFieldTop;
     [SerializeField] private Text _trackTitleText;
     [SerializeField] private Text _trackUrlText;
+    // Shown beside the player's name and version, which take the title's
+    // place while nothing is loaded. A UI without it (the Controller Bar)
+    // leaves its title empty then (issue #258).
+    [SerializeField] private GameObject _trackInfoLogo;
 
     [Header("Playback Control Buttons (Left Side)")]
     [SerializeField, RegisterEvent(nameof(VRCUrlInputField.onEndEdit), nameof(PlayUrl))] private VRCUrlInputField _urlInputField;
@@ -360,8 +362,6 @@ namespace Yamadev.YamaStream.UI
     }
 
     public void PlayUrl() => PlayUrlField(_urlInputField);
-
-    public void PlayUrlTop() => PlayUrlField(_urlInputFieldTop);
 
     private void PlayUrlField(VRCUrlInputField urlInputField)
     {
@@ -1047,29 +1047,27 @@ namespace Yamadev.YamaStream.UI
       var track = _controller.Track;
       var title = TrackUtils.GetTitle(track);
       var url = TrackUtils.GetUrl(track).Get();
-      if (Utilities.IsValid(_trackTitleText)) _trackTitleText.text = !string.IsNullOrEmpty(title) ? title : url;
-      if (Utilities.IsValid(_trackUrlText)) _trackUrlText.text = !string.IsNullOrEmpty(title) ? url : string.Empty;
-      UpdateUrlHintView(string.IsNullOrEmpty(title) && string.IsNullOrEmpty(url));
+      bool empty = string.IsNullOrEmpty(title) && string.IsNullOrEmpty(url);
+      // The name and version match the info panel's, so they never go stale.
+      bool branding = empty && Utilities.IsValid(_trackInfoLogo);
+      if (Utilities.IsValid(_trackInfoLogo)) _trackInfoLogo.SetActive(empty);
+      if (Utilities.IsValid(_trackTitleText)) _trackTitleText.text = branding ? $"KawaPlayer v{_controller.Version}" : !string.IsNullOrEmpty(title) ? title : url;
+      if (Utilities.IsValid(_trackUrlText))
+      {
+        // Hidden while empty, so the title card, sized to what it shows,
+        // keeps no room for it.
+        _trackUrlText.text = !string.IsNullOrEmpty(title) ? url : string.Empty;
+        _trackUrlText.gameObject.SetActive(!string.IsNullOrEmpty(_trackUrlText.text));
+      }
+      UpdateUrlHintView(empty);
     }
 
     private void UpdateUrlHintView(bool trackInfoEmpty)
     {
       if (!Utilities.IsValid(_urlHintText)) return;
-      string hint = string.Empty;
-      if (trackInfoEmpty)
-      {
-        // The branding always shows while idle, matching the version string
-        // in the info panel so it never goes stale. An interceptor module
-        // appends what its URL input accepts; a missing key resolves to an
-        // empty string, so an unwired module or a stale key leaves the
-        // branding alone instead of adding a blank tail.
-        hint = $"KawaPlayer v{_controller.Version}";
-        if (!string.IsNullOrEmpty(_urlHintKey))
-        {
-          string accepts = GetTranslation(_urlHintKey);
-          if (!string.IsNullOrEmpty(accepts)) hint = $"{hint} / {accepts}";
-        }
-      }
+      // A missing key resolves to an empty string, so an unwired module or a
+      // stale key leaves the name on its own instead of adding a blank line.
+      string hint = trackInfoEmpty && !string.IsNullOrEmpty(_urlHintKey) ? GetTranslation(_urlHintKey) : string.Empty;
       _urlHintText.text = hint;
       _urlHintText.gameObject.SetActive(!string.IsNullOrEmpty(hint));
     }

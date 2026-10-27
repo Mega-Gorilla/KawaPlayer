@@ -98,15 +98,13 @@ ImageViewer        - 画像ビューア (VRCImageDownloader)
 
 ### Phase 1: URL入力 (UIController)
 
-UIController には2つの URL入力欄がある:
-- `_urlInputField` — メインコントロールバー内
-- `_urlInputFieldTop` — トップバー内
+UIController の URL入力欄は `_urlInputField`（下の帯の URL のボタン）の 1 つ。上端にあった `_urlInputFieldTop` は #258 で消した。
 
 ```
 ユーザー操作: VRCUrlInputField に URL を入力して Enter
     │
     ▼
-PlayUrl() / PlayUrlTop()                     (UIController.cs:259-261)
+PlayUrl()                                    (UIController.cs)
     │
     ▼
 PlayUrlField(urlInputField)                  (UIController.cs:263-290)
@@ -502,7 +500,7 @@ Controller.AfterVideoEnded()                 (Controller.Events.cs:131-155)
     ユーザー → VRCUrlInputField に URL 入力 → Enter
                     │
                     ▼
-            PlayUrl() / PlayUrlTop()
+            PlayUrl()
             PlayUrlField(inputField)
                     │
             ┌───────┴───────────────────────┐

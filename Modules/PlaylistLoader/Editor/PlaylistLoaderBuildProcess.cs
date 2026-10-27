@@ -91,11 +91,10 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader.Editor
     {
       foreach (var uiController in uiControllers)
       {
-        // Only the UIController that owns the main URL inputs participates;
-        // panels without inputs (PlaylistPanel etc.) never reach PlayUrlField.
-        var mainInput = uiController.GetProgramVariable("_urlInputField") as VRCUrlInputField;
-        var topInput = uiController.GetProgramVariable("_urlInputFieldTop") as VRCUrlInputField;
-        if (mainInput == null && topInput == null) continue;
+        // Only the UIController that owns the URL input participates;
+        // panels without one (PlaylistPanel etc.) never reach PlayUrlField.
+        var urlInput = uiController.GetProgramVariable("_urlInputField") as VRCUrlInputField;
+        if (urlInput == null) continue;
 
         uiController.SetProgramVariable("_urlInterceptor", loaderUi);
         loaderUi.SetProgramVariable("_uiController", uiController);
