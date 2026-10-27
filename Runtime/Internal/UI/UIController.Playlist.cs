@@ -29,7 +29,7 @@ namespace Yamadev.YamaStream.UI
     [SerializeField] private GameObject _playlistTracksPage;
     [SerializeField, RegisterEvent(nameof(Toggle.onValueChanged), nameof(GenerateQueueView))] private Toggle _queueTabToggle;
     [SerializeField, RegisterEvent(nameof(Toggle.onValueChanged), nameof(GenerateHistoryView))] private Toggle _historyTabToggle;
-    [SerializeField] private Toggle _playlistsTabToggle;
+    [SerializeField, RegisterEvent(nameof(Toggle.onValueChanged), nameof(OpenPlaylistsTab))] private Toggle _playlistsTabToggle;
 
     [Header("Playlist - Actions")]
     // Back to the playlist list. Wired the way the delete and refresh
@@ -268,6 +268,17 @@ namespace Yamadev.YamaStream.UI
       _playlistTracksPage.SetActive(false);
       _playlistListPage.SetActive(true);
       HidePlaylistHeader();
+    }
+
+    // The playlist tab goes back to the playlist list the way the back button
+    // does, so its page and the header never part. Pressed again while a
+    // playlist's tracks show it reports on again (a toggle on in its group
+    // still calls back); leaving it for the queue or history reports off,
+    // which must leave their page alone.
+    public void OpenPlaylistsTab()
+    {
+      if (!Utilities.IsValid(_playlistsTabToggle) || !_playlistsTabToggle.isOn) return;
+      ReturnToPlaylistList();
     }
 
     // Leaving a playlist's tracks -- back, the queue or history tab, or the
