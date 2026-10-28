@@ -41,7 +41,7 @@ namespace Yamadev.YamaStream.Tablet
     [SerializeField] private UIController _uiController;
     [SerializeField] private TabletPickup _tablet;
     [SerializeField] private TabletImageApp _imageApp;
-    [SerializeField] private TabletSettingsApp _settingsApp;
+    [SerializeField] private SettingsPanel _settingsApp;
     [SerializeField] private TabletVisitorsApp _visitorsApp;
 
     [Header("Screens")]
@@ -253,7 +253,6 @@ namespace Yamadev.YamaStream.Tablet
       UpdateTranslation();
       UpdateClockView();
       if (Utilities.IsValid(_imageApp)) _imageApp.UpdateTranslation();
-      if (Utilities.IsValid(_settingsApp)) _settingsApp.UpdateTranslation();
       if (Utilities.IsValid(_visitorsApp)) _visitorsApp.UpdateTranslation();
     }
 
@@ -402,6 +401,7 @@ namespace Yamadev.YamaStream.Tablet
 
       if (Utilities.IsValid(_imageApp)) _imageApp.OnLayoutChanged();
       if (Utilities.IsValid(_visitorsApp)) _visitorsApp.SetPortrait(portrait);
+      if (Utilities.IsValid(_settingsApp)) _settingsApp.SetPortrait(portrait);
     }
 
     private void SetLayoutsEnabled(bool enabled)
