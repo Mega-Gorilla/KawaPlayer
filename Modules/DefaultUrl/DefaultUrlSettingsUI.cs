@@ -12,10 +12,6 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
   {
     [SerializeField] private DefaultUrlController _controller;
     [SerializeField] private OwnerDefaultUrlStorage _storageTemplate;
-    // What to hide when there is no DefaultUrl to set: the whole card, which
-    // in the screen's settings panel is this object's parent. Empty means
-    // this object.
-    [SerializeField] private GameObject _card;
     // Dressed as a button -- icon, label, no visible box -- and clicked like
     // one. Clicking a VRCUrlInputField is what opens VRChat's text entry, so
     // making the field itself the button gets there in one press without
@@ -70,11 +66,10 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
     [SerializeField] private float _enterUrlButtonChrome = 66f;
     [SerializeField] private Text _clearButtonLabel;
     // The sizes the title's "(Global)" and the headline that says the
-    // feature is unavailable are drawn at. They are in the text's own units,
-    // so a panel whose text is set larger or smaller sets them to match (the
-    // tablet's settings app, issue #159).
-    [SerializeField] private int _globalSuffixSize = 44;
-    [SerializeField] private int _headlineSize = 48;
+    // feature is unavailable are drawn at, in the text's own units, to match
+    // the other cards of the settings.
+    [SerializeField] private int _globalSuffixSize = 26;
+    [SerializeField] private int _headlineSize = 30;
 
     private UIController _uiController;
     private string _lastSyncedUrl = null;
@@ -85,20 +80,10 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
     private DynamicPlaylist _pendingReplaced;
     private string _pendingReplacedSourceUrl = string.Empty;
 
+    // The card is this module's own row in the settings, put there when the
+    // world is built only if the module is on (ModuleUISlot.inSettings).
     void Start()
     {
-      // A player without the module, or with it switched off in Module
-      // Manager (left out of the build, or inactive in the editor's Play),
-      // has nothing to set here, so the card goes rather than saying the
-      // feature is unavailable -- that is for a viewer who is not the
-      // instance owner, while the module is there.
-      if (!Utilities.IsValid(_controller) || !_controller.gameObject.activeInHierarchy)
-      {
-        GameObject card = Utilities.IsValid(_card) ? _card : gameObject;
-        card.SetActive(false);
-        return;
-      }
-
       _uiController = GetComponentInParent<UIController>();
       if (_uiController != null) _uiController.AddListener(this);
       UpdateTranslation();

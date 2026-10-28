@@ -43,20 +43,12 @@ namespace Yamadev.YamaStream.UI
     [SerializeField] private Text _tabHistoryLabel;
     [SerializeField] private Text _tabPlaylistsLabel;
 
-    [Header("Localization - Page Labels")]
-    [SerializeField] private Text _returnToMainLabel;
-    [SerializeField] private Text _tabPlaybackLabel;
-    [SerializeField] private Text _tabVideoAndAudioLabel;
-    [SerializeField] private Text _tabUiLabel;
-
     [Header("Localization - Playback Settings")]
     [SerializeField] private Text _videoPlayerTitleLabel;
     [SerializeField] private Text _videoPlayerDescLabel;
     [SerializeField] private Text _imageViewerLabel;
     [SerializeField] private Text _playbackSpeedTitleLabel;
     [SerializeField] private Text _playbackSpeedDescLabel;
-    [SerializeField] private Text _playbackSpeedSlowerButtonLabel;
-    [SerializeField] private Text _playbackSpeedFasterButtonLabel;
     [SerializeField] private Text _repeatPlayTitleLabel;
     [SerializeField] private Text _repeatPlayDescLabel;
     [SerializeField] private Text _repeatOffButtonLabel;
@@ -285,11 +277,6 @@ namespace Yamadev.YamaStream.UI
     private void UpdateTranslation()
     {
       UpdateErrorDetailsTranslation();
-      if (Utilities.IsValid(_returnToMainLabel)) _returnToMainLabel.text = GetTranslation("button.returnToMain");
-      if (Utilities.IsValid(_tabPlaybackLabel)) _tabPlaybackLabel.text = GetTranslation("tab.playback");
-      if (Utilities.IsValid(_tabVideoAndAudioLabel)) _tabVideoAndAudioLabel.text = GetTranslation("tab.videoAndAudio");
-      if (Utilities.IsValid(_tabUiLabel)) _tabUiLabel.text = GetTranslation("tab.other");
-
       if (Utilities.IsValid(_inputUrlLabel)) _inputUrlLabel.text = GetTranslation("label.inputUrl");
       if (Utilities.IsValid(_loopLabel)) _loopLabel.text = GetTranslation("label.loop");
       if (Utilities.IsValid(_loopLabel2)) _loopLabel2.text = GetTranslation("label.loop");
@@ -305,14 +292,12 @@ namespace Yamadev.YamaStream.UI
       if (Utilities.IsValid(_playlistRefreshButtonLabel)) _playlistRefreshButtonLabel.text = GetTranslation("button.refreshPlaylist");
       if (Utilities.IsValid(_playlistDeleteButtonLabel)) _playlistDeleteButtonLabel.text = GetTranslation("button.remove");
 
-      if (Utilities.IsValid(_videoPlayerTitleLabel)) _videoPlayerTitleLabel.text = $"{GetTranslation("label.videoPlayer")}<size=44>(Global)</size>";
+      if (Utilities.IsValid(_videoPlayerTitleLabel)) _videoPlayerTitleLabel.text = $"{GetTranslation("label.videoPlayer")}<size=26>(Global)</size>";
       if (Utilities.IsValid(_videoPlayerDescLabel)) _videoPlayerDescLabel.text = GetTranslation("desc.videoPlayer");
       if (Utilities.IsValid(_imageViewerLabel)) _imageViewerLabel.text = GetTranslation("label.imageViewer");
-      if (Utilities.IsValid(_playbackSpeedTitleLabel)) _playbackSpeedTitleLabel.text = $"{GetTranslation("label.playbackSpeed")}<size=44>(Global)</size>";
+      if (Utilities.IsValid(_playbackSpeedTitleLabel)) _playbackSpeedTitleLabel.text = $"{GetTranslation("label.playbackSpeed")}<size=26>(Global)</size>";
       if (Utilities.IsValid(_playbackSpeedDescLabel)) _playbackSpeedDescLabel.text = GetTranslation("desc.playbackSpeed");
-      if (Utilities.IsValid(_playbackSpeedSlowerButtonLabel)) _playbackSpeedSlowerButtonLabel.text = GetTranslation("label.slower");
-      if (Utilities.IsValid(_playbackSpeedFasterButtonLabel)) _playbackSpeedFasterButtonLabel.text = GetTranslation("label.faster");
-      if (Utilities.IsValid(_repeatPlayTitleLabel)) _repeatPlayTitleLabel.text = $"{GetTranslation("label.repeatPlay")}<size=44>(Global)</size>";
+      if (Utilities.IsValid(_repeatPlayTitleLabel)) _repeatPlayTitleLabel.text = $"{GetTranslation("label.repeatPlay")}<size=26>(Global)</size>";
       if (Utilities.IsValid(_repeatPlayDescLabel)) _repeatPlayDescLabel.text = GetTranslation("desc.repeatPlay");
       if (Utilities.IsValid(_repeatOnButtonLabel)) _repeatOnButtonLabel.text = GetTranslation("button.repeatOn");
       if (Utilities.IsValid(_repeatOffButtonLabel)) _repeatOffButtonLabel.text = GetTranslation("button.repeatOff");

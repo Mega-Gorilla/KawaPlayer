@@ -322,7 +322,7 @@ E3 の `SendCustomVideoEvent(名前)` は、リスナー全員に `SendCustomEve
 
 ## 7. モジュールの UI の差し込み
 
-モジュールは、定義（`YamaPlayerModuleDefinition`）の `uiSlots` に「写す先のパス」と「写す元のテンプレート」を並べる。ビルドで `YamaPlayerModuleBuildProcess` が、同じ `Controller` を指す UIController ごとに `transform.Find(targetPath)` で探し、見つかった所に写す。
+モジュールは、定義（`YamaPlayerModuleDefinition`）の `uiSlots` に「写す先のパス」と「写す元のテンプレート」を並べる。ビルドで `YamaPlayerModuleBuildProcess` が、同じ `Controller` を指す UIController ごとに `transform.Find(targetPath)` で探し、見つかった所に写す。`inSettings` の付いた口は、UIController からではなく、その下の設定（`SettingsPanel`：スクリーンの設定のページと、タブレットの設定アプリ。どちらも同じ `Settings.prefab`）から探すので、1 つの口でスクリーンとタブレットの両方に入る（#309）。
 
 ![PermissionManagement の 5 つの targetPath が、ScreenUI・タブレットの UIController・全員リロードボタンの UIController に写され、Controller Bar と Playlist Panel には合うパスがないので写されない](images/device-connections/slots.svg)
 
@@ -332,11 +332,13 @@ E3 の `SendCustomVideoEvent(名前)` は、リスナー全員に `SendCustomEve
 
 | モジュール | 写す先（`targetPath`） | 当たるデバイス |
 | --- | --- | --- |
-| PermissionManagement | `Canvas/User`、`Canvas/User/Main/Pages/Settings/PageToggles`、`Canvas/User/Main/Pages/Settings/PageView`、`Canvas/Display`、`Canvas/Modules` | 本体とタブレットの `ScreenUI`、タブレット、全員リロードボタン |
-| AudioLinkAdaptor | `Canvas/User/Main/Pages/Settings/PageView/VideoView/Viewport/Content`、`Canvas/Display/Apps/Settings/Pages/Audio/Viewport/Content` | `ScreenUI`、タブレットの設定アプリ |
-| PitchShifter | `Canvas/User/Main/Pages/Settings/PageView/VideoView/Viewport/Content` | `ScreenUI` |
-| SlideShower | `Canvas/User`、`Canvas/User/Main/Pages/Settings/PageView/PlaybackView/Viewport/Content`（2 つ） | `ScreenUI` |
-| DefaultUrl | `Canvas/Display/Apps/Settings/Pages/Playback/Viewport/Content` | タブレットの設定アプリ（スクリーンのカードは `ScreenUI` に直接置いてある） |
+| PermissionManagement | `Canvas/User`、設定の `Categories`・`Pages`、`Canvas/Display`、`Canvas/Modules` | 本体とタブレットの `ScreenUI`、タブレット、全員リロードボタン（設定の分類とページは、設定のある UI だけ） |
+| AudioLinkAdaptor | 設定の `Pages/Audio/Viewport/Content` | 設定のある UI（`ScreenUI`、タブレットの設定アプリ） |
+| PitchShifter | 設定の `Pages/Audio/Viewport/Content` | 設定のある UI |
+| SlideShower | `Canvas/User`、`Canvas/Display`（行を動かす `SlideShowerUI`）、設定の `Pages/Playback/Viewport/Content`（行 2 つ） | `ScreenUI`、タブレット |
+| DefaultUrl | 設定の `Pages/Playback/Viewport/Content` | 設定のある UI |
+
+「設定の」は `inSettings` の口で、パスは設定の部品（`SettingsPanel`）から数える。行を動かす U# は、行そのものに付く物（AudioLink・ピッチ・自動再生）と、いつも動いている所に置く物（`SlideShowerUI` はシークバーも預かるので `Canvas/User` と `Canvas/Display`）がある。
 
 - 写した物の中の参照は、写した先の物に付け替える。テンプレートの外（モジュール本体）への参照は、そのまま残る。
 - 写し終えたら、テンプレートは消す。
@@ -379,7 +381,7 @@ E3 の `SendCustomVideoEvent(名前)` は、リスナー全員に `SendCustomEve
 1. **O1. プレイヤーを見つける方法が 3 通りある（図 10）。** 正の値は各部品の `_controller` だが、書くのはエディター（Sub Controller のインスペクターと、デバイスを置くメニュー）だけである。置くメニューは、親かシーンに 1 つだけの KawaPlayer を選ぶ（#267）。プレハブを更新して部品が増えても、欄を選び直すまでつながらない。ビルドは、それを手がかりに配線するだけで、Sub Controller で選んだプレイヤーと合っているかは確かめ直さない。未設定だけは、ビルドが置いた部品ごとに警告し（`DeviceLinkBuildProcess`。全員リロードボタンは自分のビルド処理）、`UIController.Start`・`YamaPlayerModule.Start` がログに出す（#294）。
 2. **O2. 共通のインスペクターが、特定のデバイスを知っている。** `YamaPlayerSubControllerEditor` が `TabletPickup`・`TabletReturnButton`・`TabletVisitorRecorder` を直接扱う。新しいデバイスの設定を足すと、このファイルを書き換えることになる（#206 もここ）。
 3. **O3. 名前の文字列の接続口に、一覧が無い。** 前の確認の 27 個、名前の出来事、差し込み口の値と名前は、送る側と受ける側が同じ文字列を書いている。打ち間違いは、コンパイルでもビルドでも見つからない。コアがモジュールの型を参照できないので、名前で呼ぶこと自体には理由がある。
-4. **O4. 差し込みの場所が、UI の階層のパス。** `uiSlots` は `Canvas/User/Main/Pages/...` のような深いパスで写す先を決める。デバイスの側は、そのパスを用意しておく必要がある（全員リロードボタンの空の `Canvas/Modules`）。合わないパスは、何も言わずに飛ばされる。
+4. **O4. 差し込みの場所が、UI の階層のパス。** `uiSlots` はパスで写す先を決める。デバイスの側は、そのパスを用意しておく必要がある（全員リロードボタンの空の `Canvas/Modules`）。合わないパスは、何も言わずに飛ばされる。設定の中の口は、設定の部品から数える `inSettings` になり、UI ごとの深いパスは無くなった（#309）が、設定の外の口は UI の階層のパスのままである。
 5. **O5. 配る先のリストが何重にもあり、食い違いやすい。** `Controller` と `UIController` のほかに、4 つのモジュールが自前のリストを持つ（表 12）。外す口はどのリストにも無い。食い違いの例が `AudioLinkAdaptor` だった。状態の変化を `Controller` のリスナーに送っていた（E3）が、受ける `AudioLinkAdaptorUI` は `AudioLinkAdaptor` の自前のリストと `UIController` にしか登録していなかった。そのため、ある UI で AudioLink を切り替えても、ほかの UI（スクリーンとタブレットの設定アプリ）のトグルは追いつかなかった。2026-10-16 に ClientSim で確かめ、自前のリストに送るように直した（#260）。
 6. **O6. 本体の UI の中を、外から直接読んでいる所がある。** `SlideShowerUI` が `UIController` の非公開の欄を読む（§4.7）。UI の作りを変えると、壊れる。
 7. **O7. 本体への命令の入り口が 2 つある。** UI を通す（前の確認と権限がかかる）道と、`Controller` を直接呼ぶ道がある。デバイスが直接呼べば、権限を通らない。今のデバイスは、どれも UI を通している。

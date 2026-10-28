@@ -32,5 +32,9 @@ namespace Yamadev.YamaStream
     public string targetPath;
     public GameObject content;
     public int siblingIndex;
+    // The path starts at the settings (SettingsPanel) rather than at the
+    // UIController, so one slot reaches the settings of every UI that has
+    // them: the screen's settings page and the tablet's settings app.
+    public bool inSettings;
   }
 }

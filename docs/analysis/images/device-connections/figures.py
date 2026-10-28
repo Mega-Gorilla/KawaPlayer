@@ -317,7 +317,7 @@ def fig_tablet():
     b.append(group(24, 70, 566, 380, "Tablet.prefab", "根元に YamaPlayerSubController"))
     b.append(node(44, 112, 170, 50, ["TabletPickup", ("VRCPickup・VRCObjectSync", "t2 f11")], "box", "t1 f12", 17))
     b.append(node(300, 108, 270, 60, ["TabletScreen", ("同期：開いているアプリ・画像の URL・一覧", "t2 f11"), ("縦横の回転・ホームボタン", "t2 f11")], "go", "t1 f12", 16))
-    apps = [("画像アプリ", "TabletImageApp"), ("設定アプリ", "TabletSettingsApp"), ("訪問者アプリ", "TabletVisitorsApp")]
+    apps = [("画像アプリ", "TabletImageApp"), ("設定アプリ", "SettingsPanel"), ("訪問者アプリ", "TabletVisitorsApp")]
     for i, (name, cls) in enumerate(apps):
         b.append(node(44, 202 + i * 60, 170, 46, [name, (cls, "t2 f11")], "box", "t1 f12", 17))
     b.append(node(300, 212, 270, 50, ["UIController（タブレットの）", ("ホーム画面・設定アプリのボタン", "t2 f11")], "box", "t1 f12", 17))
@@ -361,18 +361,19 @@ def fig_global():
 
 # Figure 9: module UI copied into every UIController (E12).
 def fig_slots():
-    W, H = 820, 470
+    W, H = 820, 494
     b = [text(24, 30, "モジュールの UI の差し込み（E12）", "t1 f14"),
          text(24, 50, "ビルドで、同じ Controller を指すすべての UIController に、パスが見つかった所だけ写す（例は PermissionManagement）", "t2 f12")]
-    b.append(card(24, 72, 326, 250, "YamaPlayerModuleDefinition.uiSlots", [
+    b.append(card(24, 72, 326, 274, "YamaPlayerModuleDefinition.uiSlots", [
         ("targetPath", "t2 f11 b"),
         ("Canvas/User", "t1 mono"),
-        ("Canvas/User/Main/Pages/Settings/PageToggles", "t1 mono"),
-        ("Canvas/User/Main/Pages/Settings/PageView", "t1 mono"),
+        ("Categories（設定から）", "t1 mono"),
+        ("Pages（設定から）", "t1 mono"),
         ("Canvas/Display", "t1 mono"),
         ("Canvas/Modules", "t1 mono"),
         ("content：写す元のテンプレート", "t2 f11"),
         ("siblingIndex：写した先での並び", "t2 f11"),
+        ("inSettings：設定（SettingsPanel）から探す", "t2 f11"),
     ], "box", step=24))
     b.append(node(372, 150, 136, 96, ["YamaPlayerModule", "BuildProcess", ("transform.Find", "t2 mono"), ("(targetPath)", "t2 mono")], "go", "t1 f12", 18))
     b.append(arrow([(350, 198), (372, 198)]))
@@ -384,12 +385,12 @@ def fig_slots():
         y = 80 + i * 70
         b.append(node(544, y, 252, 56, [name, (path, "t2 f11")], "box" if ok else "hot", "t1 f12", 17))
         b.append(arrow([(508, 198), (526, 198), (526, y + 28), (544, y + 28)], "solid" if ok else "dash"))
-    b.append(text(24, 352, "写した物は、実行時に GetComponentInParent<UIController>() で自分の UIController を見つけて登録する。", "t2 f12"))
-    b.append(text(24, 374, "写した物の中の参照は、写した先の物に付け替える。テンプレートの外（モジュール本体）への参照はそのまま残る。", "t2 f12"))
-    b.append(text(24, 396, "パスが見つからない UI は、何も言わずに飛ばす。", "t2 f12"))
-    b.append(text(24, 418, "写し終えたら、テンプレートは消す。", "t2 f12"))
+    b.append(text(24, 376, "inSettings の口は、UIController の下の設定（スクリーンの設定のページ、タブレットの設定アプリ）から探すので、1 つで両方に入る。", "t2 f12"))
+    b.append(text(24, 398, "写した物は、実行時に GetComponentInParent<UIController>() で自分の UIController を見つけて登録する。", "t2 f12"))
+    b.append(text(24, 420, "写した物の中の参照は、写した先の物に付け替える。テンプレートの外（モジュール本体）への参照はそのまま残る。", "t2 f12"))
+    b.append(text(24, 442, "パスが見つからない UI は、何も言わずに飛ばす。写し終えたら、テンプレートは消す。", "t2 f12"))
     return svg(W, H, "モジュールのUIの差し込み",
-               "モジュールの定義のuiSlotsにはtargetPathと写す元がある。ビルド処理は、同じControllerを指すUIControllerごとにパスを探し、見つかった所に写す。ScreenUI、タブレットのUIController、全員リロードボタンのUIControllerには写され、Controller BarとPlaylist Panelには合うパスがないので写されない。", "".join(b))
+               "モジュールの定義のuiSlotsにはtargetPathと写す元がある。ビルド処理は、同じControllerを指すUIControllerごとにパスを探し（inSettingsの口はその設定から）、見つかった所に写す。ScreenUI、タブレットのUIController、全員リロードボタンのUIControllerには写され、Controller BarとPlaylist Panelには合うパスがないので写されない。", "".join(b))
 
 
 # Figure 10: three ways a part finds its player.
