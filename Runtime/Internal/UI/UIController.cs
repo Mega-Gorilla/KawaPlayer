@@ -1268,7 +1268,7 @@ namespace Yamadev.YamaStream.UI
     public override void AfterVideoErrorOccurred(VideoError videoError)
     {
       UpdateErrorView(videoError);
-      // stop clears an error
+      // Stop clears an error, so it stays pressable after one.
       UpdateControlsView();
     }
     public override void AfterPlayerHandlerChanged(VideoPlayerType playerType) => UpdateUI();
@@ -1292,7 +1292,7 @@ namespace Yamadev.YamaStream.UI
     public override void AfterQueueUpdated()
     {
       if (Utilities.IsValid(_queueTabToggle) && _queueTabToggle.isOn) GeneratePlaylistTracks();
-      // next plays from the queue
+      // Next plays from the queue, so a track in it makes next pressable.
       UpdateControlsView();
     }
     public override void AfterHistoryUpdated()
