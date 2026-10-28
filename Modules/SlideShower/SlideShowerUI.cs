@@ -139,11 +139,12 @@ namespace Yamadev.YamaStream.Modules.SlideShower
     private void UpdateTranslation()
     {
       if (!Utilities.IsValid(_uiController)) return;
-      if (Utilities.IsValid(_slideModeTitleText)) _slideModeTitleText.text = _uiController.GetTranslation("module.slideshower.slideMode.title");
+      // Both reach everyone in the instance, as the settings mark with "(Global)".
+      if (Utilities.IsValid(_slideModeTitleText)) _slideModeTitleText.text = $"{_uiController.GetTranslation("module.slideshower.slideMode.title")}<size=26>(Global)</size>";
       if (Utilities.IsValid(_slideModeDescriptionText)) _slideModeDescriptionText.text = _uiController.GetTranslation("module.slideshower.slideMode.description");
       if (Utilities.IsValid(_slideModeOnText)) _slideModeOnText.text = _uiController.GetTranslation("module.slideshower.slideMode.on");
       if (Utilities.IsValid(_slideModeOffText)) _slideModeOffText.text = _uiController.GetTranslation("module.slideshower.slideMode.off");
-      if (Utilities.IsValid(_slideSecondsTitleText)) _slideSecondsTitleText.text = _uiController.GetTranslation("module.slideshower.slideSeconds.title");
+      if (Utilities.IsValid(_slideSecondsTitleText)) _slideSecondsTitleText.text = $"{_uiController.GetTranslation("module.slideshower.slideSeconds.title")}<size=26>(Global)</size>";
       if (Utilities.IsValid(_slideSecondsDescriptionText)) _slideSecondsDescriptionText.text = _uiController.GetTranslation("module.slideshower.slideSeconds.description");
       if (Utilities.IsValid(_slide1sText)) _slide1sText.text = _uiController.GetTranslation("module.slideshower.slideSeconds.1s");
       if (Utilities.IsValid(_slide2sText)) _slide2sText.text = _uiController.GetTranslation("module.slideshower.slideSeconds.2s");
