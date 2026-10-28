@@ -1256,7 +1256,15 @@ namespace Yamadev.YamaStream.UI
       ClearSelectionIfEmptied();
       GeneratePlaylistView();
       GeneratePlaylistTracks();
+      // The card names the playing playlist and the place in it, which a
+      // refresh (a new name or count) or a delete changes while the track
+      // stays the same.
+      UpdateTrackView();
     }
+    // The playlist indexes can change without the track (deleting the
+    // playlist that plays drops them), and reach this player apart from the
+    // playlist's own sync, so the card follows every sync too.
+    public override void AfterTrackSynced() => UpdateTrackView();
     public override void AfterVolumeChanged(float volume) => UpdateAudioView();
     public override void AfterMuteChanged(bool mute) => UpdateAudioView();
     public override void AfterMaxResolutionChanged(int maxResolution) => UpdateScreenView();
