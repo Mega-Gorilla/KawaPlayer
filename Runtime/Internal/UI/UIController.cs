@@ -219,7 +219,20 @@ namespace Yamadev.YamaStream.UI
       if (Utilities.IsValid(_reloadButton))
       {
         bool canReload = _controller.CanReload;
-        if (_reloadButton.interactable != canReload) _reloadButton.interactable = canReload;
+        if (_reloadButton.interactable != canReload)
+        {
+          _reloadButton.interactable = canReload;
+          // Its ground is only the ring shown while it is pointed at, so its
+          // icon (the child Image) is what shows it cannot be pressed.
+          var icon = _reloadButton.transform.Find("Image");
+          if (Utilities.IsValid(icon))
+          {
+            var image = icon.GetComponent<Image>();
+            var color = image.color;
+            color.a = canReload ? 1f : 0.3f;
+            image.color = color;
+          }
+        }
       }
     }
 
