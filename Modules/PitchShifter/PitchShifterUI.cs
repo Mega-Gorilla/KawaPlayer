@@ -30,7 +30,7 @@ namespace Yamadev.YamaStream.Modules.PitchShifter
     {
       if (!Utilities.IsValid(_uiController)) return;
       // The pitch reaches everyone in the instance, as the settings mark with "(Global)".
-      if (Utilities.IsValid(_titleText)) _titleText.text = $"{_uiController.GetTranslation("module.pitchshifter.title")}<size=26>(Global)</size>";
+      if (Utilities.IsValid(_titleText)) _titleText.text = _uiController.GetTranslation("module.pitchshifter.title") + UIController.GlobalSuffix;
       if (Utilities.IsValid(_descriptionText)) _descriptionText.text = _uiController.GetTranslation("module.pitchshifter.description");
     }
 
