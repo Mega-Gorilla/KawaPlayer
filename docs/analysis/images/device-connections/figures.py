@@ -379,8 +379,8 @@ def fig_slots():
     b.append(arrow([(350, 198), (372, 198)]))
     uis = [("ScreenUI（本体・タブレットのアプリ）", "Canvas/User ほか", True),
            ("タブレットの UIController", "Canvas/Display", True),
-           ("全員リロードボタンの UIController", "Canvas/Modules（空で用意）", True),
-           ("Controller Bar・Playlist Panel", "合うパスがない → 写さない", False)]
+           ("全員リロードボタン・Playlist Panel", "Canvas/Modules（空で用意）", True),
+           ("Controller Bar", "合うパスがない → 写さない", False)]
     for i, (name, path, ok) in enumerate(uis):
         y = 80 + i * 70
         b.append(node(544, y, 252, 56, [name, (path, "t2 f11")], "box" if ok else "hot", "t1 f12", 17))
@@ -390,7 +390,7 @@ def fig_slots():
     b.append(text(24, 420, "写した物の中の参照は、写した先の物に付け替える。テンプレートの外（モジュール本体）への参照はそのまま残る。", "t2 f12"))
     b.append(text(24, 442, "パスが見つからない UI は、何も言わずに飛ばす。写し終えたら、テンプレートは消す。", "t2 f12"))
     return svg(W, H, "モジュールのUIの差し込み",
-               "モジュールの定義のuiSlotsにはtargetPathと写す元がある。ビルド処理は、同じControllerを指すUIControllerごとにパスを探し（inSettingsの口はその設定から）、見つかった所に写す。ScreenUI、タブレットのUIController、全員リロードボタンのUIControllerには写され、Controller BarとPlaylist Panelには合うパスがないので写されない。", "".join(b))
+               "モジュールの定義のuiSlotsにはtargetPathと写す元がある。ビルド処理は、同じControllerを指すUIControllerごとにパスを探し（inSettingsの口はその設定から）、見つかった所に写す。ScreenUI、タブレットのUIController、全員リロードボタンとPlaylist PanelのUIControllerには写され、Controller Barには合うパスがないので写されない。", "".join(b))
 
 
 # Figure 10: three ways a part finds its player.

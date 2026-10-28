@@ -60,7 +60,8 @@ save(im, "bar-more.png")
 im, d = canvas(); d.ellipse(p(0, 0, 512, 512), fill=255); save(im, "bar-circle.png", 256)
 
 # the list panel (P3): the queue tab (lines and a plus), the history tab (a clock), and the playlist's
-# actions: its URL (a link and a question mark) and delete (a bin); the playlist tab uses bar-list.png
+# actions: its URL and delete (a bin); the playlist tab uses bar-list.png. The URL is shown to copy, so its icon is
+# the usual copy icon (two sheets, P6); a track's URL and the dialog's copy field use it too
 im, d = canvas()
 stroke(d, (88, 132), (340, 132)); stroke(d, (88, 232), (340, 232)); stroke(d, (88, 332), (236, 332))
 stroke(d, (360, 268), (360, 396)); stroke(d, (296, 332), (424, 332))
@@ -70,12 +71,10 @@ d.ellipse(p(64, 64, 448, 448), outline=255, width=30 * S)
 stroke(d, (256, 150), (256, 256)); stroke(d, (256, 256), (322, 300))
 save(im, "bar-history.png")
 im, d = canvas()
-link = Image.open(OUT + "link.png").split()[-1].resize((360 * S, 360 * S), Image.LANCZOS)
-im.paste(link, (0, 152 * S), link)
-d.arc(p(320, 40, 448, 168), 180, 90, fill=255, width=30 * S)
-stroke(d, (384, 168), (384, 214))
-d.ellipse(p(366, 252, 402, 288), fill=255)
-save(im, "bar-url.png")
+d.rounded_rectangle(p(64, 64, 344, 344), radius=56 * S, outline=255, width=30 * S)      # the back sheet
+d.rounded_rectangle(p(140, 140, 476, 476), radius=84 * S, fill=0)                         # cleared behind the front one
+d.rounded_rectangle(p(168, 168, 448, 448), radius=56 * S, outline=255, width=30 * S)    # the front sheet
+save(im, "bar-copy.png")
 im, d = canvas()
 stroke(d, (104, 140), (408, 140)); stroke(d, (208, 140), (208, 100)); stroke(d, (208, 100), (304, 100)); stroke(d, (304, 100), (304, 140))
 stroke(d, (148, 188), (174, 420)); stroke(d, (174, 420), (338, 420)); stroke(d, (338, 420), (364, 188))
