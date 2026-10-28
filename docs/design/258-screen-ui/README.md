@@ -152,7 +152,7 @@ VRChat のレーザーとデスクトップの照準は、目の動きと同じ�
 | 時間とシークバー | `Bottom/ProgressBar` | 帯の 1 段目にする。文字は 24 |
 | 音量のボタンと板 | `Bottom/Volume`（`Mute`・`MuteOff`・`Slider`） | 帯にはボタンだけを置き、スライダーとミュートは縦長の板へ移す。割合の文字を足す |
 | 一覧の板 | `RightSide/Playlists`（`Open`・`Main`） | `Open` の取っ手をやめ、帯の一覧のボタンで開け閉めする（Animator の `TogglePlaylist` はそのまま使う）。右の端に沿って上から下まで、幅 600 で置き、帯より手前に描く。開くと `Playlists` の層が、シークバー（`Bottom/ProgressBar`）を板の手前で終わらせ、再生の操作（`Controls/Actions`）を残りの中央へ、音量と一覧のボタン（`Controls/Right`）を板の手前へ動かし、左の組（`Controls/Left`）を下へ消し、設定とその他を薄れさせる（`CanvasGroup`）。板の外を押す受け（`Main/ListShade`）と、タブの右の「∨」（`Top/Close`）を足す |
-| 一覧のタブ | `RightSide/Playlists/Main/Top/Tabs/Toggle`〜`Toggle (2)` | アイコンを足し、高さ 64 にする（P3 では 84、P5 で詰めた） |
+| 一覧のタブ | `RightSide/Playlists/Main/Top/Tabs/Queue`・`History`・`Playlists` | アイコンを足し、高さ 64 にする（P3 では 84、P5 で詰めた） |
 | プレイリストの更新・削除 | `RightSide/Playlists/Main/Top/Info/Actions` | 「…」の下に出す下地へ移す |
 | 設定のボタン | `LeftSide/Container/Settings` | 帯の右へ移す |
 | 設定のページ | `Pages/Settings`（入れ子の `SettingPanel`） | 全画面のまま、背景を半透明にする。中身は、タブレットの設定アプリを元にした共通の部品に置き換える（5.5 節） |

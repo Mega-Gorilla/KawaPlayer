@@ -3508,7 +3508,7 @@ GameObject:
   - component: {fileID: 1499971906204250239}
   - component: {fileID: 8432583523971406565}
   m_Layer: 0
-  m_Name: Toggle (2)
+  m_Name: Playlists
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4539,7 +4539,7 @@ GameObject:
   - component: {fileID: 4330590620178257740}
   - component: {fileID: 4275162696151255088}
   m_Layer: 0
-  m_Name: Toggle (1)
+  m_Name: History
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5600,7 +5600,7 @@ GameObject:
   - component: {fileID: 5596484040571735265}
   - component: {fileID: 7249147820268451843}
   m_Layer: 0
-  m_Name: Toggle
+  m_Name: Queue
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

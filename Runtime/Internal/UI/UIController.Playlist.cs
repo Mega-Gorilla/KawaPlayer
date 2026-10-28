@@ -18,8 +18,8 @@ namespace Yamadev.YamaStream.UI
     [SerializeField] private LoopScroll _playlistsListScroll;
     [SerializeField] private LoopScroll _playlistTracksScroll;
     // The two halves of the list, where one replaces the other: the
-    // playlists, and a playlist's tracks. Where a UI shows both side by side
-    // these are left unwired, as there is nowhere to go back to.
+    // playlists, and a playlist's tracks. A UI without the list (the
+    // Controller Bar, the Global Reload Button) leaves them unwired.
     [SerializeField] private GameObject _playlistListPage;
     [SerializeField] private GameObject _playlistTracksPage;
     [SerializeField, RegisterEvent(nameof(Toggle.onValueChanged), nameof(GenerateQueueView))] private Toggle _queueTabToggle;
