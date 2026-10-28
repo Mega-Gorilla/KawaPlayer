@@ -10,6 +10,10 @@ namespace Yamadev.YamaStream.UI
 {
   public partial class UIController
   {
+    // What the title of a setting that reaches everyone in the instance
+    // carries, drawn smaller than the title (36). Modules' settings use it too.
+    public const string GlobalSuffix = "<size=26>(Global)</size>";
+
     #region Serialized Fields
 
     [SerializeField, HideInInspector] private TextAsset _translationJsonFile;
@@ -292,12 +296,12 @@ namespace Yamadev.YamaStream.UI
       if (Utilities.IsValid(_playlistRefreshButtonLabel)) _playlistRefreshButtonLabel.text = GetTranslation("button.refreshPlaylist");
       if (Utilities.IsValid(_playlistDeleteButtonLabel)) _playlistDeleteButtonLabel.text = GetTranslation("button.remove");
 
-      if (Utilities.IsValid(_videoPlayerTitleLabel)) _videoPlayerTitleLabel.text = $"{GetTranslation("label.videoPlayer")}<size=26>(Global)</size>";
+      if (Utilities.IsValid(_videoPlayerTitleLabel)) _videoPlayerTitleLabel.text = GetTranslation("label.videoPlayer") + GlobalSuffix;
       if (Utilities.IsValid(_videoPlayerDescLabel)) _videoPlayerDescLabel.text = GetTranslation("desc.videoPlayer");
       if (Utilities.IsValid(_imageViewerLabel)) _imageViewerLabel.text = GetTranslation("label.imageViewer");
-      if (Utilities.IsValid(_playbackSpeedTitleLabel)) _playbackSpeedTitleLabel.text = $"{GetTranslation("label.playbackSpeed")}<size=26>(Global)</size>";
+      if (Utilities.IsValid(_playbackSpeedTitleLabel)) _playbackSpeedTitleLabel.text = GetTranslation("label.playbackSpeed") + GlobalSuffix;
       if (Utilities.IsValid(_playbackSpeedDescLabel)) _playbackSpeedDescLabel.text = GetTranslation("desc.playbackSpeed");
-      if (Utilities.IsValid(_repeatPlayTitleLabel)) _repeatPlayTitleLabel.text = $"{GetTranslation("label.repeatPlay")}<size=26>(Global)</size>";
+      if (Utilities.IsValid(_repeatPlayTitleLabel)) _repeatPlayTitleLabel.text = GetTranslation("label.repeatPlay") + GlobalSuffix;
       if (Utilities.IsValid(_repeatPlayDescLabel)) _repeatPlayDescLabel.text = GetTranslation("desc.repeatPlay");
       if (Utilities.IsValid(_repeatOnButtonLabel)) _repeatOnButtonLabel.text = GetTranslation("button.repeatOn");
       if (Utilities.IsValid(_repeatOffButtonLabel)) _repeatOffButtonLabel.text = GetTranslation("button.repeatOff");

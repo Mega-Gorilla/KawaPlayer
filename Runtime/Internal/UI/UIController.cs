@@ -1060,12 +1060,24 @@ namespace Yamadev.YamaStream.UI
       if (Utilities.IsValid(_trackTitleText)) _trackTitleText.text = branding ? $"KawaPlayer v{_controller.Version}" : !string.IsNullOrEmpty(title) ? title : url;
       if (Utilities.IsValid(_trackUrlText))
       {
-        // Hidden while empty, so the title card, sized to what it shows,
-        // keeps no room for it.
-        _trackUrlText.text = !string.IsNullOrEmpty(title) ? url : string.Empty;
+        // The playlist and the place in it while one of its tracks plays,
+        // else the URL under a title. Hidden while empty, so the title card,
+        // sized to what it shows, keeps no room for it.
+        string place = empty ? string.Empty : PlaylistPlace();
+        _trackUrlText.text = !string.IsNullOrEmpty(place) ? place : !string.IsNullOrEmpty(title) ? url : string.Empty;
         _trackUrlText.gameObject.SetActive(!string.IsNullOrEmpty(_trackUrlText.text));
       }
       UpdateUrlHintView(empty);
+    }
+
+    // "Playlist · 3 / 8"; empty for a URL entered or a track from the queue,
+    // which leave no playlist playing.
+    private string PlaylistPlace()
+    {
+      Playlist playlist = _controller.ActivePlaylist;
+      int index = _controller.PlayingTrackIndex;
+      if (!Utilities.IsValid(playlist) || index < 0 || index >= playlist.TrackCount) return string.Empty;
+      return $"{playlist.PlaylistName} · {index + 1} / {playlist.TrackCount}";
     }
 
     private void UpdateUrlHintView(bool trackInfoEmpty)
@@ -1244,7 +1256,15 @@ namespace Yamadev.YamaStream.UI
       ClearSelectionIfEmptied();
       GeneratePlaylistView();
       GeneratePlaylistTracks();
+      // The card names the playing playlist and the place in it, which a
+      // refresh (a new name or count) or a delete changes while the track
+      // stays the same.
+      UpdateTrackView();
     }
+    // The playlist indexes can change without the track (deleting the
+    // playlist that plays drops them), and reach this player apart from the
+    // playlist's own sync, so the card follows every sync too.
+    public override void AfterTrackSynced() => UpdateTrackView();
     public override void AfterVolumeChanged(float volume) => UpdateAudioView();
     public override void AfterMuteChanged(bool mute) => UpdateAudioView();
     public override void AfterMaxResolutionChanged(int maxResolution) => UpdateScreenView();
