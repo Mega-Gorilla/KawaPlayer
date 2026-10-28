@@ -69,7 +69,7 @@ KawaPlayer には、これからもタブレットやボタンのようなデバ
 | デバイス | プレハブ | 本体を指す部品 | 持てる | 自分で同期する物 | 権限の差し込み先 |
 | --- | --- | --- | --- | --- | --- |
 | Controller Bar | `Prefabs/ControlBar.prefab` | `UIController` | — | 無し | 無し（合うパスがない） |
-| Playlist Panel | `Prefabs/PlaylistPanel.prefab` | `UIController` | — | 無し | 無し（合うパスがない） |
+| Playlist Panel | `Prefabs/PlaylistPanel.prefab` | `UIController` | — | 無し | `UI/Canvas/Modules`（空で用意、#315） |
 | Sub Screen | `Prefabs/SubScreen.prefab` | `YamaPlayerScreen` | 持てる（`VRCPickup`） | 置き場所（`VRCObjectSync`、選んだとき） | — |
 | タブレット | `Prefabs/Tablet.prefab` | `UIController` ×2 | 持てる（`TabletPickup`） | `TabletScreen`、`TabletVisitorRecorder` | `Canvas/Display` と、KawaPlayer アプリの `Canvas/User` |
 | 全員リロードボタン | `Modules/GlobalReload/GlobalReloadButton.prefab` | `UIController` | — | 無し（モジュールがネットワークのイベントを送る） | `Canvas/Modules`（空で用意） |
@@ -287,7 +287,10 @@ E3 の `SendCustomVideoEvent(名前)` は、リスナー全員に `SendCustomEve
 
 ### 6.1 Controller Bar・Playlist Panel
 
-中に `UIController` が 1 つあり、`_controller` で本体を指す。モジュールの UI を差し込むパスを持たないので、権限の確認は無い（§7）。Playlist Panel は自分のダイアログ（`Modal`）を持たず、削除と更新のボタンは、制作者がダイアログを指したときだけ出る。
+どちらも中に `UIController` が 1 つあり、`_controller` で本体を指す。
+
+- **Controller Bar：** モジュールの UI を差し込むパスを持たないので、権限の確認は無い（§7）。
+- **Playlist Panel：** スクリーンの一覧と同じ部品（`Prefabs/UI/ListPanel.prefab`）を 1 列で持ち、`UIController` の一覧の欄（21 個）はスクリーンと同じ形でつなぐ（#315）。空の `UI/Canvas/Modules` を持つので、権限管理の受け手が写され、押した操作に権限がかかる（§7）。自分のダイアログ（`Modal`）は持たない（計画の D8）。そのため「…」（更新・URL？・削除）は出ず、権限で断られたときの知らせも出ない。
 
 ### 6.2 Sub Screen
 
@@ -324,7 +327,7 @@ E3 の `SendCustomVideoEvent(名前)` は、リスナー全員に `SendCustomEve
 
 モジュールは、定義（`YamaPlayerModuleDefinition`）の `uiSlots` に「写す先のパス」と「写す元のテンプレート」を並べる。ビルドで `YamaPlayerModuleBuildProcess` が、同じ `Controller` を指す UIController ごとに `transform.Find(targetPath)` で探し、見つかった所に写す。`inSettings` の付いた口は、UIController からではなく、その下の設定（`SettingsPanel`：スクリーンの設定のページと、タブレットの設定アプリ。どちらも同じ `Settings.prefab`）から探すので、1 つの口でスクリーンとタブレットの両方に入る（#309）。
 
-![PermissionManagement の 5 つの targetPath が、ScreenUI・タブレットの UIController・全員リロードボタンの UIController に写され、Controller Bar と Playlist Panel には合うパスがないので写されない](images/device-connections/slots.svg)
+![PermissionManagement の 5 つの targetPath が、ScreenUI・タブレットの UIController・全員リロードボタンと Playlist Panel の UIController に写され、Controller Bar には合うパスがないので写されない](images/device-connections/slots.svg)
 
 **図 9** モジュールの UI の差し込み（E12）。
 
@@ -393,7 +396,7 @@ E3 の `SendCustomVideoEvent(名前)` は、リスナー全員に `SendCustomEve
 
 - **3 段のつなぎ込み：** デバイスは、エディター（Sub Controller のインスペクターと置くメニュー）・ビルド（`IYamaPlayerBuildProcess`）・実行時（`Start` での登録）の 3 段で本体につながる。
 - **接続口の集まり方：** 実行時の接続口は `Controller`（E1〜E4）と `UIController`（E5〜E9）に集まる。結び方は、型、名前の文字列、欄への書き込みが混ざる。
-- **デバイスの共通点：** 本体への命令は `UIController` を通し、前の確認で権限がかかる。ただし Controller Bar と Playlist Panel には権限の UI が写されないので、権限はかからない（§6.1）。モジュールの UI は、ビルドでパスに写され、実行時に自分の UIController を探して登録する。
+- **デバイスの共通点：** 本体への命令は `UIController` を通し、前の確認で権限がかかる。ただし Controller Bar には権限の UI が写されないので、権限はかからない（§6.1）。モジュールの UI は、ビルドでパスに写され、実行時に自分の UIController を探して登録する。
 - **同期の分担：** 再生の状態は `Controller` が、キュー・履歴・プレイリストの枠の中身はそれぞれの部品が同期する。タブレットの画面や全員リロードボタンの合図も、それぞれの部品が別に送る。
 - **整理の論点：** プレイヤーの見つけ方（O1）、デバイスを知っている共通のインスペクター（O2）、名前の一覧（O3）、パスでの差し込み（O4）、何重ものリスト（O5）、UI の中への直接の読み出し（O6）、命令の入り口（O7）、持てる・戻す・同期の作り（O8）。
 
