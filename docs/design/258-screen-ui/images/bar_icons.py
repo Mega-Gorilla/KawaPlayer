@@ -5,7 +5,7 @@ bar-circle.png is the round ground of the bar's buttons, bar-scrim.png the dark 
 (transparent at the top, opaque at the bottom; the Image's colour sets the darkness).
 Run from the repository root: python docs/design/258-screen-ui/images/bar_icons.py
 """
-from PIL import Image, ImageDraw, ImageFilter
+from PIL import Image, ImageDraw
 
 S = 4                      # supersampling
 W = 512 * S
@@ -60,8 +60,8 @@ save(im, "bar-more.png")
 im, d = canvas(); d.ellipse(p(0, 0, 512, 512), fill=255); save(im, "bar-circle.png", 256)
 
 # the list panel (P3): the queue tab (lines and a plus), the history tab (a clock), and the playlist's
-# actions: its URL and delete (a bin); the playlist tab uses bar-list.png. The URL's icon is a link with a large
-# "i" (P6), legible at the 40 it is shown at; a track's URL and the dialog's copy field use it too
+# actions: its URL and delete (a bin); the playlist tab uses bar-list.png. The URL is shown to copy, so its icon is
+# the usual copy icon (two sheets, P6); a track's URL and the dialog's copy field use it too
 im, d = canvas()
 stroke(d, (88, 132), (340, 132)); stroke(d, (88, 232), (340, 232)); stroke(d, (88, 332), (236, 332))
 stroke(d, (360, 268), (360, 396)); stroke(d, (296, 332), (424, 332))
@@ -71,20 +71,10 @@ d.ellipse(p(64, 64, 448, 448), outline=255, width=30 * S)
 stroke(d, (256, 150), (256, 256)); stroke(d, (256, 256), (322, 300))
 save(im, "bar-history.png")
 im, d = canvas()
-link = Image.open(OUT + "link.png").split()[-1].resize((256 * S, 256 * S), Image.LANCZOS)
-# link.png at half size: its strokes are grown back to 30, blurred and kept above 5 % so that their ends stay round
-grow = round((30 - 30 * 256 / 512) / 2 * S); pad = grow + 2 * S
-big = Image.new("L", (link.width + 2 * pad, link.height + 2 * pad), 0); big.paste(link, (pad, pad))
-big = big.point(lambda v: 255 if v > 127 else 0).filter(ImageFilter.GaussianBlur(grow * 0.6))
-big = big.point(lambda v: 255 if v > 12 else 0).filter(ImageFilter.GaussianBlur(S / 2))
-im.paste(big, (12 * S - pad, 246 * S - pad), big)
-# a large "i" cut out of a disc, parted from the link by a clear ring
-cx, cy, r = 374, 138, 136
-d.ellipse(p(cx - r - 18, cy - r - 18, cx + r + 18, cy + r + 18), fill=0)
-d.ellipse(p(cx - r, cy - r, cx + r, cy + r), fill=255)
-d.ellipse(p(cx - r * 0.17, cy - r * 0.69, cx + r * 0.17, cy - r * 0.35), fill=0)
-d.rounded_rectangle(p(cx - r * 0.15, cy - r * 0.18, cx + r * 0.15, cy + r * 0.58), radius=r * 0.15 * S, fill=0)
-save(im, "bar-url.png")
+d.rounded_rectangle(p(64, 64, 344, 344), radius=56 * S, outline=255, width=30 * S)      # the back sheet
+d.rounded_rectangle(p(140, 140, 476, 476), radius=84 * S, fill=0)                         # cleared behind the front one
+d.rounded_rectangle(p(168, 168, 448, 448), radius=56 * S, outline=255, width=30 * S)    # the front sheet
+save(im, "bar-copy.png")
 im, d = canvas()
 stroke(d, (104, 140), (408, 140)); stroke(d, (208, 140), (208, 100)); stroke(d, (208, 100), (304, 100)); stroke(d, (304, 100), (304, 140))
 stroke(d, (148, 188), (174, 420)); stroke(d, (174, 420), (338, 420)); stroke(d, (338, 420), (364, 188))
