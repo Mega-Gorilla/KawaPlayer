@@ -4495,9 +4495,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_IgnoreLayout: 0
-  m_MinWidth: 360
+  m_MinWidth: 300
   m_MinHeight: 84
-  m_PreferredWidth: 360
+  m_PreferredWidth: 300
   m_PreferredHeight: 84
   m_FlexibleWidth: 0
   m_FlexibleHeight: 0
@@ -9408,9 +9408,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_IgnoreLayout: 0
-  m_MinWidth: 360
+  m_MinWidth: 300
   m_MinHeight: 84
-  m_PreferredWidth: 360
+  m_PreferredWidth: 300
   m_PreferredHeight: 84
   m_FlexibleWidth: 0
   m_FlexibleHeight: 0
@@ -17907,9 +17907,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_IgnoreLayout: 0
-  m_MinWidth: 360
+  m_MinWidth: 300
   m_MinHeight: 84
-  m_PreferredWidth: 360
+  m_PreferredWidth: 300
   m_PreferredHeight: 84
   m_FlexibleWidth: 0
   m_FlexibleHeight: 0
