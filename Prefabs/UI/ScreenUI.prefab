@@ -35,11 +35,11 @@ RectTransform:
   - {fileID: 7407140556402732307}
   m_Father: {fileID: 8143776998921311582}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 1, y: 1}
-  m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -22, y: -22}
-  m_SizeDelta: {x: 64, y: 64}
-  m_Pivot: {x: 1, y: 1}
+  m_AnchorMin: {x: 1, y: 0}
+  m_AnchorMax: {x: 1, y: 0}
+  m_AnchoredPosition: {x: -22, y: 84}
+  m_SizeDelta: {x: 84, y: 84}
+  m_Pivot: {x: 1, y: 0.5}
 --- !u!222 &2221076699897597787
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -61,7 +61,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.89411765, g: 0.8980392, b: 0.91764706, a: 0.08}
+  m_Color: {r: 0.89411765, g: 0.8980392, b: 0.91764706, a: 0.12}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -8204,7 +8204,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 30, y: 30}
+  m_SizeDelta: {x: 36, y: 36}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &5647012138803431797
 CanvasRenderer:
@@ -14632,11 +14632,6 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 3117419700839333904, guid: 042f4eb5ff136bf4593129e91b6a14b3,
         type: 3}
-    - target: {fileID: 3242687917256241130, guid: 042f4eb5ff136bf4593129e91b6a14b3,
-        type: 3}
-      propertyPath: m_FlexibleWidth
-      value: 0
-      objectReference: {fileID: 0}
     - target: {fileID: 3316471951325287027, guid: 042f4eb5ff136bf4593129e91b6a14b3,
         type: 3}
       propertyPath: serializationData.Prefab
