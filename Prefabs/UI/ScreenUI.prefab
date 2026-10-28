@@ -2223,6 +2223,7 @@ GameObject:
   - component: {fileID: 3406712924629325303}
   - component: {fileID: 5552232898371428547}
   - component: {fileID: 7377090182575209913}
+  - component: {fileID: 1051170930266301944}
   m_Layer: 0
   m_Name: More
   m_TagString: Untagged
@@ -2402,6 +2403,18 @@ MonoBehaviour:
   m_FlexibleWidth: -1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
+--- !u!225 &1051170930266301944
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1025777792873729265}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &1036374018938158050
 GameObject:
   m_ObjectHideFlags: 0
@@ -17129,6 +17142,7 @@ GameObject:
   - component: {fileID: 165980333387661507}
   - component: {fileID: 7293275847718365973}
   - component: {fileID: 377367302219081457}
+  - component: {fileID: 5810829098181900286}
   m_Layer: 0
   m_Name: Settings
   m_TagString: Untagged
@@ -17422,6 +17436,18 @@ MonoBehaviour:
   m_FlexibleWidth: -1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
+--- !u!225 &5810829098181900286
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7729102713534554943}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &7747941479980742651
 GameObject:
   m_ObjectHideFlags: 0
@@ -21658,18 +21684,6 @@ MonoBehaviour:
           m_IntArgument: 0
           m_FloatArgument: 0
           m_StringArgument: HideMore
-          m_BoolArgument: 0
-        m_CallState: 2
-      - m_Target: {fileID: 2385889450029982110}
-        m_TargetAssemblyTypeName: UnityEngine.Animator, UnityEngine
-        m_MethodName: SetTrigger
-        m_Mode: 5
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: 
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: HidePlaylist
           m_BoolArgument: 0
         m_CallState: 2
 --- !u!114 &5796955394381981344
