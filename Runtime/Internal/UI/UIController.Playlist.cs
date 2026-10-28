@@ -17,14 +17,9 @@ namespace Yamadev.YamaStream.UI
     [SerializeField] private Text _currentPlaylistTrackCountText;
     [SerializeField] private LoopScroll _playlistsListScroll;
     [SerializeField] private LoopScroll _playlistTracksScroll;
-    // The two halves of the panel where one replaces the other. Not the
-    // scrolls themselves: they are the same object as the page on the main
-    // screen but sit inside it on the playlist panel, where hiding the
-    // scroll would leave the header behind.
-    //
-    // Left unwired where both halves are on screen at once -- the playlist
-    // panel puts the list and the tracks side by side, so there is nowhere
-    // to go back to and nothing to switch.
+    // The two halves of the list, where one replaces the other: the
+    // playlists, and a playlist's tracks. Where a UI shows both side by side
+    // these are left unwired, as there is nowhere to go back to.
     [SerializeField] private GameObject _playlistListPage;
     [SerializeField] private GameObject _playlistTracksPage;
     [SerializeField, RegisterEvent(nameof(Toggle.onValueChanged), nameof(GenerateQueueView))] private Toggle _queueTabToggle;
@@ -48,9 +43,15 @@ namespace Yamadev.YamaStream.UI
     [SerializeField] private Text _playlistRefreshButtonLabel;
     [SerializeField, RegisterEvent(nameof(Button.onClick), nameof(DeletePlaylist))] private Button _playlistDeleteButton;
     [SerializeField] private Text _playlistDeleteButtonLabel;
-    // The "…" that opens the strip of these actions under the header (issue
-    // #258), shown only when one of them can be used.
-    [SerializeField] private GameObject _playlistActionsButton;
+    // The header over a playlist's tracks (back, name, count, "…") and the
+    // strip of its actions under it (issue #258). Shown and hidden here
+    // rather than by an animator, so that the list works the same wherever
+    // it is placed: the screen and the Playlist Panel share it.
+    [SerializeField] private GameObject _playlistHeader;
+    [SerializeField] private GameObject _playlistActionStrip;
+    // The "…" that opens that strip, shown only when one of its actions can
+    // be used.
+    [SerializeField, RegisterEvent(nameof(Button.onClick), nameof(TogglePlaylistActions))] private Button _playlistActionsButton;
     // Shows the URL a playlist loaded in the world came from, to copy.
     [SerializeField, RegisterEvent(nameof(Button.onClick), nameof(ShowPlaylistUrl))] private Button _playlistUrlButton;
 
@@ -177,7 +178,7 @@ namespace Yamadev.YamaStream.UI
         _playlistRefreshButton.gameObject.SetActive(isDynamic && Utilities.IsValid(_playlistRefreshHandler) && slot.CanRefresh);
       if (Utilities.IsValid(_playlistUrlButton)) _playlistUrlButton.gameObject.SetActive(isDynamic && slot.CanRefresh);
       // Delete shows with any of them, so the strip is never empty.
-      if (Utilities.IsValid(_playlistActionsButton)) _playlistActionsButton.SetActive(isDynamic);
+      if (Utilities.IsValid(_playlistActionsButton)) _playlistActionsButton.gameObject.SetActive(isDynamic);
     }
 
     // A playlist baked into the world keeps no URL at run time, so the
@@ -281,16 +282,34 @@ namespace Yamadev.YamaStream.UI
       ReturnToPlaylistList();
     }
 
+    // A playlist pressed in the list: its tracks, under its header with the
+    // strip of its actions closed. The list's row calls this through its
+    // IndexTrigger, after setting _playlistIndex. The tracks' page shows
+    // before its rows are filled, as a row's animator cannot be told
+    // anything while it is inactive.
+    public void OpenPlaylist()
+    {
+      if (Utilities.IsValid(_playlistListPage)) _playlistListPage.SetActive(false);
+      if (Utilities.IsValid(_playlistTracksPage)) _playlistTracksPage.SetActive(true);
+      GeneratePlaylistTracks();
+      if (Utilities.IsValid(_playlistHeader)) _playlistHeader.SetActive(true);
+      if (Utilities.IsValid(_playlistActionStrip)) _playlistActionStrip.SetActive(false);
+    }
+
+    public void TogglePlaylistActions()
+    {
+      if (!Utilities.IsValid(_playlistActionStrip)) return;
+      _playlistActionStrip.SetActive(!_playlistActionStrip.activeSelf);
+    }
+
     // Leaving a playlist's tracks -- back, the queue or history tab, or the
     // playlist taken away -- closes its header (name, count, "…") and the
     // strip of its actions. The tabs stay in view over the header (issue
-    // #258), so a tab can be pressed while they show. The animator's layers
-    // let a hide sent while closed pass, so sending it again does no harm.
+    // #258), so a tab can be pressed while they show.
     private void HidePlaylistHeader()
     {
-      if (!Utilities.IsValid(_userUIAnimator)) return;
-      _userUIAnimator.SetTrigger("HidePlaylistTitle");
-      _userUIAnimator.SetTrigger("HideListActions");
+      if (Utilities.IsValid(_playlistHeader)) _playlistHeader.SetActive(false);
+      if (Utilities.IsValid(_playlistActionStrip)) _playlistActionStrip.SetActive(false);
     }
 
     public void DeletePlaylist()
