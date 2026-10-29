@@ -30,11 +30,12 @@ VRChat Worlds SDK 3.10.2 以上のワールドのプロジェクトに、VCC で
 
 ## YamaPlayer からの移行
 
-YamaPlayer と KawaPlayer は、同じプロジェクトに一緒には入れられません（コンパイルエラーになります）。
+YamaPlayer と KawaPlayer は、同じプロジェクトに一緒には入れられません（同じ部品を持っているので、コンパイルエラーになります）。
 
-1. Unity を閉じ、YamaPlayer を外します（VCC で入れたなら **Manage Project** の **Remove Package**、.unitypackage なら Package Manager の **Remove**）。`Packages/net.kwxxw.yama-stream/` が残っていないことを確かめます。
-2. Unity を開いてエラーがないことを確かめてから、上の手順で KawaPlayer を入れます。
-3. シーンの YamaPlayer を `KawaPlayer.prefab` に置き換えます。
+1. Unity を閉じ、VCC の **Manage Project** で KawaPlayer を足します。1.3.3 より新しい版は、入っている YamaPlayer を VCC が自動で外します。1.3.3 までの版を入れるときと、YamaPlayer を .unitypackage で入れていたときは、先に YamaPlayer を外してください（VCC なら **Manage Project** の行の **−**、.unitypackage なら Package Manager の **Remove**）。
+2. Unity を開き、シーンの赤い YamaPlayer（Missing Prefab）を消して、**GameObject > KawaPlayer > Main** で KawaPlayer を置き直します。YamaPlayer の設定とプレイリストは引き継がれないので、置き直したあとで設定し直してください。開いた直後に Console に出る `error CS2001`（消えた YamaPlayer のファイル）は、次のコンパイルで消えます。
+
+**KawaPlayer のエラーが消えないとき:** YamaPlayer を外す前に KawaPlayer を足すと、YamaPlayer を外したあとも KawaPlayer のエラー（`Problem detected while importing the Prefab file` など）が残ることがあります。Unity を閉じ、VCC で KawaPlayer を外してから、もう一度足してください。
 
 ## 利用規約
 
