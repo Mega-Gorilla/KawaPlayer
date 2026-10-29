@@ -11,6 +11,9 @@
   "legacyFolders": {
     "Assets\\Yamadev\\YamaStream": "af99c59180c62fb41ab655b73f426e61"
   },
+  "legacyPackages": [
+    "net.kwxxw.yama-stream"
+  ],
   "dependencies": {
     "com.unity.nuget.newtonsoft-json": "3.2.1"
   },
