@@ -216,24 +216,50 @@ namespace Yamadev.YamaStream.UI
       // looking pressable, when everyone was stopped or a load was under way
       // (issue #232). The wait while loading ends with no event, so it is
       // checked here.
-      if (Utilities.IsValid(_reloadButton))
+      if (Utilities.IsValid(_reloadButton)) SetPressable(_reloadButton, _controller.CanReload);
+    }
+
+    // The bar's other buttons follow the same rule, pressable only when
+    // pressing would do anything (#258 P5b): play and stop do nothing while
+    // stopped (stop still clears an error), back needs a place in a playlist,
+    // and next a place or a track in the queue. While stopped, the URL field
+    // is the main action and shows its filled ground (its child Emphasis).
+    private void UpdateControlsView()
+    {
+      bool stopped = _controller.Stopped;
+      var playlist = _controller.ActivePlaylist;
+      bool inPlaylist = Utilities.IsValid(playlist) && _controller.PlayingTrackIndex >= 0 && playlist.TrackCount > 0;
+      var queue = _controller.Queue;
+      bool queued = Utilities.IsValid(queue) && queue.TrackCount > 0;
+      SetPressable(_playButton, !stopped);
+      SetPressable(_stopButton, !stopped || _controller.IsError);
+      SetPressable(_backwardButton, inPlaylist);
+      SetPressable(_forwardButton, inPlaylist || queued);
+      if (Utilities.IsValid(_urlInputField))
       {
-        bool canReload = _controller.CanReload;
-        if (_reloadButton.interactable != canReload)
-        {
-          _reloadButton.interactable = canReload;
-          // Its ground is only the ring shown while it is pointed at, so its
-          // icon (the child Image) is what shows it cannot be pressed.
-          var icon = _reloadButton.transform.Find("Image");
-          if (Utilities.IsValid(icon))
-          {
-            var image = icon.GetComponent<Image>();
-            var color = image.color;
-            color.a = canReload ? 1f : 0.3f;
-            image.color = color;
-          }
-        }
+        var emphasis = _urlInputField.transform.Find("Emphasis");
+        if (Utilities.IsValid(emphasis)) emphasis.gameObject.SetActive(stopped);
       }
+    }
+
+    // A ring's ground is clear until pointed at, so its icon (the child
+    // Image) shows that it cannot be pressed. A filled ground (play) fades
+    // itself, as its icon is the Selectable's target, which its tint fades.
+    private void SetPressable(Button button, bool pressable)
+    {
+      if (!Utilities.IsValid(button) || button.interactable == pressable) return;
+      button.interactable = pressable;
+      var ground = button.GetComponent<Image>();
+      Graphic faded = ground;
+      if (Utilities.IsValid(ground) && button.targetGraphic == ground)
+      {
+        var icon = button.transform.Find("Image");
+        faded = Utilities.IsValid(icon) ? icon.GetComponent<Image>() : null;
+      }
+      if (!Utilities.IsValid(faded)) return;
+      var color = faded.color;
+      color.a = pressable ? 1f : 0.3f;
+      faded.color = color;
     }
 
     public bool ProgressHeld
@@ -1024,6 +1050,7 @@ namespace Yamadev.YamaStream.UI
 
     private void UpdatePlaybackView()
     {
+      UpdateControlsView();
       var repeat = RepeatUtils.NewRepeatStatus(_controller.Repeat);
       if (Utilities.IsValid(_playButton)) _playButton.gameObject.SetActive(!_controller.IsPlaying);
       if (Utilities.IsValid(_pauseButton)) _pauseButton.gameObject.SetActive(_controller.IsPlaying);
@@ -1238,7 +1265,12 @@ namespace Yamadev.YamaStream.UI
       UpdateUI();
       GeneratePlaylistTracks();
     }
-    public override void AfterVideoErrorOccurred(VideoError videoError) => UpdateErrorView(videoError);
+    public override void AfterVideoErrorOccurred(VideoError videoError)
+    {
+      UpdateErrorView(videoError);
+      // Stop clears an error, so it stays pressable after one.
+      UpdateControlsView();
+    }
     public override void AfterPlayerHandlerChanged(VideoPlayerType playerType) => UpdateUI();
     public override void AfterTimeChanged(float time) => UpdateProgressView();
     public override void AfterLoopChanged(bool loop) => UpdatePlaybackView();
@@ -1252,10 +1284,16 @@ namespace Yamadev.YamaStream.UI
       GeneratePlaylistTracks();
     }
     public override void AfterTrackUpdated() => UpdateTrackView();
-    public override void AfterVideoRetry() => UpdateLoadingView();
+    public override void AfterVideoRetry()
+    {
+      UpdateLoadingView();
+      UpdateControlsView();
+    }
     public override void AfterQueueUpdated()
     {
       if (Utilities.IsValid(_queueTabToggle) && _queueTabToggle.isOn) GeneratePlaylistTracks();
+      // Next plays from the queue, so a track in it makes next pressable.
+      UpdateControlsView();
     }
     public override void AfterHistoryUpdated()
     {
@@ -1271,13 +1309,18 @@ namespace Yamadev.YamaStream.UI
       GeneratePlaylistTracks();
       // The card names the playing playlist and the place in it, which a
       // refresh (a new name or count) or a delete changes while the track
-      // stays the same.
+      // stays the same; back and next follow the place in it too.
       UpdateTrackView();
+      UpdateControlsView();
     }
     // The playlist indexes can change without the track (deleting the
     // playlist that plays drops them), and reach this player apart from the
-    // playlist's own sync, so the card follows every sync too.
-    public override void AfterTrackSynced() => UpdateTrackView();
+    // playlist's own sync, so the card, back and next follow every sync too.
+    public override void AfterTrackSynced()
+    {
+      UpdateTrackView();
+      UpdateControlsView();
+    }
     public override void AfterVolumeChanged(float volume) => UpdateAudioView();
     public override void AfterMuteChanged(bool mute) => UpdateAudioView();
     public override void AfterMaxResolutionChanged(int maxResolution) => UpdateScreenView();
