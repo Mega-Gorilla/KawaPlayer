@@ -40,9 +40,7 @@ namespace Yamadev.YamaStream.UI
     // _urlInterceptor is; core never learns what a VHub playlist is.
     [SerializeField, HideInInspector] private UdonSharpBehaviour _playlistRefreshHandler;
     [SerializeField, RegisterEvent(nameof(Button.onClick), nameof(RefreshPlaylist))] private Button _playlistRefreshButton;
-    [SerializeField] private Text _playlistRefreshButtonLabel;
     [SerializeField, RegisterEvent(nameof(Button.onClick), nameof(DeletePlaylist))] private Button _playlistDeleteButton;
-    [SerializeField] private Text _playlistDeleteButtonLabel;
     // The header over a playlist's tracks (back, name, count, "…") and the
     // strip of its actions under it (issue #258). Shown and hidden here
     // rather than by an animator, so that the list works the same wherever
@@ -550,20 +548,10 @@ namespace Yamadev.YamaStream.UI
           if (Utilities.IsValid(downMark)) downMark.gameObject.SetActive(IsQueuePage);
           var removeMark = actions.Find("Remove");
           if (Utilities.IsValid(removeMark)) removeMark.gameObject.SetActive(IsQueuePage);
+          // The URL action shows the track's URL in the dialog's copy field,
+          // so a UI without a dialog (the Playlist Panel) does not offer it.
           var copyUrl = actions.Find("Copy");
-          if (Utilities.IsValid(copyUrl))
-          {
-            var urlTransform = copyUrl.Find("URL");
-            if (Utilities.IsValid(urlTransform))
-            {
-              var trackUrlText = urlTransform.GetComponent<InputField>();
-              if (Utilities.IsValid(trackUrlText))
-              {
-                copyUrl.gameObject.SetActive(!IsQueuePage);
-                trackUrlText.text = trackUrl.Get();
-              }
-            }
-          }
+          if (Utilities.IsValid(copyUrl)) copyUrl.gameObject.SetActive(!IsQueuePage && Utilities.IsValid(_modalDialog));
           var addMark = actions.Find("Add");
           if (Utilities.IsValid(addMark)) addMark.gameObject.SetActive(!IsQueuePage);
           var PlayMark = actions.Find("Play");
@@ -585,24 +573,39 @@ namespace Yamadev.YamaStream.UI
       if (_playlistTrackIndex < _controller.Queue.TrackCount) _controller.Queue.RemoveTrack(_playlistTrackIndex);
     }
 
+    // The track whose actions were pressed, on the history or the open
+    // playlist (the queue's actions name their index instead). Null when
+    // there is none.
+    private object[] SelectedTrack()
+    {
+      if (!_playlistTracksScroll || _playlistTrackIndex < 0) return null;
+      if (IsHistoryPage) return _controller.History.GetTrack(_playlistTrackIndex);
+      if (_playlistIndex >= 0 && _playlistIndex < _controller.Playlists.Length)
+        return _controller.Playlists[_playlistIndex].GetTrack(_playlistTrackIndex);
+      return null;
+    }
+
     public void AddPlaylistTrackToQueue()
     {
       if (!InvokeBeforeEvent("BeforeUserAddTrackToQueue")) return;
-      if (!_playlistTracksScroll || _playlistTrackIndex < 0) return;
-
-      object[] track;
-      if (IsHistoryPage)
-      {
-        track = _controller.History.GetTrack(_playlistTrackIndex);
-      }
-      else if (_playlistIndex >= 0 && _playlistIndex < _controller.Playlists.Length)
-      {
-        track = _controller.Playlists[_playlistIndex].GetTrack(_playlistTrackIndex);
-      }
-      else return;
+      var track = SelectedTrack();
+      if (track == null) return;
 
       _controller.TakeOwnership();
       _controller.Queue.AddTrack(track);
+    }
+
+    // Shows a track's URL in the dialog's copy field, as the strip under "…"
+    // shows a playlist's: a world cannot open a link, but the viewer can copy
+    // what the field holds.
+    public void ShowPlaylistTrackUrl()
+    {
+      var track = SelectedTrack();
+      if (track == null || !Utilities.IsValid(_modalDialog)) return;
+      var url = TrackUtils.GetUrl(track);
+      var title = TrackUtils.GetTitle(track);
+      if (!_modalDialog.TryShow(string.IsNullOrEmpty(title) ? url.Get() : title, string.Empty, GetTranslation("button.close"), "", this, null, null)) return;
+      _modalDialog.ShowCopyField(url.Get(), GetTranslation("button.copyUrl"));
     }
 
     public void MoveUp()

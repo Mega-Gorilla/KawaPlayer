@@ -1746,9 +1746,7 @@ MonoBehaviour:
   _dynamicPlaylists: []
   _playlistRefreshHandler: {fileID: 0}
   _playlistRefreshButton: {fileID: 0}
-  _playlistRefreshButtonLabel: {fileID: 0}
   _playlistDeleteButton: {fileID: 0}
-  _playlistDeleteButtonLabel: {fileID: 0}
 --- !u!1 &5301090629003387738
 GameObject:
   m_ObjectHideFlags: 0
