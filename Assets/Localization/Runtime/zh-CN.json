@@ -41,7 +41,6 @@
   "button.continue": "继续",
   "button.confirmAddQueue": "添加到待播队列",
   "button.confirmPlayUrl": "播放",
-  "button.back": "返回",
   "button.remove": "移除",
   "msg.videoLoading": "正在加载视频...",
   "msg.confirmChangePlayer": "是否要切换播放器？",

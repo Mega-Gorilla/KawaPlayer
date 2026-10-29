@@ -41,7 +41,6 @@
   "button.continue": "続行する",
   "button.confirmAddQueue": "再生キューに追加する",
   "button.confirmPlayUrl": "再生する",
-  "button.back": "戻る",
   "button.remove": "削除",
   "msg.videoLoading": "動画を読み込んでいます...",
   "msg.confirmChangePlayer": "動画プレイヤーを変えますか？",

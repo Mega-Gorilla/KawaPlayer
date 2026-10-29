@@ -41,7 +41,6 @@
   "button.continue": "계속",
   "button.confirmAddQueue": "대기열에 추가",
   "button.confirmPlayUrl": "재생",
-  "button.back": "뒤로가기",
   "button.remove": "삭제",
   "msg.videoLoading": "동영상을 읽고 있습니다···",
   "msg.confirmChangePlayer": "동영상 플레이어를 바꾸시겠습니까?",

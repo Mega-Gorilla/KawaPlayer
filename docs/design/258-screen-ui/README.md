@@ -258,7 +258,7 @@ U# の変更は、次の 4 つにとどめる。どれも最低の SDK（3.10.2�
 - **Network ID：** Playlist Panel の `UI`（UIController の UdonBehaviour が付いた物）は残し、部品の構成を変えない。消える `LoopScroll` などの記録は、ビルドを止めない（5.5 節の P4 で決めたこと）。スクリーンの一覧の中身も入れ子に置き換わるので、同じく古い記録が消えるだけになる。
 - **既存のプロジェクト：** 置いてある Playlist Panel の形が変わる。中心は動かないが、上下に 0.11 m ずつ伸び、左右は 0.33 m ずつ縮むので、制作者が置き直すことがある。シーンで Playlist Panel の中に付けた上書きは効かなくなる。P6 の PR とリリースノートで案内する。
 - **P6 で決めたこと（#315）：** 作るときに、上で開けておいた点を次のとおりにした。
-  - 共通の部品は `Prefabs/UI/ListPanel.prefab`。スクリーンでは `RightSide/Playlists/Main`、Playlist Panel では `UI/Canvas/List` に入れ子で入れる。どちらの UIController も、一覧の同じ 21 の欄をつなぐ。
+  - 共通の部品は `Prefabs/UI/ListPanel.prefab`。スクリーンでは `RightSide/Playlists/Main`、Playlist Panel では `UI/Canvas/List` に入れ子で入れる。どちらの UIController も、一覧の同じ 19 の欄をつなぐ（P5b。初めは 21 と書いていたが、更新と削除のボタンの名前の文字を、その欄ごと消したので直した）。
   - 入れ子のプレハブは、自分の外の物を指せない。そのため、行のひな形の `IndexTrigger` が呼ぶ先（`_udon`）は、それぞれの UI が自分のインスタンスの上書きで、自分の UIController に向ける。一覧の中から UI のアニメーターへの呼び出しも無くした。
   - 「∨」はスクリーンの `RightSide/Playlists/Close` に移した。初めは一覧の右上に重ね、スクリーンではタブを 480 に縮めていた。
     - ユーザーの判断（3 つの案から案 3、2026-10-28）で、一覧の右下に移した。帯のボタンと同じ丸い 84 で、帯のボタンの列に並ぶ。

@@ -41,7 +41,6 @@
   "button.continue": "Continue",
   "button.confirmAddQueue": "Add to queue",
   "button.confirmPlayUrl": "Play",
-  "button.back": "Back",
   "button.remove": "Remove",
   "msg.videoLoading": "Loading...",
   "msg.confirmChangePlayer": "Do you want to change the video player?",

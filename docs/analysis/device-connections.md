@@ -290,7 +290,7 @@ E3 の `SendCustomVideoEvent(名前)` は、リスナー全員に `SendCustomEve
 どちらも中に `UIController` が 1 つあり、`_controller` で本体を指す。
 
 - **Controller Bar：** モジュールの UI を差し込むパスを持たないので、権限の確認は無い（§7）。
-- **Playlist Panel：** スクリーンの一覧と同じ部品（`Prefabs/UI/ListPanel.prefab`）を 1 列で持ち、`UIController` の一覧の欄（21 個）はスクリーンと同じ形でつなぐ（#315）。空の `UI/Canvas/Modules` を持つので、権限管理の受け手が写され、押した操作に権限がかかる（§7）。自分のダイアログ（`Modal`）は持たない（計画の D8）。そのため「…」（更新・URL？・削除）は出ず、権限で断られたときの知らせも出ない。
+- **Playlist Panel：** スクリーンの一覧と同じ部品（`Prefabs/UI/ListPanel.prefab`）を 1 列で持ち、`UIController` の一覧の欄（19 個）はスクリーンと同じ形でつなぐ（#315）。空の `UI/Canvas/Modules` を持つので、権限管理の受け手が写され、押した操作に権限がかかる（§7）。自分のダイアログ（`Modal`）は持たない（計画の D8）。そのため「…」（更新・URL？・削除）は出ず、権限で断られたときの知らせも出ない。
 
 ### 6.2 Sub Screen
 
