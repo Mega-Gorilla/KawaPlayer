@@ -12,6 +12,7 @@ KawaPlayer の設計・計画・確認の手順の文書です。1 つの文書�
 | [228-playback-sync/](228-playback-sync/README.md) | #228 | 再生の同期：VizVid（VVMW）との[比較](228-playback-sync/comparison.md)と、直す方針 | 方針 | 実装済み（2026-10-15）。方針は PR #229、実装は子の issue #232〜#237 と #248（PR #238〜#243・#249）。実装後の仕様は [docs/analysis/playback-sync.md](../analysis/playback-sync.md) |
 | [258-screen-ui/](258-screen-ui/README.md) | #258 | スクリーンの UI の作り直し：決めたデザイン（操作を下にまとめて重ねる）と、作り方の計画 | 計画 | デザインは決定（2026-10-26）。作り方の D1・D2（AudioLink は設定の「音声」）・D3・D4・D6（設定はタブレットと共通の部品）・D7（一覧は Playlist Panel と共通の部品）・D8（Playlist Panel にダイアログは置かない）は決定（2026-10-28）、D5 は判断待ち。実装は P1〜P6 の PR（P5 は P5a・P5b の 2 つ） |
 | [262-intro-video/](262-intro-video/README.md) | #262 | KawaPlayer の紹介動画の絵コンテ、見た目の案の[比較](262-intro-video/look.md)、カットごとの[撮影台本](262-intro-video/script.md) | 台本 | 作った。v3.1（84.5 秒）を X と YouTube で公開した（2026-10-20）。絵コンテは PR #263、v1 のレビュー・見た目の比較・撮影台本と公開した版への書き直しは PR #264 |
+| [300-vhub-library/](300-vhub-library/README.md) | #300 | VChat 認証を使う VHub の個人ライブラリ：利用の流れ・共有の境界・両リポジトリの分担と検証 | 実装計画 | 計画案・未実装。PoC は #301、VHub 側は kisaragi-official/vhub-playlist#317、KawaPlayer 側は #302。対象リリースは未定 |
 
 ## 置き方の決まり
 
