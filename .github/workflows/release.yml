@@ -47,9 +47,7 @@ jobs:
       - name: Refuse to publish from another branch or over an existing tag
         if: ${{ inputs.publish }}
         run: |
-          # One-off for 1.3.4 (1.3.3 with legacyPackages, cut from the 1.3.3 tag
-          # while develop holds unreleased work). Revert before merging into develop.
-          if [ "$GITHUB_REF" != "refs/heads/develop" ] && [ "$GITHUB_REF" != "refs/heads/release/1.3.4" ]; then
+          if [ "$GITHUB_REF" != "refs/heads/develop" ]; then
             echo "::error::publish only from develop (got $GITHUB_REF)"
             exit 1
           fi
