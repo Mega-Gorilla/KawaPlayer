@@ -9,6 +9,7 @@ KawaPlayer is a fork of the VRChat video player [YamaPlayer](https://github.com/
 - **Unity version**: 2022.3
 - **Language**: C# / UdonSharp (VRChat's Udon scripting layer)
 - **Dependencies**: VRChat Worlds SDK (>=3.10.2), Newtonsoft.Json (3.2.1)
+- **Replaces YamaPlayer**: KawaPlayer keeps 152 of YamaPlayer's `.meta` GUIDs (scripts, U# programs, prefabs, animators, asmdefs) and its assembly names, so the two cannot be installed together. With both, the assemblies clash, and Unity rewrites on disk the GUIDs of the package it registers second, which stays broken after the other is removed (issue #319). `package.json` therefore lists YamaPlayer (`net.kwxxw.yama-stream`) in `legacyPackages`, which VCC removes when KawaPlayer is added, and an old `.unitypackage` copy (`Assets/Yamadev/YamaStream`) in `legacyFolders`. The shared GUIDs stay: changing them would break creators' scripts, add-ons written for YamaPlayer and the upstream sync.
 
 ## Build & Release
 
