@@ -121,6 +121,10 @@ jobs:
         uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ steps.version.outputs.version }}
+          # The tag goes on the commit that was built. Left out, GitHub puts a
+          # new tag on the default branch's head, which is not what was built
+          # when the run is on another branch.
+          target_commitish: ${{ github.sha }}
           prerelease: ${{ contains(steps.version.outputs.version, 'beta') }}
           # Second line of defence behind the tag check: a release that
           # already has these files keeps them.
