@@ -417,8 +417,10 @@ namespace Yamadev.YamaStream.UI
         var name = _playlistLineNames[i];
         if (Utilities.IsValid(name)) name.text = playlist.PlaylistName;
         var trackCount = _playlistLineCounts[i];
+        // As the header writes it ("8 tracks"): with "total" before it, the
+        // count wrapped onto two lines in Japanese (#332).
         if (Utilities.IsValid(trackCount))
-          trackCount.text = playlist.TrackCount > 0 ? $"{GetTranslation("label.total")} {playlist.TrackCount} {GetTranslation("label.tracks")}" : string.Empty;
+          trackCount.text = playlist.TrackCount > 0 ? $"{playlist.TrackCount} {GetTranslation("label.tracks")}" : string.Empty;
         var trigger = _playlistLineTriggers[i];
         if (Utilities.IsValid(trigger)) trigger.SetProgramVariable("_variableObject", realIndex);
       }
