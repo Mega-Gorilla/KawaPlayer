@@ -322,7 +322,8 @@ namespace Yamadev.YamaStream.UI
       // the track info it shares the bar with.
       UpdateTrackView();
       // The repeat range's start and end, and an open playlist's track
-      // count, are written with words too, when they change.
+      // count, carry words too but are otherwise written only when they
+      // change.
       UpdatePlaybackView();
       UpdatePlaylistTrackCountText();
 
