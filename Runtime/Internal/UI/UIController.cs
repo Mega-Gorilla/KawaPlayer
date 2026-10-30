@@ -784,9 +784,10 @@ namespace Yamadev.YamaStream.UI
 
     // The repeat range's start and end as their texts show them: the shared
     // range while repeat is on, else where the handles stand, which the
-    // player may still be choosing. The video's start and end, a live
-    // stream's end, and anything while repeat is on but nothing plays read
-    // "not set".
+    // player may still be choosing. The video's start and end, and anything
+    // while repeat is on but nothing plays, read "not set"; so does all of a
+    // live stream, which has no range to set and whose length (infinite or
+    // NaN) would make the handles' times no time at all.
     private void UpdateRepeatTimeTexts()
     {
       if (!Utilities.IsValid(_repeatRangeSlider) || !Utilities.IsValid(_repeatStartTimeText) || !Utilities.IsValid(_repeatEndTimeText)) return;
@@ -794,12 +795,12 @@ namespace Yamadev.YamaStream.UI
       string startText = notSet;
       string endText = notSet;
       bool on = RepeatUtils.IsOn(_controller.Repeat);
-      if (!_controller.Stopped && (_controller.IsPlaying || !on))
+      if (!_controller.Stopped && !_controller.IsLive && (_controller.IsPlaying || !on))
       {
         float start = on ? RepeatUtils.GetStartTime(_controller.Repeat) : _controller.Duration * _repeatRangeSlider.LeftValue;
         float end = on ? RepeatUtils.GetEndTime(_controller.Repeat) : _controller.Duration * _repeatRangeSlider.RightValue;
         if (start > 0f) startText = TimeSpan.FromSeconds(start).ToString(_controller.TimeFormat);
-        if (end < _controller.Duration && !_controller.IsLive) endText = TimeSpan.FromSeconds(end).ToString(_controller.TimeFormat);
+        if (end < _controller.Duration) endText = TimeSpan.FromSeconds(end).ToString(_controller.TimeFormat);
       }
       _repeatStartTimeText.text = $"{GetTranslation("label.start")}(A): {startText}";
       _repeatEndTimeText.text = $"{GetTranslation("label.end")}(B): {endText}";
