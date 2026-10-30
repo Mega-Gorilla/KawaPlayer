@@ -323,8 +323,8 @@ namespace Yamadev.YamaStream.UI
       UpdateTrackView();
       // The repeat range's start and end, and an open playlist's track
       // count, carry words too but are otherwise written only when they
-      // change.
-      UpdatePlaybackView();
+      // change. Only the texts: the handles stay where the player put them.
+      UpdateRepeatTimeTexts();
       UpdatePlaylistTrackCountText();
 
       if (Utilities.IsValid(_unlockUiMessageLabel))
