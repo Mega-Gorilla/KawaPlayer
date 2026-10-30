@@ -381,7 +381,7 @@ MARKS = {
         dict(box=(312, 592, 968, 639), n=2, cap="閉じる", at=(1120, 615)),
     ]),
     "screen/error-access-denied": dict(scale=0.667, marks=[
-        dict(box=(312, 326, 895, 414), cap="ワールドの制作者向けの案内", at=(1110, 370)),
+        dict(box=(312, 328, 895, 434), cap="ワールドの制作者向けの案内", at=(1110, 380)),
     ]),
     "tablet/home": dict(scale=0.72, marks=[
         dict(box=(138, 442, 1142, 645), n=1, cap="アプリを開く", at=(640, 400)),

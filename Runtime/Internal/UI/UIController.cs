@@ -991,10 +991,6 @@ namespace Yamadev.YamaStream.UI
       UpdateTrackView();
       UpdateLoadingView();
       UpdateAudioView();
-      if (Utilities.IsValid(_idleScreenImage) && Utilities.IsValid(_idleScreenSprite))
-      {
-        _idleScreenImage.gameObject.SetActive(_controller.Stopped || _controller.IsLoading);
-      }
     }
 
     private void UpdateProgressView()
@@ -1160,6 +1156,7 @@ namespace Yamadev.YamaStream.UI
     {
       if (Utilities.IsValid(_loadingIndicator)) _loadingIndicator.SetActive(true);
       if (Utilities.IsValid(_userUIAnimator)) _userUIAnimator.SetBool("Loading", false);
+      UpdateIdleScreenShown(true);
       if (!_statusMessageText) return;
       string message;
       switch (videoError)
@@ -1229,6 +1226,8 @@ namespace Yamadev.YamaStream.UI
       if (Utilities.IsValid(_userUIAnimator)) _userUIAnimator.SetBool("Loading", _controller.IsLoading);
       if (Utilities.IsValid(_statusMessageText)) _statusMessageText.text = GetTranslation("msg.videoLoading");
       SetErrorDetailsButtonShown(false);
+      // UpdateUI and a retry after an error both come here.
+      UpdateIdleScreenShown(false);
     }
 
     private void GenerateVersionView()
@@ -1240,10 +1239,19 @@ namespace Yamadev.YamaStream.UI
     private void UpdateIdleScreenView()
     {
       if (Utilities.IsValid(_idleScreenImage) && Utilities.IsValid(_idleScreenSprite)) _idleScreenImage.sprite = _idleScreenSprite;
+    }
+
+    // The idle screen shows while stopped, loading or showing an error, and
+    // the logo and name over the default image. The loading icon and words,
+    // and an error's message, are drawn where the name is (#332), so while
+    // either shows, the logo and name give way and the background stays.
+    private void UpdateIdleScreenShown(bool error)
+    {
+      bool message = error || _controller.IsLoading;
       if (Utilities.IsValid(_idleScreenLogo))
-      {
-        _idleScreenLogo.SetActive(Utilities.IsValid(_idleScreenSprite) && _idleScreenSprite == _defaultIdleScreenSprite);
-      }
+        _idleScreenLogo.SetActive(Utilities.IsValid(_idleScreenSprite) && _idleScreenSprite == _defaultIdleScreenSprite && !message);
+      if (Utilities.IsValid(_idleScreenImage) && Utilities.IsValid(_idleScreenSprite))
+        _idleScreenImage.gameObject.SetActive(message || _controller.Stopped);
     }
 
     // The player a URL entered next plays on, which is not always the one in
