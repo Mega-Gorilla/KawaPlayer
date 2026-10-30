@@ -244,124 +244,152 @@ MARKS = {
         dict(box=(35, 110, 307, 166), n=1),
     ]),
     "screen/controls": dict(scale=0.667, marks=[
-        dict(box=(27, 148, 69, 575), cap="左の列", at=(173, 360)),
-        dict(box=(27, 613, 1253, 699), cap="下", at=(640, 580)),
-        dict(box=(892, 107, 1252, 143), cap="右", at=(1072, 73)),
+        dict(box=(30, 24, 224, 116), n=1),
+        dict(box=(34, 565, 1250, 603), n=2),
+        dict(box=(36, 617, 350, 689), n=3),
+        dict(box=(462, 607, 818, 699), n=4),
+        dict(box=(932, 617, 1244, 689), n=5),
     ]),
-    "screen/controls-left": dict(src="screen/controls", scale=0.667, marks=[
-        dict(box=(28, 147, 68, 189), n=1),
-        dict(box=(28, 211, 68, 253), n=2),
-        dict(box=(28, 275, 68, 317), n=3),
-        dict(box=(28, 339, 68, 381), n=4),
-        dict(box=(28, 403, 68, 445), n=5),
-        dict(box=(28, 467, 68, 509), n=6),
-        dict(box=(28, 531, 68, 573), n=7),
+    # The bar's three groups, each on the bottom strip of the same picture.
+    "screen/controls-left": dict(src="screen/controls", crop=(0, 530, 1280, 720), scale=0.667, marks=[
+        dict(box=(40, 621, 104, 685), n=1),
+        dict(box=(120, 621, 184, 685), n=2),
+        dict(box=(200, 621, 264, 685), n=3),
+        dict(box=(280, 621, 344, 685), n=4),
+    ]),
+    "screen/controls-middle": dict(src="screen/controls", crop=(0, 530, 1280, 720), scale=0.667, marks=[
+        dict(box=(34, 565, 1250, 603), n=1),
+        dict(box=(475, 621, 539, 685), n=2),
+        dict(box=(554, 609, 642, 697), n=3),
+        dict(box=(657, 621, 721, 685), n=4),
+        dict(box=(741, 621, 805, 685), n=5),
+    ]),
+    "screen/controls-right": dict(src="screen/controls", crop=(0, 530, 1280, 720), scale=0.667, marks=[
+        dict(box=(936, 621, 1000, 685), n=1),
+        dict(box=(1016, 621, 1080, 685), n=2),
+        dict(box=(1096, 621, 1160, 685), n=3),
+        dict(box=(1176, 621, 1240, 685), n=4),
     ]),
     # The technical page on sync points at ReSync alone.
-    "screen/resync": dict(src="screen/controls", crop=(0, 110, 490, 600), scale=0.667, marks=[
-        dict(box=(28, 339, 68, 381), cap="ReSync（押した人の画面だけ）", at=(290, 360)),
+    "screen/resync": dict(src="screen/controls", crop=(0, 450, 700, 720), scale=0.667, marks=[
+        dict(box=(280, 621, 344, 685), cap="ReSync（押した人の画面だけ）", at=(470, 500)),
     ]),
-    "screen/controls-right": dict(src="screen/controls", scale=0.667, marks=[
-        dict(box=(892, 104, 960, 140), n=1),
-        dict(box=(1032, 104, 1088, 140), n=2),
-        dict(box=(1138, 104, 1252, 140), n=3),
+    "screen/volume": dict(crop=(700, 100, 1280, 720), scale=0.667, marks=[
+        dict(box=(930, 158, 1004, 200), n=1),
+        dict(box=(944, 208, 992, 456), n=2),
+        dict(box=(942, 478, 994, 530), n=3),
     ]),
-    "screen/controls-bottom": dict(src="screen/controls", scale=0.667, marks=[
-        dict(box=(35, 659, 69, 693), n=1),
-        dict(box=(87, 659, 121, 693), n=2),
-        dict(box=(139, 659, 173, 693), n=3),
-        dict(box=(191, 659, 225, 693), n=4),
-        dict(box=(28, 614, 1252, 642), n=5, badge=(640, 604)),
-        dict(box=(1056, 656, 1250, 696), n=6),
+    "screen/more": dict(crop=(700, 380, 1280, 720), scale=0.667, marks=[
+        dict(box=(1102, 489, 1154, 541), n=1),
+        dict(box=(1174, 489, 1226, 541), n=2),
     ]),
     "screen/playlist-list": dict(scale=0.667, marks=[
-        dict(box=(1136, 102, 1254, 142), n=1),
-        dict(box=(884, 154, 1110, 196), n=2, cap="押すと曲の一覧へ", at=(1000, 252)),
+        dict(box=(821, 21, 964, 67), n=1),
+        dict(box=(968, 21, 1111, 67), n=2),
+        dict(box=(1115, 21, 1259, 67), n=3),
+        dict(box=(817, 84, 1260, 148), n=4, cap="押すと曲の一覧へ", at=(600, 116)),
+        dict(box=(1196, 620, 1262, 686), n=5, cap="閉じる", at=(1080, 560)),
     ]),
     "screen/playlist-tracks": dict(scale=0.667, marks=[
-        dict(box=(884, 198, 1200, 246), n=1, cap="曲を押す", at=(760, 222)),
-        dict(box=(898, 106, 934, 142), n=2),
+        dict(box=(829, 93, 873, 137), n=1),
+        dict(box=(895, 98, 1145, 135), n=2),
+        dict(box=(827, 231, 1253, 297), n=3, cap="曲を押す", at=(640, 264)),
+        dict(box=(827, 298, 1253, 365), n=4, cap="流れている曲", at=(640, 332)),
     ]),
     "screen/track-actions": dict(scale=0.667, marks=[
-        dict(box=(914, 198, 962, 246), n=1),
-        dict(box=(976, 198, 1052, 246), n=2),
-        dict(box=(1058, 198, 1134, 246), n=3),
-        dict(box=(1152, 198, 1214, 246), n=4),
-    ]),
-    "screen/playlist-vhub": dict(src="screen/playlist", scale=0.667, marks=[
-        dict(box=(1197, 109, 1260, 137), n=1, cap="削除・更新", at=(1133, 67)),
+        dict(box=(853, 236, 905, 288), n=1),
+        dict(box=(957, 236, 1009, 288), n=2),
+        dict(box=(1059, 236, 1111, 288), n=3),
+        dict(box=(1161, 234, 1217, 290), n=4),
     ]),
     "screen/queue": dict(scale=0.667, marks=[
-        dict(box=(892, 104, 960, 140), n=1),
-        dict(box=(886, 152, 1140, 300), n=2),
+        dict(box=(821, 21, 964, 67), n=1),
+        dict(box=(822, 84, 1258, 285), n=2),
     ]),
     "screen/queue-actions": dict(scale=0.667, marks=[
-        dict(box=(916, 198, 956, 248), n=1),
-        dict(box=(982, 198, 1050, 248), n=2),
-        dict(box=(1062, 198, 1130, 248), n=3),
-        dict(box=(1156, 198, 1198, 248), n=4),
+        dict(box=(854, 156, 906, 208), n=1),
+        dict(box=(957, 156, 1009, 208), n=2),
+        dict(box=(1060, 156, 1112, 208), n=3),
+        dict(box=(1163, 156, 1215, 208), n=4),
     ]),
     "screen/history": dict(scale=0.667, marks=[
-        dict(box=(1032, 104, 1088, 140), n=1),
-        dict(box=(886, 152, 1140, 334), n=2),
-    ]),
-    "screen/settings-playback": dict(scale=0.667, marks=[
-        dict(box=(250, 120, 1080, 226), n=1),
-        dict(box=(250, 236, 1126, 386), n=2),
-        dict(box=(250, 397, 1066, 532), n=3),
-    ]),
-    "screen/settings-playback2": dict(scale=0.667, marks=[
-        dict(box=(250, 398, 726, 490), n=4),
-        dict(box=(250, 503, 980, 616), n=5),
-    ]),
-    "screen/settings-video": dict(scale=0.667, marks=[
-        dict(box=(250, 118, 640, 203), n=1),
-        dict(box=(250, 215, 1136, 292), n=2),
-        dict(box=(250, 297, 830, 415), n=3),
-    ]),
-    "screen/settings-other": dict(scale=0.667, marks=[
-        dict(box=(250, 116, 860, 250), n=1),
-    ]),
-    "screen/autoplay-owner": dict(scale=0.667, marks=[
-        dict(box=(24, 124, 196, 174), n=1),
-        dict(box=(214, 124, 352, 174), n=2),
-    ]),
-    "screen/autoplay-owner-set": dict(scale=0.667, marks=[
-        dict(box=(24, 94, 508, 122), n=1),
-    ]),
-    "screen/autoplay-other": dict(scale=0.667, marks=[]),
-    "screen/url-button": dict(src="screen/controls", scale=0.667, marks=[
-        dict(box=(26, 146, 70, 190), n=1, cap="ここを押す", at=(190, 168)),
-    ]),
-    "screen/playlist-loaded": dict(scale=0.667, marks=[
-        dict(box=(29, 148, 163, 191), n=1, cap="ここに URL を入れる", at=(280, 107)),
-    ]),
-    "screen/playlist": dict(scale=0.667, marks=[
-        dict(box=(892, 155, 1141, 193), n=1, cap="曲を押す", at=(753, 200)),
-        dict(box=(1197, 109, 1260, 137), n=2, cap="削除・更新", at=(1133, 67)),
+        dict(box=(968, 21, 1111, 67), n=1),
+        dict(box=(822, 84, 1258, 218), n=2),
     ]),
     "screen/settings": dict(scale=0.667, marks=[
-        dict(box=(164, 117, 236, 356), n=1, cap="切り替える", at=(200, 427)),
-        dict(box=(160, 72, 299, 97), n=2, cap="戻る", at=(373, 40)),
+        dict(box=(38, 11, 105, 77), n=1),
+        dict(box=(32, 95, 352, 532), n=2, cap="分類を切り替える", at=(192, 600)),
+        dict(box=(398, 648, 950, 712), n=3),
+    ]),
+    "screen/settings-playback": dict(src="screen/settings", scale=0.667, marks=[
+        dict(box=(409, 85, 1239, 207), n=1),
+        dict(box=(409, 223, 1239, 409), n=2),
+        dict(box=(409, 425, 1239, 643), n=3),
+    ]),
+    "screen/settings-playback2": dict(scale=0.667, marks=[
+        dict(box=(409, 335, 1239, 645), n=4),
+    ]),
+    "screen/settings-video": dict(scale=0.667, marks=[
+        dict(box=(409, 85, 1239, 272), n=1),
+        dict(box=(409, 290, 1239, 410), n=2),
+        dict(box=(409, 424, 1239, 628), n=3),
+    ]),
+    "screen/settings-audio": dict(scale=0.667, marks=[
+        dict(box=(409, 85, 1239, 286), n=1),
+    ]),
+    "screen/settings-language": dict(scale=0.667, marks=[
+        dict(box=(409, 85, 1239, 412), n=1),
+    ]),
+    # The autoplay card alone, cut from captures at 1920 x 1080, so at their own size.
+    "screen/autoplay-owner": dict(scale=1.0, marks=[
+        dict(box=(58, 339, 401, 439), n=1),
+        dict(box=(418, 339, 682, 439), n=2),
+    ]),
+    "screen/autoplay-owner-set": dict(scale=1.0, marks=[
+        dict(box=(56, 272, 940, 314), n=1),
+    ]),
+    "screen/autoplay-other": dict(scale=1.0, marks=[]),
+    "screen/url-button": dict(scale=0.667, marks=[
+        dict(box=(119, 78, 480, 106), n=1, badge=(484, 74), cap="入れられる URL", at=(700, 92)),
+        dict(box=(38, 619, 106, 687), n=2, cap="ここを押す", at=(230, 540)),
+    ]),
+    "screen/url-confirm": dict(scale=0.667, marks=[
+        dict(box=(318, 382, 762, 422), n=1),
+        dict(box=(312, 438, 520, 485), n=2),
+        dict(box=(536, 438, 744, 485), n=3),
+        dict(box=(760, 438, 968, 485), n=4),
+    ]),
+    "screen/playlist-loaded": dict(scale=0.667, marks=[
+        dict(box=(40, 621, 104, 685), n=1, cap="ここに URL を入れる", at=(260, 540)),
+    ]),
+    "screen/playlist": dict(scale=0.667, marks=[
+        dict(box=(827, 164, 1253, 230), n=1, cap="曲を押す", at=(640, 197)),
+        dict(box=(1207, 93, 1251, 137), n=2),
+    ]),
+    "screen/playlist-vhub": dict(scale=0.667, marks=[
+        dict(box=(1207, 93, 1251, 137), n=1),
+        dict(box=(832, 172, 874, 214), n=2),
+        dict(box=(893, 172, 935, 214), n=3),
+        dict(box=(1203, 168, 1251, 216), n=4),
     ]),
     "screen/global-reload": dict(scale=0.667, marks=[]),
     "screen/error": dict(scale=0.667, marks=[
-        dict(box=(552, 504, 728, 544), cap="押す", at=(840, 524)),
+        dict(box=(552, 505, 728, 543), cap="押す", at=(840, 524)),
     ]),
     "screen/error-details": dict(scale=0.667, marks=[
-        dict(box=(377, 497, 903, 532), n=1, cap="Discord の URL をコピー", at=(1067, 453)),
-        dict(box=(377, 545, 903, 584), n=2, cap="閉じる", at=(1067, 564)),
+        dict(box=(312, 531, 968, 575), n=1, cap="Discord の URL をコピー", at=(1120, 480)),
+        dict(box=(312, 592, 968, 639), n=2, cap="閉じる", at=(1120, 615)),
     ]),
     "screen/error-access-denied": dict(scale=0.667, marks=[
-        dict(box=(369, 316, 911, 410), cap="ワールドの制作者向けの案内", at=(1090, 363)),
+        dict(box=(312, 326, 895, 414), cap="ワールドの制作者向けの案内", at=(1110, 370)),
     ]),
     "tablet/home": dict(scale=0.72, marks=[
         dict(box=(138, 442, 1142, 645), n=1, cap="アプリを開く", at=(640, 400)),
         dict(box=(618, 720, 662, 766), n=2, cap="ホームボタン", at=(880, 744)),
     ]),
     "tablet/kawaplayer": dict(scale=0.72, marks=[
-        dict(box=(98, 277, 134, 314), n=1, cap="URL を入れる", at=(304, 240)),
-        dict(box=(611, 714, 669, 773), n=2, cap="ホームへ戻る", at=(880, 744)),
+        dict(box=(108, 605, 172, 669), n=1, cap="URL を入れる", at=(320, 520)),
+        dict(box=(610, 710, 670, 770), n=2, cap="ホームへ戻る", at=(880, 740)),
     ]),
     "tablet/rotate": dict(scale=0.72, marks=[]),
     "tablet/image": dict(scale=0.72, marks=[
@@ -371,7 +399,7 @@ MARKS = {
         dict(box=(782, 72, 1176, 128), cap="一覧とログを切り替え", at=(880, 184)),
     ]),
     "tablet/settings": dict(scale=0.72, marks=[
-        dict(box=(102, 147, 386, 509), cap="分類を切り替え", at=(240, 576)),
+        dict(box=(100, 143, 392, 515), cap="分類を切り替え", at=(246, 580)),
     ]),
 }
 
