@@ -442,8 +442,8 @@ namespace Yamadev.YamaStream.UI
       _playlistsListScroll.SetUp(VisiblePlaylistCount(), this, nameof(UpdatePlaylistsContent));
     }
 
-    // Redraws the tracks that show where they are scrolled to, as a change to
-    // the list they come from needs.
+    // Redraws the tracks where they are scrolled to, as a change to their
+    // list (the queue, the history or the playlist) needs.
     public void GeneratePlaylistTracks() => ShowPlaylistTracks(false);
 
     // fromTop: a playlist just opened, shown from its first track.

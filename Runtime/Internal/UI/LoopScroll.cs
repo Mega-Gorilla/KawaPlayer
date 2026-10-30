@@ -40,7 +40,7 @@ namespace Yamadev.YamaStream.UI
     }
 
     // SetUp from the first line, as a list just opened shows it: the scroll
-    // goes back to the top before the one pass that draws the lines (#318).
+    // goes back to the top before the one pass that draws the lines (#310).
     public void SetUpAtTop(int length, UdonSharpBehaviour callbackUdon, string callbackEventName)
     {
       if (!_initialized) Initialize();
