@@ -68,6 +68,22 @@ namespace Yamadev.YamaStream.UI
     // off the first title before any of them is recoloured (issue #163).
     private Color _trackTitleColor;
     private bool _trackTitleColorRead;
+    // The parts of the lines, found once when the lines are first drawn
+    // rather than again for every line drawn, which took about a tenth of
+    // opening a playlist and a third of scrolling by a line (#326). A part
+    // a line lacks stays null. A track's actions are TrackActionCount to a
+    // line, in the order of FindTrackLineParts.
+    private Text[] _trackLineTitles;
+    private Text[] _trackLineUrls;
+    private Text[] _trackLineNumbers;
+    private GameObject[] _trackLineMarks;
+    private GameObject[] _trackLineActions;
+    private Animator[] _trackLineAnimators;
+    private IndexTrigger[] _trackLineTriggers;
+    private Text[] _playlistLineNames;
+    private Text[] _playlistLineCounts;
+    private IndexTrigger[] _playlistLineTriggers;
+    private const int TrackActionCount = 6;
 
     private bool IsQueuePage => Utilities.IsValid(_queueTabToggle) && _queueTabToggle.isOn;
     private bool IsHistoryPage => Utilities.IsValid(_historyTabToggle) && _historyTabToggle.isOn;
@@ -390,33 +406,89 @@ namespace Yamadev.YamaStream.UI
 
     public void UpdatePlaylistsContent()
     {
+      if (_playlistLineNames == null || _playlistLineNames.Length != _playlistsListScroll.LineCount) FindPlaylistLineParts();
       for (int i = 0; i < _playlistsListScroll.LineCount; i++)
       {
         if (_playlistsListScroll.Indexes[i] == _playlistsListScroll.LastIndexes[i] || _playlistsListScroll.Indexes[i] == -1) continue;
         int realIndex = ToRealPlaylistIndex(_playlistsListScroll.Indexes[i]);
         if (realIndex < 0) continue;
-        var cell = _playlistsListScroll.GetComponent<ScrollRect>().content.GetChild(i);
         var playlist = _controller.Playlists[realIndex];
 
-        var n = cell.Find("Text");
-        if (Utilities.IsValid(n))
-        {
-          var name = n.GetComponent<Text>();
-          if (Utilities.IsValid(name))
-            name.text = playlist.PlaylistName;
-        }
-
-        var tr = cell.Find("TrackCount");
-        if (Utilities.IsValid(tr))
-        {
-          var trackCount = tr.GetComponent<Text>();
-          if (Utilities.IsValid(trackCount))
-            trackCount.text = playlist.TrackCount > 0 ? $"{GetTranslation("label.total")} {playlist.TrackCount} {GetTranslation("label.tracks")}" : string.Empty;
-        }
-
-        var trigger = cell.GetComponent<IndexTrigger>();
+        var name = _playlistLineNames[i];
+        if (Utilities.IsValid(name)) name.text = playlist.PlaylistName;
+        var trackCount = _playlistLineCounts[i];
+        if (Utilities.IsValid(trackCount))
+          trackCount.text = playlist.TrackCount > 0 ? $"{GetTranslation("label.total")} {playlist.TrackCount} {GetTranslation("label.tracks")}" : string.Empty;
+        var trigger = _playlistLineTriggers[i];
         if (Utilities.IsValid(trigger)) trigger.SetProgramVariable("_variableObject", realIndex);
       }
+    }
+
+    private void FindPlaylistLineParts()
+    {
+      int count = _playlistsListScroll.LineCount;
+      var content = _playlistsListScroll.GetComponent<ScrollRect>().content;
+      _playlistLineNames = new Text[count];
+      _playlistLineCounts = new Text[count];
+      _playlistLineTriggers = new IndexTrigger[count];
+      for (int i = 0; i < count; i++)
+      {
+        var line = content.GetChild(i);
+        _playlistLineNames[i] = TextAt(line, "Text");
+        _playlistLineCounts[i] = TextAt(line, "TrackCount");
+        _playlistLineTriggers[i] = line.GetComponent<IndexTrigger>();
+      }
+    }
+
+    private void FindTrackLineParts()
+    {
+      int count = _playlistTracksScroll.LineCount;
+      var content = _playlistTracksScroll.GetComponent<ScrollRect>().content;
+      _trackLineTitles = new Text[count];
+      _trackLineUrls = new Text[count];
+      _trackLineNumbers = new Text[count];
+      _trackLineMarks = new GameObject[count];
+      _trackLineActions = new GameObject[count * TrackActionCount];
+      _trackLineAnimators = new Animator[count];
+      _trackLineTriggers = new IndexTrigger[count];
+      for (int i = 0; i < count; i++)
+      {
+        var line = content.GetChild(i);
+        var info = line.Find("Info");
+        if (Utilities.IsValid(info))
+        {
+          _trackLineTitles[i] = TextAt(info, "Title");
+          _trackLineUrls[i] = TextAt(info, "Url");
+          _trackLineNumbers[i] = TextAt(info, "No");
+          var mark = info.Find("PlayingMark");
+          if (Utilities.IsValid(mark)) _trackLineMarks[i] = mark.gameObject;
+        }
+        var actions = line.Find("Actions");
+        if (Utilities.IsValid(actions))
+        {
+          int at = i * TrackActionCount;
+          _trackLineActions[at] = ObjectAt(actions, "Up");
+          _trackLineActions[at + 1] = ObjectAt(actions, "Down");
+          _trackLineActions[at + 2] = ObjectAt(actions, "Remove");
+          _trackLineActions[at + 3] = ObjectAt(actions, "Copy");
+          _trackLineActions[at + 4] = ObjectAt(actions, "Add");
+          _trackLineActions[at + 5] = ObjectAt(actions, "Play");
+        }
+        _trackLineAnimators[i] = line.GetComponent<Animator>();
+        _trackLineTriggers[i] = line.GetComponent<IndexTrigger>();
+      }
+    }
+
+    private Text TextAt(Transform parent, string name)
+    {
+      var child = parent.Find(name);
+      return Utilities.IsValid(child) ? child.GetComponent<Text>() : null;
+    }
+
+    private GameObject ObjectAt(Transform parent, string name)
+    {
+      var child = parent.Find(name);
+      return Utilities.IsValid(child) ? child.gameObject : null;
     }
 
     // The queue and history tabs show their list from the top, drawn once.
@@ -497,78 +569,64 @@ namespace Yamadev.YamaStream.UI
       }
       else return;
 
+      if (_trackLineTitles == null || _trackLineTitles.Length != _playlistTracksScroll.LineCount) FindTrackLineParts();
+      bool queuePage = IsQueuePage;
+      bool historyPage = IsHistoryPage;
+      // The URL action shows the track's URL in the dialog's copy field,
+      // so a UI without a dialog (the Playlist Panel) does not offer it.
+      bool urlAction = !queuePage && Utilities.IsValid(_modalDialog);
       for (int i = 0; i < _playlistTracksScroll.LineCount; i++)
       {
-        if (_playlistTracksScroll.Indexes[i] == _playlistTracksScroll.LastIndexes[i] || _playlistTracksScroll.Indexes[i] == -1) continue;
-        if (_playlistTracksScroll.Indexes[i] >= tracks.Length) continue;
+        int index = _playlistTracksScroll.Indexes[i];
+        if (index == _playlistTracksScroll.LastIndexes[i] || index == -1) continue;
+        if (index >= tracks.Length) continue;
 
-        var track = tracks[_playlistTracksScroll.Indexes[i]];
+        var track = tracks[index];
         var trackTitle = TrackUtils.GetTitle(track);
         var trackUrl = TrackUtils.GetUrl(track);
-        bool isPlaying = !IsQueuePage && !IsHistoryPage && _playlistIndex == _controller.ActivePlaylistIndex && _playlistTracksScroll.Indexes[i] == _controller.PlayingTrackIndex;
+        bool isPlaying = !queuePage && !historyPage && _playlistIndex == _controller.ActivePlaylistIndex && index == _controller.PlayingTrackIndex;
 
-        var cell = _playlistTracksScroll.GetComponent<ScrollRect>().content.GetChild(i);
-        var info = cell.Find("Info");
-        if (Utilities.IsValid(info))
+        var title = _trackLineTitles[i];
+        if (Utilities.IsValid(title))
         {
-          var ti = info.Find("Title");
-          if (Utilities.IsValid(ti))
+          if (!_trackTitleColorRead)
           {
-            var title = ti.GetComponent<Text>();
-            if (Utilities.IsValid(title))
-            {
-              if (!_trackTitleColorRead)
-              {
-                _trackTitleColor = title.color;
-                _trackTitleColorRead = true;
-              }
-              title.text = string.IsNullOrEmpty(trackTitle) ? trackUrl.Get() : trackTitle;
-              title.color = isPlaying ? _primaryColor : _trackTitleColor;
-            }
+            _trackTitleColor = title.color;
+            _trackTitleColorRead = true;
           }
-          var u = info.Find("Url");
-          if (Utilities.IsValid(u))
-          {
-            var urlText = u.GetComponent<Text>();
-            if (Utilities.IsValid(urlText))
-              urlText.text = string.IsNullOrEmpty(trackTitle) ? string.Empty : trackUrl.Get();
-          }
-          var no = info.Find("No");
-          if (Utilities.IsValid(no))
-          {
-            var numberText = no.GetComponent<Text>();
-            if (Utilities.IsValid(numberText))
-            {
-              numberText.text = $"{_playlistTracksScroll.Indexes[i] + 1}";
-              numberText.gameObject.SetActive(!isPlaying);
-            }
-          }
-          var playingMark = info.Find("PlayingMark");
-          if (Utilities.IsValid(playingMark)) playingMark.gameObject.SetActive(isPlaying);
+          title.text = string.IsNullOrEmpty(trackTitle) ? trackUrl.Get() : trackTitle;
+          title.color = isPlaying ? _primaryColor : _trackTitleColor;
         }
-        var actions = cell.Find("Actions");
-        if (Utilities.IsValid(actions))
+        var urlText = _trackLineUrls[i];
+        if (Utilities.IsValid(urlText)) urlText.text = string.IsNullOrEmpty(trackTitle) ? string.Empty : trackUrl.Get();
+        var numberText = _trackLineNumbers[i];
+        if (Utilities.IsValid(numberText))
         {
-          var upMark = actions.Find("Up");
-          if (Utilities.IsValid(upMark)) upMark.gameObject.SetActive(IsQueuePage);
-          var downMark = actions.Find("Down");
-          if (Utilities.IsValid(downMark)) downMark.gameObject.SetActive(IsQueuePage);
-          var removeMark = actions.Find("Remove");
-          if (Utilities.IsValid(removeMark)) removeMark.gameObject.SetActive(IsQueuePage);
-          // The URL action shows the track's URL in the dialog's copy field,
-          // so a UI without a dialog (the Playlist Panel) does not offer it.
-          var copyUrl = actions.Find("Copy");
-          if (Utilities.IsValid(copyUrl)) copyUrl.gameObject.SetActive(!IsQueuePage && Utilities.IsValid(_modalDialog));
-          var addMark = actions.Find("Add");
-          if (Utilities.IsValid(addMark)) addMark.gameObject.SetActive(!IsQueuePage);
-          var PlayMark = actions.Find("Play");
-          if (Utilities.IsValid(PlayMark)) PlayMark.gameObject.SetActive(!IsQueuePage);
+          numberText.text = $"{index + 1}";
+          numberText.gameObject.SetActive(!isPlaying);
         }
-        var ani = cell.GetComponent<Animator>();
+        var playingMark = _trackLineMarks[i];
+        if (Utilities.IsValid(playingMark)) playingMark.SetActive(isPlaying);
+
+        int at = i * TrackActionCount;
+        SetLineAction(at, queuePage);
+        SetLineAction(at + 1, queuePage);
+        SetLineAction(at + 2, queuePage);
+        SetLineAction(at + 3, urlAction);
+        SetLineAction(at + 4, !queuePage);
+        SetLineAction(at + 5, !queuePage);
+
+        var ani = _trackLineAnimators[i];
         if (Utilities.IsValid(ani)) ani.SetTrigger("Reset");
-        var trigger = cell.GetComponent<IndexTrigger>();
-        if (Utilities.IsValid(trigger)) trigger.SetProgramVariable("_variableObject", _playlistTracksScroll.Indexes[i]);
+        var trigger = _trackLineTriggers[i];
+        if (Utilities.IsValid(trigger)) trigger.SetProgramVariable("_variableObject", index);
       }
+    }
+
+    private void SetLineAction(int at, bool shown)
+    {
+      var action = _trackLineActions[at];
+      if (Utilities.IsValid(action)) action.SetActive(shown);
     }
 
     public void RemoveFromQueue()
