@@ -27,7 +27,7 @@
   "desc.videoPlayer": "AVPro reproduce vídeos y directos; Visor de imágenes muestra imágenes",
   "desc.playbackSpeed": "Al cambiarla, el vídeo se recarga",
   "desc.repeatPlay": "Repite de A a B. Se reinicia al cambiar de vídeo",
-  "desc.maxResolution": "Se aplica desde el siguiente vídeo",
+  "desc.maxResolution": "Al cambiarla, el vídeo se recarga",
   "desc.mirrorInversion": "Invierte el vídeo de izquierda a derecha",
   "desc.brightness": "Cambia el brillo de la pantalla",
   "desc.localOffset": "Reproduce un poco antes o después, solo para ti",

@@ -446,6 +446,15 @@ namespace Yamadev.YamaStream.UI
     // list (the queue, the history or the playlist) needs.
     public void GeneratePlaylistTracks() => ShowPlaylistTracks(false);
 
+    // The open playlist's track count in its header, which carries a word
+    // and so is written again when the language changes.
+    private void UpdatePlaylistTrackCountText()
+    {
+      if (!Utilities.IsValid(_currentPlaylistTrackCountText)) return;
+      if (_playlistIndex < 0 || _playlistIndex >= _controller.Playlists.Length) return;
+      _currentPlaylistTrackCountText.text = $"{_controller.Playlists[_playlistIndex].TrackCount} {GetTranslation("label.tracks")}";
+    }
+
     // fromTop: a playlist just opened, shown from its first track.
     private void ShowPlaylistTracks(bool fromTop)
     {
@@ -471,8 +480,7 @@ namespace Yamadev.YamaStream.UI
         {
           _currentPlaylistNameText.text = playlist.PlaylistName;
         }
-        if (Utilities.IsValid(_currentPlaylistTrackCountText))
-          _currentPlaylistTrackCountText.text = $"{playlist.TrackCount} {GetTranslation("label.tracks")}";
+        UpdatePlaylistTrackCountText();
       }
       else return;
 

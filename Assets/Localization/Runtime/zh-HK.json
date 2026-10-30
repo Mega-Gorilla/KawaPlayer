@@ -27,7 +27,7 @@
   "desc.videoPlayer": "AVPro\u00a0播放影片和直播，圖片檢視器顯示圖片",
   "desc.playbackSpeed": "更改後會重新載入影片",
   "desc.repeatPlay": "在\u00a0A\u00a0到\u00a0B\u00a0之間重複。\n影片變更後會重設",
-  "desc.maxResolution": "從下一部影片開始套用",
+  "desc.maxResolution": "更改後會重新載入影片",
   "desc.mirrorInversion": "左右翻轉畫面",
   "desc.brightness": "調整螢幕亮度",
   "desc.localOffset": "只讓自己的播放稍早或稍遲",

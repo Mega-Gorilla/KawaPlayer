@@ -27,7 +27,7 @@
   "desc.videoPlayer": "AVPro plays videos and streams; Image Viewer shows pictures",
   "desc.playbackSpeed": "Changing it reloads the video",
   "desc.repeatPlay": "Repeats from A to B. Resets when the video changes",
-  "desc.maxResolution": "Applies from the next video",
+  "desc.maxResolution": "Changing it reloads the video",
   "desc.mirrorInversion": "Flips the video left to right",
   "desc.brightness": "Changes how bright the screen is",
   "desc.localOffset": "Plays a little earlier or later, for you only",
