@@ -288,7 +288,8 @@ MARKS = {
         dict(box=(968, 21, 1111, 67), n=2),
         dict(box=(1115, 21, 1259, 67), n=3),
         dict(box=(817, 84, 1260, 148), n=4, cap="押すと曲の一覧へ", at=(600, 116)),
-        dict(box=(1196, 620, 1262, 686), n=5, cap="閉じる", at=(1080, 560)),
+        dict(box=(930, 218, 1137, 312), n=5, cap="VHub のプレイリストを足す", at=(640, 265)),
+        dict(box=(1196, 620, 1262, 686), n=6, cap="閉じる", at=(1080, 560)),
     ]),
     "screen/playlist-tracks": dict(scale=0.667, marks=[
         dict(box=(829, 93, 873, 137), n=1),
@@ -303,7 +304,7 @@ MARKS = {
         dict(box=(1161, 234, 1217, 290), n=4),
     ]),
     "screen/queue": dict(scale=0.667, marks=[
-        dict(box=(821, 21, 964, 67), n=1),
+        dict(box=(968, 21, 1111, 67), n=1),
         dict(box=(822, 84, 1258, 285), n=2),
     ]),
     "screen/queue-actions": dict(scale=0.667, marks=[
@@ -313,8 +314,8 @@ MARKS = {
         dict(box=(1163, 156, 1215, 208), n=4),
     ]),
     "screen/history": dict(scale=0.667, marks=[
-        dict(box=(968, 21, 1111, 67), n=1),
-        dict(box=(822, 84, 1258, 218), n=2),
+        dict(box=(1115, 21, 1259, 67), n=1),
+        dict(box=(822, 84, 1258, 151), n=2),
     ]),
     "screen/settings": dict(scale=0.667, marks=[
         dict(box=(38, 11, 105, 77), n=1),
