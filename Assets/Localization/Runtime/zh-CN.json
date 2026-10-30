@@ -1,6 +1,8 @@
 {
   "menu.settings": "设置",
   "tab.playlist": "播放列表",
+  "label.addPlaylistUrl": "用 VHub Playlist URL 添加",
+  "msg.playlistUrlOnly": "这里请输入用「VRChat用URLをコピー」（复制 VRChat 用 URL）复制的 VHub 播放列表 URL。\n视频的 URL 请用下方栏的 URL 按钮输入。",
   "tab.playback": "播放",
   "label.version": "版本",
   "label.videoPlayer": "视频播放器",

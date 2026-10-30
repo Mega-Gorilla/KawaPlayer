@@ -2,6 +2,7 @@ using System;
 using UdonSharp;
 using UnityEngine;
 using UnityEngine.UI;
+using VRC.SDK3.Components;
 using VRC.SDKBase;
 
 namespace Yamadev.YamaStream.UI
@@ -9,6 +10,8 @@ namespace Yamadev.YamaStream.UI
   public partial class UIController
   {
     [Header("Playlist - Settings")]
+    // The list opens whenever the controls show (#335): the playlists are
+    // what players open most. On for the screen.
     [SerializeField] private bool _defaultPlaylistOpen;
 
     [Header("Playlist - UI Components")]
@@ -52,6 +55,10 @@ namespace Yamadev.YamaStream.UI
     [SerializeField, RegisterEvent(nameof(Button.onClick), nameof(TogglePlaylistActions))] private Button _playlistActionsButton;
     // Shows the URL a playlist loaded in the world came from, to copy.
     [SerializeField, RegisterEvent(nameof(Button.onClick), nameof(ShowPlaylistUrl))] private Button _playlistUrlButton;
+    // The "+" under the playlists, for a VHub playlist's VRChat URL (#335),
+    // and the name shown while it is pointed at.
+    [SerializeField, RegisterEvent(nameof(VRCUrlInputField.onEndEdit), nameof(AddPlaylistUrl))] private VRCUrlInputField _addPlaylistUrlInputField;
+    [SerializeField] private Text _addPlaylistUrlLabel;
 
     private int _playlistIndex = -1;
     private int _playlistTrackIndex = -1;
@@ -193,6 +200,27 @@ namespace Yamadev.YamaStream.UI
       if (Utilities.IsValid(_playlistUrlButton)) _playlistUrlButton.gameObject.SetActive(isDynamic && slot.CanRefresh);
       // Delete shows with any of them, so the strip is never empty.
       if (Utilities.IsValid(_playlistActionsButton)) _playlistActionsButton.gameObject.SetActive(isDynamic);
+    }
+
+    // The "+" takes a VHub playlist's VRChat URL and adds the playlist to the
+    // list, without playing it, saying nothing unless it fails (#335). It
+    // needs the module that reads such a URL (the interceptor) and a dialog
+    // for a failure, so the Playlist Panel, which has none, does not show
+    // it. Any other URL is turned back with a word on what it takes.
+    private void UpdateAddPlaylistButton()
+    {
+      if (Utilities.IsValid(_addPlaylistUrlInputField))
+        _addPlaylistUrlInputField.gameObject.SetActive(Utilities.IsValid(_urlInterceptor) && Utilities.IsValid(_modalDialog));
+    }
+
+    public void AddPlaylistUrl()
+    {
+      var field = _addPlaylistUrlInputField;
+      if (!Utilities.IsValid(field) || field.wasCanceled) return;
+      var url = field.GetUrl();
+      field.SetUrl(VRCUrl.Empty);
+      if (HandToUrlInterceptor(url, true)) return;
+      ShowMessage(GetTranslation("label.addPlaylistUrl"), GetTranslation("msg.playlistUrlOnly"));
     }
 
     // A playlist baked into the world keeps no URL at run time, so the

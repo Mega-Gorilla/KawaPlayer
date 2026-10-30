@@ -17,13 +17,17 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
     // shared interceptor answers on the panel the URL was entered on.
     [SerializeField] private UIController _uiController;
 
-    // Contract with UIController.PlayUrlField: the caller writes these
+    // Contract with UIController.HandToUrlInterceptor: the caller writes these
     // variables via SetProgramVariable before sending OnUrlSubmitted, then
     // reads interceptHandled back. handled=true means the URL must not
     // continue into the video path, even when the load was refused here.
     public VRCUrl interceptUrl;
     public UIController interceptSource;
     public bool interceptHandled;
+    // The list's "+" adds a playlist without playing it, even when nothing
+    // plays, and says nothing unless it fails (#335); the URL field plays it
+    // then and reports the result, as it always has.
+    public bool interceptAddOnly;
 
     // Contract with UIController.RefreshPlaylist (issue #91): the caller
     // writes these before sending OnPlaylistRefreshRequested. refreshSource
@@ -32,8 +36,10 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
     public UIController refreshSource;
 
     // The UI that initiated the load currently in flight; OnLoadResult
-    // reports back to it.
+    // reports back to it. A load from the list's "+" reports a failure only:
+    // the playlist appearing in the list is what says it worked.
     private UIController _resultUi;
+    private bool _resultAddOnly;
     // What is being asked about, held from the question to the answer.
     //
     // One question at a time. Every panel with a URL field is wired to this
@@ -47,6 +53,7 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
     private VRCUrl _pendingLoadUrl;
     private DynamicPlaylist _pendingReplaced;
     private string _pendingReplacedSourceUrl = string.Empty;
+    private bool _pendingAddOnly;
     private bool _awaitingConfirm;
     // Which panel is being asked. _resultUi cannot stand in for it: a
     // refresh from another panel moves that while the dialog is up, and the
@@ -116,7 +123,9 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
         return;
       }
 
+      bool addOnly = interceptAddOnly;
       _resultUi = ui;
+      _resultAddOnly = addOnly;
 
       // Every slot full means this load costs the player a playlist they
       // already had. Show which one before it goes (issue #125) rather than
@@ -124,7 +133,7 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
       var replaced = _loader.GetSlotToBeReplaced(interceptUrl);
       if (Utilities.IsValid(replaced))
       {
-        if (AskBeforeReplacing(ui, interceptUrl, replaced)) return;
+        if (AskBeforeReplacing(ui, interceptUrl, replaced, addOnly)) return;
 
         // Asking failed, and why decides what happens next. A panel with a
         // dialog could have asked and did not only because that dialog is
@@ -139,16 +148,17 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
       // Either nothing is lost, or there is no modal to ask with. Loading
       // anyway is what happens today, and refusing instead would strand a
       // player whose panel has no way to delete anything either.
-      _loader.LoadPlaylistFromUrlWithFeedback(interceptUrl, this, null, string.Empty);
+      _loader.LoadPlaylistFromUrlWithFeedback(interceptUrl, this, null, string.Empty, !addOnly);
     }
 
-    private bool AskBeforeReplacing(UIController ui, VRCUrl url, DynamicPlaylist replaced)
+    private bool AskBeforeReplacing(UIController ui, VRCUrl url, DynamicPlaylist replaced, bool addOnly)
     {
       if (!Utilities.IsValid(ui)) return false;
 
       _pendingLoadUrl = url;
       _pendingUi = ui;
       _pendingReplaced = replaced;
+      _pendingAddOnly = addOnly;
       // Reading SourceUrl is only safe on a slot that holds something.
       _pendingReplacedSourceUrl = replaced.CanRefresh ? replaced.SourceUrl.Get() : string.Empty;
       _awaitingConfirm = true;
@@ -180,6 +190,7 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
       var ui = _pendingUi;
       var replaced = _pendingReplaced;
       string replacedSourceUrl = _pendingReplacedSourceUrl;
+      bool addOnly = _pendingAddOnly;
       ClearPendingConfirm();
       if (!Utilities.IsValid(_loader) || !Utilities.IsValid(url)) return;
 
@@ -199,7 +210,8 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
       // Only now, with a load of our own about to start: report to whoever
       // was asked, not to whatever touched the loader while they read.
       if (Utilities.IsValid(ui)) _resultUi = ui;
-      _loader.LoadPlaylistFromUrlWithFeedback(url, this, replaced, replacedSourceUrl);
+      _resultAddOnly = addOnly;
+      _loader.LoadPlaylistFromUrlWithFeedback(url, this, replaced, replacedSourceUrl, !addOnly);
     }
 
     // Answered no. Nothing happens, but the question has to be let go of or
@@ -212,6 +224,7 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
       _pendingUi = null;
       _pendingReplaced = null;
       _pendingReplacedSourceUrl = string.Empty;
+      _pendingAddOnly = false;
       _awaitingConfirm = false;
     }
 
@@ -248,9 +261,10 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
       // _resultUi is not cleared after a load, so leaving it alone here
       // would report this refresh on whichever panel last submitted a URL.
       _resultUi = ui;
+      _resultAddOnly = false;
       // A refresh takes back the slot it already owns, so it never costs
       // anyone a playlist and makes no promise to check.
-      _loader.LoadPlaylistFromUrlWithFeedback(refreshUrl, this, null, string.Empty);
+      _loader.LoadPlaylistFromUrlWithFeedback(refreshUrl, this, null, string.Empty, true);
     }
 
     // Called by PlaylistLoader exactly once per feedback load, on every
@@ -267,6 +281,11 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
     {
       var ui = Utilities.IsValid(_resultUi) ? _resultUi : _uiController;
       if (!Utilities.IsValid(ui)) return;
+
+      // Added from the list's "+": the new row says it worked, so only a
+      // failure is reported. Some tracks skipped still added the playlist.
+      if (_resultAddOnly && (resultCode == PlaylistLoader.LoadResultSuccess || resultCode == PlaylistLoader.LoadResultPartial))
+        return;
 
       if (resultCode == PlaylistLoader.LoadResultSuccess)
       {

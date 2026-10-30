@@ -1,6 +1,8 @@
 {
   "menu.settings": "Настройки",
   "tab.playlist": "Плейлист",
+  "label.addPlaylistUrl": "Добавить по URL VHub Playlist",
+  "msg.playlistUrlOnly": "Введите здесь URL плейлиста VHub, скопированный кнопкой «VRChat用URLをコピー» (копировать URL для VRChat).\nURL видео вводится кнопкой URL на панели внизу.",
   "tab.playback": "Плеер",
   "label.version": "Версия",
   "label.videoPlayer": "Видеоплеер",

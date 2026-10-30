@@ -1,6 +1,8 @@
 {
   "menu.settings": "Settings",
   "tab.playlist": "Playlist",
+  "label.addPlaylistUrl": "Add by VHub Playlist URL",
+  "msg.playlistUrlOnly": "Enter here the URL of a VHub playlist copied with \"VRChat用URLをコピー\" (Copy URL for VRChat).\nA video's URL goes in with the URL button in the bar below.",
   "tab.playback": "Playback",
   "label.version": "Version",
   "label.videoPlayer": "Video Player",
