@@ -27,7 +27,7 @@
   "desc.videoPlayer": "AVPro\u00a0は動画と配信、画像表示は画像を映します",
   "desc.playbackSpeed": "変えると動画を読み込み直します",
   "desc.repeatPlay": "A\u00a0から\u00a0B\u00a0までをくり返します。\n動画が変わると戻ります",
-  "desc.maxResolution": "次に読み込む動画から変わります",
+  "desc.maxResolution": "変えると動画を読み込み直します",
   "desc.mirrorInversion": "映像を左右反転します",
   "desc.brightness": "画面の明るさを変えます",
   "desc.localOffset": "自分の再生だけを、少し早め・遅めにします",

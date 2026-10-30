@@ -27,7 +27,7 @@
   "desc.videoPlayer": "AVPro\u00a0播放视频和直播，图片查看器显示图片",
   "desc.playbackSpeed": "更改后会重新加载视频",
   "desc.repeatPlay": "在\u00a0A\u00a0到\u00a0B\u00a0之间重复。\n视频变更后会重置",
-  "desc.maxResolution": "从下一个视频开始生效",
+  "desc.maxResolution": "更改后会重新加载视频",
   "desc.mirrorInversion": "左右翻转画面",
   "desc.brightness": "调整屏幕亮度",
   "desc.localOffset": "只让自己的播放稍早或稍晚",

@@ -27,7 +27,7 @@
   "desc.videoPlayer": "AVPro는 동영상과 방송을, 이미지 뷰어는 이미지를 표시합니다",
   "desc.playbackSpeed": "바꾸면 동영상을 다시 불러옵니다",
   "desc.repeatPlay": "A부터 B까지 반복합니다. 동영상이 바뀌면 초기화됩니다",
-  "desc.maxResolution": "다음에 불러오는 동영상부터 적용됩니다",
+  "desc.maxResolution": "바꾸면 동영상을 다시 불러옵니다",
   "desc.mirrorInversion": "영상을 좌우 반전합니다",
   "desc.brightness": "화면 밝기를 바꿉니다",
   "desc.localOffset": "내 재생만 조금 빠르게 또는 늦게 합니다",

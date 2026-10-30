@@ -321,6 +321,11 @@ namespace Yamadev.YamaStream.UI
       // Re-resolves the URL hint (issue #84) in the new language along with
       // the track info it shares the bar with.
       UpdateTrackView();
+      // The repeat range's start and end, and an open playlist's track
+      // count, carry words too but are otherwise written only when they
+      // change. Only the texts: the handles stay where the player put them.
+      UpdateRepeatTimeTexts();
+      UpdatePlaylistTrackCountText();
 
       if (Utilities.IsValid(_unlockUiMessageLabel))
       {

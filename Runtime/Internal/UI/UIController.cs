@@ -766,11 +766,7 @@ namespace Yamadev.YamaStream.UI
         return;
       }
 
-      if (Utilities.IsValid(_repeatStartTimeText))
-      {
-        var value = Mathf.Clamp(_controller.Duration * _repeatRangeSlider.LeftValue, 0f, _controller.Duration);
-        _repeatStartTimeText.text = $"{GetTranslation("label.start")}(A): {TimeSpan.FromSeconds(value).ToString(_controller.TimeFormat)}";
-      }
+      UpdateRepeatTimeTexts();
     }
 
     public void SetRepeatEnd()
@@ -783,11 +779,31 @@ namespace Yamadev.YamaStream.UI
         return;
       }
 
-      if (Utilities.IsValid(_repeatEndTimeText))
+      UpdateRepeatTimeTexts();
+    }
+
+    // The repeat range's start and end as their texts show them: the shared
+    // range while repeat is on, else where the handles stand, which the
+    // player may still be choosing. The video's start and end, and anything
+    // while repeat is on but nothing plays, read "not set"; so does all of a
+    // live stream, which has no range to set and whose length (infinite or
+    // NaN) would make the handles' times no time at all.
+    private void UpdateRepeatTimeTexts()
+    {
+      if (!Utilities.IsValid(_repeatRangeSlider) || !Utilities.IsValid(_repeatStartTimeText) || !Utilities.IsValid(_repeatEndTimeText)) return;
+      string notSet = GetTranslation("label.notSet");
+      string startText = notSet;
+      string endText = notSet;
+      bool on = RepeatUtils.IsOn(_controller.Repeat);
+      if (!_controller.Stopped && !_controller.IsLive && (_controller.IsPlaying || !on))
       {
-        var value = Mathf.Clamp(_controller.Duration * _repeatRangeSlider.RightValue, 0f, _controller.Duration);
-        _repeatEndTimeText.text = $"{GetTranslation("label.end")}(B): {TimeSpan.FromSeconds(value).ToString(_controller.TimeFormat)}";
+        float start = on ? RepeatUtils.GetStartTime(_controller.Repeat) : _controller.Duration * _repeatRangeSlider.LeftValue;
+        float end = on ? RepeatUtils.GetEndTime(_controller.Repeat) : _controller.Duration * _repeatRangeSlider.RightValue;
+        if (start > 0f) startText = TimeSpan.FromSeconds(start).ToString(_controller.TimeFormat);
+        if (end < _controller.Duration) endText = TimeSpan.FromSeconds(end).ToString(_controller.TimeFormat);
       }
+      _repeatStartTimeText.text = $"{GetTranslation("label.start")}(A): {startText}";
+      _repeatEndTimeText.text = $"{GetTranslation("label.end")}(B): {endText}";
     }
 
     public void SetShuffle()
@@ -1060,29 +1076,15 @@ namespace Yamadev.YamaStream.UI
       if (Utilities.IsValid(_speedValueText)) _speedValueText.text = $"{_controller.Speed:F2}x";
       if (Utilities.IsValid(_repeatOffToggle)) _repeatOffToggle.SetIsOnWithoutNotify(!RepeatUtils.IsOn(_controller.Repeat));
       if (Utilities.IsValid(_repeatOnToggle)) _repeatOnToggle.SetIsOnWithoutNotify(RepeatUtils.IsOn(_controller.Repeat));
-      if (Utilities.IsValid(_repeatRangeSlider) && Utilities.IsValid(_repeatStartTimeText) && Utilities.IsValid(_repeatEndTimeText))
+      // While nothing plays, or repeat is on, the handles go back to the
+      // shared range; while a video plays with repeat off, they stay where
+      // the player put them.
+      if (Utilities.IsValid(_repeatRangeSlider) && (!_controller.IsPlaying || RepeatUtils.IsOn(_controller.Repeat)))
       {
-        if (!_controller.IsPlaying || RepeatUtils.IsOn(_controller.Repeat))
-        {
-          string notSetText = GetTranslation("label.notSet");
-          string startText, endText;
-          if (!_controller.IsPlaying)
-          {
-            startText = notSetText;
-            endText = notSetText;
-          }
-          else
-          {
-            startText = RepeatUtils.GetStartTime(_controller.Repeat) == 0 ? notSetText : TimeSpan.FromSeconds(RepeatUtils.GetStartTime(_controller.Repeat)).ToString(_controller.TimeFormat);
-            endText = RepeatUtils.GetEndTime(_controller.Repeat) >= _controller.Duration || _controller.IsLive ? notSetText : TimeSpan.FromSeconds(RepeatUtils.GetEndTime(_controller.Repeat)).ToString(_controller.TimeFormat);
-          }
-          _repeatStartTimeText.text = $"{GetTranslation("label.start")}(A): {startText}";
-          _repeatEndTimeText.text = $"{GetTranslation("label.end")}(B): {endText}";
-
-          _repeatRangeSlider.SetLeftValueWithoutNotify(_controller.IsLive || !_controller.IsPlaying ? 0f : Mathf.Clamp(RepeatUtils.GetStartTime(_controller.Repeat) / _controller.Duration, 0f, 1f));
-          _repeatRangeSlider.SetRightValueWithoutNotify(_controller.IsLive || !_controller.IsPlaying ? 1f : Mathf.Clamp(RepeatUtils.GetEndTime(_controller.Repeat) / _controller.Duration, 0f, 1f));
-        }
+        _repeatRangeSlider.SetLeftValueWithoutNotify(_controller.IsLive || !_controller.IsPlaying ? 0f : Mathf.Clamp(RepeatUtils.GetStartTime(_controller.Repeat) / _controller.Duration, 0f, 1f));
+        _repeatRangeSlider.SetRightValueWithoutNotify(_controller.IsLive || !_controller.IsPlaying ? 1f : Mathf.Clamp(RepeatUtils.GetEndTime(_controller.Repeat) / _controller.Duration, 0f, 1f));
       }
+      UpdateRepeatTimeTexts();
       if (Utilities.IsValid(_localDelayValueText)) _localDelayValueText.text = (Mathf.Round(_controller.LocalDelay * 100) / 100).ToString();
       if (Utilities.IsValid(_shufflePlayButton)) _shufflePlayButton.gameObject.SetActive(!_controller.ShufflePlay);
       if (Utilities.IsValid(_shufflePlayOffButton)) _shufflePlayOffButton.gameObject.SetActive(_controller.ShufflePlay);
