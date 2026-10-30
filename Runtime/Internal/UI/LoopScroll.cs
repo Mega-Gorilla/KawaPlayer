@@ -39,15 +39,24 @@ namespace Yamadev.YamaStream.UI
       Render();
     }
 
+    // SetUp from the first line, as a list just opened shows it: the scroll
+    // goes back to the top before the one pass that draws the lines (#318).
+    public void SetUpAtTop(int length, UdonSharpBehaviour callbackUdon, string callbackEventName)
+    {
+      if (!_initialized) Initialize();
+      if (_initialized) _scrollRect.content.anchoredPosition = new Vector2(_scrollRect.content.anchoredPosition.x, 0);
+      SetUp(length, callbackUdon, callbackEventName);
+    }
+
     private void ResetValues()
     {
       if (!_initialized) return;
 
-      _indexes = new int[_lineCount].Populate(-1);
-      for (int i = 0; i < _lineCount; i++)
-      {
-        _scrollRect.content.GetChild(i).gameObject.SetActive(false);
-      }
+      // Every line is drawn again: a refresh brings the same indexes with
+      // new content. The lines stay on, as switching one off and on again
+      // runs OnDisable and OnEnable on all it holds, the Udon behaviours of
+      // its buttons included; UpdatePosition switches off those left empty.
+      _indexes.Populate(-1);
     }
 
     private void Render()
@@ -56,13 +65,6 @@ namespace Yamadev.YamaStream.UI
       UpdateIndexes();
       UpdatePosition();
       InvokeCallback();
-    }
-
-    public void ScrollToTop()
-    {
-      Initialize();
-      _scrollRect.content.anchoredPosition = new Vector2(_scrollRect.content.anchoredPosition.x, 0);
-      Render();
     }
 
     public int[] LastIndexes => _lastIndexes;
@@ -124,10 +126,13 @@ namespace Yamadev.YamaStream.UI
       _scrollRect.content.sizeDelta = size;
     }
 
+    // What each line shows now goes into the array that held what it showed
+    // before last, and LastIndexes takes what it showed: the two are swapped
+    // rather than made anew, as this runs on every scroll.
     private void UpdateIndexes()
     {
       int offset = Mathf.FloorToInt(_scrollRect.content.anchoredPosition.y / _lineHeight);
-      int[] indexes = new int[_lineCount];
+      int[] indexes = _lastIndexes;
       for (int i = 0; i < _lineCount; i++)
       {
         int target = offset / _lineCount * _lineCount + i;
@@ -138,13 +143,23 @@ namespace Yamadev.YamaStream.UI
       _indexes = indexes;
     }
 
+    private bool LinesChanged()
+    {
+      for (int i = 0; i < _lineCount; i++)
+        if (_indexes[i] != _lastIndexes[i]) return true;
+      return false;
+    }
+
     private void UpdatePosition()
     {
       for (int i = 0; i < _lineCount; i++)
       {
-        if (_indexes[i] == _lastIndexes[i]) continue;
-        _scrollRect.content.GetChild(i).gameObject.SetActive(_indexes[i] != -1);
-        RectTransform rect = _scrollRect.content.GetChild(i).GetComponent<RectTransform>();
+        if (_indexes[i] == _lastIndexes[i] && _indexes[i] != -1) continue;
+        GameObject line = _scrollRect.content.GetChild(i).gameObject;
+        bool shown = _indexes[i] != -1;
+        if (line.activeSelf != shown) line.SetActive(shown);
+        if (!shown) continue;
+        RectTransform rect = line.GetComponent<RectTransform>();
         rect.anchoredPosition = new Vector2(rect.anchoredPosition.x, -(_indexes[i] * _lineHeight));
       }
     }
@@ -155,6 +170,8 @@ namespace Yamadev.YamaStream.UI
       if ((_position - _scrollRect.content.anchoredPosition).sqrMagnitude <= SCROLL_THRESHOLD_SQR) return;
       _position = _scrollRect.content.anchoredPosition;
       UpdateIndexes();
+      // A scroll within the same lines changes nothing they show.
+      if (!LinesChanged()) return;
       UpdatePosition();
       InvokeCallback();
     }

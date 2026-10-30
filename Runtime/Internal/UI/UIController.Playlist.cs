@@ -289,7 +289,7 @@ namespace Yamadev.YamaStream.UI
     {
       if (Utilities.IsValid(_playlistListPage)) _playlistListPage.SetActive(false);
       if (Utilities.IsValid(_playlistTracksPage)) _playlistTracksPage.SetActive(true);
-      GeneratePlaylistTracks();
+      ShowPlaylistTracks(true);
       if (Utilities.IsValid(_playlistHeader)) _playlistHeader.SetActive(true);
       if (Utilities.IsValid(_playlistActionStrip)) _playlistActionStrip.SetActive(false);
     }
@@ -419,12 +419,13 @@ namespace Yamadev.YamaStream.UI
       }
     }
 
+    // The queue and history tabs show their list from the top, drawn once.
     public void GenerateQueueView()
     {
       UpdatePlaylistActionButtons();
       if (!IsQueuePage || !Utilities.IsValid(_playlistTracksScroll)) return;
       HidePlaylistHeader();
-      _playlistTracksScroll.SetUp(_controller.Queue.TrackCount, this, nameof(UpdatePlaylistTracksContent));
+      _playlistTracksScroll.SetUpAtTop(_controller.Queue.TrackCount, this, nameof(UpdatePlaylistTracksContent));
     }
 
     public void GenerateHistoryView()
@@ -432,7 +433,7 @@ namespace Yamadev.YamaStream.UI
       UpdatePlaylistActionButtons();
       if (!IsHistoryPage || !Utilities.IsValid(_playlistTracksScroll)) return;
       HidePlaylistHeader();
-      _playlistTracksScroll.SetUp(_controller.History.TrackCount, this, nameof(UpdatePlaylistTracksContent));
+      _playlistTracksScroll.SetUpAtTop(_controller.History.TrackCount, this, nameof(UpdatePlaylistTracksContent));
     }
 
     public void GeneratePlaylistsView()
@@ -441,7 +442,12 @@ namespace Yamadev.YamaStream.UI
       _playlistsListScroll.SetUp(VisiblePlaylistCount(), this, nameof(UpdatePlaylistsContent));
     }
 
-    public void GeneratePlaylistTracks()
+    // Redraws the tracks that show where they are scrolled to, as a change to
+    // the list they come from needs.
+    public void GeneratePlaylistTracks() => ShowPlaylistTracks(false);
+
+    // fromTop: a playlist just opened, shown from its first track.
+    private void ShowPlaylistTracks(bool fromTop)
     {
       UpdatePlaylistActionButtons();
       if (!Utilities.IsValid(_playlistsListScroll) || !Utilities.IsValid(_playlistTracksScroll)) return;
@@ -470,7 +476,8 @@ namespace Yamadev.YamaStream.UI
       }
       else return;
 
-      _playlistTracksScroll.SetUp(trackCount, this, nameof(UpdatePlaylistTracksContent));
+      if (fromTop) _playlistTracksScroll.SetUpAtTop(trackCount, this, nameof(UpdatePlaylistTracksContent));
+      else _playlistTracksScroll.SetUp(trackCount, this, nameof(UpdatePlaylistTracksContent));
     }
 
     public void UpdatePlaylistTracksContent()
