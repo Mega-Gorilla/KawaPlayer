@@ -68,11 +68,11 @@ namespace Yamadev.YamaStream.UI
     // off the first title before any of them is recoloured (issue #163).
     private Color _trackTitleColor;
     private bool _trackTitleColorRead;
-    // The parts of the lines, found once when the lines are first drawn:
-    // finding them again for every line drawn was most of what opening a
-    // playlist cost (#326). A part a line lacks stays null. A track's
-    // actions are TrackActionCount to a line, in the order of
-    // FindTrackLineParts.
+    // The parts of the lines, found once when the lines are first drawn
+    // rather than again for every line drawn, which took about a tenth of
+    // opening a playlist and a third of scrolling by a line (#326). A part
+    // a line lacks stays null. A track's actions are TrackActionCount to a
+    // line, in the order of FindTrackLineParts.
     private Text[] _trackLineTitles;
     private Text[] _trackLineUrls;
     private Text[] _trackLineNumbers;
