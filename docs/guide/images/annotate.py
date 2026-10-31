@@ -319,35 +319,35 @@ MARKS = {
     ]),
     "screen/settings": dict(scale=0.667, marks=[
         dict(box=(38, 11, 105, 77), n=1),
-        dict(box=(32, 92, 288, 440), n=2, cap="分類を切り替える", at=(160, 520)),
-        dict(box=(296, 645, 1220, 712), n=3),
+        dict(box=(32, 92, 250, 440), n=2, cap="分類を切り替える", at=(141, 520)),
+        dict(box=(258, 645, 1194, 712), n=3),
     ]),
     "screen/settings-playback": dict(src="screen/settings", scale=0.667, marks=[
-        dict(box=(308, 86, 1240, 181), n=1),
-        dict(box=(308, 195, 1240, 343), n=2),
-        dict(box=(308, 357, 1240, 568), n=3),
+        dict(box=(270, 86, 1240, 181), n=1),
+        dict(box=(270, 195, 1240, 343), n=2),
+        dict(box=(270, 358, 1240, 568), n=3),
     ]),
     "screen/settings-playback2": dict(scale=0.667, marks=[
-        dict(box=(308, 409, 1240, 656), n=4),
+        dict(box=(270, 439, 1240, 655), n=4),
     ]),
     "screen/settings-video": dict(scale=0.667, marks=[
-        dict(box=(308, 86, 1240, 233), n=1),
-        dict(box=(308, 248, 1240, 343), n=2),
-        dict(box=(308, 357, 1240, 518), n=3),
+        dict(box=(270, 86, 1240, 233), n=1),
+        dict(box=(270, 248, 1240, 343), n=2),
+        dict(box=(270, 357, 1240, 517), n=3),
     ]),
     "screen/settings-audio": dict(scale=0.667, marks=[
-        dict(box=(308, 86, 1240, 246), n=1),
+        dict(box=(270, 86, 1240, 246), n=1),
     ]),
     "screen/settings-language": dict(scale=0.667, marks=[
-        dict(box=(308, 86, 1240, 345), n=1),
+        dict(box=(270, 86, 1240, 345), n=1),
     ]),
     # The autoplay card alone, cut from captures at 1920 x 1080, so at their own size.
     "screen/autoplay-owner": dict(scale=1.0, marks=[
-        dict(box=(44, 268, 323, 353), n=1),
-        dict(box=(332, 268, 547, 353), n=2),
+        dict(box=(45, 226, 323, 311), n=1),
+        dict(box=(333, 226, 548, 311), n=2),
     ]),
     "screen/autoplay-owner-set": dict(scale=1.0, marks=[
-        dict(box=(42, 212, 712, 258), n=1),
+        dict(box=(42, 170, 712, 213), n=1),
     ]),
     "screen/autoplay-other": dict(scale=1.0, marks=[]),
     "screen/url-button": dict(scale=0.667, marks=[
@@ -400,7 +400,7 @@ MARKS = {
         dict(box=(782, 72, 1176, 128), cap="一覧とログを切り替え", at=(880, 184)),
     ]),
     "tablet/settings": dict(scale=0.72, marks=[
-        dict(box=(100, 143, 392, 515), cap="分類を切り替え", at=(246, 580)),
+        dict(box=(100, 143, 348, 515), cap="分類を切り替え", at=(224, 580)),
     ]),
 }
 
