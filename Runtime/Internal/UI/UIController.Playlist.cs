@@ -314,10 +314,11 @@ namespace Yamadev.YamaStream.UI
     }
 
     // The tracks' page, or the playlists'. A page is shown and hidden by its
-    // canvas, and stays on while hidden: switching a page off and on ran
-    // OnDisable and OnEnable on all it holds, which took most of the time of
-    // going back and of opening a playlist (#326). A canvas switched off
-    // draws nothing, and nothing in it takes a press.
+    // canvas, and stays on while hidden until the controls next show
+    // (SwitchOffHiddenListPage): switching a page off and on ran OnDisable
+    // and OnEnable on all it holds, which took most of the time of going
+    // back and of opening a playlist (#326). A canvas switched off draws
+    // nothing, and nothing in it takes a press.
     private void ShowTracksPage(bool shown)
     {
       SetPageShown(_playlistListPage, !shown);
