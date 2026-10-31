@@ -34,6 +34,10 @@ namespace Yamadev.YamaStream.UI
     [SerializeField] private Animator _systemUIAnimator;
     // The press over the whole screen that shows and hides its controls.
     [SerializeField, RegisterEvent(nameof(Toggle.onValueChanged), nameof(ToggleUI))] private Toggle _uiToggle;
+    // While a video plays, the controls hide this many seconds after the
+    // screen was last pressed; 0 leaves them up (#340). Set in the KawaPlayer
+    // inspector.
+    [SerializeField] private float _controlsHideSeconds = 10f;
 
     [Header("Modal Dialog")]
     [SerializeField] private Modal _modalDialog;
@@ -201,7 +205,66 @@ namespace Yamadev.YamaStream.UI
       {
         SwitchOffHiddenListPage();
         OpenListWithControls();
+        TouchControls();
       }
+    }
+
+    // When the controls were last shown or the screen last used, and whether
+    // a check for hiding them is waiting (#340).
+    private float _controlsTouchedAt;
+    private bool _controlsHideCheckWaiting;
+
+    // The controls were shown or used: they stay up _controlsHideSeconds
+    // from now. A UI without controls to hide (the Playlist Panel) has no
+    // animator.
+    private void TouchControls()
+    {
+      if (_controlsHideSeconds <= 0f || !Utilities.IsValid(_userUIAnimator)) return;
+      _controlsTouchedAt = Time.time;
+      if (_controlsHideCheckWaiting) return;
+      _controlsHideCheckWaiting = true;
+      SendCustomEventDelayedSeconds(nameof(_CheckControlsHide), _controlsHideSeconds);
+    }
+
+    // Hides the controls, as a press on the screen would, once they have gone
+    // unused for _controlsHideSeconds while a video plays. While nothing
+    // plays (stopped, paused or loading), or a dialog, a page or a URL field
+    // is open, they stay, and the count starts again: a video that starts by
+    // itself has its controls hidden a period later.
+    public void _CheckControlsHide()
+    {
+      _controlsHideCheckWaiting = false;
+      if (_controlsHideSeconds <= 0f || !Utilities.IsValid(_userUIAnimator) || !IsUserUIState("ToggleUI", "UIOn")) return;
+      float left = _controlsTouchedAt + _controlsHideSeconds - Time.time;
+      if (left > 0f)
+      {
+        _controlsHideCheckWaiting = true;
+        SendCustomEventDelayedSeconds(nameof(_CheckControlsHide), left);
+        return;
+      }
+      if (CanHideControls())
+      {
+        _userUIAnimator.SetTrigger("ToggleUI");
+        return;
+      }
+      TouchControls();
+    }
+
+    // The screen was used while its controls show: a press on it, or a
+    // scroll of the list that brought other lines in.
+    private void TouchShownControls()
+    {
+      if (Utilities.IsValid(_userUIAnimator) && IsUserUIState("ToggleUI", "UIOn")) TouchControls();
+    }
+
+    private bool CanHideControls()
+    {
+      if (!Utilities.IsValid(_controller) || !_controller.IsPlaying) return false;
+      if (Utilities.IsValid(_modalDialog) && _modalDialog.gameObject.activeSelf) return false;
+      if (IsUserUIState("Page", "ShowPage")) return false;
+      if (Utilities.IsValid(_urlInputField) && _urlInputField.isFocused) return false;
+      if (Utilities.IsValid(_addPlaylistUrlInputField) && _addPlaylistUrlInputField.isFocused) return false;
+      return true;
     }
 
     private void OpenListWithControls()

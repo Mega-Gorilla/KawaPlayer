@@ -475,8 +475,12 @@ namespace Yamadev.YamaStream.UI
       _playlistsListScroll.SetUp(VisiblePlaylistCount(), this, nameof(UpdatePlaylistsContent));
     }
 
+    // Called by the list's LoopScroll when its lines are drawn: on a scroll
+    // that brings other lines in too, which counts the controls' time again
+    // (#340).
     public void UpdatePlaylistsContent()
     {
+      TouchShownControls();
       if (_playlistLineNames == null || _playlistLineNames.Length != _playlistsListScroll.LineCount) FindPlaylistLineParts();
       for (int i = 0; i < _playlistsListScroll.LineCount; i++)
       {
@@ -636,8 +640,10 @@ namespace Yamadev.YamaStream.UI
       else _playlistTracksScroll.SetUp(trackCount, this, nameof(UpdatePlaylistTracksContent));
     }
 
+    // Called by the list's LoopScroll as UpdatePlaylistsContent is.
     public void UpdatePlaylistTracksContent()
     {
+      TouchShownControls();
       object[][] tracks;
       if (IsQueuePage)
       {

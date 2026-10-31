@@ -92,6 +92,7 @@ namespace Yamadev.YamaStream.UI
       _userUIAnimator.SetTrigger("ToggleUI");
       SwitchOffHiddenListPage();
       OpenListWithControls();
+      TouchControls();
       _locked = false;
     }
 
@@ -103,11 +104,25 @@ namespace Yamadev.YamaStream.UI
       if (value)
       {
         _lastInputTime = Time.time;
+        // A press on the screen counts the controls' time again (#340).
+        if (!_locked && Utilities.IsValid(_userUIAnimator) && IsUserUIState("ToggleUI", "UIOn") && IsPointingAtScreen()) TouchControls();
       }
       else
       {
         _lastInputTime = 0f;
       }
+    }
+
+    // Whether the local player points at this screen (its canvas, the lock's
+    // detection rect) with the hand that last pressed, or the head on
+    // desktop.
+    private bool IsPointingAtScreen()
+    {
+      if (!Utilities.IsValid(_lockDetectionRect)) return false;
+      var trackingDataType = IsInVR ? (_rightHand ? TrackingDataType.RightHand : TrackingDataType.LeftHand) : TrackingDataType.Head;
+      Vector3 point = TrackingUtils.GetMousePosition(LocalPlayer, trackingDataType, _rayHits);
+      if (point == Vector3.zero) return false;
+      return _lockDetectionRect.rect.Contains(_lockDetectionRect.InverseTransformPoint(point));
     }
 
     public override void InputGrab(bool value, UdonInputEventArgs args)
