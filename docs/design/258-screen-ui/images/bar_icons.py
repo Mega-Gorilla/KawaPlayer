@@ -81,6 +81,12 @@ stroke(d, (148, 188), (174, 420)); stroke(d, (174, 420), (338, 420)); stroke(d, 
 stroke(d, (226, 244), (230, 360)); stroke(d, (286, 244), (282, 360))
 save(im, "bar-trash.png")
 
+# the "+" under the playlists (#335): a plus in a square, so that it stands out at the end of the list
+im, d = canvas()
+d.rounded_rectangle(p(48, 48, 464, 464), radius=96 * S, outline=255, width=30 * S)
+stroke(d, (256, 168), (256, 344)); stroke(d, (168, 256), (344, 256))
+save(im, "bar-add-box.png")
+
 # the gradient: 0 at the top, 0.72 at 45 % down, 1 at the bottom
 h = 256
 g = Image.new("RGBA", (4, h), (255, 255, 255, 0))

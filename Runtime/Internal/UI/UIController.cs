@@ -32,6 +32,8 @@ namespace Yamadev.YamaStream.UI
     [Header("Animator")]
     [SerializeField] private Animator _userUIAnimator;
     [SerializeField] private Animator _systemUIAnimator;
+    // The press over the whole screen that shows and hides its controls.
+    [SerializeField, RegisterEvent(nameof(Toggle.onValueChanged), nameof(ToggleUI))] private Toggle _uiToggle;
 
     [Header("Modal Dialog")]
     [SerializeField] private Modal _modalDialog;
@@ -174,6 +176,7 @@ namespace Yamadev.YamaStream.UI
 
       InitializeTranslation();
       UpdateTranslation();
+      UpdateAddPlaylistButton();
       GeneratePlaylistView();
 
       UpdateUI();
@@ -185,7 +188,33 @@ namespace Yamadev.YamaStream.UI
       {
         _repeatRangeSlider.SetUp(this, nameof(SetRepeatStart), nameof(SetRepeatEnd));
       }
-      if (Utilities.IsValid(_userUIAnimator) && _defaultPlaylistOpen) _userUIAnimator.SetTrigger("TogglePlaylist");
+    }
+
+    // A press on the screen shows or hides its controls, and they show with
+    // the list open where _defaultPlaylistOpen is on (#335).
+    public void ToggleUI()
+    {
+      if (!Utilities.IsValid(_userUIAnimator)) return;
+      bool showing = !IsUserUIState("ToggleUI", "UIOn");
+      _userUIAnimator.SetTrigger("ToggleUI");
+      if (showing) OpenListWithControls();
+    }
+
+    private void OpenListWithControls()
+    {
+      if (!_defaultPlaylistOpen || !Utilities.IsValid(_userUIAnimator)) return;
+      // A close left waiting would shut it again at once.
+      _userUIAnimator.ResetTrigger("HidePlaylist");
+      if (!IsUserUIState("Playlists", "PlaylistOn")) _userUIAnimator.SetTrigger("TogglePlaylist");
+    }
+
+    // The state a layer of the controls' animator is in, or is going to.
+    private bool IsUserUIState(string layer, string state)
+    {
+      int index = _userUIAnimator.GetLayerIndex(layer);
+      if (index < 0) return false;
+      var info = _userUIAnimator.IsInTransition(index) ? _userUIAnimator.GetNextAnimatorStateInfo(index) : _userUIAnimator.GetCurrentAnimatorStateInfo(index);
+      return info.IsName(state);
     }
 
     // The UI's path in the Hierarchy, so that the log names the device it is
@@ -408,6 +437,28 @@ namespace Yamadev.YamaStream.UI
 
     public void PlayUrl() => PlayUrlField(_urlInputField);
 
+    // Optional URL interceptor (issue #82): a module (PlaylistLoader) can
+    // claim an entered URL before the video path sees it. Wired by the
+    // module's build process; unassigned means the hook is inert. This is a
+    // dedicated slot rather than a Before event because _actionCancelled is
+    // a single shared flag — the interceptor itself invokes
+    // InvokeBeforeEvent("BeforeUserLoadPlaylist"), and nesting that inside
+    // another InvokeBeforeEvent would race the flag. addOnly asks it to add a
+    // playlist without playing it (the list's "+", #335). Returns whether it
+    // took the URL.
+    private bool HandToUrlInterceptor(VRCUrl url, bool addOnly)
+    {
+      if (!Utilities.IsValid(_urlInterceptor)) return false;
+      _urlInterceptor.SetProgramVariable("interceptUrl", url);
+      // Pass the calling UIController so a shared interceptor talks back to
+      // the panel the URL was entered on, not a fixed one.
+      _urlInterceptor.SetProgramVariable("interceptSource", this);
+      _urlInterceptor.SetProgramVariable("interceptAddOnly", addOnly);
+      _urlInterceptor.SetProgramVariable("interceptHandled", false);
+      _urlInterceptor.SendCustomEvent("OnUrlSubmitted");
+      return (bool)_urlInterceptor.GetProgramVariable("interceptHandled");
+    }
+
     private void PlayUrlField(VRCUrlInputField urlInputField)
     {
       if (!Utilities.IsValid(urlInputField)) return;
@@ -419,26 +470,10 @@ namespace Yamadev.YamaStream.UI
       // would otherwise load a VHub URL left there.
       if (urlInputField.wasCanceled) return;
 
-      // Optional URL interceptor (issue #82): a module (PlaylistLoader) can
-      // claim the entered URL before the video path sees it. Wired by the
-      // module's build process; unassigned means the hook is inert. This is a
-      // dedicated slot rather than a Before event because _actionCancelled is
-      // a single shared flag — the interceptor itself invokes
-      // InvokeBeforeEvent("BeforeUserLoadPlaylist"), and nesting that inside
-      // another InvokeBeforeEvent would race the flag.
-      if (Utilities.IsValid(_urlInterceptor))
+      if (HandToUrlInterceptor(urlInputField.GetUrl(), false))
       {
-        _urlInterceptor.SetProgramVariable("interceptUrl", urlInputField.GetUrl());
-        // Pass the calling UIController so a shared interceptor talks back
-        // to the panel the URL was entered on, not a fixed one.
-        _urlInterceptor.SetProgramVariable("interceptSource", this);
-        _urlInterceptor.SetProgramVariable("interceptHandled", false);
-        _urlInterceptor.SendCustomEvent("OnUrlSubmitted");
-        if ((bool)_urlInterceptor.GetProgramVariable("interceptHandled"))
-        {
-          urlInputField.SetUrl(VRCUrl.Empty);
-          return;
-        }
+        urlInputField.SetUrl(VRCUrl.Empty);
+        return;
       }
 
       if (_controller.FindHandlerIndexForUrl(urlInputField.GetUrl()) < 0)
