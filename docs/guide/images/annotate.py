@@ -272,7 +272,7 @@ MARKS = {
     ]),
     # The technical page on sync points at ReSync alone.
     "screen/resync": dict(src="screen/controls", crop=(0, 450, 700, 720), scale=0.667, marks=[
-        dict(box=(280, 621, 344, 685), cap="ReSync（押した人の画面だけ）", at=(470, 500)),
+        dict(box=(120, 621, 184, 685), cap="ReSync（押した人の画面だけ）", at=(400, 500)),
     ]),
     "screen/volume": dict(crop=(700, 100, 1280, 720), scale=0.667, marks=[
         dict(box=(930, 158, 1004, 200), n=1),
@@ -382,7 +382,7 @@ MARKS = {
         dict(box=(312, 592, 968, 639), n=2, cap="閉じる", at=(1120, 615)),
     ]),
     "screen/error-access-denied": dict(scale=0.667, marks=[
-        dict(box=(312, 328, 895, 434), cap="ワールドの制作者向けの案内", at=(1110, 380)),
+        dict(box=(312, 342, 895, 448), cap="ワールドの制作者向けの案内", at=(1110, 394)),
     ]),
     "tablet/home": dict(scale=0.72, marks=[
         dict(box=(138, 442, 1142, 645), n=1, cap="アプリを開く", at=(640, 400)),
