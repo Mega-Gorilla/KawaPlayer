@@ -319,35 +319,35 @@ MARKS = {
     ]),
     "screen/settings": dict(scale=0.667, marks=[
         dict(box=(38, 11, 105, 77), n=1),
-        dict(box=(32, 95, 352, 532), n=2, cap="分類を切り替える", at=(192, 600)),
-        dict(box=(398, 648, 950, 712), n=3),
+        dict(box=(32, 92, 288, 440), n=2, cap="分類を切り替える", at=(160, 520)),
+        dict(box=(330, 644, 790, 712), n=3),
     ]),
     "screen/settings-playback": dict(src="screen/settings", scale=0.667, marks=[
-        dict(box=(409, 85, 1239, 207), n=1),
-        dict(box=(409, 223, 1239, 409), n=2),
-        dict(box=(409, 425, 1239, 643), n=3),
+        dict(box=(343, 11, 1240, 107), n=1, badge=(316, 26)),
+        dict(box=(343, 120, 1240, 268), n=2),
+        dict(box=(343, 282, 1240, 493), n=3),
     ]),
     "screen/settings-playback2": dict(scale=0.667, marks=[
-        dict(box=(409, 335, 1239, 645), n=4),
+        dict(box=(343, 409, 1240, 648), n=4),
     ]),
     "screen/settings-video": dict(scale=0.667, marks=[
-        dict(box=(409, 85, 1239, 272), n=1),
-        dict(box=(409, 290, 1239, 410), n=2),
-        dict(box=(409, 424, 1239, 628), n=3),
+        dict(box=(343, 11, 1240, 158), n=1, badge=(316, 26)),
+        dict(box=(343, 173, 1240, 268), n=2),
+        dict(box=(343, 282, 1240, 443), n=3),
     ]),
     "screen/settings-audio": dict(scale=0.667, marks=[
-        dict(box=(409, 85, 1239, 286), n=1),
+        dict(box=(343, 11, 1240, 171), n=1, badge=(316, 26)),
     ]),
     "screen/settings-language": dict(scale=0.667, marks=[
-        dict(box=(409, 85, 1239, 412), n=1),
+        dict(box=(343, 11, 1240, 270), n=1, badge=(316, 26)),
     ]),
     # The autoplay card alone, cut from captures at 1920 x 1080, so at their own size.
     "screen/autoplay-owner": dict(scale=1.0, marks=[
-        dict(box=(58, 339, 401, 439), n=1),
-        dict(box=(418, 339, 682, 439), n=2),
+        dict(box=(44, 268, 323, 353), n=1),
+        dict(box=(332, 268, 547, 353), n=2),
     ]),
     "screen/autoplay-owner-set": dict(scale=1.0, marks=[
-        dict(box=(56, 272, 940, 314), n=1),
+        dict(box=(42, 212, 712, 258), n=1),
     ]),
     "screen/autoplay-other": dict(scale=1.0, marks=[]),
     "screen/url-button": dict(scale=0.667, marks=[
