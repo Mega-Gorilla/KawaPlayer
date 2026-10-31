@@ -12802,11 +12802,11 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 292734531063019626}
+  - {fileID: 538617092906238259}
   - {fileID: 7631229491457857161}
   - {fileID: 8810495163147598961}
   - {fileID: 6179534767491539918}
   - {fileID: 3617190538740728735}
-  - {fileID: 538617092906238259}
   m_Father: {fileID: 612088799061730350}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -12856,7 +12856,6 @@ GameObject:
   - component: {fileID: 2536630678056052985}
   - component: {fileID: 7574605570119269224}
   - component: {fileID: 7639388899738941496}
-  - component: {fileID: 588378431209169988}
   m_Layer: 0
   m_Name: ReSync
   m_TagString: Untagged
@@ -13078,18 +13077,6 @@ MonoBehaviour:
   m_FlexibleWidth: -1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
---- !u!225 &588378431209169988
-CanvasGroup:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8948759205498552713}
-  m_Enabled: 1
-  m_Alpha: 1
-  m_Interactable: 1
-  m_BlocksRaycasts: 1
-  m_IgnoreParentGroups: 0
 --- !u!1 &8954201767523596970
 GameObject:
   m_ObjectHideFlags: 0
