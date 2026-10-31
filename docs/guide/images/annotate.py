@@ -320,26 +320,26 @@ MARKS = {
     "screen/settings": dict(scale=0.667, marks=[
         dict(box=(38, 11, 105, 77), n=1),
         dict(box=(32, 92, 288, 440), n=2, cap="分類を切り替える", at=(160, 520)),
-        dict(box=(330, 644, 790, 712), n=3),
+        dict(box=(296, 645, 1220, 712), n=3),
     ]),
     "screen/settings-playback": dict(src="screen/settings", scale=0.667, marks=[
-        dict(box=(343, 11, 1240, 107), n=1, badge=(316, 26)),
-        dict(box=(343, 120, 1240, 268), n=2),
-        dict(box=(343, 282, 1240, 493), n=3),
+        dict(box=(308, 86, 1240, 181), n=1),
+        dict(box=(308, 195, 1240, 343), n=2),
+        dict(box=(308, 357, 1240, 568), n=3),
     ]),
     "screen/settings-playback2": dict(scale=0.667, marks=[
-        dict(box=(343, 409, 1240, 648), n=4),
+        dict(box=(308, 409, 1240, 656), n=4),
     ]),
     "screen/settings-video": dict(scale=0.667, marks=[
-        dict(box=(343, 11, 1240, 158), n=1, badge=(316, 26)),
-        dict(box=(343, 173, 1240, 268), n=2),
-        dict(box=(343, 282, 1240, 443), n=3),
+        dict(box=(308, 86, 1240, 233), n=1),
+        dict(box=(308, 248, 1240, 343), n=2),
+        dict(box=(308, 357, 1240, 518), n=3),
     ]),
     "screen/settings-audio": dict(scale=0.667, marks=[
-        dict(box=(343, 11, 1240, 171), n=1, badge=(316, 26)),
+        dict(box=(308, 86, 1240, 246), n=1),
     ]),
     "screen/settings-language": dict(scale=0.667, marks=[
-        dict(box=(343, 11, 1240, 270), n=1, badge=(316, 26)),
+        dict(box=(308, 86, 1240, 345), n=1),
     ]),
     # The autoplay card alone, cut from captures at 1920 x 1080, so at their own size.
     "screen/autoplay-owner": dict(scale=1.0, marks=[
