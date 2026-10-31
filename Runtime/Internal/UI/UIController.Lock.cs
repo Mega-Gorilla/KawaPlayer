@@ -89,6 +89,7 @@ namespace Yamadev.YamaStream.UI
     {
       if (!Utilities.IsValid(_lockDetectionRect) || !Utilities.IsValid(_userUIAnimator)) return;
       _lockDetectionRect.gameObject.layer = DEFAULT_LAYER;
+      SwitchOffHiddenListPage();
       _userUIAnimator.SetTrigger("ToggleUI");
       OpenListWithControls();
       _locked = false;

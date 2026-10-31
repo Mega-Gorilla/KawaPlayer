@@ -92,9 +92,10 @@ namespace Yamadev.YamaStream.UI
       // group sets (the screen's list panel, issue #258) can be 0 before its
       // first layout pass, and grows and shrinks as the panel's header and
       // strip come and go, so its height now is not the most it will need;
-      // the canvas it is on bounds that.
+      // the canvas it is on bounds that. Not a canvas of its own, which is
+      // only as tall as the scroll (the list's pages each have one, #326).
       float height = _scrollRect.GetComponent<RectTransform>().rect.height;
-      Canvas canvas = GetComponentInParent<Canvas>();
+      Canvas canvas = transform.parent.GetComponentInParent<Canvas>();
       if (Utilities.IsValid(canvas)) height = Mathf.Max(height, canvas.GetComponent<RectTransform>().rect.height);
       int count = Mathf.CeilToInt(height / _lineHeight);
       for (int i = 0; i < count; i++)

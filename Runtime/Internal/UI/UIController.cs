@@ -196,6 +196,7 @@ namespace Yamadev.YamaStream.UI
     {
       if (!Utilities.IsValid(_userUIAnimator)) return;
       bool showing = !IsUserUIState("ToggleUI", "UIOn");
+      if (showing) SwitchOffHiddenListPage();
       _userUIAnimator.SetTrigger("ToggleUI");
       if (showing) OpenListWithControls();
     }
