@@ -2,7 +2,7 @@
 
 KawaPlayer の版ごとの変更です。1.2.0 からは、同じノートが GitHub の [Releases](https://github.com/Mega-Gorilla/KawaPlayer/releases) にも載っています。
 
-ワールドの中（Info パネルとタブレットのバージョン情報）に出るのは、直近 3 回の版の主な変更だけです（`Assets/updatelog.txt`）。1.3.0 までは、その版の分だけでした。
+ワールドの中（スクリーンとタブレットの設定の「情報」）に出るのは、直近 3 回の版の主な変更だけです（`Assets/updatelog.txt`）。1.3.0 までは、その版の分だけでした。
 
 | 版 | 日付 | ノート |
 | --- | --- | --- |

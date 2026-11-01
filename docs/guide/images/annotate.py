@@ -279,9 +279,10 @@ MARKS = {
         dict(box=(944, 208, 992, 456), n=2),
         dict(box=(942, 478, 994, 530), n=3),
     ]),
-    "screen/more": dict(crop=(700, 380, 1280, 720), scale=0.667, marks=[
-        dict(box=(1102, 489, 1154, 541), n=1),
-        dict(box=(1174, 489, 1226, 541), n=2),
+    # The locked screen after two presses: the message and the presses counted.
+    "screen/locked": dict(crop=(0, 560, 1280, 720), scale=0.667, marks=[
+        dict(box=(323, 672, 896, 706), n=1),
+        dict(box=(899, 672, 958, 706), n=2),
     ]),
     "screen/playlist-list": dict(scale=0.667, marks=[
         dict(box=(821, 21, 964, 67), n=1),
@@ -319,7 +320,7 @@ MARKS = {
     ]),
     "screen/settings": dict(scale=0.667, marks=[
         dict(box=(38, 11, 105, 77), n=1),
-        dict(box=(32, 92, 250, 440), n=2, cap="分類を切り替える", at=(141, 520)),
+        dict(box=(32, 92, 250, 530), n=2, cap="分類を切り替える", at=(141, 610)),
         dict(box=(258, 645, 1194, 712), n=3),
     ]),
     "screen/settings-playback": dict(src="screen/settings", scale=0.667, marks=[
@@ -340,6 +341,10 @@ MARKS = {
     ]),
     "screen/settings-language": dict(scale=0.667, marks=[
         dict(box=(270, 86, 1240, 345), n=1),
+    ]),
+    "screen/settings-about": dict(scale=0.667, marks=[
+        dict(box=(270, 86, 1240, 266), n=1),
+        dict(box=(270, 280, 1240, 655), n=2),
     ]),
     # The autoplay card alone, cut from captures at 1920 x 1080, so at their own size.
     "screen/autoplay-owner": dict(scale=1.0, marks=[
@@ -385,7 +390,7 @@ MARKS = {
         dict(box=(312, 342, 895, 448), cap="ワールドの制作者向けの案内", at=(1110, 394)),
     ]),
     "tablet/home": dict(scale=0.72, marks=[
-        dict(box=(138, 442, 1142, 645), n=1, cap="アプリを開く", at=(640, 400)),
+        dict(box=(238, 434, 1042, 650), n=1, cap="アプリを開く", at=(640, 400)),
         dict(box=(618, 720, 662, 766), n=2, cap="ホームボタン", at=(880, 744)),
     ]),
     "tablet/kawaplayer": dict(scale=0.72, marks=[
@@ -400,7 +405,7 @@ MARKS = {
         dict(box=(782, 72, 1176, 128), cap="一覧とログを切り替え", at=(880, 184)),
     ]),
     "tablet/settings": dict(scale=0.72, marks=[
-        dict(box=(100, 143, 348, 515), cap="分類を切り替え", at=(224, 580)),
+        dict(box=(100, 143, 348, 625), cap="分類を切り替え", at=(224, 690)),
     ]),
 }
 
