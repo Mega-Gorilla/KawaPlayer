@@ -449,7 +449,6 @@ MonoBehaviour:
   _shuffleLabel: {fileID: 0}
   _shuffleLabel2: {fileID: 0}
   _settingsLabel: {fileID: 0}
-  _versionLabel: {fileID: 0}
   _lockUiLabel: {fileID: 0}
   _tabQueueLabel: {fileID: 9104598662856248125}
   _tabHistoryLabel: {fileID: 5392054350513014707}
@@ -478,7 +477,7 @@ MonoBehaviour:
   _modalImageViewerLabel: {fileID: 0}
   _lockDetectionRect: {fileID: 0}
   _unlockProgressText: {fileID: 0}
-  _unlockHoldDuration: 0.6
+  _unlockClickWindow: 1.5
   _defaultPlaylistOpen: 1
   _currentPlaylistNameText: {fileID: 8733256438743287266}
   _currentPlaylistTrackCountText: {fileID: 5304575778300383255}

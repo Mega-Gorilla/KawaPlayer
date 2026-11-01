@@ -1663,7 +1663,7 @@ MonoBehaviour:
     inSettings: 0
   - targetPath: Categories
     content: {fileID: 2191516973420817430}
-    siblingIndex: -1
+    siblingIndex: -2
     inSettings: 1
   - targetPath: Pages
     content: {fileID: 7104998376335983347}

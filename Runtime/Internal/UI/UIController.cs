@@ -1338,10 +1338,14 @@ namespace Yamadev.YamaStream.UI
       UpdateIdleScreenShown(false);
     }
 
+    // The settings' About category (issue #341). UI Text wraps only at
+    // spaces, so a Japanese line of the update log with an early space
+    // broke there and left a stub of a line: spaces that do not break let
+    // every line run to the edge.
     private void GenerateVersionView()
     {
       if (Utilities.IsValid(_versionDisplayText)) _versionDisplayText.text = $"KawaPlayer v{_controller.Version}";
-      if (Utilities.IsValid(_updateLogText) && Utilities.IsValid(_updateLogTextAsset)) _updateLogText.text = _updateLogTextAsset.text;
+      if (Utilities.IsValid(_updateLogText) && Utilities.IsValid(_updateLogTextAsset)) _updateLogText.text = _updateLogTextAsset.text.Replace(" ", " ");
     }
 
     private void UpdateIdleScreenView()

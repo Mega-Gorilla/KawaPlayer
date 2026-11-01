@@ -39,7 +39,6 @@ namespace Yamadev.YamaStream.UI
     [SerializeField] private Text _shuffleLabel;
     [SerializeField] private Text _shuffleLabel2;
     [SerializeField] private Text _settingsLabel;
-    [SerializeField] private Text _versionLabel;
     [SerializeField] private Text _lockUiLabel;
 
     [Header("Localization - Right Side Labels")]
@@ -287,7 +286,6 @@ namespace Yamadev.YamaStream.UI
       if (Utilities.IsValid(_shuffleLabel)) _shuffleLabel.text = GetTranslation("label.shuffle");
       if (Utilities.IsValid(_shuffleLabel2)) _shuffleLabel2.text = GetTranslation("label.shuffle");
       if (Utilities.IsValid(_settingsLabel)) _settingsLabel.text = GetTranslation("menu.settings");
-      if (Utilities.IsValid(_versionLabel)) _versionLabel.text = GetTranslation("label.version");
       if (Utilities.IsValid(_lockUiLabel)) _lockUiLabel.text = GetTranslation("label.lockUi");
 
       if (Utilities.IsValid(_tabQueueLabel)) _tabQueueLabel.text = GetTranslation("label.playQueue");
