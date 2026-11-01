@@ -80,32 +80,32 @@ MARKS = {
         dict(box=(355, 192, 641, 224), n=2, badge=(645, 188)),
     ]),
     "unity/inspector": dict(scale=0.72, marks=[
-        dict(box=(285, 360, 581, 385), n=1),
-        dict(box=(24, 428, 832, 548), n=2),
-        dict(box=(24, 563, 832, 945), n=3),
-        dict(box=(24, 961, 832, 1051), n=4),
-        dict(box=(24, 1067, 832, 1207), n=5),
-        dict(box=(24, 1223, 832, 1380), n=6),
+        dict(box=(220, 360, 519, 386), n=1),
+        dict(box=(24, 429, 832, 579), n=2),
+        dict(box=(24, 594, 832, 976), n=3),
+        dict(box=(24, 992, 832, 1082), n=4),
+        dict(box=(24, 1098, 832, 1238), n=5),
+        dict(box=(24, 1254, 832, 1411), n=6),
     ]),
     # The settings page shows each part of the inspector under its heading, with the
     # number it has on the whole inspector.
-    "unity/inspector-language": dict(src="unity/inspector", crop=(196, 338, 676, 400), scale=0.72, marks=[
-        dict(n=1, badge=(260, 372)),
+    "unity/inspector-language": dict(src="unity/inspector", crop=(131, 338, 700, 400), scale=0.72, marks=[
+        dict(n=1, badge=(195, 373)),
     ]),
-    "unity/inspector-appearance": dict(src="unity/inspector", crop=(3, 418, 841, 556), scale=0.72, pad=dict(left=28), marks=[
-        dict(n=2, badge=(-11, 441)),
+    "unity/inspector-appearance": dict(src="unity/inspector", crop=(3, 419, 841, 587), scale=0.72, pad=dict(left=28), marks=[
+        dict(n=2, badge=(-11, 442)),
     ]),
-    "unity/inspector-player": dict(src="unity/inspector", crop=(3, 553, 841, 953), scale=0.72, pad=dict(left=28), marks=[
-        dict(n=3, badge=(-11, 576)),
+    "unity/inspector-player": dict(src="unity/inspector", crop=(3, 584, 841, 984), scale=0.72, pad=dict(left=28), marks=[
+        dict(n=3, badge=(-11, 607)),
     ]),
-    "unity/inspector-playlist": dict(src="unity/inspector", crop=(3, 951, 841, 1059), scale=0.72, pad=dict(left=28), marks=[
-        dict(n=4, badge=(-11, 974)),
+    "unity/inspector-playlist": dict(src="unity/inspector", crop=(3, 982, 841, 1090), scale=0.72, pad=dict(left=28), marks=[
+        dict(n=4, badge=(-11, 1005)),
     ]),
-    "unity/inspector-modules": dict(src="unity/inspector", crop=(3, 1057, 841, 1215), scale=0.72, pad=dict(left=28), marks=[
-        dict(n=5, badge=(-11, 1080)),
+    "unity/inspector-modules": dict(src="unity/inspector", crop=(3, 1088, 841, 1246), scale=0.72, pad=dict(left=28), marks=[
+        dict(n=5, badge=(-11, 1111)),
     ]),
-    "unity/inspector-version": dict(src="unity/inspector", crop=(3, 1213, 841, 1391), scale=0.72, pad=dict(left=28), marks=[
-        dict(n=6, badge=(-11, 1236)),
+    "unity/inspector-version": dict(src="unity/inspector", crop=(3, 1244, 841, 1422), scale=0.72, pad=dict(left=28), marks=[
+        dict(n=6, badge=(-11, 1267)),
     ]),
     # The first look at the editor, with nothing to press yet.
     "unity/playlist-editor": dict(scale=0.8, marks=[]),
