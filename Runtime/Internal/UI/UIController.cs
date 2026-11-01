@@ -506,12 +506,9 @@ namespace Yamadev.YamaStream.UI
       _controller.SetPlayerType(VideoPlayerType.ImageViewer);
     }
 
-    // The field's entry ending (entered or cancelled) counts the controls'
-    // time again (#340), as their hiding waited while it was open.
     public void PlayUrl()
     {
-      ForgetScreenPresses();
-      TouchShownControls();
+      UrlEntryEnded();
       PlayUrlField(_urlInputField);
     }
 

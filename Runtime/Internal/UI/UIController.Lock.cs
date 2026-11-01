@@ -112,19 +112,22 @@ namespace Yamadev.YamaStream.UI
       }
     }
 
-    // A URL field's text input popup takes VRChat's input while it is open,
-    // so the press that opened it may never be let go to Udon: when the
-    // field's entry ends, no press on the screen is held (#340).
-    private void ForgetScreenPresses()
+    // A URL field's entry ended (entered or cancelled; its onEndEdit). Its
+    // text input popup takes VRChat's input while it is open, so the press
+    // that opened it may never be let go to Udon: no press on the screen is
+    // held now. The controls' hiding waited while it was open, so their time
+    // counts again (#340).
+    private void UrlEntryEnded()
     {
       _screenPressedRight = false;
       _screenPressedLeft = false;
+      TouchShownControls();
     }
 
     // Whether the local player points at this screen (its canvas, the lock's
     // detection rect) with the hand that last pressed, or the head on
-    // desktop. The lock reads it every frame, and a press reads it to count
-    // the controls' time again (#340).
+    // desktop. The lock reads it every frame, and a press reads it to keep
+    // the controls up while it is held (#340).
     private bool IsPointingAtScreen()
     {
       if (!Utilities.IsValid(_lockDetectionRect)) return false;

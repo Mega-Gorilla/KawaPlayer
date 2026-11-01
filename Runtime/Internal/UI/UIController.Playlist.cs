@@ -217,8 +217,7 @@ namespace Yamadev.YamaStream.UI
 
     public void AddPlaylistUrl()
     {
-      ForgetScreenPresses();
-      TouchShownControls();
+      UrlEntryEnded();
       var field = _addPlaylistUrlInputField;
       if (!Utilities.IsValid(field) || field.wasCanceled) return;
       var url = field.GetUrl();
