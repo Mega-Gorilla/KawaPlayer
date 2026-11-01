@@ -34,9 +34,9 @@ namespace Yamadev.YamaStream.UI
     [SerializeField] private Animator _systemUIAnimator;
     // The press over the whole screen that shows and hides its controls.
     [SerializeField, RegisterEvent(nameof(Toggle.onValueChanged), nameof(ToggleUI))] private Toggle _uiToggle;
-    // While a video plays, the controls hide this many seconds after the
-    // screen was last pressed; 0 leaves them up (#340). Set in the KawaPlayer
-    // inspector.
+    // The controls hide this many seconds after the screen was last used,
+    // whether a video plays or not; 0 leaves them up (#340). Set in the
+    // KawaPlayer inspector.
     [SerializeField] private float _controlsHideSeconds = 10f;
 
     [Header("Modal Dialog")]
@@ -227,12 +227,12 @@ namespace Yamadev.YamaStream.UI
     }
 
     // Hides the controls, as a press on the screen would, once they have gone
-    // unused for _controlsHideSeconds while a video plays. While nothing
-    // plays (stopped, paused or loading), a press on the screen is held, or a
-    // dialog, a page or a URL field is open, they stay, and the count starts
-    // again. What ends those counts the time again too (a video starting or
-    // resuming, a press let go, a URL entered; a dialog and a page close with
-    // a press), so the controls stay a whole period after it.
+    // unused for _controlsHideSeconds, whether a video plays, is stopped,
+    // paused or loading. While a press on the screen is held, or a dialog, a
+    // page or a URL field is open, they stay, and the count starts again.
+    // What ends those counts the time again too (a press let go, a URL
+    // entered; a dialog and a page close with a press), so the controls stay
+    // a whole period after it.
     public void _CheckControlsHide()
     {
       _controlsHideCheckWaiting = false;
@@ -252,9 +252,8 @@ namespace Yamadev.YamaStream.UI
       TouchControls();
     }
 
-    // The screen was used while its controls show (a press on it let go, a
-    // scroll of the list that brought other lines in, a URL entered), or a
-    // video started or resumed under them.
+    // The screen was used while its controls show: a press on it let go, a
+    // scroll of the list that brought other lines in, or a URL entered.
     private void TouchShownControls()
     {
       if (Utilities.IsValid(_userUIAnimator) && IsUserUIState("ToggleUI", "UIOn")) TouchControls();
@@ -262,7 +261,6 @@ namespace Yamadev.YamaStream.UI
 
     private bool CanHideControls()
     {
-      if (!Utilities.IsValid(_controller) || !_controller.IsPlaying) return false;
       if (_screenPressedRight || _screenPressedLeft || _progressDrag) return false;
       if (Utilities.IsValid(_modalDialog) && _modalDialog.gameObject.activeSelf) return false;
       if (IsUserUIState("Page", "ShowPage")) return false;
@@ -1376,19 +1374,9 @@ namespace Yamadev.YamaStream.UI
     #region Event Handlers
 
     public override void AfterVideoReady() => UpdateUI();
-    // A video starting or resuming gives the controls a whole period from
-    // then before they hide (#340).
-    public override void AfterVideoStarted()
-    {
-      UpdateUI();
-      TouchShownControls();
-    }
+    public override void AfterVideoStarted() => UpdateUI();
     public override void AfterVideoEnded() => UpdateUI();
-    public override void AfterVideoPlayed()
-    {
-      UpdateUI();
-      TouchShownControls();
-    }
+    public override void AfterVideoPlayed() => UpdateUI();
     public override void AfterVideoPaused() => UpdateUI();
     public override void AfterVideoStopped()
     {
