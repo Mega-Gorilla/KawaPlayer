@@ -21,29 +21,17 @@ namespace Yamadev.YamaStream.UI
     private float _lastInputTime = 0f;
     private bool _pointerInside = false;
     private bool _rightHand = true;
+    // Whether each hand is holding a press that began on the screen while
+    // its controls showed (#340).
+    private bool _screenPressedRight;
+    private bool _screenPressedLeft;
     private RaycastHit[] _rayHits = new RaycastHit[TrackingUtils.MAX_RAY_HITS];
 
     public override void PostLateUpdate()
     {
       if (!Utilities.IsValid(_lockDetectionRect) || !_locked) return;
 
-      var trackingDataType = IsInVR ? (_rightHand ? TrackingDataType.RightHand : TrackingDataType.LeftHand) : TrackingDataType.Head;
-      Vector3 mousePosition = TrackingUtils.GetMousePosition(LocalPlayer, trackingDataType, _rayHits);
-
-      if (mousePosition == Vector3.zero)
-      {
-        if (_pointerInside)
-        {
-          _systemUIAnimator.SetTrigger("HideLockMessage");
-          _pointerInside = false;
-        }
-        _unlockProgressText.text = "";
-        return;
-      }
-
-      Vector3 localPosition = _lockDetectionRect.InverseTransformPoint(mousePosition);
-
-      bool pointerInside = _lockDetectionRect.rect.Contains(localPosition);
+      bool pointerInside = IsPointingAtScreen();
       if (pointerInside != _pointerInside)
       {
         if (pointerInside) _systemUIAnimator.SetTrigger("ShowLockMessage");
@@ -92,6 +80,7 @@ namespace Yamadev.YamaStream.UI
       _userUIAnimator.SetTrigger("ToggleUI");
       SwitchOffHiddenListPage();
       OpenListWithControls();
+      TouchControls();
       _locked = false;
     }
 
@@ -103,11 +92,49 @@ namespace Yamadev.YamaStream.UI
       if (value)
       {
         _lastInputTime = Time.time;
+        // A press on the screen keeps the controls up while it is held (a
+        // drag of the seek bar or a slider) and counts their time again when
+        // it is let go (#340).
+        if (!_locked && Utilities.IsValid(_userUIAnimator) && IsUserUIState("ToggleUI", "UIOn") && IsPointingAtScreen())
+        {
+          if (_rightHand) _screenPressedRight = true;
+          else _screenPressedLeft = true;
+          TouchControls();
+        }
       }
       else
       {
         _lastInputTime = 0f;
+        bool wasPressed = _rightHand ? _screenPressedRight : _screenPressedLeft;
+        if (_rightHand) _screenPressedRight = false;
+        else _screenPressedLeft = false;
+        if (wasPressed) TouchShownControls();
       }
+    }
+
+    // A URL field's entry ended (entered or cancelled; its onEndEdit). Its
+    // text input popup takes VRChat's input while it is open, so the press
+    // that opened it may never be let go to Udon: no press on the screen is
+    // held now. The controls' hiding waited while it was open, so their time
+    // counts again (#340).
+    private void UrlEntryEnded()
+    {
+      _screenPressedRight = false;
+      _screenPressedLeft = false;
+      TouchShownControls();
+    }
+
+    // Whether the local player points at this screen (its canvas, the lock's
+    // detection rect) with the hand that last pressed, or the head on
+    // desktop. The lock reads it every frame, and a press reads it to keep
+    // the controls up while it is held (#340).
+    private bool IsPointingAtScreen()
+    {
+      if (!Utilities.IsValid(_lockDetectionRect)) return false;
+      var trackingDataType = IsInVR ? (_rightHand ? TrackingDataType.RightHand : TrackingDataType.LeftHand) : TrackingDataType.Head;
+      Vector3 point = TrackingUtils.GetMousePosition(LocalPlayer, trackingDataType, _rayHits);
+      if (point == Vector3.zero) return false;
+      return _lockDetectionRect.rect.Contains(_lockDetectionRect.InverseTransformPoint(point));
     }
 
     public override void InputGrab(bool value, UdonInputEventArgs args)

@@ -228,6 +228,8 @@
   "settings.playback.maxRetry": "最大重試次數",
   "settings.ui.idleScreenSprite": "待機畫面精靈圖",
   "settings.ui.idleScreenSprite.tooltip": "設定影片未播放時顯示的圖片。預設圖片上會疊加顯示 KawaPlayer 的標誌與名稱；你選擇的圖片會照原樣顯示。",
+  "settings.ui.controlsHideSeconds": "自動隱藏控制項的秒數",
+  "settings.ui.controlsHideSeconds.tooltip": "播放影片時，最後一次點擊螢幕後經過此秒數，螢幕上的控制項會自動隱藏。設為 0 則不自動隱藏。停止、暫停或載入時，以及開啟對話框、設定頁面或 URL 輸入欄時不會隱藏。",
   "label.yamaPlayer": "KawaPlayer",
   "msg.playModeNotAvailable": "KawaPlayer在播放模式下無法使用。",
   "msg.yamaPlayerRequired": "需要KawaPlayer參照。",

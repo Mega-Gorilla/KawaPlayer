@@ -56,6 +56,7 @@ namespace Yamadev.YamaStream.Editor
     private UIController _uiController;
     private SerializedObject _uiControllerSerializedObject;
     private SerializedProperty _idleScreenSprite;
+    private SerializedProperty _controlsHideSeconds;
 
     private bool _screenSettingsFoldout = false;
     private bool _speakerSettingsFoldout = false;
@@ -147,6 +148,7 @@ namespace Yamadev.YamaStream.Editor
       {
         _uiControllerSerializedObject = new SerializedObject(_uiController);
         _idleScreenSprite = _uiControllerSerializedObject.FindProperty("_idleScreenSprite");
+        _controlsHideSeconds = _uiControllerSerializedObject.FindProperty("_controlsHideSeconds");
       }
     }
 
@@ -232,6 +234,11 @@ namespace Yamadev.YamaStream.Editor
       if (_idleScreenSprite != null)
       {
         EditorGUILayout.PropertyField(_idleScreenSprite, EditorLocalization.GetLayout("settings.ui.idleScreenSprite", "settings.ui.idleScreenSprite.tooltip"));
+      }
+      if (_controlsHideSeconds != null)
+      {
+        EditorGUILayout.PropertyField(_controlsHideSeconds, EditorLocalization.GetLayout("settings.ui.controlsHideSeconds", "settings.ui.controlsHideSeconds.tooltip"));
+        if (_controlsHideSeconds.floatValue < 0f) _controlsHideSeconds.floatValue = 0f;
       }
     }
 
