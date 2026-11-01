@@ -21,6 +21,10 @@ namespace Yamadev.YamaStream.UI
     private float _lastInputTime = 0f;
     private bool _pointerInside = false;
     private bool _rightHand = true;
+    // Whether each hand is holding a press that began on the screen while
+    // its controls showed (#340).
+    private bool _screenPressedRight;
+    private bool _screenPressedLeft;
     private RaycastHit[] _rayHits = new RaycastHit[TrackingUtils.MAX_RAY_HITS];
 
     public override void PostLateUpdate()
@@ -88,12 +92,23 @@ namespace Yamadev.YamaStream.UI
       if (value)
       {
         _lastInputTime = Time.time;
-        // A press on the screen counts the controls' time again (#340).
-        if (!_locked && Utilities.IsValid(_userUIAnimator) && IsUserUIState("ToggleUI", "UIOn") && IsPointingAtScreen()) TouchControls();
+        // A press on the screen keeps the controls up while it is held (a
+        // drag of the seek bar or a slider) and counts their time again when
+        // it is let go (#340).
+        if (!_locked && Utilities.IsValid(_userUIAnimator) && IsUserUIState("ToggleUI", "UIOn") && IsPointingAtScreen())
+        {
+          if (_rightHand) _screenPressedRight = true;
+          else _screenPressedLeft = true;
+          TouchControls();
+        }
       }
       else
       {
         _lastInputTime = 0f;
+        bool wasPressed = _rightHand ? _screenPressedRight : _screenPressedLeft;
+        if (_rightHand) _screenPressedRight = false;
+        else _screenPressedLeft = false;
+        if (wasPressed) TouchShownControls();
       }
     }
 

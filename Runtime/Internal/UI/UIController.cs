@@ -228,9 +228,11 @@ namespace Yamadev.YamaStream.UI
 
     // Hides the controls, as a press on the screen would, once they have gone
     // unused for _controlsHideSeconds while a video plays. While nothing
-    // plays (stopped, paused or loading), or a dialog, a page or a URL field
-    // is open, they stay, and the count starts again: a video that starts by
-    // itself has its controls hidden a period later.
+    // plays (stopped, paused or loading), a press on the screen is held, or a
+    // dialog, a page or a URL field is open, they stay, and the count starts
+    // again. What ends those counts the time again too (a video starting or
+    // resuming, a press let go, a URL entered; a dialog and a page close with
+    // a press), so the controls stay a whole period after it.
     public void _CheckControlsHide()
     {
       _controlsHideCheckWaiting = false;
@@ -250,8 +252,9 @@ namespace Yamadev.YamaStream.UI
       TouchControls();
     }
 
-    // The screen was used while its controls show: a press on it, or a
-    // scroll of the list that brought other lines in.
+    // The screen was used while its controls show (a press on it let go, a
+    // scroll of the list that brought other lines in, a URL entered), or a
+    // video started or resumed under them.
     private void TouchShownControls()
     {
       if (Utilities.IsValid(_userUIAnimator) && IsUserUIState("ToggleUI", "UIOn")) TouchControls();
@@ -260,6 +263,7 @@ namespace Yamadev.YamaStream.UI
     private bool CanHideControls()
     {
       if (!Utilities.IsValid(_controller) || !_controller.IsPlaying) return false;
+      if (_screenPressedRight || _screenPressedLeft || _progressDrag) return false;
       if (Utilities.IsValid(_modalDialog) && _modalDialog.gameObject.activeSelf) return false;
       if (IsUserUIState("Page", "ShowPage")) return false;
       if (Utilities.IsValid(_urlInputField) && _urlInputField.isFocused) return false;
@@ -502,7 +506,13 @@ namespace Yamadev.YamaStream.UI
       _controller.SetPlayerType(VideoPlayerType.ImageViewer);
     }
 
-    public void PlayUrl() => PlayUrlField(_urlInputField);
+    // The field's entry ending (entered or cancelled) counts the controls'
+    // time again (#340), as their hiding waited while it was open.
+    public void PlayUrl()
+    {
+      TouchShownControls();
+      PlayUrlField(_urlInputField);
+    }
 
     // Optional URL interceptor (issue #82): a module (PlaylistLoader) can
     // claim an entered URL before the video path sees it. Wired by the
@@ -1368,9 +1378,19 @@ namespace Yamadev.YamaStream.UI
     #region Event Handlers
 
     public override void AfterVideoReady() => UpdateUI();
-    public override void AfterVideoStarted() => UpdateUI();
+    // A video starting or resuming gives the controls a whole period from
+    // then before they hide (#340).
+    public override void AfterVideoStarted()
+    {
+      UpdateUI();
+      TouchShownControls();
+    }
     public override void AfterVideoEnded() => UpdateUI();
-    public override void AfterVideoPlayed() => UpdateUI();
+    public override void AfterVideoPlayed()
+    {
+      UpdateUI();
+      TouchShownControls();
+    }
     public override void AfterVideoPaused() => UpdateUI();
     public override void AfterVideoStopped()
     {
