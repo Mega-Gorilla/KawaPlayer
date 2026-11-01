@@ -27,23 +27,7 @@ namespace Yamadev.YamaStream.UI
     {
       if (!Utilities.IsValid(_lockDetectionRect) || !_locked) return;
 
-      var trackingDataType = IsInVR ? (_rightHand ? TrackingDataType.RightHand : TrackingDataType.LeftHand) : TrackingDataType.Head;
-      Vector3 mousePosition = TrackingUtils.GetMousePosition(LocalPlayer, trackingDataType, _rayHits);
-
-      if (mousePosition == Vector3.zero)
-      {
-        if (_pointerInside)
-        {
-          _systemUIAnimator.SetTrigger("HideLockMessage");
-          _pointerInside = false;
-        }
-        _unlockProgressText.text = "";
-        return;
-      }
-
-      Vector3 localPosition = _lockDetectionRect.InverseTransformPoint(mousePosition);
-
-      bool pointerInside = _lockDetectionRect.rect.Contains(localPosition);
+      bool pointerInside = IsPointingAtScreen();
       if (pointerInside != _pointerInside)
       {
         if (pointerInside) _systemUIAnimator.SetTrigger("ShowLockMessage");
@@ -115,7 +99,8 @@ namespace Yamadev.YamaStream.UI
 
     // Whether the local player points at this screen (its canvas, the lock's
     // detection rect) with the hand that last pressed, or the head on
-    // desktop.
+    // desktop. The lock reads it every frame, and a press reads it to count
+    // the controls' time again (#340).
     private bool IsPointingAtScreen()
     {
       if (!Utilities.IsValid(_lockDetectionRect)) return false;
