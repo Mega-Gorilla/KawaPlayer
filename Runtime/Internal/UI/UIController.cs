@@ -510,6 +510,7 @@ namespace Yamadev.YamaStream.UI
     // time again (#340), as their hiding waited while it was open.
     public void PlayUrl()
     {
+      ForgetScreenPresses();
       TouchShownControls();
       PlayUrlField(_urlInputField);
     }
