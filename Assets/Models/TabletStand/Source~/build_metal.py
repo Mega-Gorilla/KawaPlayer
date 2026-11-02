@@ -16,13 +16,19 @@ so in Unity the front faces -Z and depth is +Z. Each is one mesh with one
 material; its colours come from cells of a small palette, every face
 sampling the middle of its cell, as the tablet does.
 
-- The floor stand is a kiosk: a 40 x 30 cm base plate, two columns and a
-  hinge, and a holder that frames the tablet, leaning back 30 degrees with
+- The floor stand is a kiosk: a 40 x 30 cm base plate, a rounded cover
+  where the column stands on it, a column with a groove down its front, a
+  hinge, and a box with a rim round the tablet, leaning back 30 degrees with
   the screen at about 1.15 m.
-- The magnet stand is aluminium: a base plate, a tapered neck leaning back,
-  and a 24 x 14 cm plate leaning back 15 degrees, with two pads and a round
-  magnet, which the tablet sticks to. The plate is smaller than the tablet,
-  so the tablet hides it.
+- The magnet stand is aluminium: one sheet bent into a foot that runs
+  forwards, widening, and a neck leaning back 15 degrees, narrowing, which
+  ends in a hinge with a knuckle at each end, on a round swivel behind a
+  24 x 14 cm plate, with two pads and a round magnet on its face, which the
+  tablet sticks to. The plate is smaller than the tablet, so the tablet
+  hides it. It is centred on its footprint.
+
+Faces meeting at more than 40 degrees are split, the rest shade smooth, so
+the bends and the rounded corners look round and the edges stay sharp.
 
 The return button goes where the tablet rests (the holder's back, the
 magnet), so it shows when the tablet is away.
@@ -86,14 +92,52 @@ class Builder:
         sx, sy, sz = (s / 2 for s in size)
         self.prism([(-sx, -sy), (sx, -sy), (sx, sy), (-sx, sy)], -sz, sz, matrix, cell)
 
-    def hexahedron(self, bottom, top, cell):
-        """Eight corners: bottom and top quads, counter-clockwise from above."""
-        verts = [self.bm.verts.new(Vector(p)) for p in bottom + top]
-        faces = [[3, 2, 1, 0], [4, 5, 6, 7], [0, 1, 5, 4], [1, 2, 6, 5], [2, 3, 7, 6], [3, 0, 4, 7]]
+    def ring(self, outer, inner, z0, z1, matrix, cell):
+        """The area between two outlines in local XY with as many points each, extruded from z0 to z1."""
+        n = len(outer)
+        vo = [self.bm.verts.new(matrix @ Vector((x, y, z))) for z in (z0, z1) for x, y in outer]
+        vi = [self.bm.verts.new(matrix @ Vector((x, y, z))) for z in (z0, z1) for x, y in inner]
+        verts = vo + vi
+        o, i_ = 0, 2 * n
+        faces = []
+        for i in range(n):
+            j = (i + 1) % n
+            faces += [[o + n + i, o + n + j, i_ + n + j, i_ + n + i], [o + i, i_ + i, i_ + j, o + j],
+                      [o + i, o + j, o + n + j, o + n + i], [i_ + j, i_ + i, i_ + n + i, i_ + n + j]]
         self._faces(verts, faces, cell)
+
+    def sheet(self, stations, thickness, cell):
+        """A bent sheet across X: per station, a point of its top surface in (y, z), the normal into the sheet
+        there and its half width."""
+        rows = []
+        for p, n, hw in stations:
+            q = p + thickness * n
+            rows.append([self.bm.verts.new((x, y, z)) for x, (y, z) in ((-hw, p), (hw, p), (-hw, q), (hw, q))])
+        TL, TR, BL, BR = range(4)
+        verts = [v for row in rows for v in row]
+        faces = []
+        for r in range(len(rows) - 1):
+            a, b = 4 * r, 4 * (r + 1)
+            faces += [[a + TL, a + TR, b + TR, b + TL], [a + BR, a + BL, b + BL, b + BR],
+                      [a + BL, a + TL, b + TL, b + BL], [a + TR, a + BR, b + BR, b + TR]]
+        last = 4 * (len(rows) - 1)
+        faces += [[TR, TL, BL, BR], [last + TL, last + TR, last + BR, last + BL]]
+        self._faces(verts, faces, cell)
+
+    def centre_depth(self):
+        """Moves the mesh to be centred front to back; returns how far."""
+        ys = [v.co.y for v in self.bm.verts]
+        shift = -(min(ys) + max(ys)) / 2
+        bmesh.ops.translate(self.bm, vec=(0, shift, 0), verts=self.bm.verts)
+        return shift
 
     def finish(self, name):
         bmesh.ops.recalc_face_normals(self.bm, faces=self.bm.faces)
+        self.bm.normal_update()
+        for f in self.bm.faces:
+            f.smooth = True
+        sharp = [e for e in self.bm.edges if len(e.link_faces) == 2 and e.calc_face_angle(0) > math.radians(40)]
+        bmesh.ops.split_edges(self.bm, edges=sharp)
         mesh = bpy.data.meshes.new(name)
         self.bm.to_mesh(mesh)
         self.bm.free()
@@ -131,57 +175,93 @@ def plate_frame(matrix):
     return matrix @ Matrix.Rotation(math.radians(90), 4, "X")
 
 
-def report(name, matrix, local):
+def report(matrix, local, shift=0.0):
     """A point in a part's local frame, with the part's lean, in Unity: (x, height, depth)."""
     p = matrix @ Vector(local)
-    return f"(0, {p.z:.5f}, {p.y:.5f})"
+    return f"(0, {p.z:.5f}, {p.y + shift:.5f})"
+
+
+def v2(y, z):
+    return Vector((y, z))
 
 
 # Floor stand.
 fb = Builder()
 fb.prism(rounded_rect(0.40, 0.30, 0.02, 4), 0.0, 0.010, Matrix.Identity(4), WHITE)
-fb.box((0.08, 0.07, 0.02), Matrix.Translation((0, 0.04, 0.020)), LIGHT)
+COLUMN_Y = 0.04
+# The rounded cover where the column stands on the base.
+fb.prism(rounded_rect(0.11, 0.075, 0.03, 4), 0.010, 0.030, Matrix.Translation((0, COLUMN_Y, 0)), WHITE)
+# The column: two profiles with a groove between them down its front.
 POLE_TOP = 1.05
-for x in (-0.016, 0.016):
-    fb.box((0.022, 0.045, POLE_TOP - 0.03), Matrix.Translation((x, 0.04, 0.03 + (POLE_TOP - 0.03) / 2)), WHITE)
-fb.box((0.06, 0.05, 0.06), Matrix.Translation((0, 0.04, POLE_TOP + 0.02)), LIGHT)
+COLUMN_W, COLUMN_D, GROOVE_W, GROOVE_D = 0.056, 0.042, 0.008, 0.006
+pole_h = POLE_TOP - 0.03
+side_w = (COLUMN_W - GROOVE_W) / 2
+for x in (-(GROOVE_W + side_w) / 2, (GROOVE_W + side_w) / 2):
+    fb.box((side_w, COLUMN_D, pole_h), Matrix.Translation((x, COLUMN_Y, 0.03 + pole_h / 2)), WHITE)
+fb.box((GROOVE_W, COLUMN_D - GROOVE_D, pole_h), Matrix.Translation((0, COLUMN_Y + GROOVE_D / 2, 0.03 + pole_h / 2)), LIGHT)
+# The hinge at the column's top, behind the box.
+fb.box((0.05, 0.04, 0.05), Matrix.Translation((0, COLUMN_Y + 0.01, POLE_TOP + 0.015)), LIGHT)
 FLOOR_TILT = 30.0
 holder = lean(FLOOR_TILT, Vector((0, 0.02, POLE_TOP + 0.09)))
-RIM = 0.018
+holder_face = plate_frame(holder)
+RIM = 0.024
 OUTER_W, OUTER_H = TABLET_WIDTH + 2 * RIM, TABLET_HEIGHT + 2 * RIM
-# Back plate behind the tablet's back (local y 0 .. 0.012), and the rim around
-# the tablet, standing 4.5 mm proud of its face (local y -0.012 .. 0).
-fb.box((OUTER_W, 0.012, OUTER_H), holder @ Matrix.Translation((0, 0.006, 0)), WHITE)
-for sx, sz, x, z in ((OUTER_W, RIM, 0, TABLET_HEIGHT / 2 + RIM / 2), (OUTER_W, RIM, 0, -TABLET_HEIGHT / 2 - RIM / 2),
-                     (RIM, TABLET_HEIGHT, TABLET_WIDTH / 2 + RIM / 2, 0), (RIM, TABLET_HEIGHT, -TABLET_WIDTH / 2 - RIM / 2, 0)):
-    fb.box((sx, 0.012, sz), holder @ Matrix.Translation((x, -0.006, z)), WHITE)
+outline = rounded_rect(OUTER_W, OUTER_H, 0.016, 4)
+# The box behind the tablet's back (local y 0 .. 0.026), and the rim round the
+# tablet, standing 4.5 mm proud of its face (local y -0.012 .. 0), 1 mm clear of it.
+fb.prism(outline, -0.026, 0.0, holder_face, WHITE)
+fb.ring(outline, rounded_rect(TABLET_WIDTH + 0.002, TABLET_HEIGHT + 0.002, 0.004, 4), 0.0, 0.012, holder_face, WHITE)
 floor = fb.finish("KawaTabletStand_Floor")
-print(f"REPORT floor dock_unity_position={report('floor', holder, (0, -TABLET_THICKNESS / 2, 0))} dock_unity_euler=({FLOOR_TILT:.1f}, 0, 0)")
-print(f"REPORT floor button_unity_position={report('floor', holder, (0, -0.0006, 0))} button_unity_euler=({FLOOR_TILT:.1f}, 0, 0)")
+print(f"REPORT floor dock_unity_position={report(holder, (0, -TABLET_THICKNESS / 2, 0))} dock_unity_euler=({FLOOR_TILT:.1f}, 0, 0)")
+print(f"REPORT floor button_unity_position={report(holder, (0, -0.0006, 0))} button_unity_euler=({FLOOR_TILT:.1f}, 0, 0)")
 
-# Magnet stand.
+# Magnet stand: one sheet, the foot running forwards from the bend, widening,
+# and the neck leaning back, narrowing, with the plate on the neck's front.
 mb = Builder()
-mb.prism(rounded_rect(0.17, 0.15, 0.012, 4), 0.0, 0.006, Matrix.Translation((0, -0.01, 0)), GREY)
-NECK_T = 0.006
-neck_b = (-0.005, 0.006)     # (y, z) of the neck's front face at the bottom
-neck_t = (0.045, 0.150)      # and at the top
-mb.hexahedron(
-    [(-0.05, neck_b[0], neck_b[1]), (0.05, neck_b[0], neck_b[1]), (0.05, neck_b[0] + NECK_T, neck_b[1]), (-0.05, neck_b[0] + NECK_T, neck_b[1])],
-    [(-0.035, neck_t[0], neck_t[1]), (0.035, neck_t[0], neck_t[1]), (0.035, neck_t[0] + NECK_T, neck_t[1]), (-0.035, neck_t[0] + NECK_T, neck_t[1])],
-    GREY)
+SHEET_T = 0.006
+FOOT = 0.120                 # the foot's top surface, from its front edge to the bend
+FOOT_FRONT_W, NECK_BOTTOM_W, NECK_TOP_W = 0.140, 0.105, 0.080
+BEND_R = 0.012               # of the top surface, which is inside the bend
+BEND_SEGMENTS = 6
 MAGNET_TILT = 15.0
+NECK_ANGLE = 90.0 - MAGNET_TILT  # parallel to the plate
 PLATE_T = 0.008
-plate = lean(MAGNET_TILT, Vector((0, neck_t[0] - PLATE_T / 2, 0.172)))
+PLATE_Z = 0.172              # the plate's middle, where the neck ends behind it
+# Behind the plate: a round swivel, and the hinge the neck ends in (its axis
+# across X, at the plate's middle), with a knuckle at each end.
+SWIVEL_R, SWIVEL_T = 0.038, 0.006
+HINGE_R, HINGE_L, KNUCKLE_L = 0.010, 0.088, 0.004
+HINGE_BACK = PLATE_T / 2 + SWIVEL_T + HINGE_R - 0.002  # the hinge's axis, behind the plate's middle
+stations = [(v2(-FOOT, SHEET_T), v2(0, -1), FOOT_FRONT_W / 2), (v2(0, SHEET_T), v2(0, -1), NECK_BOTTOM_W / 2)]
+bend_center = v2(0, SHEET_T + BEND_R)
+for k in range(1, BEND_SEGMENTS + 1):
+    phi = math.radians(NECK_ANGLE * k / BEND_SEGMENTS)
+    stations.append((bend_center + BEND_R * v2(math.sin(phi), -math.cos(phi)), v2(math.sin(phi), -math.cos(phi)), NECK_BOTTOM_W / 2))
+neck_dir = v2(math.cos(math.radians(NECK_ANGLE)), math.sin(math.radians(NECK_ANGLE)))
+neck_in = stations[-1][1]
+neck_top = stations[-1][0] + ((PLATE_Z - stations[-1][0].y) / neck_dir.y) * neck_dir
+stations.append((neck_top, neck_in, NECK_TOP_W / 2))
+mb.sheet(stations, SHEET_T, GREY)
+# The neck's middle ends on the hinge's axis; the plate is in front of it.
+plate_middle = neck_top + (SHEET_T / 2 - HINGE_BACK) * neck_in
+plate = lean(MAGNET_TILT, Vector((0, plate_middle.x, plate_middle.y)))
 face = plate_frame(plate)
 # The plate (local y -0.004 .. 0.004), and on its face the pads and the magnet (1 mm).
 mb.prism(rounded_rect(0.24, 0.14, 0.015, 4), -PLATE_T / 2, PLATE_T / 2, face, GREY)
 for x in (-0.095, 0.095):
     mb.prism(rounded_rect(0.035, 0.12, 0.012, 3), PLATE_T / 2, PLATE_T / 2 + 0.001, face @ Matrix.Translation((x, 0, 0)), PAD)
 mb.prism(circle(0.02, 16), PLATE_T / 2, PLATE_T / 2 + 0.001, face, DISC)
+# Behind it, the swivel and the hinge (a cylinder along X).
+mb.prism(circle(SWIVEL_R, 12), -PLATE_T / 2 - SWIVEL_T, -PLATE_T / 2, face, GREY)
+hinge = face @ Matrix.Translation((0, 0, -HINGE_BACK)) @ Matrix.Rotation(math.radians(90), 4, "Y")
+mb.prism(circle(HINGE_R, 10), -HINGE_L / 2, HINGE_L / 2, hinge, GREY)
+for z0 in (-HINGE_L / 2 - KNUCKLE_L, HINGE_L / 2):
+    mb.prism(circle(HINGE_R + 0.0015, 10), z0, z0 + KNUCKLE_L, hinge, DISC)
+magnet_shift = mb.centre_depth()
 magnet = mb.finish("KawaTabletStand_Magnet")
 rest = -(PLATE_T / 2 + 0.001)
-print(f"REPORT magnet dock_unity_position={report('magnet', plate, (0, rest - TABLET_THICKNESS / 2, 0))} dock_unity_euler=({MAGNET_TILT:.1f}, 0, 0)")
-print(f"REPORT magnet button_unity_position={report('magnet', plate, (0, rest - 0.0006, 0))} button_unity_euler=({MAGNET_TILT:.1f}, 0, 0)")
+print(f"REPORT magnet dock_unity_position={report(plate, (0, rest - TABLET_THICKNESS / 2, 0), magnet_shift)} dock_unity_euler=({MAGNET_TILT:.1f}, 0, 0)")
+print(f"REPORT magnet button_unity_position={report(plate, (0, rest - 0.0006, 0), magnet_shift)} button_unity_euler=({MAGNET_TILT:.1f}, 0, 0)")
 
 # The palette.
 img = bpy.data.images.new("KawaTabletStand_Palette", width=8 * len(PALETTE), height=8)

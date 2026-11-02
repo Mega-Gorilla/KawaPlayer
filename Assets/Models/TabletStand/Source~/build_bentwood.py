@@ -10,12 +10,15 @@ and where the tablet rests on it. Add --render to also write preview renders
 (--render <folder>): keep them outside Assets, or Unity imports them into
 the package. This folder ends in "~", so Unity does not import the script.
 
-The stand is one sheet of bent plywood, 8 mm thick: a base whose front edge
-curls up into a lip, bending up at the back into a support steeper than the
-tablet, so the tablet stands on the base behind the lip and leans on the
-support's top edge. It is modelled like the tablet: X is width, Z is
-height, the front faces -Y, and it is turned half a turn about Z before
-export, so in Unity the front faces -Z and depth is +Z.
+The stand is one sheet of bent plywood, 8 mm thick, an S seen from the side:
+a long base whose front edge turns up a little, a wide bend at the back that
+carries the sheet up and forwards, and a second bend that turns it back into
+a panel leaning back, a little steeper than the tablet, so the tablet stands
+on the base and leans on the panel's top edge. The return button sits on the
+panel, in the gap behind the tablet. It is modelled like the tablet: X is
+width, Z is height, the front faces -Y, and it is turned half a turn about Z
+before export, so in Unity the front faces -Z and depth is +Z. The stand is
+centred on its footprint.
 
 One mesh, one material: the faces sample the veneer part of a 512 atlas
 (V 0.125 to 1, the grain along U), the cut edges its plywood stripes (V 0
@@ -35,30 +38,37 @@ RENDER_DIR = os.path.abspath(argv[argv.index("--render") + 1]) if "--render" in 
 os.makedirs(OUT, exist_ok=True)
 
 # Metres. The profile is in (y, z): y is depth, the front at -y; z is height.
-WIDTH = 0.160
+WIDTH = 0.100
 THICKNESS = 0.008
 # The tablet it holds (Assets/Models/Tablet/Source~/build_tablet.py).
 TABLET_HEIGHT = 0.1895
 TABLET_THICKNESS = 0.0075
 TABLET_ANGLE = 70.0          # the tablet's lean, from the table
-SUPPORT_ANGLE = 78.0         # the support is steeper, so it stays behind the tablet
-TABLET_BACK_Y = -0.050       # the tablet's lower back edge, standing on the base
-REST = 0.110                 # how far up the tablet's back the support's top edge touches it
-LIP_START_Y = -0.060         # where the base's top surface starts to curl up into the lip
-LIP_RADIUS = 0.010
-LIP_ANGLE = 60.0
-LIP_SEGMENTS = 5
-BEND_RADIUS = 0.016          # of the top surface, where the base bends up into the support
-BEND_SEGMENTS = 10
-CORNER_TOP = 0.022           # rounded corners of the sheet's two ends, seen unrolled
+# The top surface's path, from where the base bends up at the back.
+REAR_RADIUS = 0.032          # the wide bend at the back...
+REAR_ANGLE = 124.0           # ...until the sheet heads up and forwards
+REAR_SEGMENTS = 9
+MIDDLE = 0.016               # straight, leaning forwards
+UPPER_RADIUS = 0.022         # the bend back...
+PANEL_ANGLE = 76.0           # ...into the panel, steeper than the tablet, which leans on its top edge only
+UPPER_SEGMENTS = 5
+PANEL = 0.050                # the panel, flat
+FOOT_MARGIN = 0.050          # the base runs this far in front of the tablet's foot...
+LIP_RADIUS = 0.030           # ...and then turns up
+LIP_ANGLE = 22.0
+LIP_SEGMENTS = 3
+CORNER_TOP = 0.020           # rounded corners of the sheet's two ends, seen unrolled
 CORNER_LIP = 0.010
 CORNER_SEGMENTS = 4
 GAP = 0.0005                 # between the tablet and the stand
+BUTTON_DOWN = 0.031          # the return button's middle, this far down the panel from its top edge
+BUTTON_OUT = 0.001           # and this far in front of it (the button is 35 mm across)
 
 # Atlas: the veneer above V 0.125, the plywood stripes below it. The veneer
-# part is a patch of VENEER_U x VENEER_V metres.
+# part is a patch of VENEER_U x VENEER_V metres; the sheet is shorter than
+# VENEER_U unrolled, so the grain does not repeat on it.
 VENEER_V0 = 0.125
-VENEER_U = 0.26
+VENEER_U = 0.30
 VENEER_V = 0.2275
 STRIPES = (0.012, 0.113)
 
@@ -73,29 +83,42 @@ def direction(deg):
 
 
 base_top = THICKNESS
-d_tablet = direction(TABLET_ANGLE)
-n_tablet = v2(d_tablet.y, -d_tablet.x)            # out of the tablet's back
-p_back = v2(TABLET_BACK_Y, base_top + GAP)        # the tablet's lower back edge
-rest = p_back + REST * d_tablet - GAP * n_tablet  # the support's top front edge
-e = direction(SUPPORT_ANGLE)
-corner = rest - ((rest.y - base_top) / e.y) * e   # where the top surface's base and support lines meet
-tangent = BEND_RADIUS * math.tan(math.radians(SUPPORT_ANGLE) / 2)
-bend_start = corner - v2(tangent, 0)
-bend_center = bend_start + v2(0, BEND_RADIUS)
 
-# The top (front) surface, from the lip's end to the support's top edge,
-# as (point, direction of travel).
+# The top (front) surface as (point, direction of travel), from where the
+# base bends up at the back (y 0) to the panel's top edge: the rear bend
+# turns left (its centre above the sheet), the upper bend right (its centre
+# behind the sheet).
+back = [(v2(0, base_top), v2(1, 0))]
+rear_center = v2(0, base_top + REAR_RADIUS)
+for k in range(1, REAR_SEGMENTS + 1):
+    phi = math.radians(REAR_ANGLE * k / REAR_SEGMENTS)
+    back.append((rear_center + REAR_RADIUS * v2(math.sin(phi), -math.cos(phi)), v2(math.cos(phi), math.sin(phi))))
+upper_start = back[-1][0] + MIDDLE * direction(REAR_ANGLE)
+back.append((upper_start, direction(REAR_ANGLE)))
+a1, a2 = math.radians(REAR_ANGLE), math.radians(PANEL_ANGLE)
+upper_center = upper_start + UPPER_RADIUS * v2(math.sin(a1), -math.cos(a1))
+for k in range(1, UPPER_SEGMENTS + 1):
+    phi = a1 + (a2 - a1) * k / UPPER_SEGMENTS
+    back.append((upper_center + UPPER_RADIUS * v2(-math.sin(phi), math.cos(phi)), v2(math.cos(phi), math.sin(phi))))
+e = direction(PANEL_ANGLE)
+rest = back[-1][0] + PANEL * e                     # the panel's top front edge
+back.append((rest, e))
+
+# The tablet leans on that edge, with its foot on the base.
+d_tablet = direction(TABLET_ANGLE)
+n_tablet = v2(d_tablet.y, -d_tablet.x)             # out of the tablet's back
+on_back = rest - GAP * n_tablet                    # a point of the tablet's back
+p_back = on_back + ((base_top + GAP - on_back.y) / d_tablet.y) * d_tablet  # its lower back edge
+REST = (rest - p_back).length                      # how far up the tablet's back the panel's top edge touches it
+
+# The base runs on in front of the tablet's foot, then turns up into the lip.
+lip_start_y = (p_back - TABLET_THICKNESS * n_tablet).x - FOOT_MARGIN
 path = []
-lip_center = v2(LIP_START_Y, base_top + LIP_RADIUS)
+lip_center = v2(lip_start_y, base_top + LIP_RADIUS)
 for k in range(LIP_SEGMENTS + 1):
     phi = math.radians(LIP_ANGLE) * (1 - k / LIP_SEGMENTS)
     path.append((lip_center + LIP_RADIUS * v2(-math.sin(phi), -math.cos(phi)), v2(math.cos(phi), -math.sin(phi))))
-path.append((bend_start, v2(1, 0)))
-for k in range(1, BEND_SEGMENTS + 1):
-    theta = math.radians(-90 + SUPPORT_ANGLE * k / BEND_SEGMENTS)
-    t = v2(-math.sin(theta), math.cos(theta))
-    path.append((bend_center + BEND_RADIUS * v2(math.cos(theta), math.sin(theta)), t))
-path.append((rest, e))
+path += back
 
 # Length along the top surface, unrolled.
 lengths = [0.0]
@@ -174,6 +197,11 @@ for face, kind in faces:
 sharp = [ed for ed in bm.edges if len({k for f, k in faces if f in ed.link_faces}) > 1]
 bmesh.ops.split_edges(bm, edges=sharp)
 
+# Centre the stand on its footprint, front to back.
+ys = [v.co.y for v in bm.verts]
+SHIFT = -(min(ys) + max(ys)) / 2
+bmesh.ops.translate(bm, vec=(0, SHIFT, 0), verts=bm.verts)
+
 mesh = bpy.data.meshes.new("KawaTabletStand_Bentwood")
 bm.to_mesh(mesh)
 bm.free()
@@ -187,14 +215,17 @@ mesh.materials.append(mat)
 tris = sum(len(p.vertices) - 2 for p in mesh.polygons)
 dims = obj.dimensions
 print(f"REPORT tris={tris} verts={len(mesh.vertices)} faces={len(mesh.polygons)} size_m=({dims.x:.4f}, {dims.y:.4f}, {dims.z:.4f})")
-print(f"REPORT unrolled_length={total:.4f} bend_start_y={bend_start.x:.4f} clearance_behind_tablet={bend_start.x - TABLET_BACK_Y:.4f}")
+print(f"REPORT unrolled_length={total:.4f} rest_up_tablet_back={REST:.4f} tablet_foot_unity_z={p_back.x + SHIFT:.4f}")
 
-# Where the tablet rests, in Unity: its middle, and its lean about X. Depth
-# (Blender y) becomes Unity z, height (Blender z) Unity y.
+# Where the tablet rests, in Unity: its middle, and its lean about X; and
+# where the return button goes, facing out of the panel. Depth (Blender y)
+# becomes Unity z, height (Blender z) Unity y.
 middle = p_back + (TABLET_HEIGHT / 2) * d_tablet - (TABLET_THICKNESS / 2) * n_tablet
 tilt = 90.0 - TABLET_ANGLE
-print(f"REPORT dock_unity_position=(0, {middle.y:.5f}, {middle.x:.5f}) dock_unity_euler=({tilt:.1f}, 0, 0)")
-print(f"REPORT rest_point_unity=(0, {rest.y:.5f}, {rest.x:.5f}) lip_top_unity_y={path[0][0].y:.5f}")
+button = rest - BUTTON_DOWN * e + BUTTON_OUT * v2(-e.y, e.x)
+print(f"REPORT dock_unity_position=(0, {middle.y:.5f}, {middle.x + SHIFT:.5f}) dock_unity_euler=({tilt:.1f}, 0, 0)")
+print(f"REPORT button_unity_position=(0, {button.y:.5f}, {button.x + SHIFT:.5f}) button_unity_euler=({90.0 - PANEL_ANGLE:.1f}, 0, 0)")
+print(f"REPORT rest_point_unity=(0, {rest.y:.5f}, {rest.x + SHIFT:.5f}) lip_top_unity_y={path[0][0].y:.5f}")
 
 if RENDER_DIR:
     os.makedirs(RENDER_DIR, exist_ok=True)
@@ -205,7 +236,7 @@ if RENDER_DIR:
     tb.to_mesh(tab.data)
     tb.free()
     tab.scale = (0.30, TABLET_THICKNESS, TABLET_HEIGHT)
-    tab.location = (0, middle.x, middle.y)
+    tab.location = (0, middle.x + SHIFT, middle.y)
     tab.rotation_euler = (math.radians(-tilt), 0, 0)
     scene.collection.objects.link(tab)
     floor = bpy.data.objects.new("Floor", bpy.data.meshes.new("Floor"))
