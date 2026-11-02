@@ -16,16 +16,16 @@ namespace Yamadev.YamaStream.Tablet
   // tablet as it was made sits at _origin + x * _scale.
   //
   // The size is a property of the body, as its place is: it is shared when
-  // the place is, when the world gave the tablet a VRCObjectSync (Global
-  // Sync in the inspector), and each player's own otherwise. It sits on its
+  // the place is, when the body has a VRCObjectSync (Global Sync in the
+  // inspector, on in the prefab), and each player's own otherwise. It sits on its
   // own object, under the body, so that it syncs by itself: the body's own
   // behaviour shares its object with the VRCObjectSync and cannot sync by
   // hand, and the screen (TabletScreen) changes owner with each press.
   [UdonBehaviourSyncMode(BehaviourSyncMode.Manual)]
   public class TabletSize : YamaPlayerBehaviour
   {
-    public const float MinScale = 1f;
-    public const float MaxScale = 5f;
+    private const float MinScale = 1f;
+    private const float MaxScale = 5f;
 
     // While the size changes, it is sent at most this often; the last one is
     // sent when it stops.
@@ -100,8 +100,8 @@ namespace Yamadev.YamaStream.Tablet
     }
 
     // Sets the size, keeping a point given in the body's space where it is.
-    // finished sends it now, else at most every SendInterval.
-    public void ResizeAbout(float scale, Vector3 fixedPoint, bool finished)
+    // It is sent at most every SendInterval; FinishResize sends the last.
+    public void ResizeAbout(float scale, Vector3 fixedPoint)
     {
       Prepare();
       scale = Mathf.Clamp(scale, MinScale, MaxScale);
@@ -109,7 +109,14 @@ namespace Yamadev.YamaStream.Tablet
       _origin = fixedPoint - madePoint * scale;
       _scale = scale;
       Apply();
-      Send(finished);
+      Send(false);
+    }
+
+    // Sends the size it ended at, once the resizing stops.
+    public void FinishResize()
+    {
+      Prepare();
+      Send(true);
     }
 
     // Back to the size it was made, as when the tablet goes back to its place.

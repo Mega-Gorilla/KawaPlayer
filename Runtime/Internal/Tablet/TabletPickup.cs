@@ -126,7 +126,7 @@ namespace Yamadev.YamaStream.Tablet
       }
       if (doublings != 0f)
       {
-        _size.ResizeAbout(_size.Scale * Mathf.Pow(2f, doublings), _resizePoint, false);
+        _size.ResizeAbout(_size.Scale * Mathf.Pow(2f, doublings), _resizePoint);
         Touch();
       }
       SendCustomEventDelayedFrames(nameof(_ResizeFrame), 1);
@@ -137,8 +137,7 @@ namespace Yamadev.YamaStream.Tablet
       if (!_resizing) return;
       _resizing = false;
       if (IsLocalPlayerValid) LocalPlayer.Immobilize(false);
-      // Sends the size it ended at.
-      _size.ResizeAbout(_size.Scale, _resizePoint, true);
+      _size.FinishResize();
     }
 
     // The point that stays where it is while the tablet grows, in this
