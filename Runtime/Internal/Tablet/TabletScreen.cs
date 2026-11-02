@@ -92,8 +92,9 @@ namespace Yamadev.YamaStream.Tablet
     [SerializeField] private LayoutGroup[] _landscapeLayouts = new LayoutGroup[0];
     // The KawaPlayer app stays landscape, so that its controls keep their
     // size; it turns over with the tablet, around the middle of its screen.
-    [SerializeField] private Transform _kawaPlayerApp;
-    [SerializeField] private Transform _kawaPlayerScreen;
+    // TabletSize places it, as it also sizes it (issue #342): this says how
+    // far it turns.
+    [SerializeField] private TabletSize _size;
 
     [UdonSynced] private int _appIndex = Home;
     [UdonSynced] private VRCUrl _imageUrl = VRCUrl.Empty;
@@ -110,10 +111,6 @@ namespace Yamadev.YamaStream.Tablet
     private bool _layoutApplied;
     private Vector2 _displaySize;
     private float _kawaPlayerTurn;
-    private Vector3 _kawaPlayerPosition;
-    private Quaternion _kawaPlayerRotation;
-    private Vector3 _kawaPlayerCenter;
-    private Vector3 _kawaPlayerAxis;
 
     private void Start()
     {
@@ -297,17 +294,6 @@ namespace Yamadev.YamaStream.Tablet
     private void StartOrientation()
     {
       if (Utilities.IsValid(_display)) _displaySize = _display.sizeDelta;
-      if (Utilities.IsValid(_kawaPlayerApp))
-      {
-        _kawaPlayerPosition = _kawaPlayerApp.localPosition;
-        _kawaPlayerRotation = _kawaPlayerApp.localRotation;
-        Transform parent = _kawaPlayerApp.parent;
-        if (Utilities.IsValid(parent))
-        {
-          _kawaPlayerCenter = parent.InverseTransformPoint(Utilities.IsValid(_kawaPlayerScreen) ? _kawaPlayerScreen.position : _kawaPlayerApp.position);
-          _kawaPlayerAxis = parent.InverseTransformDirection(transform.forward);
-        }
-      }
       _turn = FindTurn(true);
       ApplyOrientation();
     }
@@ -395,10 +381,7 @@ namespace Yamadev.YamaStream.Tablet
 
     private void TurnKawaPlayer(float turn)
     {
-      if (!Utilities.IsValid(_kawaPlayerApp)) return;
-      Quaternion rotation = Quaternion.AngleAxis(turn, _kawaPlayerAxis);
-      _kawaPlayerApp.localRotation = rotation * _kawaPlayerRotation;
-      _kawaPlayerApp.localPosition = _kawaPlayerCenter + rotation * (_kawaPlayerPosition - _kawaPlayerCenter);
+      if (Utilities.IsValid(_size)) _size.TurnApp(turn, transform.forward);
     }
 
     #endregion

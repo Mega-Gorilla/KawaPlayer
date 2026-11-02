@@ -315,7 +315,7 @@ def fig_tablet():
     b = [text(24, 30, "タブレットの中", "t1 f14"),
          text(24, 50, "タブレットは UIController を 2 つ持ち、画面の状態は自分の TabletScreen で同期する", "t2 f12")]
     b.append(group(24, 70, 566, 380, "Tablet.prefab", "根元に YamaPlayerSubController"))
-    b.append(node(44, 112, 170, 50, ["TabletPickup", ("VRCPickup・VRCObjectSync", "t2 f11")], "box", "t1 f12", 17))
+    b.append(node(44, 108, 170, 66, ["TabletPickup", ("VRCPickup・VRCObjectSync", "t2 f11"), ("子の TabletSize：大きさ", "t2 f11")], "box", "t1 f12", 17))
     b.append(node(300, 108, 270, 60, ["TabletScreen", ("同期：開いているアプリ・画像の URL・一覧", "t2 f11"), ("縦横の回転・ホームボタン", "t2 f11")], "go", "t1 f12", 16))
     apps = [("画像アプリ", "TabletImageApp"), ("設定アプリ", "SettingsPanel"), ("訪問者アプリ", "TabletVisitorsApp")]
     for i, (name, cls) in enumerate(apps):
