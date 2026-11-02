@@ -123,7 +123,9 @@ namespace Yamadev.YamaStream.Tablet
 
     // Let go by its holder, who owns it, near a stand's rest: the middle of
     // the tablet as it shows (a resize moves it off the body's origin)
-    // against where its middle will be on the rest.
+    // against where its middle will be on the rest, both in the world, with
+    // the scale of the body and its parents, which the body keeps on the
+    // rest (the rest's own scale is the stand's, not the tablet's).
     private bool IsNearDock()
     {
       if (!Utilities.IsValid(_dock) || !_dock.gameObject.activeInHierarchy) return false;
@@ -131,8 +133,8 @@ namespace Yamadev.YamaStream.Tablet
       Vector3 middle = transform.position, rest = _dock.position;
       if (Utilities.IsValid(_size))
       {
-        middle += transform.rotation * _size.Center;
-        rest += _dock.rotation * _size.MadeCenter;
+        middle = transform.TransformPoint(_size.Center);
+        rest += _dock.rotation * Vector3.Scale(transform.lossyScale, _size.MadeCenter);
       }
       return (middle - rest).sqrMagnitude <= DockReach * DockReach;
     }
