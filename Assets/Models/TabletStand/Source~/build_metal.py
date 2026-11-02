@@ -30,9 +30,11 @@ and silver.
   foot. At its top the neck bends back into a tab, flat against the back of
   a 24 x 14 cm plate leaning back 15 degrees, with two pads and a round
   magnet on its face, which the tablet sticks to. The plate is smaller than
-  the tablet, so the tablet hides it. It is centred on its footprint.
+  the tablet, so the tablet hides it. Its corners and edges are rounded, as
+  are the foot's front corners and the tab's top ones in plan. It is
+  centred on its footprint.
 
-Faces meeting at more than 40 degrees are split, the rest shade smooth, so
+Faces meeting at more than 50 degrees are split, the rest shade smooth, so
 the bends and the rounded corners look round and the edges stay sharp.
 
 The return button goes where the tablet rests (the holder's back, the
@@ -93,6 +95,18 @@ class Builder:
         faces += [[i, (i + 1) % n, n + (i + 1) % n, n + i] for i in range(n)]
         self._faces(verts, faces, cell)
 
+    def loft(self, rings, matrix, cell):
+        """Outlines in local XY with as many points each (counter-clockwise), each at its z, rising: joined in
+        turn and closed at both ends."""
+        n = len(rings[0][0])
+        verts = [self.bm.verts.new(matrix @ Vector((x, y, z))) for outline, z in rings for x, y in outline]
+        last = (len(rings) - 1) * n
+        faces = [list(reversed(range(n))), list(range(last, last + n))]
+        for r in range(len(rings) - 1):
+            a, b = r * n, (r + 1) * n
+            faces += [[a + i, a + (i + 1) % n, b + (i + 1) % n, b + i] for i in range(n)]
+        self._faces(verts, faces, cell)
+
     def box(self, size, matrix, cell):
         sx, sy, sz = (s / 2 for s in size)
         self.prism([(-sx, -sy), (sx, -sy), (sx, sy), (-sx, sy)], -sz, sz, matrix, cell)
@@ -141,7 +155,7 @@ class Builder:
         self.bm.normal_update()
         for f in self.bm.faces:
             f.smooth = True
-        sharp = [e for e in self.bm.edges if len(e.link_faces) == 2 and e.calc_face_angle(0) > math.radians(40)]
+        sharp = [e for e in self.bm.edges if len(e.link_faces) == 2 and e.calc_face_angle(0) > math.radians(50)]
         bmesh.ops.split_edges(self.bm, edges=sharp)
         mesh = bpy.data.meshes.new(name)
         self.bm.to_mesh(mesh)
@@ -167,6 +181,28 @@ def rounded_rect(w, h, r, seg):
 
 def circle(r, seg):
     return [(r * math.cos(2 * math.pi * k / seg), r * math.sin(2 * math.pi * k / seg)) for k in range(seg)]
+
+
+def rounded_slab(w, h, r, t, edge, seg):
+    """A w x h slab with corners of radius r, t thick from -t/2 to t/2, its edges rounded with radius edge on
+    both faces, in 45 degree steps: the rings for Builder.loft."""
+    rings = []
+    for side, angles in ((-1, (0, 45, 90)), (1, (90, 135, 180))):
+        for a in angles:
+            o = edge * (math.sin(math.radians(a)) - 1)
+            rings.append((rounded_rect(w + 2 * o, h + 2 * o, r + o, seg), side * (t / 2 - edge) - edge * math.cos(math.radians(a))))
+    return rings
+
+
+def rounded_ends(start, direction, normal, length, half_width_at, radius, steps, at_end):
+    """Stations along a straight piece of a sheet, from start along direction for length, whose corners at one
+    end (at_end, else at the start) are rounded with radius in plan: half_width_at(d) is its half width d along."""
+    stations = []
+    for k in range(steps + 1):
+        e = radius * (1 - math.cos(math.radians(90 * k / steps)))   # how far from that end
+        d = length - e if at_end else e
+        stations.append((start + d * direction, normal, half_width_at(d) - radius + math.sqrt(max(0.0, radius * radius - (radius - e) ** 2))))
+    return stations if not at_end else stations[::-1]
 
 
 def lean(degrees, origin):
@@ -236,12 +272,16 @@ NECK_ANGLE = 110.0           # from the foot: past upright, so the neck leans fo
 TOP_R = 0.015                # the bend into the tab, of the top surface, which is outside it
 TOP_SEGMENTS = 4
 TAB = 0.050                  # the tab, its middle behind the plate's middle
+FOOT_CORNER, TAB_CORNER = 0.025, 0.020  # the foot's front corners and the tab's top ones, rounded in plan
 PLATE_T = 0.008
 PLATE_Z = 0.172              # the plate's middle
+PLATE_CORNER, PLATE_EDGE = 0.030, 0.003  # the plate's corners, and its edges, rounded front and back
 a_neck, a_tab = math.radians(NECK_ANGLE), math.radians(90.0 - MAGNET_TILT)
 neck_dir, tab_dir = v2(math.cos(a_neck), math.sin(a_neck)), v2(math.cos(a_tab), math.sin(a_tab))
 plate_front = v2(-math.sin(a_tab), math.cos(a_tab))  # the tab's top surface faces the plate
-stations = [(v2(-FOOT, SHEET_T), v2(0, -1), FOOT_FRONT_W / 2), (v2(0, SHEET_T), v2(0, -1), NECK_BOTTOM_W / 2)]
+stations = rounded_ends(v2(-FOOT, SHEET_T), v2(1, 0), v2(0, -1), FOOT,
+                        lambda d: FOOT_FRONT_W / 2 + (NECK_BOTTOM_W - FOOT_FRONT_W) / 2 * d / FOOT, FOOT_CORNER, 4, False)
+stations.append((v2(0, SHEET_T), v2(0, -1), NECK_BOTTOM_W / 2))
 bend_center = v2(0, SHEET_T + BEND_R)
 for k in range(1, BEND_SEGMENTS + 1):
     phi = a_neck * k / BEND_SEGMENTS
@@ -255,15 +295,15 @@ for k in range(1, TOP_SEGMENTS + 1):
     phi = a_neck + (a_tab - a_neck) * k / TOP_SEGMENTS
     stations.append((top_center + TOP_R * v2(-math.sin(phi), math.cos(phi)), v2(math.sin(phi), -math.cos(phi)), NECK_TOP_W / 2))
 tab_start = stations[-1][0]
-stations.append((tab_start + TAB * tab_dir, stations[-1][1], NECK_TOP_W / 2))
+stations += rounded_ends(tab_start, tab_dir, stations[-1][1], TAB, lambda d: NECK_TOP_W / 2, TAB_CORNER, 4, True)
 mb.sheet(stations, SHEET_T, ALUMINIUM)
 plate_middle = tab_start + (TAB / 2) * tab_dir + (PLATE_T / 2) * plate_front
 plate = lean(MAGNET_TILT, Vector((0, plate_middle.x, plate_middle.y)))
 face = plate_frame(plate)
 # The plate (local y -0.004 .. 0.004), and on its face the pads and the magnet (1 mm).
-mb.prism(rounded_rect(0.24, 0.14, 0.015, 4), -PLATE_T / 2, PLATE_T / 2, face, ALUMINIUM)
+mb.loft(rounded_slab(0.24, 0.14, PLATE_CORNER, PLATE_T, PLATE_EDGE, 4), face, ALUMINIUM)
 for x in (-0.095, 0.095):
-    mb.prism(rounded_rect(0.035, 0.12, 0.012, 3), PLATE_T / 2, PLATE_T / 2 + 0.001, face @ Matrix.Translation((x, 0, 0)), PAD)
+    mb.prism(rounded_rect(0.035, 0.11, 0.014, 3), PLATE_T / 2, PLATE_T / 2 + 0.001, face @ Matrix.Translation((x, 0, 0)), PAD)
 mb.prism(circle(0.02, 16), PLATE_T / 2, PLATE_T / 2 + 0.001, face, DISC)
 magnet_shift = mb.centre_depth()
 magnet = mb.finish("KawaTabletStand_Magnet")
