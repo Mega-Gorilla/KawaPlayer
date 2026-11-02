@@ -22,8 +22,10 @@ and silver.
 
 - The floor stand (Signage, in the inspector) is a kiosk: a 40 x 30 cm base
   plate, a rounded cover where the column stands on it, a column with a
-  groove down its front, a hinge, and a box with a rim round the tablet,
-  leaning back 30 degrees with the screen at about 1.15 m.
+  groove down its front, and a box with a rim round the tablet, leaning
+  back 30 degrees with the screen at about 1.15 m, its back edge rounded.
+  The column runs up into a mount on the box's back, its top cut along it,
+  so from behind the stand shows plain faces.
 - The magnet stand (Aluminium, in the inspector) is one sheet bent into a
   foot that runs forwards, widening, and a neck that comes back over it,
   leaning forwards 20 degrees and narrowing, so the weight stands over the
@@ -56,7 +58,7 @@ TABLET_WIDTH = 0.300
 TABLET_HEIGHT = 0.1895
 TABLET_THICKNESS = 0.0075
 
-# The cells: the floor stand's body and its parts (the groove, the hinge),
+# The cells: the floor stand's body and its parts (the strip in the groove),
 # the magnet stand's aluminium, its pads and its magnet; two and the last
 # two are spare.
 FLOOR_BODY, FLOOR_PARTS, SPARE, ALUMINIUM, PAD, DISC = range(6)
@@ -105,6 +107,14 @@ class Builder:
         for r in range(len(rings) - 1):
             a, b = r * n, (r + 1) * n
             faces += [[a + i, a + (i + 1) % n, b + (i + 1) % n, b + i] for i in range(n)]
+        self._faces(verts, faces, cell)
+
+    def column(self, x0, x1, y0, y1, z0, top_at, cell):
+        """A block from x0 to x1 and y0 to y1, standing from z0 up to a top that slants with y (top_at(y)),
+        left open there, where the part it ends against covers it."""
+        corners = [(x0, y0), (x1, y0), (x1, y1), (x0, y1)]
+        verts = [self.bm.verts.new((x, y, z0)) for x, y in corners] + [self.bm.verts.new((x, y, top_at(y))) for x, y in corners]
+        faces = [[3, 2, 1, 0], [0, 1, 5, 4], [1, 2, 6, 5], [2, 3, 7, 6], [3, 0, 4, 7]]
         self._faces(verts, faces, cell)
 
     def box(self, size, matrix, cell):
@@ -194,6 +204,17 @@ def rounded_slab(w, h, r, t, edge, seg):
     return rings
 
 
+def rounded_back(w, h, r, t, edge, seg):
+    """A w x h slab with corners of radius r, from z -t up to 0, its back edge (at -t) rounded with radius edge
+    in 45 degree steps: the rings for Builder.loft."""
+    rings = []
+    for a in (0, 45, 90):
+        o = edge * (math.sin(math.radians(a)) - 1)
+        rings.append((rounded_rect(w + 2 * o, h + 2 * o, r + o, seg), -t + edge - edge * math.cos(math.radians(a))))
+    rings.append((rounded_rect(w, h, r, seg), 0.0))
+    return rings
+
+
 def rounded_ends(start, direction, normal, length, half_width_at, radius, steps, at_end):
     """Stations along a straight piece of a sheet, from start along direction for length, whose corners at one
     end (at_end, else at the start) are rounded with radius in plan: half_width_at(d) is its half width d along."""
@@ -232,26 +253,36 @@ fb.prism(rounded_rect(0.40, 0.30, 0.02, 4), 0.0, 0.010, Matrix.Identity(4), FLOO
 COLUMN_Y = 0.04
 # The rounded cover where the column stands on the base.
 fb.prism(rounded_rect(0.11, 0.075, 0.03, 4), 0.010, 0.030, Matrix.Translation((0, COLUMN_Y, 0)), FLOOR_BODY)
-# The column: two profiles with a groove between them down its front.
-POLE_TOP = 1.05
-COLUMN_W, COLUMN_D, GROOVE_W, GROOVE_D = 0.056, 0.042, 0.008, 0.006
-pole_h = POLE_TOP - 0.03
-side_w = (COLUMN_W - GROOVE_W) / 2
-for x in (-(GROOVE_W + side_w) / 2, (GROOVE_W + side_w) / 2):
-    fb.box((side_w, COLUMN_D, pole_h), Matrix.Translation((x, COLUMN_Y, 0.03 + pole_h / 2)), FLOOR_BODY)
-fb.box((GROOVE_W, COLUMN_D - GROOVE_D, pole_h), Matrix.Translation((0, COLUMN_Y + GROOVE_D / 2, 0.03 + pole_h / 2)), FLOOR_PARTS)
-# The hinge at the column's top, behind the box.
-fb.box((0.05, 0.04, 0.05), Matrix.Translation((0, COLUMN_Y + 0.01, POLE_TOP + 0.015)), FLOOR_PARTS)
 FLOOR_TILT = 30.0
-holder = lean(FLOOR_TILT, Vector((0, 0.02, POLE_TOP + 0.09)))
+POLE_TOP = 1.05              # the box's middle is 9 cm above it
+holder_origin = Vector((0, 0.02, POLE_TOP + 0.09))
+holder = lean(FLOOR_TILT, holder_origin)
 holder_face = plate_frame(holder)
 RIM = 0.024
+BOX_D, BOX_EDGE = 0.026, 0.004  # the box's depth behind the tablet's back, and its back edge's rounding
+MOUNT_W, MOUNT_H, MOUNT_T = 0.10, 0.11, 0.004  # the plate on the box's back the column ends against
 OUTER_W, OUTER_H = TABLET_WIDTH + 2 * RIM, TABLET_HEIGHT + 2 * RIM
 outline = rounded_rect(OUTER_W, OUTER_H, 0.016, 4)
-# The box behind the tablet's back (local y 0 .. 0.026), and the rim round the
-# tablet, standing 4.5 mm proud of its face (local y -0.012 .. 0), 1 mm clear of it.
-fb.prism(outline, -0.026, 0.0, holder_face, FLOOR_BODY)
+# The box behind the tablet's back (local y 0 .. BOX_D), its back edge rounded,
+# and the rim round the tablet, standing 4.5 mm proud of its face (local y
+# -0.012 .. 0), 1 mm clear of it.
+fb.loft(rounded_back(OUTER_W, OUTER_H, 0.016, BOX_D, BOX_EDGE, 4), holder_face, FLOOR_BODY)
 fb.ring(outline, rounded_rect(TABLET_WIDTH + 0.002, TABLET_HEIGHT + 0.002, 0.004, 4), 0.0, 0.012, holder_face, FLOOR_BODY)
+# The column runs up into the mount on the box's back: its top is cut along
+# the mount's back, (y, z) with (y - o.y) cos t - (z - o.z) sin t = depth.
+COLUMN_W, COLUMN_D, GROOVE_W, GROOVE_D = 0.056, 0.042, 0.008, 0.006
+tilt = math.radians(FLOOR_TILT)
+mount_back = BOX_D + MOUNT_T
+top_at = lambda y: holder_origin.z + ((y - holder_origin.y) * math.cos(tilt) - mount_back) / math.sin(tilt)
+mount_up = (COLUMN_Y - holder_origin.y - mount_back * math.cos(tilt)) / math.sin(tilt)  # up the box, where the column's middle meets it
+fb.prism(rounded_rect(MOUNT_W, MOUNT_H, 0.02, 4), -mount_back, -BOX_D, holder_face @ Matrix.Translation((0, mount_up, 0)), FLOOR_BODY)
+# One block behind, two in front with the groove between them, and in the
+# groove a strip of the parts' colour: from behind, one plain face.
+front, back = COLUMN_Y - COLUMN_D / 2, COLUMN_Y + COLUMN_D / 2
+fb.column(-COLUMN_W / 2, COLUMN_W / 2, front + GROOVE_D, back, 0.03, top_at, FLOOR_BODY)
+for x0, x1 in ((-COLUMN_W / 2, -GROOVE_W / 2), (GROOVE_W / 2, COLUMN_W / 2)):
+    fb.column(x0, x1, front, front + GROOVE_D, 0.03, top_at, FLOOR_BODY)
+fb.column(-GROOVE_W / 2, GROOVE_W / 2, front + GROOVE_D - 0.001, front + GROOVE_D, 0.03, top_at, FLOOR_PARTS)
 floor = fb.finish("KawaTabletStand_Floor")
 print(f"REPORT floor dock_unity_position={report(holder, (0, -TABLET_THICKNESS / 2, 0))} dock_unity_euler=({FLOOR_TILT:.1f}, 0, 0)")
 print(f"REPORT floor button_unity_position={report(holder, (0, -0.0006, 0))} button_unity_euler=({FLOOR_TILT:.1f}, 0, 0)")
