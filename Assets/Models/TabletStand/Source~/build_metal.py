@@ -25,11 +25,13 @@ and silver.
   groove down its front, a hinge, and a box with a rim round the tablet,
   leaning back 30 degrees with the screen at about 1.15 m.
 - The magnet stand (Aluminium, in the inspector) is one sheet bent into a
-  foot that runs forwards, widening, and a neck leaning back 15 degrees,
-  narrowing, which ends in a hinge with a knuckle at each end, on a round
-  swivel behind a 24 x 14 cm plate, with two pads and a round magnet on its
-  face, which the tablet sticks to. The plate is smaller than the tablet,
-  so the tablet hides it. It is centred on its footprint.
+  foot that runs forwards, widening, and a neck that comes back over it,
+  leaning forwards 20 degrees and narrowing, so the weight stands over the
+  foot. The neck ends in a hinge with a knuckle at each end, on a round
+  swivel behind a 24 x 14 cm plate leaning back 15 degrees, with two pads
+  and a round magnet on its face, which the tablet sticks to. The plate is
+  smaller than the tablet, so the tablet hides it. It is centred on its
+  footprint.
 
 Faces meeting at more than 40 degrees are split, the rest shade smooth, so
 the bends and the rounded corners look round and the edges stay sharp.
@@ -219,16 +221,18 @@ floor = fb.finish("KawaTabletStand_Floor")
 print(f"REPORT floor dock_unity_position={report(holder, (0, -TABLET_THICKNESS / 2, 0))} dock_unity_euler=({FLOOR_TILT:.1f}, 0, 0)")
 print(f"REPORT floor button_unity_position={report(holder, (0, -0.0006, 0))} button_unity_euler=({FLOOR_TILT:.1f}, 0, 0)")
 
-# Magnet stand: one sheet, the foot running forwards from the bend, widening,
-# and the neck leaning back, narrowing, with the plate on the neck's front.
+# Magnet stand: one sheet, the foot running forwards from the bend at the
+# back, widening, and the neck coming back over it, leaning forwards and
+# narrowing, so the plate and the tablet stand over the foot; the hinge at
+# the neck's top leans the plate back.
 mb = Builder()
 SHEET_T = 0.006
 FOOT = 0.120                 # the foot's top surface, from its front edge to the bend
 FOOT_FRONT_W, NECK_BOTTOM_W, NECK_TOP_W = 0.140, 0.105, 0.080
 BEND_R = 0.012               # of the top surface, which is inside the bend
-BEND_SEGMENTS = 6
-MAGNET_TILT = 15.0
-NECK_ANGLE = 90.0 - MAGNET_TILT  # parallel to the plate
+BEND_SEGMENTS = 8
+MAGNET_TILT = 15.0           # the plate, leaning back
+NECK_ANGLE = 110.0           # from the foot: past upright, so the neck leans forwards 20 degrees
 PLATE_T = 0.008
 PLATE_Z = 0.172              # the plate's middle, where the neck ends behind it
 # Behind the plate: a round swivel, and the hinge the neck ends in (its axis
@@ -246,8 +250,11 @@ neck_in = stations[-1][1]
 neck_top = stations[-1][0] + ((PLATE_Z - stations[-1][0].y) / neck_dir.y) * neck_dir
 stations.append((neck_top, neck_in, NECK_TOP_W / 2))
 mb.sheet(stations, SHEET_T, ALUMINIUM)
-# The neck's middle ends on the hinge's axis; the plate is in front of it.
-plate_middle = neck_top + (SHEET_T / 2 - HINGE_BACK) * neck_in
+# The neck's middle ends on the hinge's axis; the plate's middle is in front
+# of it, along the plate's front normal.
+hinge_axis = neck_top + (SHEET_T / 2) * neck_in
+plate_front = v2(-math.cos(math.radians(MAGNET_TILT)), math.sin(math.radians(MAGNET_TILT)))
+plate_middle = hinge_axis + HINGE_BACK * plate_front
 plate = lean(MAGNET_TILT, Vector((0, plate_middle.x, plate_middle.y)))
 face = plate_frame(plate)
 # The plate (local y -0.004 .. 0.004), and on its face the pads and the magnet (1 mm).
