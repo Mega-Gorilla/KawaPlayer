@@ -25,12 +25,13 @@ namespace Yamadev.YamaStream.Editor
       public string[] Colors; // the materials' last name; tablet.standColor.<colour, first letter lower>
     }
 
+    // In the order the inspector offers them: those for a table, then the one for the floor.
     public static readonly Design[] All =
     {
       new Design { Child = "Bentwood", Key = "bentwood", Colors = new[] { "Walnut", "WhiteOak", "SmokedWalnut", "Black" } },
-      new Design { Child = "Floor", Key = "floor", Colors = new[] { "White" } },
       new Design { Child = "Magnet", Key = "magnet", Colors = new[] { "SpaceGrey" } },
       new Design { Child = "Cushion", Key = "cushion", Colors = new[] { "Red", "Grey" } },
+      new Design { Child = "Floor", Key = "floor", Colors = new[] { "White" } },
     };
 
     public static Material MaterialOf(Design design, string color)
