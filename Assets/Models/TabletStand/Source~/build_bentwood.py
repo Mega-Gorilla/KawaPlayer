@@ -4,11 +4,9 @@ Run from the repository root:
 
     blender -b --factory-startup --python "Assets/Models/TabletStand/Source~/build_bentwood.py" -- Assets/Models/TabletStand
 
-Writes KawaTabletStand_Bentwood.fbx to the given folder and prints the triangle count
-and where the tablet rests on it. Add --render to also write preview renders
-(Cycles, CPU), with a flat tablet stand-in, to the folder given after it
-(--render <folder>): keep them outside Assets, or Unity imports them into
-the package. This folder ends in "~", so Unity does not import the script.
+Writes KawaTabletStand_Bentwood.fbx to the given folder and prints the triangle count,
+where the tablet rests on it and where its return button goes. This folder
+ends in "~", so Unity does not import the script.
 
 The stand is one sheet of bent plywood, 8 mm thick, an S seen from the side:
 a long base whose front edge turns up a little, a wide bend at the back that
@@ -34,7 +32,6 @@ from mathutils import Matrix, Vector
 
 argv = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
 OUT = os.path.abspath(argv[0]) if argv else os.getcwd()
-RENDER_DIR = os.path.abspath(argv[argv.index("--render") + 1]) if "--render" in argv else None
 os.makedirs(OUT, exist_ok=True)
 
 # Metres. The profile is in (y, z): y is depth, the front at -y; z is height.
@@ -226,45 +223,6 @@ button = rest - BUTTON_DOWN * e + BUTTON_OUT * v2(-e.y, e.x)
 print(f"REPORT dock_unity_position=(0, {middle.y:.5f}, {middle.x + SHIFT:.5f}) dock_unity_euler=({tilt:.1f}, 0, 0)")
 print(f"REPORT button_unity_position=(0, {button.y:.5f}, {button.x + SHIFT:.5f}) button_unity_euler=({90.0 - PANEL_ANGLE:.1f}, 0, 0)")
 print(f"REPORT rest_point_unity=(0, {rest.y:.5f}, {rest.x + SHIFT:.5f}) lip_top_unity_y={path[0][0].y:.5f}")
-
-if RENDER_DIR:
-    os.makedirs(RENDER_DIR, exist_ok=True)
-    scene = bpy.context.scene
-    tab = bpy.data.objects.new("Tablet", bpy.data.meshes.new("Tablet"))
-    tb = bmesh.new()
-    bmesh.ops.create_cube(tb, size=1.0)
-    tb.to_mesh(tab.data)
-    tb.free()
-    tab.scale = (0.30, TABLET_THICKNESS, TABLET_HEIGHT)
-    tab.location = (0, middle.x + SHIFT, middle.y)
-    tab.rotation_euler = (math.radians(-tilt), 0, 0)
-    scene.collection.objects.link(tab)
-    floor = bpy.data.objects.new("Floor", bpy.data.meshes.new("Floor"))
-    fb = bmesh.new()
-    bmesh.ops.create_grid(fb, x_segments=1, y_segments=1, size=0.4)
-    fb.to_mesh(floor.data)
-    fb.free()
-    scene.collection.objects.link(floor)
-    scene.render.engine = "CYCLES"
-    scene.cycles.device = "CPU"
-    scene.cycles.samples = 32
-    scene.render.resolution_x, scene.render.resolution_y = 900, 700
-    world = bpy.data.worlds.new("World")
-    world.use_nodes = True
-    world.node_tree.nodes["Background"].inputs[0].default_value = (0.75, 0.76, 0.78, 1)
-    scene.world = world
-    cd = bpy.data.cameras.new("C")
-    cd.lens = 60
-    cam = bpy.data.objects.new("C", cd)
-    scene.collection.objects.link(cam)
-    scene.camera = cam
-    for name, loc in {"side": (0.55, 0.0, 0.08), "angle": (0.35, -0.42, 0.25), "front": (0.0, -0.6, 0.12)}.items():
-        cam.location = loc
-        cam.rotation_euler = (Vector((0, -0.01, 0.07)) - Vector(loc)).to_track_quat("-Z", "Y").to_euler()
-        scene.render.filepath = os.path.join(RENDER_DIR, f"render_{name}.png")
-        bpy.ops.render.render(write_still=True)
-    bpy.data.objects.remove(tab)
-    bpy.data.objects.remove(floor)
 
 # Half a turn about Z, so the front faces -Z in Unity, as the tablet does.
 obj.matrix_world = Matrix.Rotation(math.pi, 4, "Z") @ obj.matrix_world
