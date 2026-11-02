@@ -121,20 +121,30 @@ namespace Yamadev.YamaStream.Tablet
       SendCustomEventDelayedFrames(nameof(_DockFrame), 1);
     }
 
-    // Let go by its holder, who owns it, near a stand's rest.
+    // Let go by its holder, who owns it, near a stand's rest: the middle of
+    // the tablet as it shows (a resize moves it off the body's origin)
+    // against where its middle will be on the rest.
     private bool IsNearDock()
     {
       if (!Utilities.IsValid(_dock) || !_dock.gameObject.activeInHierarchy) return false;
       if (Utilities.IsValid(_objectSync) && !IsObjectOwner) return false;
-      return (transform.position - _dock.position).sqrMagnitude <= DockReach * DockReach;
+      Vector3 middle = transform.position, rest = _dock.position;
+      if (Utilities.IsValid(_size))
+      {
+        middle += transform.rotation * _size.Center;
+        rest += _dock.rotation * _size.MadeCenter;
+      }
+      return (middle - rest).sqrMagnitude <= DockReach * DockReach;
     }
 
     // Runs each frame while the tablet slides onto the stand, and stops
-    // itself once it is there or picked up again.
+    // itself once it is there, picked up again, or taken by someone else
+    // (who becomes its owner, and whose pickup reaches only them).
     public void _DockFrame()
     {
-      if (!_docking)
+      if (!_docking || (Utilities.IsValid(_objectSync) && !IsObjectOwner))
       {
+        _docking = false;
         _dockLoopRunning = false;
         return;
       }

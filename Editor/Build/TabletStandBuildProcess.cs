@@ -29,7 +29,9 @@ namespace Yamadev.YamaStream.Editor
           var model = stand.Find(design.Child);
           if (model != null && !model.gameObject.activeSelf) model.tag = "EditorOnly";
         }
-        if (!stand.gameObject.activeInHierarchy)
+        // Switched off in the inspector, not merely hidden with the tablet or
+        // one of its parents, which a world may show later.
+        if (!stand.gameObject.activeSelf)
         {
           stand.tag = "EditorOnly";
           continue;
