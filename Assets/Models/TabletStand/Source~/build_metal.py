@@ -27,11 +27,10 @@ and silver.
 - The magnet stand (Aluminium, in the inspector) is one sheet bent into a
   foot that runs forwards, widening, and a neck that comes back over it,
   leaning forwards 20 degrees and narrowing, so the weight stands over the
-  foot. The neck ends in a hinge with a knuckle at each end, on a round
-  swivel behind a 24 x 14 cm plate leaning back 15 degrees, with two pads
-  and a round magnet on its face, which the tablet sticks to. The plate is
-  smaller than the tablet, so the tablet hides it. It is centred on its
-  footprint.
+  foot. At its top the neck bends back into a tab, flat against the back of
+  a 24 x 14 cm plate leaning back 15 degrees, with two pads and a round
+  magnet on its face, which the tablet sticks to. The plate is smaller than
+  the tablet, so the tablet hides it. It is centred on its footprint.
 
 Faces meeting at more than 40 degrees are split, the rest shade smooth, so
 the bends and the rounded corners look round and the edges stay sharp.
@@ -56,8 +55,8 @@ TABLET_HEIGHT = 0.1895
 TABLET_THICKNESS = 0.0075
 
 # The cells: the floor stand's body and its parts (the groove, the hinge),
-# the magnet stand's aluminium, its pads and its magnet (and the hinge's
-# knuckles); two and the last two are spare.
+# the magnet stand's aluminium, its pads and its magnet; two and the last
+# two are spare.
 FLOOR_BODY, FLOOR_PARTS, SPARE, ALUMINIUM, PAD, DISC = range(6)
 CELLS = 8
 GREY_50 = (0.5, 0.5, 0.5)
@@ -223,8 +222,9 @@ print(f"REPORT floor button_unity_position={report(holder, (0, -0.0006, 0))} but
 
 # Magnet stand: one sheet, the foot running forwards from the bend at the
 # back, widening, and the neck coming back over it, leaning forwards and
-# narrowing, so the plate and the tablet stand over the foot; the hinge at
-# the neck's top leans the plate back.
+# narrowing, so the plate and the tablet stand over the foot; at its top the
+# neck bends back into a tab flat against the plate's back, which leans the
+# plate back.
 mb = Builder()
 SHEET_T = 0.006
 FOOT = 0.120                 # the foot's top surface, from its front edge to the bend
@@ -233,28 +233,31 @@ BEND_R = 0.012               # of the top surface, which is inside the bend
 BEND_SEGMENTS = 8
 MAGNET_TILT = 15.0           # the plate, leaning back
 NECK_ANGLE = 110.0           # from the foot: past upright, so the neck leans forwards 20 degrees
+TOP_R = 0.015                # the bend into the tab, of the top surface, which is outside it
+TOP_SEGMENTS = 4
+TAB = 0.050                  # the tab, its middle behind the plate's middle
 PLATE_T = 0.008
-PLATE_Z = 0.172              # the plate's middle, where the neck ends behind it
-# Behind the plate: a round swivel, and the hinge the neck ends in (its axis
-# across X, at the plate's middle), with a knuckle at each end.
-SWIVEL_R, SWIVEL_T = 0.038, 0.006
-HINGE_R, HINGE_L, KNUCKLE_L = 0.010, 0.088, 0.004
-HINGE_BACK = PLATE_T / 2 + SWIVEL_T + HINGE_R - 0.002  # the hinge's axis, behind the plate's middle
+PLATE_Z = 0.172              # the plate's middle
+a_neck, a_tab = math.radians(NECK_ANGLE), math.radians(90.0 - MAGNET_TILT)
+neck_dir, tab_dir = v2(math.cos(a_neck), math.sin(a_neck)), v2(math.cos(a_tab), math.sin(a_tab))
+plate_front = v2(-math.sin(a_tab), math.cos(a_tab))  # the tab's top surface faces the plate
 stations = [(v2(-FOOT, SHEET_T), v2(0, -1), FOOT_FRONT_W / 2), (v2(0, SHEET_T), v2(0, -1), NECK_BOTTOM_W / 2)]
 bend_center = v2(0, SHEET_T + BEND_R)
 for k in range(1, BEND_SEGMENTS + 1):
-    phi = math.radians(NECK_ANGLE * k / BEND_SEGMENTS)
+    phi = a_neck * k / BEND_SEGMENTS
     stations.append((bend_center + BEND_R * v2(math.sin(phi), -math.cos(phi)), v2(math.sin(phi), -math.cos(phi)), NECK_BOTTOM_W / 2))
-neck_dir = v2(math.cos(math.radians(NECK_ANGLE)), math.sin(math.radians(NECK_ANGLE)))
-neck_in = stations[-1][1]
-neck_top = stations[-1][0] + ((PLATE_Z - stations[-1][0].y) / neck_dir.y) * neck_dir
-stations.append((neck_top, neck_in, NECK_TOP_W / 2))
+# The neck ends where the bend and the half tab above it bring the plate's middle to PLATE_Z.
+neck_top_z = PLATE_Z - (PLATE_T / 2) * plate_front.y - (TAB / 2) * tab_dir.y - TOP_R * (math.cos(a_tab) - math.cos(a_neck))
+neck_top = stations[-1][0] + ((neck_top_z - stations[-1][0].y) / neck_dir.y) * neck_dir
+stations.append((neck_top, stations[-1][1], NECK_TOP_W / 2))
+top_center = neck_top + TOP_R * v2(math.sin(a_neck), -math.cos(a_neck))
+for k in range(1, TOP_SEGMENTS + 1):
+    phi = a_neck + (a_tab - a_neck) * k / TOP_SEGMENTS
+    stations.append((top_center + TOP_R * v2(-math.sin(phi), math.cos(phi)), v2(math.sin(phi), -math.cos(phi)), NECK_TOP_W / 2))
+tab_start = stations[-1][0]
+stations.append((tab_start + TAB * tab_dir, stations[-1][1], NECK_TOP_W / 2))
 mb.sheet(stations, SHEET_T, ALUMINIUM)
-# The neck's middle ends on the hinge's axis; the plate's middle is in front
-# of it, along the plate's front normal.
-hinge_axis = neck_top + (SHEET_T / 2) * neck_in
-plate_front = v2(-math.cos(math.radians(MAGNET_TILT)), math.sin(math.radians(MAGNET_TILT)))
-plate_middle = hinge_axis + HINGE_BACK * plate_front
+plate_middle = tab_start + (TAB / 2) * tab_dir + (PLATE_T / 2) * plate_front
 plate = lean(MAGNET_TILT, Vector((0, plate_middle.x, plate_middle.y)))
 face = plate_frame(plate)
 # The plate (local y -0.004 .. 0.004), and on its face the pads and the magnet (1 mm).
@@ -262,12 +265,6 @@ mb.prism(rounded_rect(0.24, 0.14, 0.015, 4), -PLATE_T / 2, PLATE_T / 2, face, AL
 for x in (-0.095, 0.095):
     mb.prism(rounded_rect(0.035, 0.12, 0.012, 3), PLATE_T / 2, PLATE_T / 2 + 0.001, face @ Matrix.Translation((x, 0, 0)), PAD)
 mb.prism(circle(0.02, 16), PLATE_T / 2, PLATE_T / 2 + 0.001, face, DISC)
-# Behind it, the swivel and the hinge (a cylinder along X).
-mb.prism(circle(SWIVEL_R, 12), -PLATE_T / 2 - SWIVEL_T, -PLATE_T / 2, face, ALUMINIUM)
-hinge = face @ Matrix.Translation((0, 0, -HINGE_BACK)) @ Matrix.Rotation(math.radians(90), 4, "Y")
-mb.prism(circle(HINGE_R, 10), -HINGE_L / 2, HINGE_L / 2, hinge, ALUMINIUM)
-for z0 in (-HINGE_L / 2 - KNUCKLE_L, HINGE_L / 2):
-    mb.prism(circle(HINGE_R + 0.0015, 10), z0, z0 + KNUCKLE_L, hinge, DISC)
 magnet_shift = mb.centre_depth()
 magnet = mb.finish("KawaTabletStand_Magnet")
 rest = -(PLATE_T / 2 + 0.001)
