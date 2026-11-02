@@ -5,27 +5,31 @@ Run from the repository root:
 
     blender -b --factory-startup --python "Assets/Models/TabletStand/Source~/build_metal.py" -- Assets/Models/TabletStand
 
-Writes KawaTabletStand_Floor.fbx, KawaTabletStand_Magnet.fbx and
-KawaTabletStand_Palette.png to the given folder, and prints each one's
-triangle count, where the tablet rests on it and where its return button
-goes. This folder ends in "~", so Unity does not import the script.
+Writes KawaTabletStand_Floor.fbx, KawaTabletStand_Magnet.fbx and their
+palettes (KawaTabletStand_Palette.png, _Palette_Black.png and
+_Palette_Silver.png) to the given folder, and prints each one's triangle
+count, where the tablet rests on it and where its return button goes. This
+folder ends in "~", so Unity does not import the script.
 
 Modelled like the tablet and the bentwood stand: X is width, Z is height,
 the front faces -Y, and each is turned half a turn about Z before export,
 so in Unity the front faces -Z and depth is +Z. Each is one mesh with one
 material; its colours come from cells of a small palette, every face
-sampling the middle of its cell, as the tablet does.
+sampling the middle of its cell, as the tablet does. Each colour's material
+takes a palette with the same cells in other colours: the plain one is the
+white floor stand and the space grey magnet stand, the others are black
+and silver.
 
-- The floor stand is a kiosk: a 40 x 30 cm base plate, a rounded cover
-  where the column stands on it, a column with a groove down its front, a
-  hinge, and a box with a rim round the tablet, leaning back 30 degrees with
-  the screen at about 1.15 m.
-- The magnet stand is aluminium: one sheet bent into a foot that runs
-  forwards, widening, and a neck leaning back 15 degrees, narrowing, which
-  ends in a hinge with a knuckle at each end, on a round swivel behind a
-  24 x 14 cm plate, with two pads and a round magnet on its face, which the
-  tablet sticks to. The plate is smaller than the tablet, so the tablet
-  hides it. It is centred on its footprint.
+- The floor stand (Signage, in the inspector) is a kiosk: a 40 x 30 cm base
+  plate, a rounded cover where the column stands on it, a column with a
+  groove down its front, a hinge, and a box with a rim round the tablet,
+  leaning back 30 degrees with the screen at about 1.15 m.
+- The magnet stand (Aluminium, in the inspector) is one sheet bent into a
+  foot that runs forwards, widening, and a neck leaning back 15 degrees,
+  narrowing, which ends in a hinge with a knuckle at each end, on a round
+  swivel behind a 24 x 14 cm plate, with two pads and a round magnet on its
+  face, which the tablet sticks to. The plate is smaller than the tablet,
+  so the tablet hides it. It is centred on its footprint.
 
 Faces meeting at more than 40 degrees are split, the rest shade smooth, so
 the bends and the rounded corners look round and the edges stay sharp.
@@ -49,21 +53,21 @@ TABLET_WIDTH = 0.300
 TABLET_HEIGHT = 0.1895
 TABLET_THICKNESS = 0.0075
 
-PALETTE = [
-    (0.90, 0.90, 0.89),  # white powder coat
-    (0.78, 0.78, 0.78),  # light grey parts
-    (0.12, 0.12, 0.13),  # dark rubber
-    (0.33, 0.34, 0.36),  # space grey aluminium
-    (0.60, 0.60, 0.61),  # pads
-    (0.47, 0.47, 0.48),  # the magnet
-    (0.5, 0.5, 0.5),
-    (0.5, 0.5, 0.5),
-]
-WHITE, LIGHT, DARK, GREY, PAD, DISC = range(6)
+# The cells: the floor stand's body and its parts (the groove, the hinge),
+# the magnet stand's aluminium, its pads and its magnet (and the hinge's
+# knuckles); two and the last two are spare.
+FLOOR_BODY, FLOOR_PARTS, SPARE, ALUMINIUM, PAD, DISC = range(6)
+CELLS = 8
+GREY_50 = (0.5, 0.5, 0.5)
+PALETTES = {
+    "": [(0.90, 0.90, 0.89), (0.78, 0.78, 0.78), GREY_50, (0.33, 0.34, 0.36), (0.60, 0.60, 0.61), (0.47, 0.47, 0.48), GREY_50, GREY_50],
+    "_Black": [(0.11, 0.11, 0.12), (0.22, 0.22, 0.23), GREY_50, (0.10, 0.10, 0.11), (0.25, 0.25, 0.26), (0.18, 0.18, 0.19), GREY_50, GREY_50],
+    "_Silver": [(0.70, 0.71, 0.73), (0.55, 0.56, 0.58), GREY_50, (0.74, 0.75, 0.77), (0.46, 0.46, 0.47), (0.62, 0.62, 0.63), GREY_50, GREY_50],
+}
 
 
 def cell_uv(cell):
-    return ((cell + 0.5) / len(PALETTE), 0.5)
+    return ((cell + 0.5) / CELLS, 0.5)
 
 
 class Builder:
@@ -187,20 +191,20 @@ def v2(y, z):
 
 # Floor stand.
 fb = Builder()
-fb.prism(rounded_rect(0.40, 0.30, 0.02, 4), 0.0, 0.010, Matrix.Identity(4), WHITE)
+fb.prism(rounded_rect(0.40, 0.30, 0.02, 4), 0.0, 0.010, Matrix.Identity(4), FLOOR_BODY)
 COLUMN_Y = 0.04
 # The rounded cover where the column stands on the base.
-fb.prism(rounded_rect(0.11, 0.075, 0.03, 4), 0.010, 0.030, Matrix.Translation((0, COLUMN_Y, 0)), WHITE)
+fb.prism(rounded_rect(0.11, 0.075, 0.03, 4), 0.010, 0.030, Matrix.Translation((0, COLUMN_Y, 0)), FLOOR_BODY)
 # The column: two profiles with a groove between them down its front.
 POLE_TOP = 1.05
 COLUMN_W, COLUMN_D, GROOVE_W, GROOVE_D = 0.056, 0.042, 0.008, 0.006
 pole_h = POLE_TOP - 0.03
 side_w = (COLUMN_W - GROOVE_W) / 2
 for x in (-(GROOVE_W + side_w) / 2, (GROOVE_W + side_w) / 2):
-    fb.box((side_w, COLUMN_D, pole_h), Matrix.Translation((x, COLUMN_Y, 0.03 + pole_h / 2)), WHITE)
-fb.box((GROOVE_W, COLUMN_D - GROOVE_D, pole_h), Matrix.Translation((0, COLUMN_Y + GROOVE_D / 2, 0.03 + pole_h / 2)), LIGHT)
+    fb.box((side_w, COLUMN_D, pole_h), Matrix.Translation((x, COLUMN_Y, 0.03 + pole_h / 2)), FLOOR_BODY)
+fb.box((GROOVE_W, COLUMN_D - GROOVE_D, pole_h), Matrix.Translation((0, COLUMN_Y + GROOVE_D / 2, 0.03 + pole_h / 2)), FLOOR_PARTS)
 # The hinge at the column's top, behind the box.
-fb.box((0.05, 0.04, 0.05), Matrix.Translation((0, COLUMN_Y + 0.01, POLE_TOP + 0.015)), LIGHT)
+fb.box((0.05, 0.04, 0.05), Matrix.Translation((0, COLUMN_Y + 0.01, POLE_TOP + 0.015)), FLOOR_PARTS)
 FLOOR_TILT = 30.0
 holder = lean(FLOOR_TILT, Vector((0, 0.02, POLE_TOP + 0.09)))
 holder_face = plate_frame(holder)
@@ -209,8 +213,8 @@ OUTER_W, OUTER_H = TABLET_WIDTH + 2 * RIM, TABLET_HEIGHT + 2 * RIM
 outline = rounded_rect(OUTER_W, OUTER_H, 0.016, 4)
 # The box behind the tablet's back (local y 0 .. 0.026), and the rim round the
 # tablet, standing 4.5 mm proud of its face (local y -0.012 .. 0), 1 mm clear of it.
-fb.prism(outline, -0.026, 0.0, holder_face, WHITE)
-fb.ring(outline, rounded_rect(TABLET_WIDTH + 0.002, TABLET_HEIGHT + 0.002, 0.004, 4), 0.0, 0.012, holder_face, WHITE)
+fb.prism(outline, -0.026, 0.0, holder_face, FLOOR_BODY)
+fb.ring(outline, rounded_rect(TABLET_WIDTH + 0.002, TABLET_HEIGHT + 0.002, 0.004, 4), 0.0, 0.012, holder_face, FLOOR_BODY)
 floor = fb.finish("KawaTabletStand_Floor")
 print(f"REPORT floor dock_unity_position={report(holder, (0, -TABLET_THICKNESS / 2, 0))} dock_unity_euler=({FLOOR_TILT:.1f}, 0, 0)")
 print(f"REPORT floor button_unity_position={report(holder, (0, -0.0006, 0))} button_unity_euler=({FLOOR_TILT:.1f}, 0, 0)")
@@ -241,20 +245,20 @@ neck_dir = v2(math.cos(math.radians(NECK_ANGLE)), math.sin(math.radians(NECK_ANG
 neck_in = stations[-1][1]
 neck_top = stations[-1][0] + ((PLATE_Z - stations[-1][0].y) / neck_dir.y) * neck_dir
 stations.append((neck_top, neck_in, NECK_TOP_W / 2))
-mb.sheet(stations, SHEET_T, GREY)
+mb.sheet(stations, SHEET_T, ALUMINIUM)
 # The neck's middle ends on the hinge's axis; the plate is in front of it.
 plate_middle = neck_top + (SHEET_T / 2 - HINGE_BACK) * neck_in
 plate = lean(MAGNET_TILT, Vector((0, plate_middle.x, plate_middle.y)))
 face = plate_frame(plate)
 # The plate (local y -0.004 .. 0.004), and on its face the pads and the magnet (1 mm).
-mb.prism(rounded_rect(0.24, 0.14, 0.015, 4), -PLATE_T / 2, PLATE_T / 2, face, GREY)
+mb.prism(rounded_rect(0.24, 0.14, 0.015, 4), -PLATE_T / 2, PLATE_T / 2, face, ALUMINIUM)
 for x in (-0.095, 0.095):
     mb.prism(rounded_rect(0.035, 0.12, 0.012, 3), PLATE_T / 2, PLATE_T / 2 + 0.001, face @ Matrix.Translation((x, 0, 0)), PAD)
 mb.prism(circle(0.02, 16), PLATE_T / 2, PLATE_T / 2 + 0.001, face, DISC)
 # Behind it, the swivel and the hinge (a cylinder along X).
-mb.prism(circle(SWIVEL_R, 12), -PLATE_T / 2 - SWIVEL_T, -PLATE_T / 2, face, GREY)
+mb.prism(circle(SWIVEL_R, 12), -PLATE_T / 2 - SWIVEL_T, -PLATE_T / 2, face, ALUMINIUM)
 hinge = face @ Matrix.Translation((0, 0, -HINGE_BACK)) @ Matrix.Rotation(math.radians(90), 4, "Y")
-mb.prism(circle(HINGE_R, 10), -HINGE_L / 2, HINGE_L / 2, hinge, GREY)
+mb.prism(circle(HINGE_R, 10), -HINGE_L / 2, HINGE_L / 2, hinge, ALUMINIUM)
 for z0 in (-HINGE_L / 2 - KNUCKLE_L, HINGE_L / 2):
     mb.prism(circle(HINGE_R + 0.0015, 10), z0, z0 + KNUCKLE_L, hinge, DISC)
 magnet_shift = mb.centre_depth()
@@ -263,16 +267,18 @@ rest = -(PLATE_T / 2 + 0.001)
 print(f"REPORT magnet dock_unity_position={report(plate, (0, rest - TABLET_THICKNESS / 2, 0), magnet_shift)} dock_unity_euler=({MAGNET_TILT:.1f}, 0, 0)")
 print(f"REPORT magnet button_unity_position={report(plate, (0, rest - 0.0006, 0), magnet_shift)} button_unity_euler=({MAGNET_TILT:.1f}, 0, 0)")
 
-# The palette.
-img = bpy.data.images.new("KawaTabletStand_Palette", width=8 * len(PALETTE), height=8)
-pixels = []
-for y in range(8):
-    for c in PALETTE:
-        pixels += [*c, 1.0] * 8
-img.pixels = pixels
-img.filepath_raw = os.path.join(OUT, "KawaTabletStand_Palette.png")
-img.file_format = "PNG"
-img.save()
+# The palettes, 8 x 8 pixels a cell.
+for suffix, colours in PALETTES.items():
+    name = "KawaTabletStand_Palette" + suffix
+    img = bpy.data.images.new(name, width=8 * CELLS, height=8)
+    pixels = []
+    for y in range(8):
+        for c in colours:
+            pixels += [*c, 1.0] * 8
+    img.pixels = pixels
+    img.filepath_raw = os.path.join(OUT, name + ".png")
+    img.file_format = "PNG"
+    img.save()
 
 for obj, name in ((floor, "KawaTabletStand_Floor"), (magnet, "KawaTabletStand_Magnet")):
     obj.matrix_world = Matrix.Rotation(math.pi, 4, "Z") @ obj.matrix_world

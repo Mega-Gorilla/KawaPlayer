@@ -84,6 +84,8 @@ for name, (photo_name, turn, mean, contrast) in COLOURS.items():
 FABRICS = {
     "Red": (168, 30, 34),
     "Grey": (122, 120, 118),
+    "Navy": (38, 52, 90),
+    "Beige": (196, 178, 150),
 }
 FABRIC_SIZE = 256
 

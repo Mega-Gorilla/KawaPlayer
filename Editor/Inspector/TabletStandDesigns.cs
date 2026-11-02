@@ -29,9 +29,9 @@ namespace Yamadev.YamaStream.Editor
     public static readonly Design[] All =
     {
       new Design { Child = "Bentwood", Key = "bentwood", Colors = new[] { "Walnut", "WhiteOak", "SmokedWalnut", "Black" } },
-      new Design { Child = "Magnet", Key = "magnet", Colors = new[] { "SpaceGrey" } },
-      new Design { Child = "Cushion", Key = "cushion", Colors = new[] { "Red", "Grey" } },
-      new Design { Child = "Floor", Key = "floor", Colors = new[] { "White" } },
+      new Design { Child = "Magnet", Key = "magnet", Colors = new[] { "SpaceGrey", "Silver", "Black" } },
+      new Design { Child = "Cushion", Key = "cushion", Colors = new[] { "Red", "Grey", "Navy", "Beige" } },
+      new Design { Child = "Floor", Key = "floor", Colors = new[] { "White", "Black", "Silver" } },
     };
 
     public static Material MaterialOf(Design design, string color)
