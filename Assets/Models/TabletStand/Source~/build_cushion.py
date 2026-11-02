@@ -136,16 +136,25 @@ stations = ([(-WIDTH / 2 + dx, d, 0.0) for dx, d in END_ROUND]
 rings = []
 for x, d, notch in stations:
     rings.append([bm.verts.new((x, p.x, p.y)) for p in drawn_in(pressed(notch), d)])
-perimeter = [0.0]
-for a, b in zip(section, section[1:] + section[:1]):
-    perimeter.append(perimeter[-1] + (b - a).length)
+# UVs: round the section (U) and across the width (V), each the same for
+# every point of a ring, so nothing shears from ring to ring. V counts the
+# rounded ends' drawing in as well as the width, so the fabric keeps its size
+# round the ends' edges; down the notch's short walls it stretches a little.
 n = len(section)
-for r0, r1, (x0, _, _), (x1, _, _) in zip(rings, rings[1:], stations, stations[1:]):
+around = [0.0]
+for a, b in zip(section, section[1:] + section[:1]):
+    around.append(around[-1] + (b - a).length)
+across = [0.0]
+for (x0, d0, _), (x1, d1, _) in zip(stations, stations[1:]):
+    across.append(across[-1] + math.hypot(x1 - x0, d1 - d0))
+for k, (r0, r1) in enumerate(zip(rings, rings[1:])):
     for i in range(n):
         j = (i + 1) % n
         face = bm.faces.new((r0[i], r0[j], r1[j], r1[i]))
-        for loop, (s, x) in zip(face.loops, ((perimeter[i], x0), (perimeter[i + 1], x0), (perimeter[i + 1], x1), (perimeter[i], x1))):
-            loop[uv].uv = (s / FABRIC, (x + WIDTH / 2) / FABRIC)
+        corners = ((around[i], across[k]), (around[i + 1], across[k]),
+                   (around[i + 1], across[k + 1]), (around[i], across[k + 1]))
+        for loop, (u_, v_) in zip(face.loops, corners):
+            loop[uv].uv = (u_ / FABRIC, v_ / FABRIC)
 caps = [bm.faces.new(rings[0]), bm.faces.new(rings[-1])]
 for face in caps:
     for loop in face.loops:

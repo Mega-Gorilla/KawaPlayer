@@ -61,12 +61,15 @@ GAP = 0.0005                 # between the tablet and the stand
 BUTTON_DOWN = 0.031          # the return button's middle, this far down the panel from its top edge
 BUTTON_OUT = 0.001           # and this far in front of it (the button is 35 mm across)
 
-# Atlas: the veneer above V 0.125, the plywood stripes below it. The veneer
-# part is a patch of VENEER_U x VENEER_V metres; the sheet is shorter than
-# VENEER_U unrolled, so the grain does not repeat on it.
+# Atlas (512 x 256, make_textures.py): the veneer above V 0.125, the plywood
+# stripes below it. The veneer part, 512 x 224 pixels, is a patch of VENEER_U
+# x VENEER_V metres, so its pixels are square on the sheet (about 1,830 a
+# metre); the sheet's faces, the back one too, are shorter than VENEER_U
+# unrolled and narrower than VENEER_V, so the grain does not repeat on them. The cut edges take the
+# stripes' rows across the thickness and the same pixels a metre along.
 VENEER_V0 = 0.125
-VENEER_U = 0.30
-VENEER_V = 0.2275
+VENEER_U = 0.28
+VENEER_V = 0.1225
 STRIPES = (0.012, 0.113)
 
 
@@ -171,21 +174,28 @@ faces.append((bm.faces.new((rows[-1][2][TL], rows[-1][2][TR], rows[-1][2][BR], r
 bm.normal_update()
 bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
 
-# UVs, before the edges are split.
+# UVs, before the edges are split. The faces take the sheet unrolled, each
+# by its own length (the back face is longer round the rear bend and shorter
+# round the upper one); the cut edges along the sides take the length along
+# the side, round the rounded corners too.
+side_length, back_length = [0.0], [0.0]
+for (s0, hw0, v0), (s1, hw1, v1) in zip(rows, rows[1:]):
+    side_length.append(side_length[-1] + math.hypot(s1 - s0, hw1 - hw0))
+    back_length.append(back_length[-1] + math.hypot(v1[BL].co.y - v0[BL].co.y, v1[BL].co.z - v0[BL].co.z))
 station_of = {}
-for s, hw, vs in rows:
+for k, (s, hw, vs) in enumerate(rows):
     for i, v in enumerate(vs):
-        station_of[v] = (s, i)
+        station_of[v] = (k, i)
 for face, kind in faces:
     for loop in face.loops:
-        s, i = station_of[loop.vert]
+        k, i = station_of[loop.vert]
         x = loop.vert.co.x
         if kind in ("top", "bottom"):
-            u_ = s / VENEER_U
+            u_ = (rows[k][0] if kind == "top" else back_length[k]) / VENEER_U
             v_ = VENEER_V0 + (1 - VENEER_V0) * (x + VENEER_V / 2) / VENEER_V
         else:
             depth = 0.0 if i in (TL, TR) else 1.0
-            u_ = s / VENEER_U if kind == "side" else (x + WIDTH / 2) / WIDTH * 0.5
+            u_ = side_length[k] / VENEER_U if kind == "side" else (x + WIDTH / 2) / VENEER_U
             v_ = STRIPES[0] + depth * (STRIPES[1] - STRIPES[0])
         loop[uv].uv = (u_, v_)
 

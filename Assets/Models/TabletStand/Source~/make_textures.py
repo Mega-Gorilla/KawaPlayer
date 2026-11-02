@@ -1,14 +1,17 @@
-"""Draws the bentwood tablet stand's atlases (issue #349), one 512 JPG per colour.
+"""Draws the bentwood tablet stand's atlases (issue #349), one 512 x 256 JPG
+per colour, and the cushion's fabrics, one 256 JPG per colour.
 
 Run with Python 3 and Pillow, from the repository root:
 
     python -P "Assets/Models/TabletStand/Source~/make_textures.py" <folder with the veneer photos> Assets/Models/TabletStand
 
 The veneer photos are free-to-use 1K diffuse JPGs, named as below. Each
-atlas is the veneer above V 0.125 (rows 0 to 447, the grain running along
-U, which is the length of the bent sheet) and the plywood's cut edge below
-it (rows 448 to 511: thin face veneers of the stand's colour around birch
-plies with glue lines), as build_bentwood.py maps them.
+atlas is the veneer above V 0.125 (rows 0 to 223, the grain running along
+U, which is the length of the bent sheet: 28 x 12.25 cm of veneer, about
+1,830 pixels a metre both ways, enough for the stand's faces unrolled)
+and the plywood's cut edge below it (rows 224 to 255: thin face veneers of
+the stand's colour around birch plies with glue lines), as build_bentwood.py
+maps them.
 
 The photos are raw wood; each colour moves the photo's mean to the colour of
 a finished piece and scales its contrast, keeping the grain.
@@ -27,8 +30,9 @@ COLOURS = {
     "SmokedWalnut": ("smoked_walnut_veneer_diff_1k.jpg", False, (78, 52, 38), 0.9),
     "Black": ("flamed_black_veneer_diff_1k.jpg", False, (38, 35, 34), 0.8),
 }
-SIZE = 512
-VENEER_ROWS = 448
+SIZE = 512                   # the atlas's width
+HEIGHT = 256
+VENEER_ROWS = 224
 BIRCH = (214, 184, 140)
 BIRCH_DARK = (196, 162, 118)
 GLUE = (122, 96, 66)
@@ -48,10 +52,10 @@ def finish(photo, mean, contrast):
 def edge(face):
     """The cut edge: a face veneer of the stand's colour at the top and bottom,
     plies of birch between them, a darker glue line between plies."""
-    strip = Image.new("RGB", (SIZE, SIZE - VENEER_ROWS), BIRCH)
+    strip = Image.new("RGB", (SIZE, HEIGHT - VENEER_ROWS), BIRCH)
     px = strip.load()
     h = strip.height
-    face_rows = 4
+    face_rows = 2
     ply = (h - 2 * face_rows) / PLIES
     for y in range(h):
         if y < face_rows or y >= h - face_rows:
@@ -68,9 +72,10 @@ for name, (photo_name, turn, mean, contrast) in COLOURS.items():
     photo = Image.open(os.path.join(SRC, photo_name)).convert("RGB")
     if turn:
         photo = photo.transpose(Image.Transpose.ROTATE_90)
-    # The veneer part keeps the photo's aspect: 1024 x 896 of it, made 512 x 448.
-    veneer = finish(photo.crop((0, 0, 1024, 896)), mean, contrast).resize((SIZE, VENEER_ROWS), Image.LANCZOS)
-    atlas = Image.new("RGB", (SIZE, SIZE))
+    # The veneer part keeps the photo's aspect and scale: the middle 1024 x 448
+    # of it, made 512 x 224.
+    veneer = finish(photo.crop((0, 224, 1024, 672)), mean, contrast).resize((SIZE, VENEER_ROWS), Image.LANCZOS)
+    atlas = Image.new("RGB", (SIZE, HEIGHT))
     atlas.paste(veneer, (0, 0))
     atlas.paste(edge(mean), (0, VENEER_ROWS))
     path = os.path.join(OUT, f"KawaTabletStand_Bentwood_{name}.jpg")
