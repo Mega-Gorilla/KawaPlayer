@@ -153,6 +153,10 @@ MARKS = {
     "unity/tablet-player-field": dict(src="unity/tablet-inspector", scale=0.72, pad=dict(right=270), marks=[
         dict(box=(274, 430, 664, 456), cap="操作する KawaPlayer", at=(826, 443)),
     ]),
+    "unity/tablet-stand": dict(src="unity/tablet-inspector", crop=(0, 600, 690, 900), scale=0.72, pad=dict(right=300), marks=[
+        dict(box=(24, 744, 302, 770), n=1, cap="スタンドを付ける", at=(845, 757)),
+        dict(box=(44, 774, 684, 830), n=2, cap="デザインと色を選ぶ", at=(845, 802)),
+    ]),
     "unity/build": dict(scale=0.72, pad=dict(left=16), marks=[
         dict(box=(9, 257, 404, 288), n=1),
         dict(box=(10, 304, 631, 402), n=2),
@@ -398,6 +402,8 @@ MARKS = {
         dict(box=(610, 710, 670, 770), n=2, cap="ホームへ戻る", at=(880, 740)),
     ]),
     "tablet/rotate": dict(scale=0.72, marks=[]),
+    "tablet/stands": dict(scale=0.72, marks=[]),
+    "tablet/stand-colors": dict(scale=0.72, marks=[]),
     "tablet/image": dict(scale=0.72, marks=[
         dict(box=(571, 74, 1176, 126), cap="画像の URL を入れる", at=(872, 184)),
     ]),
