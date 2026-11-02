@@ -15,12 +15,19 @@ namespace Yamadev.YamaStream.Tablet
   // body's space that stays where it is (the holding hand). A point x of the
   // tablet as it was made sits at _origin + x * _scale.
   //
+  // The KawaPlayer app also turns over with the tablet (TabletScreen works
+  // out how far, around the middle of its screen). This is the one script
+  // that writes the app's place, putting the turn first and the size after
+  // it, so neither undoes the other whichever comes first.
+  //
   // The size is a property of the body, as its place is: it is shared when
   // the place is, when the body has a VRCObjectSync (Global Sync in the
-  // inspector, on in the prefab), and each player's own otherwise. It sits on its
-  // own object, under the body, so that it syncs by itself: the body's own
-  // behaviour shares its object with the VRCObjectSync and cannot sync by
-  // hand, and the screen (TabletScreen) changes owner with each press.
+  // inspector, on in the prefab), and each player's own otherwise. It sits
+  // on its own object, under the body, so that it syncs by itself: the
+  // body's own behaviour shares its object with the VRCObjectSync and cannot
+  // sync by hand, and the screen (TabletScreen) changes owner with each
+  // press. The app's turn is not shared: each player works it out from the
+  // tablet as they see it.
   [UdonBehaviourSyncMode(BehaviourSyncMode.Manual)]
   public class TabletSize : YamaPlayerBehaviour
   {
@@ -31,9 +38,13 @@ namespace Yamadev.YamaStream.Tablet
     // sent when it stops.
     private const float SendInterval = 0.2f;
 
-    // The body's children that grow with it: the model, the screen's canvas
-    // and the KawaPlayer app.
+    // The body's children that grow with it and do not turn: the model and
+    // the screen's canvas.
     [SerializeField] private Transform[] _parts = new Transform[0];
+    // The KawaPlayer app, another child of the body, which grows and turns,
+    // and its screen, the middle of which it turns around.
+    [SerializeField] private Transform _app;
+    [SerializeField] private Transform _appScreen;
     // The collider on the body the tablet is grabbed by.
     [SerializeField] private BoxCollider _grabCollider;
 
@@ -42,8 +53,13 @@ namespace Yamadev.YamaStream.Tablet
 
     private float _scale = MinScale;
     private Vector3 _origin = Vector3.zero;
+    private Quaternion _appTurn = Quaternion.identity;
     private Vector3[] _partPositions;
     private Vector3[] _partScales;
+    private Vector3 _appPosition;
+    private Quaternion _appRotation;
+    private Vector3 _appScale;
+    private Vector3 _appCenter;
     private Vector3 _colliderCenter;
     private Vector3 _colliderSize;
     private bool _shared;
@@ -52,8 +68,9 @@ namespace Yamadev.YamaStream.Tablet
 
     private void Start() => Prepare();
 
-    // Remembers the parts as they were made. A size may come in before
-    // Start, so whatever comes first does this.
+    // Remembers the parts as they were made. A size or a turn may come in
+    // before Start, so whatever comes first does this; nothing else writes
+    // these parts, so they are still as they were made then.
     private void Prepare()
     {
       if (_ready) return;
@@ -65,6 +82,15 @@ namespace Yamadev.YamaStream.Tablet
         if (!Utilities.IsValid(_parts[i])) continue;
         _partPositions[i] = _parts[i].localPosition;
         _partScales[i] = _parts[i].localScale;
+      }
+      if (Utilities.IsValid(_app))
+      {
+        _appPosition = _app.localPosition;
+        _appRotation = _app.localRotation;
+        _appScale = _app.localScale;
+        _appCenter = Utilities.IsValid(_appScreen) && Utilities.IsValid(_app.parent)
+          ? _app.parent.InverseTransformPoint(_appScreen.position)
+          : _appPosition;
       }
       if (Utilities.IsValid(_grabCollider))
       {
@@ -100,11 +126,13 @@ namespace Yamadev.YamaStream.Tablet
     }
 
     // Sets the size, keeping a point given in the body's space where it is.
-    // It is sent at most every SendInterval; FinishResize sends the last.
+    // It is sent at most every SendInterval; FinishResize sends the last. At
+    // a limit the size stays, and nothing is placed or sent again.
     public void ResizeAbout(float scale, Vector3 fixedPoint)
     {
       Prepare();
       scale = Mathf.Clamp(scale, MinScale, MaxScale);
+      if (scale == _scale) return;
       Vector3 madePoint = (fixedPoint - _origin) / _scale;
       _origin = fixedPoint - madePoint * scale;
       _scale = scale;
@@ -128,6 +156,18 @@ namespace Yamadev.YamaStream.Tablet
       _origin = Vector3.zero;
       Apply();
       Send(true);
+    }
+
+    // Turns the KawaPlayer app by degrees around an axis given in the
+    // world's space (TabletScreen's forward), around the middle of its
+    // screen as it was made.
+    public void TurnApp(float degrees, Vector3 axis)
+    {
+      Prepare();
+      Transform body = transform.parent;
+      if (Utilities.IsValid(body)) axis = body.InverseTransformDirection(axis);
+      _appTurn = Quaternion.AngleAxis(degrees, axis);
+      Apply();
     }
 
     private void Send(bool now)
@@ -157,6 +197,13 @@ namespace Yamadev.YamaStream.Tablet
         if (!Utilities.IsValid(part)) continue;
         part.localPosition = _origin + _partPositions[i] * _scale;
         part.localScale = _partScales[i] * _scale;
+      }
+      if (Utilities.IsValid(_app))
+      {
+        Vector3 turned = _appCenter + _appTurn * (_appPosition - _appCenter);
+        _app.localPosition = _origin + turned * _scale;
+        _app.localRotation = _appTurn * _appRotation;
+        _app.localScale = _appScale * _scale;
       }
       if (Utilities.IsValid(_grabCollider))
       {
