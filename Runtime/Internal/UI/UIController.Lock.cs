@@ -11,14 +11,19 @@ namespace Yamadev.YamaStream.UI
     private const int DEFAULT_LAYER = 0; // こっちはビームが出る
     private const int UI_LAYER = 5; // こっちはビームが出ない、ロック時はこっち
 
+    // The lock comes off with this many presses on the screen, all within
+    // _unlockClickWindow seconds of the first (issue #341).
+    private const int UnlockClicks = 3;
+
     [Header("UI Lock - Components")]
     [SerializeField] private RectTransform _lockDetectionRect;
+    // Shows the presses made so far, a filled dot for each ("●●○").
     [SerializeField] private Text _unlockProgressText;
-    [SerializeField] private float _unlockHoldDuration = 0.6f;
+    [SerializeField] private float _unlockClickWindow = 1.5f;
 
     private bool _locked = false;
-    private bool _lastInput = false;
-    private float _lastInputTime = 0f;
+    private int _unlockClicks = 0;
+    private float _unlockFirstClickTime = 0f;
     private bool _pointerInside = false;
     private bool _rightHand = true;
     // Whether each hand is holding a press that began on the screen while
@@ -39,29 +44,39 @@ namespace Yamadev.YamaStream.UI
         _pointerInside = pointerInside;
       }
 
-      if (!pointerInside)
+      // Pointing away, or the time for the presses running out, counts
+      // them again.
+      if (_unlockClicks > 0 && (!pointerInside || Time.time - _unlockFirstClickTime > _unlockClickWindow)) ResetUnlockClicks();
+    }
+
+    // A press while locked and pointing at the screen: the first starts the
+    // time, and the third within it takes the lock off.
+    private void CountUnlockClick()
+    {
+      if (!IsPointingAtScreen()) return;
+      if (_unlockClicks == 0 || Time.time - _unlockFirstClickTime > _unlockClickWindow)
       {
-        _unlockProgressText.text = "";
+        _unlockClicks = 0;
+        _unlockFirstClickTime = Time.time;
+      }
+      _unlockClicks++;
+      if (_unlockClicks < UnlockClicks)
+      {
+        string dots = "";
+        for (int i = 0; i < UnlockClicks; i++) dots += i < _unlockClicks ? "●" : "○";
+        _unlockProgressText.text = dots;
         return;
       }
+      ResetUnlockClicks();
+      UnlockUI();
+      _pointerInside = false;
+      _systemUIAnimator.SetTrigger("HideLockMessage");
+    }
 
-      if (_lastInputTime != 0f)
-      {
-        _unlockProgressText.text = $"{Mathf.Clamp01((Time.time - _lastInputTime) / _unlockHoldDuration) * 100f:0}%";
-
-        if (Time.time - _lastInputTime >= _unlockHoldDuration)
-        {
-          UnlockUI();
-          _unlockProgressText.text = "";
-          _pointerInside = false;
-          _systemUIAnimator.SetTrigger("HideLockMessage");
-        }
-      }
-
-      if (!_lastInput)
-      {
-        _unlockProgressText.text = "";
-      }
+    private void ResetUnlockClicks()
+    {
+      _unlockClicks = 0;
+      _unlockProgressText.text = "";
     }
 
     public void LockUI()
@@ -70,6 +85,7 @@ namespace Yamadev.YamaStream.UI
       if (!Utilities.IsValid(_systemUIAnimator) || !Utilities.IsValid(_unlockProgressText)) return;
       _lockDetectionRect.gameObject.layer = UI_LAYER;
       _userUIAnimator.SetTrigger("ToggleUI");
+      ResetUnlockClicks();
       _locked = true;
     }
 
@@ -86,16 +102,19 @@ namespace Yamadev.YamaStream.UI
 
     public override void InputUse(bool value, UdonInputEventArgs args)
     {
-      _lastInput = value;
       _rightHand = args.handType == HandType.RIGHT;
 
       if (value)
       {
-        _lastInputTime = Time.time;
+        if (_locked)
+        {
+          CountUnlockClick();
+          return;
+        }
         // A press on the screen keeps the controls up while it is held (a
         // drag of the seek bar or a slider) and counts their time again when
         // it is let go (#340).
-        if (!_locked && Utilities.IsValid(_userUIAnimator) && IsUserUIState("ToggleUI", "UIOn") && IsPointingAtScreen())
+        if (Utilities.IsValid(_userUIAnimator) && IsUserUIState("ToggleUI", "UIOn") && IsPointingAtScreen())
         {
           if (_rightHand) _screenPressedRight = true;
           else _screenPressedLeft = true;
@@ -104,7 +123,6 @@ namespace Yamadev.YamaStream.UI
       }
       else
       {
-        _lastInputTime = 0f;
         bool wasPressed = _rightHand ? _screenPressedRight : _screenPressedLeft;
         if (_rightHand) _screenPressedRight = false;
         else _screenPressedLeft = false;

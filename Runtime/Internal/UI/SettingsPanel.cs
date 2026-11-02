@@ -20,6 +20,10 @@ namespace Yamadev.YamaStream.UI
     [SerializeField] private Text _videoLabel;
     [SerializeField] private Text _audioLabel;
     [SerializeField] private Text _languageLabel;
+    // The last category, About: KawaPlayer's version, who made it and the
+    // update log, which the UIController writes (issue #341).
+    [SerializeField] private Text _aboutLabel;
+    [SerializeField] private Text _updateLogLabel;
     [SerializeField] private Text _noteText;
     // The category toggles. Lying flat, its layout group stacks them on the
     // left; upright, TabletScreen switches the group off and this places
@@ -48,6 +52,8 @@ namespace Yamadev.YamaStream.UI
       SetText(_videoLabel, "settings.video");
       SetText(_audioLabel, "settings.audio");
       SetText(_languageLabel, "label.languageSelect");
+      SetText(_aboutLabel, "settings.about");
+      SetText(_updateLogLabel, "settings.updateLog");
       SetText(_noteText, "settings.note");
     }
 
