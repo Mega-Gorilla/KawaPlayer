@@ -71,7 +71,7 @@ KawaPlayer には、これからもタブレットやボタンのようなデバ
 | Controller Bar | `Prefabs/ControlBar.prefab` | `UIController` | — | 無し | 無し（合うパスがない） |
 | Playlist Panel | `Prefabs/PlaylistPanel.prefab` | `UIController` | — | 無し | `UI/Canvas/Modules`（空で用意、#315） |
 | Sub Screen | `Prefabs/SubScreen.prefab` | `YamaPlayerScreen` | 持てる（`VRCPickup`） | 置き場所（`VRCObjectSync`、選んだとき） | — |
-| タブレット | `Prefabs/Tablet.prefab` | `UIController` ×2 | 持てる（`TabletPickup`） | `TabletScreen`、`TabletVisitorRecorder` | `Canvas/Display` と、KawaPlayer アプリの `Canvas/User` |
+| タブレット | `Prefabs/Tablet.prefab` | `UIController` ×2 | 持てる（`TabletPickup`）。持ったまま大きさを変えられる（`TabletSize`、#342） | `TabletScreen`、`TabletVisitorRecorder`、`TabletSize` | `Canvas/Display` と、KawaPlayer アプリの `Canvas/User` |
 | 全員リロードボタン | `Modules/GlobalReload/GlobalReloadButton.prefab` | `UIController` | — | 無し（モジュールがネットワークのイベントを送る） | `Canvas/Modules`（空で用意） |
 
 `YamaPlayerSubController`（`Runtime/Components/YamaPlayerSubController.cs`）は、`YamaPlayer` の欄が 1 つあるだけの `MonoBehaviour` で、実行時の処理を持たない。YamaPlayer から引き継いだもので、KawaPlayer はタブレットと全員リロードボタンにも使っている。
@@ -365,6 +365,7 @@ E3 の `SendCustomVideoEvent(名前)` は、リスナー全員に `SendCustomEve
 | `TabletScreen` | `Manual` | 開いているアプリ、画像の URL と一覧、画像を見ているか |
 | `TabletVisitorRecorder` | `Manual` | 訪問者の記録（ワールドに 1 つ） |
 | `TabletPickup` | `NoVariableSync` | 変数は無し。位置は `VRCObjectSync`（持てる・同期を選んだとき） |
+| `TabletSize` | `Manual` | タブレットの大きさと、大きくするときの中心（#342）。`Body` の子の `Body/Size` にある。`Body` に `VRCObjectSync` があるときだけ送り、受け取る |
 | `GlobalReload` | `Manual` | 変数は無し。ネットワークのイベント（`OnGlobalReload`）を全員に送る |
 | `PermissionManagement`・`DefaultUrlController`・`OwnerDefaultUrlStorage` | `Manual` | 権限、自動再生の URL |
 | `PitchShifter`・`SlideShower` | `Manual` | それぞれの設定。オーナーを `Controller` に合わせる（`IsSyncedModule`） |
