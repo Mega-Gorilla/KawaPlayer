@@ -2,6 +2,7 @@ using UdonSharp;
 using UnityEngine;
 using VRC.SDK3.Components;
 using VRC.SDKBase;
+using VRC.Udon.Common;
 
 namespace Yamadev.YamaStream.Tablet
 {
@@ -24,6 +25,12 @@ namespace Yamadev.YamaStream.Tablet
   // proximity is 0.03 m, so a VR hand takes the tablet only where it touches
   // it, and pointing at the screen from away lifts nothing (issues #150,
   // #157).
+  //
+  // Its holder can resize it (issue #342): with the trigger held (the
+  // pickup's Use, which reaches only the holder), the holding hand's stick
+  // up or down, or on desktop the mouse wheel with the left button held.
+  // TabletSize keeps the size. The holding hand stays where it is, and the
+  // player does not walk meanwhile, as the left stick walks.
   [UdonBehaviourSyncMode(BehaviourSyncMode.NoVariableSync)]
   public class TabletPickup : YamaPlayerBehaviour
   {
@@ -33,11 +40,28 @@ namespace Yamadev.YamaStream.Tablet
     // returns it. Falling out of the world is left to the Respawn Height.
     [SerializeField, Min(0f)] private float _idleReturnSeconds = 0f;
 
+    // The tablet's size, on its own object under this one.
+    [SerializeField] private TabletSize _size;
+
+    // A stick pushed all the way doubles the size in this many seconds.
+    private const float DoublingSeconds = 1f;
+    // A stick nearer the middle than this does nothing.
+    private const float StickDeadZone = 0.15f;
+    // Each notch of the mouse wheel (0.1 of its axis) changes the size by
+    // a tenth: log2(1.1) doublings.
+    private const float WheelNotch = 0.1f;
+    private const float WheelNotchDoublings = 0.1375035f;
+
     private VRCPickup _pickup;
     private VRCObjectSync _objectSync;
     private Vector3 _spawnPosition;
     private Quaternion _spawnRotation;
     private float _lastTouchTime;
+    private bool _resizing;
+    private bool _resizeLoopRunning;
+    private Vector3 _resizePoint;
+    private float _lookVertical;
+    private float _moveVertical;
 
     private void Start()
     {
@@ -58,7 +82,76 @@ namespace Yamadev.YamaStream.Tablet
 
     public override void OnPickup() => Touch();
 
-    public override void OnDrop() => Touch();
+    public override void OnDrop()
+    {
+      StopResizing();
+      Touch();
+    }
+
+    public override void OnPickupUseDown()
+    {
+      if (!Utilities.IsValid(_size) || !IsLocalPlayerValid || _resizing) return;
+      _resizing = true;
+      _resizePoint = HoldingPoint();
+      LocalPlayer.Immobilize(true);
+      if (_resizeLoopRunning) return;
+      _resizeLoopRunning = true;
+      SendCustomEventDelayedFrames(nameof(_ResizeFrame), 1);
+    }
+
+    public override void OnPickupUseUp() => StopResizing();
+
+    // The right stick (look) and the left one (move), up and down.
+    public override void InputLookVertical(float value, UdonInputEventArgs args) => _lookVertical = value;
+
+    public override void InputMoveVertical(float value, UdonInputEventArgs args) => _moveVertical = value;
+
+    // Runs each frame while resizing, and stops itself once it is over.
+    public void _ResizeFrame()
+    {
+      if (!_resizing)
+      {
+        _resizeLoopRunning = false;
+        return;
+      }
+      float doublings;
+      if (IsInVR)
+      {
+        float stick = _pickup.currentHand == VRC_Pickup.PickupHand.Left ? _moveVertical : _lookVertical;
+        doublings = Mathf.Abs(stick) < StickDeadZone ? 0f : stick * Time.deltaTime / DoublingSeconds;
+      }
+      else
+      {
+        doublings = Input.GetAxis("Mouse ScrollWheel") / WheelNotch * WheelNotchDoublings;
+      }
+      if (doublings != 0f)
+      {
+        _size.ResizeAbout(_size.Scale * Mathf.Pow(2f, doublings), _resizePoint);
+        Touch();
+      }
+      SendCustomEventDelayedFrames(nameof(_ResizeFrame), 1);
+    }
+
+    private void StopResizing()
+    {
+      if (!_resizing) return;
+      _resizing = false;
+      if (IsLocalPlayerValid) LocalPlayer.Immobilize(false);
+      _size.FinishResize();
+    }
+
+    // The point that stays where it is while the tablet grows, in this
+    // object's space: in VR the nearest point of the tablet to the holding
+    // hand, so the edge in the hand stays in it; on desktop, where the tablet
+    // is held before the eyes, its middle.
+    private Vector3 HoldingPoint()
+    {
+      if (!IsInVR) return _size.Center;
+      VRCPlayerApi.TrackingDataType hand = _pickup.currentHand == VRC_Pickup.PickupHand.Left
+        ? VRCPlayerApi.TrackingDataType.LeftHand
+        : VRCPlayerApi.TrackingDataType.RightHand;
+      return _size.NearestPoint(transform.InverseTransformPoint(LocalPlayer.GetTrackingData(hand).position));
+    }
 
     // Called on everyone when the screen changes, so a tablet in use does
     // not wander off however long it has been since anyone held it.
@@ -69,6 +162,7 @@ namespace Yamadev.YamaStream.Tablet
     {
       if (IsHeld) return;
       Touch();
+      if (Utilities.IsValid(_size)) _size.ResetSize();
       if (!IsAwayFromSpawn()) return;
 
       // Without global sync, every player has their own tablet and only

@@ -20,6 +20,10 @@ namespace Yamadev.YamaStream.UI
     [SerializeField] private Text _videoLabel;
     [SerializeField] private Text _audioLabel;
     [SerializeField] private Text _languageLabel;
+    // The last category, About: KawaPlayer's version, who made it and the
+    // update log, which the UIController writes (issue #341).
+    [SerializeField] private Text _aboutLabel;
+    [SerializeField] private Text _updateLogLabel;
     [SerializeField] private Text _noteText;
     // The category toggles. Lying flat, its layout group stacks them on the
     // left; upright, TabletScreen switches the group off and this places
@@ -48,6 +52,8 @@ namespace Yamadev.YamaStream.UI
       SetText(_videoLabel, "settings.video");
       SetText(_audioLabel, "settings.audio");
       SetText(_languageLabel, "label.languageSelect");
+      SetText(_aboutLabel, "settings.about");
+      SetText(_updateLogLabel, "settings.updateLog");
       SetText(_noteText, "settings.note");
     }
 
@@ -115,7 +121,7 @@ namespace Yamadev.YamaStream.UI
       {
         RectTransform rect = icon.GetComponent<RectTransform>();
         if (portrait) Place(rect, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -44f), new Vector2(56f, 56f));
-        else Place(rect, new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(72f, 0f), new Vector2(64f, 64f));
+        else Place(rect, new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(56f, 0f), new Vector2(64f, 64f));
       }
       if (Utilities.IsValid(label))
       {
@@ -128,7 +134,10 @@ namespace Yamadev.YamaStream.UI
         }
         else
         {
-          Place(rect, Vector2.zero, Vector2.one, new Vector2(60f, 0f), new Vector2(-152f, 0f));
+          // From 20 after the icon to 12 short of the button's end: the
+          // longest name (Spanish's "Reproducción", 218 at 36) fits a
+          // category 340 wide (#337).
+          Place(rect, Vector2.zero, Vector2.one, new Vector2(48f, 0f), new Vector2(-120f, 0f));
           if (Utilities.IsValid(text)) text.alignment = TextAnchor.MiddleLeft;
         }
       }

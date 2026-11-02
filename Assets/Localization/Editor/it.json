@@ -228,6 +228,8 @@
   "module.manager.autoplayConflict": "'{0}' e '{1}' sono entrambi attivi. Entrambi avviano la riproduzione all'ingresso, quindi quale venga riprodotto dipende dal momento, e '{0}' potrebbe non essere riprodotto. Disattivane uno.",
   "settings.ui.idleScreenSprite": "Immagine di Attesa",
   "settings.ui.idleScreenSprite.tooltip": "Imposta l'immagine mostrata quando nessun video è in riproduzione. Sull'immagine predefinita compaiono il logo e il nome di KawaPlayer; l'immagine che scegli viene mostrata così com'è.",
+  "settings.ui.controlsHideSeconds": "Nascondi i controlli dopo (secondi)",
+  "settings.ui.controlsHideSeconds.tooltip": "I controlli dello schermo si nascondono dopo questi secondi dall'ultima pressione sullo schermo, che un video sia in riproduzione o no. Con 0 restano visibili. Non si nascondono mentre lo schermo è tenuto premuto, né mentre sono aperti una finestra di dialogo, la pagina delle impostazioni o un campo URL.",
   "label.yamaPlayer": "KawaPlayer",
   "msg.playModeNotAvailable": "KawaPlayer non è disponibile durante la modalità Play.",
   "msg.yamaPlayerRequired": "È richiesto un riferimento a KawaPlayer.",

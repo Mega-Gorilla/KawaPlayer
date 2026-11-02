@@ -39,7 +39,6 @@ namespace Yamadev.YamaStream.UI
     [SerializeField] private Text _shuffleLabel;
     [SerializeField] private Text _shuffleLabel2;
     [SerializeField] private Text _settingsLabel;
-    [SerializeField] private Text _versionLabel;
     [SerializeField] private Text _lockUiLabel;
 
     [Header("Localization - Right Side Labels")]
@@ -287,12 +286,12 @@ namespace Yamadev.YamaStream.UI
       if (Utilities.IsValid(_shuffleLabel)) _shuffleLabel.text = GetTranslation("label.shuffle");
       if (Utilities.IsValid(_shuffleLabel2)) _shuffleLabel2.text = GetTranslation("label.shuffle");
       if (Utilities.IsValid(_settingsLabel)) _settingsLabel.text = GetTranslation("menu.settings");
-      if (Utilities.IsValid(_versionLabel)) _versionLabel.text = GetTranslation("label.version");
       if (Utilities.IsValid(_lockUiLabel)) _lockUiLabel.text = GetTranslation("label.lockUi");
 
       if (Utilities.IsValid(_tabQueueLabel)) _tabQueueLabel.text = GetTranslation("label.playQueue");
       if (Utilities.IsValid(_tabHistoryLabel)) _tabHistoryLabel.text = GetTranslation("label.playHistory");
       if (Utilities.IsValid(_tabPlaylistsLabel)) _tabPlaylistsLabel.text = GetTranslation("tab.playlist");
+      if (Utilities.IsValid(_addPlaylistUrlLabel)) _addPlaylistUrlLabel.text = GetTranslation("label.addPlaylistUrl");
 
       if (Utilities.IsValid(_videoPlayerTitleLabel)) _videoPlayerTitleLabel.text = GetTranslation("label.videoPlayer") + GlobalSuffix;
       if (Utilities.IsValid(_videoPlayerDescLabel)) _videoPlayerDescLabel.text = GetTranslation("desc.videoPlayer");

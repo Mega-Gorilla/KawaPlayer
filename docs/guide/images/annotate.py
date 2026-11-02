@@ -80,32 +80,32 @@ MARKS = {
         dict(box=(355, 192, 641, 224), n=2, badge=(645, 188)),
     ]),
     "unity/inspector": dict(scale=0.72, marks=[
-        dict(box=(285, 360, 581, 385), n=1),
-        dict(box=(24, 428, 832, 548), n=2),
-        dict(box=(24, 563, 832, 945), n=3),
-        dict(box=(24, 961, 832, 1051), n=4),
-        dict(box=(24, 1067, 832, 1207), n=5),
-        dict(box=(24, 1223, 832, 1380), n=6),
+        dict(box=(220, 360, 519, 386), n=1),
+        dict(box=(24, 429, 832, 579), n=2),
+        dict(box=(24, 594, 832, 976), n=3),
+        dict(box=(24, 992, 832, 1082), n=4),
+        dict(box=(24, 1098, 832, 1238), n=5),
+        dict(box=(24, 1254, 832, 1411), n=6),
     ]),
     # The settings page shows each part of the inspector under its heading, with the
     # number it has on the whole inspector.
-    "unity/inspector-language": dict(src="unity/inspector", crop=(196, 338, 676, 400), scale=0.72, marks=[
-        dict(n=1, badge=(260, 372)),
+    "unity/inspector-language": dict(src="unity/inspector", crop=(131, 338, 700, 400), scale=0.72, marks=[
+        dict(n=1, badge=(195, 373)),
     ]),
-    "unity/inspector-appearance": dict(src="unity/inspector", crop=(3, 418, 841, 556), scale=0.72, pad=dict(left=28), marks=[
-        dict(n=2, badge=(-11, 441)),
+    "unity/inspector-appearance": dict(src="unity/inspector", crop=(3, 419, 841, 587), scale=0.72, pad=dict(left=28), marks=[
+        dict(n=2, badge=(-11, 442)),
     ]),
-    "unity/inspector-player": dict(src="unity/inspector", crop=(3, 553, 841, 953), scale=0.72, pad=dict(left=28), marks=[
-        dict(n=3, badge=(-11, 576)),
+    "unity/inspector-player": dict(src="unity/inspector", crop=(3, 584, 841, 984), scale=0.72, pad=dict(left=28), marks=[
+        dict(n=3, badge=(-11, 607)),
     ]),
-    "unity/inspector-playlist": dict(src="unity/inspector", crop=(3, 951, 841, 1059), scale=0.72, pad=dict(left=28), marks=[
-        dict(n=4, badge=(-11, 974)),
+    "unity/inspector-playlist": dict(src="unity/inspector", crop=(3, 982, 841, 1090), scale=0.72, pad=dict(left=28), marks=[
+        dict(n=4, badge=(-11, 1005)),
     ]),
-    "unity/inspector-modules": dict(src="unity/inspector", crop=(3, 1057, 841, 1215), scale=0.72, pad=dict(left=28), marks=[
-        dict(n=5, badge=(-11, 1080)),
+    "unity/inspector-modules": dict(src="unity/inspector", crop=(3, 1088, 841, 1246), scale=0.72, pad=dict(left=28), marks=[
+        dict(n=5, badge=(-11, 1111)),
     ]),
-    "unity/inspector-version": dict(src="unity/inspector", crop=(3, 1213, 841, 1391), scale=0.72, pad=dict(left=28), marks=[
-        dict(n=6, badge=(-11, 1236)),
+    "unity/inspector-version": dict(src="unity/inspector", crop=(3, 1244, 841, 1422), scale=0.72, pad=dict(left=28), marks=[
+        dict(n=6, badge=(-11, 1267)),
     ]),
     # The first look at the editor, with nothing to press yet.
     "unity/playlist-editor": dict(scale=0.8, marks=[]),
@@ -272,23 +272,25 @@ MARKS = {
     ]),
     # The technical page on sync points at ReSync alone.
     "screen/resync": dict(src="screen/controls", crop=(0, 450, 700, 720), scale=0.667, marks=[
-        dict(box=(280, 621, 344, 685), cap="ReSync（押した人の画面だけ）", at=(470, 500)),
+        dict(box=(120, 621, 184, 685), cap="ReSync（押した人の画面だけ）", at=(400, 500)),
     ]),
     "screen/volume": dict(crop=(700, 100, 1280, 720), scale=0.667, marks=[
         dict(box=(930, 158, 1004, 200), n=1),
         dict(box=(944, 208, 992, 456), n=2),
         dict(box=(942, 478, 994, 530), n=3),
     ]),
-    "screen/more": dict(crop=(700, 380, 1280, 720), scale=0.667, marks=[
-        dict(box=(1102, 489, 1154, 541), n=1),
-        dict(box=(1174, 489, 1226, 541), n=2),
+    # The locked screen after two presses: the message and the presses counted.
+    "screen/locked": dict(crop=(0, 560, 1280, 720), scale=0.667, marks=[
+        dict(box=(323, 672, 896, 706), n=1),
+        dict(box=(899, 672, 958, 706), n=2),
     ]),
     "screen/playlist-list": dict(scale=0.667, marks=[
         dict(box=(821, 21, 964, 67), n=1),
         dict(box=(968, 21, 1111, 67), n=2),
         dict(box=(1115, 21, 1259, 67), n=3),
         dict(box=(817, 84, 1260, 148), n=4, cap="押すと曲の一覧へ", at=(600, 116)),
-        dict(box=(1196, 620, 1262, 686), n=5, cap="閉じる", at=(1080, 560)),
+        dict(box=(817, 219, 1260, 283), n=5, cap="VHub のプレイリストを足す", at=(600, 251)),
+        dict(box=(1196, 620, 1262, 686), n=6, cap="閉じる", at=(1080, 560)),
     ]),
     "screen/playlist-tracks": dict(scale=0.667, marks=[
         dict(box=(829, 93, 873, 137), n=1),
@@ -303,7 +305,7 @@ MARKS = {
         dict(box=(1161, 234, 1217, 290), n=4),
     ]),
     "screen/queue": dict(scale=0.667, marks=[
-        dict(box=(821, 21, 964, 67), n=1),
+        dict(box=(968, 21, 1111, 67), n=1),
         dict(box=(822, 84, 1258, 285), n=2),
     ]),
     "screen/queue-actions": dict(scale=0.667, marks=[
@@ -313,40 +315,44 @@ MARKS = {
         dict(box=(1163, 156, 1215, 208), n=4),
     ]),
     "screen/history": dict(scale=0.667, marks=[
-        dict(box=(968, 21, 1111, 67), n=1),
-        dict(box=(822, 84, 1258, 218), n=2),
+        dict(box=(1115, 21, 1259, 67), n=1),
+        dict(box=(822, 84, 1258, 151), n=2),
     ]),
     "screen/settings": dict(scale=0.667, marks=[
         dict(box=(38, 11, 105, 77), n=1),
-        dict(box=(32, 95, 352, 532), n=2, cap="分類を切り替える", at=(192, 600)),
-        dict(box=(398, 648, 950, 712), n=3),
+        dict(box=(32, 92, 250, 530), n=2, cap="分類を切り替える", at=(141, 610)),
+        dict(box=(258, 645, 1194, 712), n=3),
     ]),
     "screen/settings-playback": dict(src="screen/settings", scale=0.667, marks=[
-        dict(box=(409, 85, 1239, 207), n=1),
-        dict(box=(409, 223, 1239, 409), n=2),
-        dict(box=(409, 425, 1239, 643), n=3),
+        dict(box=(270, 86, 1240, 181), n=1),
+        dict(box=(270, 195, 1240, 343), n=2),
+        dict(box=(270, 358, 1240, 568), n=3),
     ]),
     "screen/settings-playback2": dict(scale=0.667, marks=[
-        dict(box=(409, 335, 1239, 645), n=4),
+        dict(box=(270, 439, 1240, 655), n=4),
     ]),
     "screen/settings-video": dict(scale=0.667, marks=[
-        dict(box=(409, 85, 1239, 272), n=1),
-        dict(box=(409, 290, 1239, 410), n=2),
-        dict(box=(409, 424, 1239, 628), n=3),
+        dict(box=(270, 86, 1240, 233), n=1),
+        dict(box=(270, 248, 1240, 343), n=2),
+        dict(box=(270, 357, 1240, 517), n=3),
     ]),
     "screen/settings-audio": dict(scale=0.667, marks=[
-        dict(box=(409, 85, 1239, 286), n=1),
+        dict(box=(270, 86, 1240, 246), n=1),
     ]),
     "screen/settings-language": dict(scale=0.667, marks=[
-        dict(box=(409, 85, 1239, 412), n=1),
+        dict(box=(270, 86, 1240, 345), n=1),
+    ]),
+    "screen/settings-about": dict(scale=0.667, marks=[
+        dict(box=(270, 86, 1240, 266), n=1),
+        dict(box=(270, 280, 1240, 655), n=2),
     ]),
     # The autoplay card alone, cut from captures at 1920 x 1080, so at their own size.
     "screen/autoplay-owner": dict(scale=1.0, marks=[
-        dict(box=(58, 339, 401, 439), n=1),
-        dict(box=(418, 339, 682, 439), n=2),
+        dict(box=(45, 226, 323, 311), n=1),
+        dict(box=(333, 226, 548, 311), n=2),
     ]),
     "screen/autoplay-owner-set": dict(scale=1.0, marks=[
-        dict(box=(56, 272, 940, 314), n=1),
+        dict(box=(42, 170, 712, 213), n=1),
     ]),
     "screen/autoplay-other": dict(scale=1.0, marks=[]),
     "screen/url-button": dict(scale=0.667, marks=[
@@ -381,10 +387,10 @@ MARKS = {
         dict(box=(312, 592, 968, 639), n=2, cap="閉じる", at=(1120, 615)),
     ]),
     "screen/error-access-denied": dict(scale=0.667, marks=[
-        dict(box=(312, 326, 895, 414), cap="ワールドの制作者向けの案内", at=(1110, 370)),
+        dict(box=(312, 342, 895, 448), cap="ワールドの制作者向けの案内", at=(1110, 394)),
     ]),
     "tablet/home": dict(scale=0.72, marks=[
-        dict(box=(138, 442, 1142, 645), n=1, cap="アプリを開く", at=(640, 400)),
+        dict(box=(238, 434, 1042, 650), n=1, cap="アプリを開く", at=(640, 400)),
         dict(box=(618, 720, 662, 766), n=2, cap="ホームボタン", at=(880, 744)),
     ]),
     "tablet/kawaplayer": dict(scale=0.72, marks=[
@@ -399,7 +405,7 @@ MARKS = {
         dict(box=(782, 72, 1176, 128), cap="一覧とログを切り替え", at=(880, 184)),
     ]),
     "tablet/settings": dict(scale=0.72, marks=[
-        dict(box=(100, 143, 392, 515), cap="分類を切り替え", at=(246, 580)),
+        dict(box=(100, 143, 348, 625), cap="分類を切り替え", at=(224, 690)),
     ]),
 }
 

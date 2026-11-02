@@ -228,6 +228,8 @@
   "settings.playback.maxRetry": "最大重试次数",
   "settings.ui.idleScreenSprite": "待机画面精灵图",
   "settings.ui.idleScreenSprite.tooltip": "设置视频未播放时显示的图片。默认图片上会叠加显示 KawaPlayer 的标志和名称；你选择的图片会按原样显示。",
+  "settings.ui.controlsHideSeconds": "自动隐藏控件的秒数",
+  "settings.ui.controlsHideSeconds.tooltip": "最后一次点击屏幕后经过此秒数，无论是否在播放视频，屏幕上的控件都会自动隐藏。设为 0 则不自动隐藏。按住屏幕时，以及打开对话框、设置页面或 URL 输入框时不会隐藏。",
   "label.yamaPlayer": "KawaPlayer",
   "msg.playModeNotAvailable": "KawaPlayer在播放模式下不可用。",
   "msg.yamaPlayerRequired": "需要KawaPlayer引用。",

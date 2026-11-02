@@ -228,6 +228,8 @@
   "module.manager.autoplayConflict": "\"{0}\" and \"{1}\" are both enabled. Both start a video when someone joins, so which one plays depends on timing, and \"{0}\" may not play. Disable one of them.",
   "settings.ui.idleScreenSprite": "Idle Screen Sprite",
   "settings.ui.idleScreenSprite.tooltip": "Set the image displayed when no video is playing. The default image shows the KawaPlayer logo and name over it; an image you choose is shown as it is.",
+  "settings.ui.controlsHideSeconds": "Hide Controls After (Seconds)",
+  "settings.ui.controlsHideSeconds.tooltip": "The screen's controls hide this many seconds after the screen was last pressed, whether a video plays or not. 0 keeps them up. They stay while the screen is held, and while a dialog, the settings page or a URL field is open.",
   "label.yamaPlayer": "KawaPlayer",
   "msg.playModeNotAvailable": "KawaPlayer is not available in play mode.",
   "msg.yamaPlayerRequired": "KawaPlayer reference is required.",

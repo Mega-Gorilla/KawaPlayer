@@ -32,6 +32,12 @@ namespace Yamadev.YamaStream.UI
     [Header("Animator")]
     [SerializeField] private Animator _userUIAnimator;
     [SerializeField] private Animator _systemUIAnimator;
+    // The press over the whole screen that shows and hides its controls.
+    [SerializeField, RegisterEvent(nameof(Toggle.onValueChanged), nameof(ToggleUI))] private Toggle _uiToggle;
+    // The controls hide this many seconds after the screen was last used,
+    // whether a video plays or not; 0 leaves them up (#340). Set in the
+    // KawaPlayer inspector.
+    [SerializeField] private float _controlsHideSeconds = 10f;
 
     [Header("Modal Dialog")]
     [SerializeField] private Modal _modalDialog;
@@ -174,6 +180,7 @@ namespace Yamadev.YamaStream.UI
 
       InitializeTranslation();
       UpdateTranslation();
+      UpdateAddPlaylistButton();
       GeneratePlaylistView();
 
       UpdateUI();
@@ -185,7 +192,98 @@ namespace Yamadev.YamaStream.UI
       {
         _repeatRangeSlider.SetUp(this, nameof(SetRepeatStart), nameof(SetRepeatEnd));
       }
-      if (Utilities.IsValid(_userUIAnimator) && _defaultPlaylistOpen) _userUIAnimator.SetTrigger("TogglePlaylist");
+    }
+
+    // A press on the screen shows or hides its controls, and they show with
+    // the list open where _defaultPlaylistOpen is on (#335).
+    public void ToggleUI()
+    {
+      if (!Utilities.IsValid(_userUIAnimator)) return;
+      bool showing = !IsUserUIState("ToggleUI", "UIOn");
+      _userUIAnimator.SetTrigger("ToggleUI");
+      if (showing)
+      {
+        SwitchOffHiddenListPage();
+        OpenListWithControls();
+        TouchControls();
+      }
+    }
+
+    // When the controls were last shown or the screen last used, and whether
+    // a check for hiding them is waiting (#340).
+    private float _controlsTouchedAt;
+    private bool _controlsHideCheckWaiting;
+
+    // The controls were shown or used: they stay up _controlsHideSeconds
+    // from now. A UI without controls to hide (the Playlist Panel) has no
+    // animator.
+    private void TouchControls()
+    {
+      if (_controlsHideSeconds <= 0f || !Utilities.IsValid(_userUIAnimator)) return;
+      _controlsTouchedAt = Time.time;
+      if (_controlsHideCheckWaiting) return;
+      _controlsHideCheckWaiting = true;
+      SendCustomEventDelayedSeconds(nameof(_CheckControlsHide), _controlsHideSeconds);
+    }
+
+    // Hides the controls, as a press on the screen would, once they have gone
+    // unused for _controlsHideSeconds, whether a video plays, is stopped,
+    // paused or loading. While a press on the screen is held, or a dialog, a
+    // page or a URL field is open, they stay, and the count starts again.
+    // What ends those counts the time again too (a press let go, a URL
+    // entered; a dialog and a page close with a press), so the controls stay
+    // a whole period after it.
+    public void _CheckControlsHide()
+    {
+      _controlsHideCheckWaiting = false;
+      if (_controlsHideSeconds <= 0f || !Utilities.IsValid(_userUIAnimator) || !IsUserUIState("ToggleUI", "UIOn")) return;
+      float left = _controlsTouchedAt + _controlsHideSeconds - Time.time;
+      if (left > 0f)
+      {
+        _controlsHideCheckWaiting = true;
+        SendCustomEventDelayedSeconds(nameof(_CheckControlsHide), left);
+        return;
+      }
+      if (CanHideControls())
+      {
+        _userUIAnimator.SetTrigger("ToggleUI");
+        return;
+      }
+      TouchControls();
+    }
+
+    // The screen was used while its controls show: a press on it let go, a
+    // scroll of the list that brought other lines in, or a URL entered.
+    private void TouchShownControls()
+    {
+      if (Utilities.IsValid(_userUIAnimator) && IsUserUIState("ToggleUI", "UIOn")) TouchControls();
+    }
+
+    private bool CanHideControls()
+    {
+      if (_screenPressedRight || _screenPressedLeft || _progressDrag) return false;
+      if (Utilities.IsValid(_modalDialog) && _modalDialog.gameObject.activeSelf) return false;
+      if (IsUserUIState("Page", "ShowPage")) return false;
+      if (Utilities.IsValid(_urlInputField) && _urlInputField.isFocused) return false;
+      if (Utilities.IsValid(_addPlaylistUrlInputField) && _addPlaylistUrlInputField.isFocused) return false;
+      return true;
+    }
+
+    private void OpenListWithControls()
+    {
+      if (!_defaultPlaylistOpen || !Utilities.IsValid(_userUIAnimator)) return;
+      // A close left waiting would shut it again at once.
+      _userUIAnimator.ResetTrigger("HidePlaylist");
+      if (!IsUserUIState("Playlists", "PlaylistOn")) _userUIAnimator.SetTrigger("TogglePlaylist");
+    }
+
+    // The state a layer of the controls' animator is in, or is going to.
+    private bool IsUserUIState(string layer, string state)
+    {
+      int index = _userUIAnimator.GetLayerIndex(layer);
+      if (index < 0) return false;
+      var info = _userUIAnimator.IsInTransition(index) ? _userUIAnimator.GetNextAnimatorStateInfo(index) : _userUIAnimator.GetCurrentAnimatorStateInfo(index);
+      return info.IsName(state);
     }
 
     // The UI's path in the Hierarchy, so that the log names the device it is
@@ -406,7 +504,33 @@ namespace Yamadev.YamaStream.UI
       _controller.SetPlayerType(VideoPlayerType.ImageViewer);
     }
 
-    public void PlayUrl() => PlayUrlField(_urlInputField);
+    public void PlayUrl()
+    {
+      UrlEntryEnded();
+      PlayUrlField(_urlInputField);
+    }
+
+    // Optional URL interceptor (issue #82): a module (PlaylistLoader) can
+    // claim an entered URL before the video path sees it. Wired by the
+    // module's build process; unassigned means the hook is inert. This is a
+    // dedicated slot rather than a Before event because _actionCancelled is
+    // a single shared flag — the interceptor itself invokes
+    // InvokeBeforeEvent("BeforeUserLoadPlaylist"), and nesting that inside
+    // another InvokeBeforeEvent would race the flag. addOnly asks it to add a
+    // playlist without playing it (the list's "+", #335). Returns whether it
+    // took the URL.
+    private bool HandToUrlInterceptor(VRCUrl url, bool addOnly)
+    {
+      if (!Utilities.IsValid(_urlInterceptor)) return false;
+      _urlInterceptor.SetProgramVariable("interceptUrl", url);
+      // Pass the calling UIController so a shared interceptor talks back to
+      // the panel the URL was entered on, not a fixed one.
+      _urlInterceptor.SetProgramVariable("interceptSource", this);
+      _urlInterceptor.SetProgramVariable("interceptAddOnly", addOnly);
+      _urlInterceptor.SetProgramVariable("interceptHandled", false);
+      _urlInterceptor.SendCustomEvent("OnUrlSubmitted");
+      return (bool)_urlInterceptor.GetProgramVariable("interceptHandled");
+    }
 
     private void PlayUrlField(VRCUrlInputField urlInputField)
     {
@@ -419,26 +543,10 @@ namespace Yamadev.YamaStream.UI
       // would otherwise load a VHub URL left there.
       if (urlInputField.wasCanceled) return;
 
-      // Optional URL interceptor (issue #82): a module (PlaylistLoader) can
-      // claim the entered URL before the video path sees it. Wired by the
-      // module's build process; unassigned means the hook is inert. This is a
-      // dedicated slot rather than a Before event because _actionCancelled is
-      // a single shared flag — the interceptor itself invokes
-      // InvokeBeforeEvent("BeforeUserLoadPlaylist"), and nesting that inside
-      // another InvokeBeforeEvent would race the flag.
-      if (Utilities.IsValid(_urlInterceptor))
+      if (HandToUrlInterceptor(urlInputField.GetUrl(), false))
       {
-        _urlInterceptor.SetProgramVariable("interceptUrl", urlInputField.GetUrl());
-        // Pass the calling UIController so a shared interceptor talks back
-        // to the panel the URL was entered on, not a fixed one.
-        _urlInterceptor.SetProgramVariable("interceptSource", this);
-        _urlInterceptor.SetProgramVariable("interceptHandled", false);
-        _urlInterceptor.SendCustomEvent("OnUrlSubmitted");
-        if ((bool)_urlInterceptor.GetProgramVariable("interceptHandled"))
-        {
-          urlInputField.SetUrl(VRCUrl.Empty);
-          return;
-        }
+        urlInputField.SetUrl(VRCUrl.Empty);
+        return;
       }
 
       if (_controller.FindHandlerIndexForUrl(urlInputField.GetUrl()) < 0)
@@ -991,10 +1099,6 @@ namespace Yamadev.YamaStream.UI
       UpdateTrackView();
       UpdateLoadingView();
       UpdateAudioView();
-      if (Utilities.IsValid(_idleScreenImage) && Utilities.IsValid(_idleScreenSprite))
-      {
-        _idleScreenImage.gameObject.SetActive(_controller.Stopped || _controller.IsLoading);
-      }
     }
 
     private void UpdateProgressView()
@@ -1160,6 +1264,7 @@ namespace Yamadev.YamaStream.UI
     {
       if (Utilities.IsValid(_loadingIndicator)) _loadingIndicator.SetActive(true);
       if (Utilities.IsValid(_userUIAnimator)) _userUIAnimator.SetBool("Loading", false);
+      UpdateIdleScreenShown(true);
       if (!_statusMessageText) return;
       string message;
       switch (videoError)
@@ -1229,21 +1334,36 @@ namespace Yamadev.YamaStream.UI
       if (Utilities.IsValid(_userUIAnimator)) _userUIAnimator.SetBool("Loading", _controller.IsLoading);
       if (Utilities.IsValid(_statusMessageText)) _statusMessageText.text = GetTranslation("msg.videoLoading");
       SetErrorDetailsButtonShown(false);
+      // UpdateUI and a retry after an error both come here.
+      UpdateIdleScreenShown(false);
     }
 
+    // The settings' About category (issue #341). UI Text wraps only at
+    // spaces, so a Japanese line of the update log with an early space
+    // broke there and left a stub of a line: spaces that do not break let
+    // every line run to the edge.
     private void GenerateVersionView()
     {
       if (Utilities.IsValid(_versionDisplayText)) _versionDisplayText.text = $"KawaPlayer v{_controller.Version}";
-      if (Utilities.IsValid(_updateLogText) && Utilities.IsValid(_updateLogTextAsset)) _updateLogText.text = _updateLogTextAsset.text;
+      if (Utilities.IsValid(_updateLogText) && Utilities.IsValid(_updateLogTextAsset)) _updateLogText.text = _updateLogTextAsset.text.Replace(" ", " ");
     }
 
     private void UpdateIdleScreenView()
     {
       if (Utilities.IsValid(_idleScreenImage) && Utilities.IsValid(_idleScreenSprite)) _idleScreenImage.sprite = _idleScreenSprite;
+    }
+
+    // The idle screen shows while stopped, loading or showing an error, and
+    // the logo and name over the default image. The loading icon and words,
+    // and an error's message, are drawn where the name is (#332), so while
+    // either shows, the logo and name give way and the background stays.
+    private void UpdateIdleScreenShown(bool error)
+    {
+      bool message = error || _controller.IsLoading;
       if (Utilities.IsValid(_idleScreenLogo))
-      {
-        _idleScreenLogo.SetActive(Utilities.IsValid(_idleScreenSprite) && _idleScreenSprite == _defaultIdleScreenSprite);
-      }
+        _idleScreenLogo.SetActive(Utilities.IsValid(_idleScreenSprite) && _idleScreenSprite == _defaultIdleScreenSprite && !message);
+      if (Utilities.IsValid(_idleScreenImage) && Utilities.IsValid(_idleScreenSprite))
+        _idleScreenImage.gameObject.SetActive(message || _controller.Stopped);
     }
 
     // The player a URL entered next plays on, which is not always the one in

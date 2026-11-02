@@ -2,6 +2,7 @@ using System;
 using UdonSharp;
 using UnityEngine;
 using UnityEngine.UI;
+using VRC.SDK3.Components;
 using VRC.SDKBase;
 
 namespace Yamadev.YamaStream.UI
@@ -9,6 +10,8 @@ namespace Yamadev.YamaStream.UI
   public partial class UIController
   {
     [Header("Playlist - Settings")]
+    // The list opens whenever the controls show (#335): the playlists are
+    // what players open most. On for the screen.
     [SerializeField] private bool _defaultPlaylistOpen;
 
     [Header("Playlist - UI Components")]
@@ -18,8 +21,10 @@ namespace Yamadev.YamaStream.UI
     [SerializeField] private LoopScroll _playlistsListScroll;
     [SerializeField] private LoopScroll _playlistTracksScroll;
     // The two halves of the list, where one replaces the other: the
-    // playlists, and a playlist's tracks. A UI without the list (the
-    // Controller Bar, the Global Reload Button) leaves them unwired.
+    // playlists, and the tracks (a playlist's, the queue or the history).
+    // Each is a canvas of its own, shown and hidden by its canvas rather
+    // than by switching the page (ShowTracksPage). A UI without the list
+    // (the Controller Bar, the Global Reload Button) leaves them unwired.
     [SerializeField] private GameObject _playlistListPage;
     [SerializeField] private GameObject _playlistTracksPage;
     [SerializeField, RegisterEvent(nameof(Toggle.onValueChanged), nameof(GenerateQueueView))] private Toggle _queueTabToggle;
@@ -52,6 +57,10 @@ namespace Yamadev.YamaStream.UI
     [SerializeField, RegisterEvent(nameof(Button.onClick), nameof(TogglePlaylistActions))] private Button _playlistActionsButton;
     // Shows the URL a playlist loaded in the world came from, to copy.
     [SerializeField, RegisterEvent(nameof(Button.onClick), nameof(ShowPlaylistUrl))] private Button _playlistUrlButton;
+    // The "+" under the playlists, for a VHub playlist's VRChat URL (#335),
+    // and the name shown while it is pointed at.
+    [SerializeField, RegisterEvent(nameof(VRCUrlInputField.onEndEdit), nameof(AddPlaylistUrl))] private VRCUrlInputField _addPlaylistUrlInputField;
+    [SerializeField] private Text _addPlaylistUrlLabel;
 
     private int _playlistIndex = -1;
     private int _playlistTrackIndex = -1;
@@ -195,6 +204,28 @@ namespace Yamadev.YamaStream.UI
       if (Utilities.IsValid(_playlistActionsButton)) _playlistActionsButton.gameObject.SetActive(isDynamic);
     }
 
+    // The "+" takes a VHub playlist's VRChat URL and adds the playlist to the
+    // list, without playing it, saying nothing unless it fails (#335). It
+    // needs the module that reads such a URL (the interceptor) and a dialog
+    // for a failure, so the Playlist Panel, which has none, does not show
+    // it. Any other URL is turned back with a word on what it takes.
+    private void UpdateAddPlaylistButton()
+    {
+      if (Utilities.IsValid(_addPlaylistUrlInputField))
+        _addPlaylistUrlInputField.gameObject.SetActive(Utilities.IsValid(_urlInterceptor) && Utilities.IsValid(_modalDialog));
+    }
+
+    public void AddPlaylistUrl()
+    {
+      UrlEntryEnded();
+      var field = _addPlaylistUrlInputField;
+      if (!Utilities.IsValid(field) || field.wasCanceled) return;
+      var url = field.GetUrl();
+      field.SetUrl(VRCUrl.Empty);
+      if (HandToUrlInterceptor(url, true)) return;
+      ShowMessage(GetTranslation("label.addPlaylistUrl"), GetTranslation("msg.playlistUrlOnly"));
+    }
+
     // A playlist baked into the world keeps no URL at run time, so the
     // button shows only for one loaded in the world, whose source is the
     // URL it was loaded from (the VRChat URL VHub gives it).
@@ -258,8 +289,7 @@ namespace Yamadev.YamaStream.UI
       // exists (issue #113). Only when that view is what is on screen: the
       // queue and history pages borrow the same object, and the list page is
       // already where this would go.
-      if (!IsQueuePage && !IsHistoryPage &&
-          Utilities.IsValid(_playlistTracksPage) && _playlistTracksPage.activeSelf)
+      if (!IsQueuePage && !IsHistoryPage && IsTracksPageShown())
         ReturnToPlaylistList();
     }
 
@@ -280,9 +310,52 @@ namespace Yamadev.YamaStream.UI
       if (!Utilities.IsValid(_playlistListPage)) return;
       if (!Utilities.IsValid(_playlistTracksPage)) return;
 
-      _playlistTracksPage.SetActive(false);
-      _playlistListPage.SetActive(true);
+      ShowTracksPage(false);
       HidePlaylistHeader();
+    }
+
+    // The tracks' page, or the playlists'. A page is shown and hidden by its
+    // canvas, and stays on while hidden until the controls next show
+    // (SwitchOffHiddenListPage): switching a page off and on ran OnDisable
+    // and OnEnable on all it holds, which took most of the time of going
+    // back and of opening a playlist (#326). A canvas switched off draws
+    // nothing, and nothing in it takes a press.
+    private void ShowTracksPage(bool shown)
+    {
+      SetPageShown(_playlistListPage, !shown);
+      SetPageShown(_playlistTracksPage, shown);
+    }
+
+    // A page switched off as the controls showed is switched on to show.
+    private void SetPageShown(GameObject page, bool shown)
+    {
+      if (!Utilities.IsValid(page)) return;
+      if (shown && !page.activeSelf) page.SetActive(true);
+      var canvas = page.GetComponent<Canvas>();
+      if (Utilities.IsValid(canvas)) canvas.enabled = shown;
+    }
+
+    // As the controls start to show, everything under them is still off, and
+    // switching off the page hidden by its canvas costs nothing: left on, it
+    // would be switched on with the controls, every time they show (#326).
+    private void SwitchOffHiddenListPage()
+    {
+      SwitchOffIfHidden(_playlistListPage);
+      SwitchOffIfHidden(_playlistTracksPage);
+    }
+
+    private void SwitchOffIfHidden(GameObject page)
+    {
+      if (!Utilities.IsValid(page) || !page.activeSelf) return;
+      var canvas = page.GetComponent<Canvas>();
+      if (Utilities.IsValid(canvas) && !canvas.enabled) page.SetActive(false);
+    }
+
+    private bool IsTracksPageShown()
+    {
+      if (!Utilities.IsValid(_playlistTracksPage)) return false;
+      var canvas = _playlistTracksPage.GetComponent<Canvas>();
+      return Utilities.IsValid(canvas) && canvas.enabled;
     }
 
     // The playlist tab goes back to the playlist list the way the back button
@@ -303,8 +376,7 @@ namespace Yamadev.YamaStream.UI
     // anything while it is inactive.
     public void OpenPlaylist()
     {
-      if (Utilities.IsValid(_playlistListPage)) _playlistListPage.SetActive(false);
-      if (Utilities.IsValid(_playlistTracksPage)) _playlistTracksPage.SetActive(true);
+      ShowTracksPage(true);
       ShowPlaylistTracks(true);
       if (Utilities.IsValid(_playlistHeader)) _playlistHeader.SetActive(true);
       if (Utilities.IsValid(_playlistActionStrip)) _playlistActionStrip.SetActive(false);
@@ -404,8 +476,12 @@ namespace Yamadev.YamaStream.UI
       _playlistsListScroll.SetUp(VisiblePlaylistCount(), this, nameof(UpdatePlaylistsContent));
     }
 
+    // Called by the list's LoopScroll when its lines are drawn: on a scroll
+    // that brings other lines in too, which counts the controls' time again
+    // (#340).
     public void UpdatePlaylistsContent()
     {
+      TouchShownControls();
       if (_playlistLineNames == null || _playlistLineNames.Length != _playlistsListScroll.LineCount) FindPlaylistLineParts();
       for (int i = 0; i < _playlistsListScroll.LineCount; i++)
       {
@@ -417,8 +493,10 @@ namespace Yamadev.YamaStream.UI
         var name = _playlistLineNames[i];
         if (Utilities.IsValid(name)) name.text = playlist.PlaylistName;
         var trackCount = _playlistLineCounts[i];
+        // As the header writes it ("8 tracks"): with "total" before it, the
+        // count wrapped onto two lines in Japanese (#332).
         if (Utilities.IsValid(trackCount))
-          trackCount.text = playlist.TrackCount > 0 ? $"{GetTranslation("label.total")} {playlist.TrackCount} {GetTranslation("label.tracks")}" : string.Empty;
+          trackCount.text = playlist.TrackCount > 0 ? $"{playlist.TrackCount} {GetTranslation("label.tracks")}" : string.Empty;
         var trigger = _playlistLineTriggers[i];
         if (Utilities.IsValid(trigger)) trigger.SetProgramVariable("_variableObject", realIndex);
       }
@@ -491,11 +569,13 @@ namespace Yamadev.YamaStream.UI
       return Utilities.IsValid(child) ? child.gameObject : null;
     }
 
-    // The queue and history tabs show their list from the top, drawn once.
+    // The queue and history tabs show their list on the tracks' page, from
+    // the top, drawn once.
     public void GenerateQueueView()
     {
       UpdatePlaylistActionButtons();
       if (!IsQueuePage || !Utilities.IsValid(_playlistTracksScroll)) return;
+      ShowTracksPage(true);
       HidePlaylistHeader();
       _playlistTracksScroll.SetUpAtTop(_controller.Queue.TrackCount, this, nameof(UpdatePlaylistTracksContent));
     }
@@ -504,6 +584,7 @@ namespace Yamadev.YamaStream.UI
     {
       UpdatePlaylistActionButtons();
       if (!IsHistoryPage || !Utilities.IsValid(_playlistTracksScroll)) return;
+      ShowTracksPage(true);
       HidePlaylistHeader();
       _playlistTracksScroll.SetUpAtTop(_controller.History.TrackCount, this, nameof(UpdatePlaylistTracksContent));
     }
@@ -560,8 +641,10 @@ namespace Yamadev.YamaStream.UI
       else _playlistTracksScroll.SetUp(trackCount, this, nameof(UpdatePlaylistTracksContent));
     }
 
+    // Called by the list's LoopScroll as UpdatePlaylistsContent is.
     public void UpdatePlaylistTracksContent()
     {
+      TouchShownControls();
       object[][] tracks;
       if (IsQueuePage)
       {
