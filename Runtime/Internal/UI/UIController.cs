@@ -5,6 +5,7 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using VRC.SDK3.Components;
 using VRC.SDK3.Components.Video;
+using VRC.SDK3.Video.Components.Base;
 using VRC.SDKBase;
 
 namespace Yamadev.YamaStream.UI
@@ -167,6 +168,20 @@ namespace Yamadev.YamaStream.UI
     // where before the two wrote over each other every frame (issue #195).
     private bool _progressHeld;
 
+    // What the seek row shows of the video, read from the controller when the
+    // video's state changes (ReadPlaybackState), not each frame: each read of
+    // another behaviour makes garbage, and the Controller Bar shows its seek
+    // row all the time (#356). The time, which changes each frame, is read
+    // from the video player itself, a call out of Udon that makes none.
+    private bool _playbackStopped = true;
+    private bool _playbackLoading;
+    private bool _playbackLive;
+    private bool _playbackImage;
+    private float _playbackDuration;
+    private BaseVRCVideoPlayer _videoPlayer;
+    private string _timeFormat;
+    private float _reloadCheckedAt;
+
     private void Start()
     {
       if (!_controller)
@@ -175,8 +190,8 @@ namespace Yamadev.YamaStream.UI
         return;
       }
       _controller.AddListener(this);
-      string timeFormat = _controller.TimeFormat;
-      _timesInWholeSeconds = timeFormat != null && timeFormat.Length > 1 && timeFormat.IndexOf('f') < 0 && timeFormat.IndexOf('F') < 0;
+      _timeFormat = _controller.TimeFormat;
+      _timesInWholeSeconds = _timeFormat != null && _timeFormat.Length > 1 && _timeFormat.IndexOf('f') < 0 && _timeFormat.IndexOf('F') < 0;
 
       InitializeTranslation();
       UpdateTranslation();
@@ -302,7 +317,9 @@ namespace Yamadev.YamaStream.UI
     // them every frame, each read a call into another behaviour, made the
     // most garbage of any Udon in a world (#356). What shows again is
     // brought up to date as it shows (RefreshShownControls), or here the
-    // next frame.
+    // next frame. What shows is drawn from what the UI keeps of the video
+    // (ReadPlaybackState), so a UI that always shows, as the Controller Bar
+    // does, makes no garbage either.
     private void Update()
     {
       if (!Utilities.IsValid(_controller)) return;
@@ -311,12 +328,8 @@ namespace Yamadev.YamaStream.UI
       if (_uiUpdateWaiting) UpdateUI();
       if (_tracksRedrawWaiting && IsTracksPageVisible()) GeneratePlaylistTracks();
       if (Utilities.IsValid(_volumeTooltipText) && _volumeTooltipText.gameObject.activeInHierarchy) UpdateVolumeTooltip();
-      if (IsProgressShown() && !_controller.Stopped && !_controller.IsLoading) UpdateProgressView();
-      // Pressable only when a reload would do anything: it did nothing, while
-      // looking pressable, when everyone was stopped or a load was under way
-      // (issue #232). The wait while loading ends with no event, so it is
-      // checked here.
-      if (Utilities.IsValid(_reloadButton) && _reloadButton.gameObject.activeInHierarchy) SetPressable(_reloadButton, _controller.CanReload);
+      if (IsProgressShown() && !_playbackStopped && !_playbackLoading) UpdateProgressView();
+      if (Utilities.IsValid(_reloadButton) && _reloadButton.gameObject.activeInHierarchy && Time.time - _reloadCheckedAt >= 1f) UpdateReloadButton();
     }
 
     private bool _uiUpdateWaiting;
@@ -350,8 +363,34 @@ namespace Yamadev.YamaStream.UI
     private void RefreshShownControls()
     {
       if (!Utilities.IsValid(_controller)) return;
+      ReadPlaybackState();
       if (Utilities.IsValid(_volumeTooltipText)) UpdateVolumeTooltip();
       UpdateProgressView();
+      UpdateReloadButton();
+    }
+
+    // Read when the video's state changes: every track event that redraws
+    // the view goes through UpdateUI, and an error and a retry, which do not,
+    // read it themselves. The player in use, and so the video player read
+    // for the time, changes only with these too.
+    private void ReadPlaybackState()
+    {
+      _playbackStopped = _controller.Stopped;
+      _playbackLoading = _controller.IsLoading;
+      _playbackImage = _controller.Handler.Type == VideoPlayerType.ImageViewer;
+      _playbackLive = _controller.IsLive;
+      _playbackDuration = _playbackLive ? 0f : _controller.Duration;
+      var handler = _controller.ActiveHandler;
+      _videoPlayer = Utilities.IsValid(handler) ? handler.GetComponent<BaseVRCVideoPlayer>() : null;
+    }
+
+    // Pressable only when a reload would do anything: it did nothing, while
+    // looking pressable, when everyone was stopped or a load was under way
+    // (issue #232). Checked with the video's state, and once a second while
+    // it shows, as the wait while loading ends with no event.
+    private void UpdateReloadButton()
+    {
+      _reloadCheckedAt = Time.time;
       if (Utilities.IsValid(_reloadButton)) SetPressable(_reloadButton, _controller.CanReload);
     }
 
@@ -1132,6 +1171,7 @@ namespace Yamadev.YamaStream.UI
     {
       // Whatever drew it, a redraw a track change asked for is done.
       _uiUpdateWaiting = false;
+      ReadPlaybackState();
       UpdatePlayerSelector();
       UpdateProgressView();
       UpdatePlaybackView();
@@ -1139,30 +1179,28 @@ namespace Yamadev.YamaStream.UI
       UpdateTrackView();
       UpdateLoadingView();
       UpdateAudioView();
+      UpdateReloadButton();
     }
 
+    // Runs every frame while the seek row shows, so it reads nothing of the
+    // controller: the video's state is what ReadPlaybackState kept, and the
+    // time comes from the video player (#356).
     private void UpdateProgressView()
     {
       if (_progressHeld) return;
 
-      // Each read of the controller is a call into another behaviour, and this
-      // runs every frame while the bar shows: what it needs is read once
-      // (#356).
-      bool isImage = _controller.Handler.Type == VideoPlayerType.ImageViewer;
-      bool isLive = _controller.IsLive;
-      float duration = isLive ? 0f : _controller.Duration;
-      float videoTime = _controller.VideoTime;
+      float videoTime = Utilities.IsValid(_videoPlayer) ? _videoPlayer.GetTime() : 0f;
 
       if (Utilities.IsValid(_currentTimeText))
       {
-        if (isLive) _currentTimeText.text = string.Empty;
+        if (_playbackLive) _currentTimeText.text = string.Empty;
         else
         {
           int second = Mathf.FloorToInt(videoTime);
           if (!_timesInWholeSeconds || second != _shownVideoSecond || _currentTimeText.text != _shownVideoTimeText)
           {
             _shownVideoSecond = second;
-            _shownVideoTimeText = _controller.FormatedVideoTime;
+            _shownVideoTimeText = TimeSpan.FromSeconds(videoTime).ToString(_timeFormat);
             _currentTimeText.text = _shownVideoTimeText;
           }
         }
@@ -1170,15 +1208,15 @@ namespace Yamadev.YamaStream.UI
 
       if (Utilities.IsValid(_totalDurationText))
       {
-        if (isImage) _totalDurationText.text = "Image";
-        else if (isLive) _totalDurationText.text = "Live";
+        if (_playbackImage) _totalDurationText.text = "Image";
+        else if (_playbackLive) _totalDurationText.text = "Live";
         else
         {
-          int second = Mathf.FloorToInt(duration);
+          int second = Mathf.FloorToInt(_playbackDuration);
           if (!_timesInWholeSeconds || second != _shownDurationSecond || _totalDurationText.text != _shownDurationText)
           {
             _shownDurationSecond = second;
-            _shownDurationText = _controller.FormatedDuration;
+            _shownDurationText = TimeSpan.FromSeconds(_playbackDuration).ToString(_timeFormat);
             _totalDurationText.text = _shownDurationText;
           }
         }
@@ -1186,24 +1224,27 @@ namespace Yamadev.YamaStream.UI
 
       if (Utilities.IsValid(_progressSlider) && !_progressDrag)
       {
-        var progressValue = isLive ? 1f : Mathf.Clamp(duration == 0f ? 0f : videoTime / duration, 0f, 1f);
+        var progressValue = _playbackLive ? 1f : Mathf.Clamp(_playbackDuration == 0f ? 0f : videoTime / _playbackDuration, 0f, 1f);
         _progressSlider.SetValueWithoutNotify(progressValue);
       }
 
-      UpdateTooltip(isImage, isLive, duration);
+      UpdateTooltip();
     }
 
-    private void UpdateTooltip(bool isImage, bool isLive, float duration)
+    // The tooltip's time is that of the place pointed at, which the helper
+    // knows: read only while the tooltip shows, as each read of the helper
+    // is a call into another behaviour.
+    private void UpdateTooltip()
     {
       if (!Utilities.IsValid(_progressSliderHelper) || !Utilities.IsValid(_progressTooltipText)) return;
 
-      var showTooltip = !isLive && !isImage && !_controller.Stopped;
+      var showTooltip = !_playbackLive && !_playbackImage && !_playbackStopped;
       var helper = _progressSliderHelper.gameObject;
       if (helper.activeSelf != showTooltip) helper.SetActive(showTooltip);
 
-      if (!showTooltip) return;
+      if (!showTooltip || !_progressTooltipText.gameObject.activeInHierarchy) return;
 
-      var seekSeconds = duration * _progressSliderHelper.Percent;
+      var seekSeconds = _playbackDuration * _progressSliderHelper.Percent;
       if (float.IsInfinity(seekSeconds) || float.IsNaN(seekSeconds))
       {
         _progressTooltipText.text = "Live";
@@ -1213,7 +1254,7 @@ namespace Yamadev.YamaStream.UI
       int second = Mathf.FloorToInt(seekSeconds);
       if (_timesInWholeSeconds && second == _shownSeekSecond && _progressTooltipText.text == _shownSeekText) return;
       _shownSeekSecond = second;
-      _shownSeekText = TimeSpan.FromSeconds(seekSeconds).ToString(_controller.TimeFormat);
+      _shownSeekText = TimeSpan.FromSeconds(seekSeconds).ToString(_timeFormat);
       _progressTooltipText.text = _shownSeekText;
     }
 
@@ -1448,9 +1489,11 @@ namespace Yamadev.YamaStream.UI
       // redraw asked for before it is done first, as each event drew at once
       // before: left for Update, it put the loading words back over the error.
       if (_uiUpdateWaiting) UpdateUI();
+      ReadPlaybackState();
       UpdateErrorView(videoError);
       // Stop clears an error, so it stays pressable after one.
       UpdateControlsView();
+      UpdateReloadButton();
     }
     public override void AfterPlayerHandlerChanged(VideoPlayerType playerType) => UpdateUI();
     public override void AfterTimeChanged(float time) => UpdateProgressView();
@@ -1467,8 +1510,10 @@ namespace Yamadev.YamaStream.UI
     public override void AfterTrackUpdated() => UpdateTrackView();
     public override void AfterVideoRetry()
     {
+      ReadPlaybackState();
       UpdateLoadingView();
       UpdateControlsView();
+      UpdateReloadButton();
     }
     public override void AfterQueueUpdated()
     {
