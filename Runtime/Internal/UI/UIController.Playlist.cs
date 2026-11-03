@@ -535,7 +535,8 @@ namespace Yamadev.YamaStream.UI
         var info = line.Find("Info");
         if (Utilities.IsValid(info))
         {
-          _trackLineTitles[i] = TextAt(info, "Title");
+          // In the clip it moves in while the row is pointed at (TitleMarquee, #352).
+          _trackLineTitles[i] = TextAt(info, "TitleClip/Title");
           _trackLineUrls[i] = TextAt(info, "Url");
           _trackLineNumbers[i] = TextAt(info, "No");
           var mark = info.Find("PlayingMark");
