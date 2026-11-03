@@ -207,7 +207,7 @@
     <section class="card">
       <div class="copy">
         <div class="head"><div class="num">3</div><h2>KawaPlayer に貼る</h2></div>
-        <p class="body"><em>「URLを入力」</em>を押して、<br>コピーした URL を貼り付けます。</p>
+        <p class="body">左下の<em>「URLを入力」</em>を押して、<br>コピーした URL を貼り付けます。</p>
         <p class="note">PC では <kbd>Ctrl</kbd> + <kbd>V</kbd> のあと <kbd>Enter</kbd></p>
       </div>
       <div class="shot" id="s3"></div>
@@ -283,18 +283,18 @@
     cursorAt("s2", btn.left - base.left + btn.width * 0.74, btn.top - base.top + btn.height * 0.4);
   }
 
-  // 3: the URL field pointed at, and the message once the playlist is in.
-  const c3 = crop("s3", "step3.png", 1920, 1080, 0, 150, 1400);
-  mark("s3", c3, [30, 214, 262, 292]);
-  cursorAt("s3", (196 - c3.x) * c3.s, (262 - c3.y) * c3.s);
-  tag("s3", c3, "ここに貼り付け", 282, 230);
-  mark("s3", c3, [528, 380, 1392, 700]);
-  tag("s3", c3, "読み込み完了！", 1010, 398);
+  // 3: the URL button bottom left, pointed at (its name shows above it), and the message once the playlist is in.
+  const c3 = crop("s3", "step3.png", 1920, 1080, 0, 320, 1610);
+  mark("s3", c3, [48, 918, 168, 1038]);
+  cursorAt("s3", (128 - c3.x) * c3.s, (950 - c3.y) * c3.s);
+  tag("s3", c3, "押して貼り付け", 200, 768);
+  mark("s3", c3, [412, 331, 1508, 748]);
+  tag("s3", c3, "読み込み完了！", 1060, 370);
 
-  // 4: the track list, playing.
-  const c4 = crop("s4", "step4.png", 1920, 1080, 900, 122, 1000);
-  mark("s4", c4, [1326, 226, 1868, 294]);
-  tag("s4", c4, "再生中", 1140, 238);
+  // 4: the playlist's tracks in the list on the right, the first playing.
+  const c4 = crop("s4", "step4.png", 1920, 1080, 770, 30, 1150);
+  mark("s4", c4, [1228, 252, 1880, 340]);
+  tag("s4", c4, "再生中", 1010, 272);
 </script>
 </body>
 </html>
