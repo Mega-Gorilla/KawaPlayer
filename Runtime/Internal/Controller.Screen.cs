@@ -129,8 +129,14 @@ namespace Yamadev.YamaStream
       }
     }
 
+    // The texture last passed on. A handler tells of a texture only when it
+    // changes (#356), so a screen or a listener that comes later is given
+    // this one as it comes.
+    private Texture _shownTexture;
+
     public override void AfterTextureUpdated(Texture texture)
     {
+      _shownTexture = texture;
       int screenCount = _screens.Length;
       for (int i = 0; i < screenCount; i++)
       {
@@ -187,6 +193,7 @@ namespace Yamadev.YamaStream
       _screenTypes = _screenTypes.Add(screenType);
       _screens = _screens.Add(screen);
       _textureProperties = _textureProperties.Add(textureProperty);
+      if (Utilities.IsValid(_shownTexture)) AfterTextureUpdated(_shownTexture);
     }
   }
 }

@@ -37,15 +37,21 @@ namespace Yamadev.YamaStream.Modules.LightVolumeAdaptor
       _pixels = new Color32[1];
     }
 
+    // The video's texture, sampled every frame while there is one. The
+    // controller tells of a texture only when it changes (#356), so the
+    // sampling runs here rather than on each telling.
+    private Texture _texture;
+
     public override void AfterTextureUpdated(Texture texture)
     {
-      if (!Utilities.IsValid(texture))
-      {
-        SetColor(Color.black);
-        return;
-      }
+      _texture = texture;
+      if (!Utilities.IsValid(texture)) SetColor(Color.black);
+    }
 
-      VRCGraphics.Blit(texture, _downsampledTexture);
+    private void Update()
+    {
+      if (!Utilities.IsValid(_texture)) return;
+      VRCGraphics.Blit(_texture, _downsampledTexture);
       VRCAsyncGPUReadback.Request(_downsampledTexture, _downsampledTexture.mipmapCount - 1, (IUdonEventReceiver)this);
     }
 

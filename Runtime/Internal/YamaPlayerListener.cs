@@ -32,6 +32,9 @@ namespace Yamadev.YamaStream
 
     #region Screen Events
 
+    // Told when the video's texture changes, not every frame (#356), and once
+    // as the listener is added while a texture shows. A listener that samples
+    // the picture every frame keeps the texture and reads it in its own Update.
     public virtual void AfterTextureUpdated(Texture texture) { }
     public virtual void AfterMirrorFlipChanged(bool mirrorFlip) { }
     public virtual void AfterBrightnessChanged(float brightness) { }
