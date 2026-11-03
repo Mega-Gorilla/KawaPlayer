@@ -21,8 +21,10 @@ namespace Yamadev.YamaStream
     private Texture _videoTexture;
     private RenderTexture _blitTexture;
     // The texture the listener last heard of. It hears of one only when it
-    // changes: told every frame, the controller passed the same texture on to
-    // every screen and listener every frame (#356).
+    // changes, or when a video becomes ready (OnVideoReady forgets it): told
+    // every frame, the controller passed the same texture on to every screen
+    // and listener every frame (#356). Forgotten rather than cleared, so a
+    // stop before the first texture still clears the screens.
     private Texture _notifiedTexture;
     private bool _textureNotified;
     private bool _stopped = true;
