@@ -48,8 +48,8 @@ namespace Yamadev.YamaStream.UI
 
     private void OnDisable() => Stop();
 
-    // Remembers where the title rests: the first time it moves, as nothing
-    // else moves or sizes it.
+    // Remembers where the title rests, the first time the row is pointed at:
+    // nothing else moves or sizes it.
     private void Prepare()
     {
       if (_prepared) return;
@@ -79,9 +79,10 @@ namespace Yamadev.YamaStream.UI
       SendCustomEventDelayedFrames(nameof(_Step), 1);
     }
 
-    // The list drew another track on this row while it is pointed at. A
-    // title that moves finds out in _Step, but one too short to move has no
-    // _Step running, so the list tells it here (#353 review F1).
+    // The list drew another track on this row while it is pointed at (a
+    // scroll, a change to the list). The list is what writes the title, and
+    // it tells the row here, as a title too short to move has no _Step
+    // running that could notice (#353 review F1).
     public void TitleChanged()
     {
       if (!_prepared || _title.text == _text) return;
@@ -108,12 +109,6 @@ namespace Yamadev.YamaStream.UI
     {
       _loopQueued = false;
       if (!_moving) return;
-      // The list drew another track on this row (a scroll, a refresh).
-      if (_title.text != _text)
-      {
-        Begin();
-        return;
-      }
       if (Time.time >= _waitUntil)
       {
         if (_offset >= _distance)
