@@ -13,7 +13,7 @@ There is no standalone CLI build for the package; open it in Unity `2022.3` with
 Releases are cut from the manual GitHub Actions workflow in `.github/workflows/release.yml`, which packages ZIP and `.unitypackage` artifacts from `package.json`.
 
 ## Coding Style & Naming Conventions
-Follow the existing C# style: 2-space indentation, braces on their own lines, `PascalCase` for types/methods/properties, and `_camelCase` for private fields. Keep namespaces under `Yamadev.YamaStream`. Match existing assembly boundaries: runtime code must stay UdonSharp-safe, while UnityEditor APIs belong only in `Editor/` or module editor assemblies. Preserve Unity `.meta` files when moving or adding assets.
+Follow the existing C# style: 2-space indentation, braces on their own lines, `PascalCase` for types/methods/properties, and `_camelCase` for private fields. Keep namespaces under `Yamadev.YamaStream`. Match existing assembly boundaries: runtime code must stay UdonSharp-safe, while UnityEditor APIs belong only in `Editor/` or module editor assemblies. Preserve Unity `.meta` files when moving or adding assets. Code that runs every frame must make no garbage: it reads other UdonBehaviours only for what shows or once a second, and never passes values of different types through one U# method parameter (CLAUDE.md, Key Constraints, #356).
 
 ## Compatibility & Technical Debt Policy
 

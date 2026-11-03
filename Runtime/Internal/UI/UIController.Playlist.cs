@@ -359,6 +359,19 @@ namespace Yamadev.YamaStream.UI
       return Utilities.IsValid(canvas) && canvas.enabled;
     }
 
+    // Whether the tracks' page can be seen now: its page shown, and the list
+    // itself on (the screen's controls switch it off with them).
+    private bool IsTracksPageVisible() => Utilities.IsValid(_playlistTracksPage) && _playlistTracksPage.activeInHierarchy && IsTracksPageShown();
+
+    // A track stopping or loading moves the playing mark in the list. The list
+    // is drawn again in Update, once for all such events, and not until it
+    // can be seen: a list that cannot is drawn again whenever it shows
+    // anyway, or by Update when it does (#356). A UI with no list (the
+    // Controller Bar, the Global Reload Button) waits for nothing.
+    private bool _tracksRedrawWaiting;
+
+    private void RequestTracksRedraw() => _tracksRedrawWaiting = Utilities.IsValid(_playlistTracksPage);
+
     // The playlist tab goes back to the playlist list the way the back button
     // does, so its page and the header never part. Pressed again while a
     // playlist's tracks show it reports on again (a toggle on in its group
@@ -616,6 +629,7 @@ namespace Yamadev.YamaStream.UI
     // fromTop: a playlist just opened, shown from its first track.
     private void ShowPlaylistTracks(bool fromTop)
     {
+      _tracksRedrawWaiting = false;
       UpdatePlaylistActionButtons();
       if (!Utilities.IsValid(_playlistsListScroll) || !Utilities.IsValid(_playlistTracksScroll)) return;
       if (!IsQueuePage && !IsHistoryPage && _playlistIndex < 0) return;

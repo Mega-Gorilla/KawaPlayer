@@ -298,36 +298,44 @@ Controller.AfterVideoStarted()              (Controller.Events.cs:103-112)
 
 ### Phase 7: 再生中の Update ループ
 
-**Controller.Update()** (Controller.cs:61-67):
+別の UdonBehaviour のプロパティを読むと（`_controller.Stopped` など）、そのたびにごみ（GC のメモリ）が出る。毎フレーム動く処理は、それを読む回数を減らしてある（#356）。
+
+**Controller.Update()** (Controller.cs):
 ```csharp
 private void Update()
 {
-    // 再生中かつ同期間隔経過
-    if (IsPlaying && Time.time - _lastSync > _syncFrequency)
-    {
-        EnsureVideoTime();  // 時刻同期チェック
-    }
+    // 1 秒ごとにだけハンドラーに聞く。再生中でなければ 1 秒後にまた聞く
+    if (Time.time - _lastSync <= SYNC_INTERVAL) return;
+    if (IsPlaying) CheckVideoTime();  // 時刻同期チェック
+    else _lastSync = Time.time;
 }
 ```
 
-**UIController.Update()** (UIController.cs:138-146):
-```csharp
-private void Update()
-{
-    // ボリュームツールチップ更新
-    // プログレスバー更新 (再生中かつロード中でない場合)
-    if (!_controller.Stopped && !_controller.IsLoading) UpdateProgressView();
-}
+**UIController.Update()** (UIController.cs):
 ```
+毎フレーム:
+    ├── 曲の切り替えのイベントで予約した UpdateUI() を 1 回だけ (_uiUpdateWaiting)
+    ├── 一覧の再描画の予約 (_tracksRedrawWaiting) を、曲の一覧が見えているときだけ
+    ├── 音量のツールチップ (出ているときだけ)
+    ├── プログレスバーと時刻 (出ていて、再生中でロード中でないときだけ。時刻は動画プレイヤーから)
+    └── ReSync ボタンの押せる・押せない (出ているときだけ、1 秒に 1 回)
+```
+操作が隠れている間は何も読まない。出るときに `RefreshShownControls()` でそろえる。
 
-**BaseVideoPlayerHandler.Update()** (BaseVideoPlayerHandler.cs:35-60):
+出ているあいだも、毎フレーム Controller は読まない。止まっているか・読み込み中か・ライブか・画像か・長さと、時刻を読む動画プレイヤーは、動画の状態が変わる知らせのときだけ読んで覚えておく（`ReadPlaybackState`。`UpdateUI` と、それを通らないエラーと再試行から）。毎フレーム変わる時刻は、動画プレイヤー（`BaseVRCVideoPlayer.GetTime()`）から直接読む。Udon の外の呼び出しなので、ごみが出ない。再生バーが常に出ている Controller Bar も、これで毎フレームのごみが 0 になった。ReSync を押せるかは、知らせのときと、出ているあいだ 1 秒に 1 回だけ確かめる（読み込み中の 15 秒の待ちは知らせなしに終わるため）。シークの吹き出しの時刻は、吹き出しが出ている（指している）ときだけ読む。
+
+エラーの文だけは、Controller の状態ではなく届いたイベント（`AfterVideoErrorOccurred` のエラーの種類）から描く。予備のプレイヤーに切り替えたあとは、使っているプレイヤーがエラーでないこともあり、描くときの状態からは決められない。そのため、エラーが届いたときは、それより前の予約をその場で済ませてからエラーを描く。Update に残すと、読み込み中の文がエラーの上に戻っていた（#357 のレビュー F1）。
+
+**BaseVideoPlayerHandler.Update()** (BaseVideoPlayerHandler.cs):
 ```
 毎フレーム:
     ├── テクスチャ取得 (MaterialPropertyBlock or sharedMaterial)
     ├── AVPro (Windows) の場合:
     │   └── Blit処理で色空間変換 (LateUpdate)
-    └── リスナーに AfterTextureUpdated 通知
+    └── テクスチャが変わったときだけ、リスナーに AfterTextureUpdated 通知
+        (動画の準備ができたときは、同じテクスチャでももう一度)
 ```
+準備ができたときにもう一度知らせるのは、プレイヤーがテクスチャを使い回し、エラーで止まるときは何も知らせず、そのあいだに予備のプレイヤーが自分のテクスチャを出して止まるときに消すことがあるため。`Controller` は最後に渡したテクスチャを持ち（`_shownTexture`）、あとから加わったスクリーン（`AddScreen`）とリスナー（`AddListener`）にもそれを渡す。左右反転と明るさはテクスチャと同じプロパティブロックでスクリーンに届くので、変わったときはそのテクスチャも書き直す。毎フレーム色を取る LightVolumeAdaptor は、受け取ったテクスチャを持って自分の `Update` で取る。
 
 ---
 
@@ -579,12 +587,12 @@ Controller.AfterVideoEnded()                 (Controller.Events.cs:131-155)
                  │
 [Phase 7] 再生中
     Controller.Update() 毎フレーム
-         ├── EnsureVideoTime() 5秒毎に時刻同期
-         └── UIController.Update()
-              └── UpdateProgressView() プログレスバー更新
+         └── CheckVideoTime() 1秒毎に時刻同期
+    UIController.Update() 毎フレーム
+         └── UpdateProgressView() プログレスバー更新 (出ているときだけ)
 
     BaseVideoPlayerHandler.Update() 毎フレーム
-         └── テクスチャ取得 → AfterTextureUpdated()
+         └── テクスチャ取得 → 変わったときだけ AfterTextureUpdated()
               └── スクリーンに描画
 
 [動画終了時]
@@ -737,7 +745,7 @@ Controller._listeners[] に登録されるもの:
 | `AfterQueueUpdated` | キュー変更 |
 | `AfterHistoryUpdated` | 履歴変更 |
 | `AfterPlayerHandlerChanged` | ハンドラー切替 |
-| `AfterTextureUpdated` | テクスチャ更新 (毎フレーム) |
+| `AfterTextureUpdated` | テクスチャが変わったとき (加わったときにも今のものを 1 回) |
 | `AfterTimeChanged` | シーク |
 | `AfterSpeedChanged` | 速度変更 |
 | `AfterLoopChanged` | ループ切替 |
