@@ -1,6 +1,7 @@
 ﻿using UdonSharp;
 using UnityEngine;
 using VRC.SDKBase;
+using VRC.SDK3.Components.Video;
 using VRC.SDK3.Rendering;
 using VRC.Udon.Common.Interfaces;
 
@@ -37,9 +38,10 @@ namespace Yamadev.YamaStream.Modules.LightVolumeAdaptor
       _pixels = new Color32[1];
     }
 
-    // The video's texture, sampled every frame while there is one. The
+    // The video's texture, sampled every frame while a video shows. The
     // controller tells of a texture only when it changes (#356), so the
-    // sampling runs here rather than on each telling.
+    // sampling runs here rather than on each telling. It is forgotten when
+    // the video stops or fails, and told again when a video is ready.
     private Texture _texture;
 
     public override void AfterTextureUpdated(Texture texture)
@@ -57,6 +59,9 @@ namespace Yamadev.YamaStream.Modules.LightVolumeAdaptor
 
     public override void OnAsyncGpuReadbackComplete(VRCAsyncGPUReadbackRequest request)
     {
+      // A readback asked for before the video stopped comes in a frame or
+      // more after it, and lit the room with the last frame again.
+      if (!Utilities.IsValid(_texture)) return;
       if (request.TryGetData(_pixels))
       {
         SetColor(_pixels[0]);
@@ -88,8 +93,14 @@ namespace Yamadev.YamaStream.Modules.LightVolumeAdaptor
 
     public override void AfterVideoStopped()
     {
+      _texture = null;
       SetColor(Color.black);
     }
+
+    // A player stopped by an error keeps its last frame and tells of no
+    // texture: the light keeps its colour, without reading that frame back
+    // every frame until a retry or another video is ready.
+    public override void AfterVideoErrorOccurred(VideoError videoError) => _texture = null;
 #endif
   }
 }
