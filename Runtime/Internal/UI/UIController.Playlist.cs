@@ -366,10 +366,11 @@ namespace Yamadev.YamaStream.UI
     // A track stopping or loading moves the playing mark in the list. The list
     // is drawn again in Update, once for all such events, and not until it
     // can be seen: a list that cannot is drawn again whenever it shows
-    // anyway, or by Update when it does (#356).
+    // anyway, or by Update when it does (#356). A UI with no list (the
+    // Controller Bar, the Global Reload Button) waits for nothing.
     private bool _tracksRedrawWaiting;
 
-    private void RequestTracksRedraw() => _tracksRedrawWaiting = true;
+    private void RequestTracksRedraw() => _tracksRedrawWaiting = Utilities.IsValid(_playlistTracksPage);
 
     // The playlist tab goes back to the playlist list the way the back button
     // does, so its page and the header never part. Pressed again while a

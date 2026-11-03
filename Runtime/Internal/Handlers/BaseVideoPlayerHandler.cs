@@ -284,6 +284,11 @@ namespace Yamadev.YamaStream
         return;
       }
 
+      // A video just ready tells its texture even when it is the one told
+      // before (a player reuses its texture): since then, an error stopped
+      // this player without telling, and the fallback player may have shown
+      // its own and cleared the screens as it stopped.
+      _textureNotified = false;
       if (Utilities.IsValid(_listener)) _listener.AfterVideoReady();
     }
 
