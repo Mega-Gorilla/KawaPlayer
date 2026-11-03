@@ -79,6 +79,15 @@ namespace Yamadev.YamaStream.UI
       SendCustomEventDelayedFrames(nameof(_Step), 1);
     }
 
+    // The list drew another track on this row while it is pointed at. A
+    // title that moves finds out in _Step, but one too short to move has no
+    // _Step running, so the list tells it here (#353 review F1).
+    public void TitleChanged()
+    {
+      if (!_prepared || _title.text == _text) return;
+      Begin();
+    }
+
     private void Stop()
     {
       _moving = false;

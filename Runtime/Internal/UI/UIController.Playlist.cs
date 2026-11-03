@@ -89,6 +89,7 @@ namespace Yamadev.YamaStream.UI
     private GameObject[] _trackLineActions;
     private Animator[] _trackLineAnimators;
     private IndexTrigger[] _trackLineTriggers;
+    private TitleMarquee[] _trackLineMarquees;
     private Text[] _playlistLineNames;
     private Text[] _playlistLineCounts;
     private IndexTrigger[] _playlistLineTriggers;
@@ -529,6 +530,7 @@ namespace Yamadev.YamaStream.UI
       _trackLineActions = new GameObject[count * TrackActionCount];
       _trackLineAnimators = new Animator[count];
       _trackLineTriggers = new IndexTrigger[count];
+      _trackLineMarquees = new TitleMarquee[count];
       for (int i = 0; i < count; i++)
       {
         var line = content.GetChild(i);
@@ -537,6 +539,8 @@ namespace Yamadev.YamaStream.UI
         {
           // In the clip it moves in while the row is pointed at (TitleMarquee, #352).
           _trackLineTitles[i] = TextAt(info, "TitleClip/Title");
+          var marquee = info.Find("TitleClip/Marquee");
+          if (Utilities.IsValid(marquee)) _trackLineMarquees[i] = marquee.GetComponent<TitleMarquee>();
           _trackLineUrls[i] = TextAt(info, "Url");
           _trackLineNumbers[i] = TextAt(info, "No");
           var mark = info.Find("PlayingMark");
@@ -688,6 +692,9 @@ namespace Yamadev.YamaStream.UI
           }
           title.text = string.IsNullOrEmpty(trackTitle) ? trackUrl.Get() : trackTitle;
           title.color = isPlaying ? _primaryColor : _trackTitleColor;
+          // Only the row pointed at has its marquee on.
+          var marquee = _trackLineMarquees[i];
+          if (Utilities.IsValid(marquee) && marquee.gameObject.activeInHierarchy) marquee.TitleChanged();
         }
         var urlText = _trackLineUrls[i];
         if (Utilities.IsValid(urlText)) urlText.text = string.IsNullOrEmpty(trackTitle) ? string.Empty : trackUrl.Get();
