@@ -1444,6 +1444,15 @@ namespace Yamadev.YamaStream.UI
     }
     public override void AfterVideoErrorOccurred(VideoError videoError)
     {
+      // The error is drawn from this event, not from the controller, whose
+      // player in use may already be the fallback, not in error. So the
+      // redraw asked for before it is done first, as each event drew at once
+      // before: left for Update, it put the loading words back over the error.
+      if (_uiUpdateWaiting)
+      {
+        _uiUpdateWaiting = false;
+        UpdateUI();
+      }
       UpdateErrorView(videoError);
       // Stop clears an error, so it stays pressable after one.
       UpdateControlsView();

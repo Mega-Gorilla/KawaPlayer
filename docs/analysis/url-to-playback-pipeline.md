@@ -322,6 +322,8 @@ private void Update()
 ```
 操作が隠れている間は何も読まない。出るときに `RefreshShownControls()` でそろえる。
 
+エラーの文だけは、Controller の状態ではなく届いたイベント（`AfterVideoErrorOccurred` のエラーの種類）から描く。予備のプレイヤーに切り替えたあとは、使っているプレイヤーがエラーでないこともあり、描くときの状態からは決められない。そのため、エラーが届いたときは、それより前の予約をその場で済ませてからエラーを描く。Update に残すと、読み込み中の文がエラーの上に戻っていた（#357 のレビュー F1）。
+
 **BaseVideoPlayerHandler.Update()** (BaseVideoPlayerHandler.cs):
 ```
 毎フレーム:
