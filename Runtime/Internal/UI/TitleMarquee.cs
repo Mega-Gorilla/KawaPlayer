@@ -7,13 +7,14 @@ namespace Yamadev.YamaStream.UI
 {
   // Moves a track's title left while the row is pointed at, so that a title
   // longer than the row can be read whole (issue #352). At rest the title is
-  // one line, cut at the edge of the list.
+  // one line, cut at the edge of the list. While the row is pointed at, its
+  // actions show at its right end (#354), and the title ends before them.
   //
   // It runs while its object is on: the row's button changes state through
-  // the row's animator (TrackAction), whose Hover layer switches this object
-  // on while the row is pointed at or pressed and off otherwise. A row with
-  // an EventTrigger would know the same, but would also take the drags that
-  // scroll the list.
+  // the row's animator (TrackAction), which switches this object and the
+  // actions on while the row is pointed at or pressed and off otherwise. A
+  // row with an EventTrigger would know the same, but would also take the
+  // drags that scroll the list.
   //
   // The title sits in a clip (_clip) from its own left edge, which is on only
   // while the title moves: a RectMask2D culls its graphics again every frame,
@@ -28,14 +29,21 @@ namespace Yamadev.YamaStream.UI
     // Seconds it waits before it moves, and at the end before it starts again.
     private const float StartWait = 1f;
     private const float EndWait = 1.5f;
+    // What each action shown takes from the title's room: 52 wide and 16 to
+    // the next, with 8 after the last before the row's end and 8 between the
+    // title and the first (the row's Actions in ListPanel.prefab).
+    private const float ActionStep = 68f;
 
     [SerializeField] private Text _title;
     [SerializeField] private RectMask2D _clip;
+    [SerializeField] private RectTransform _actions;
 
     private RectTransform _titleRect;
     private RectTransform _clipRect;
     private Vector2 _restPosition;
     private Vector2 _restSize;
+    private Vector2 _restClipMax;
+    private int _actionCount;
     private bool _prepared;
     private bool _moving;
     private bool _loopQueued;
@@ -58,6 +66,7 @@ namespace Yamadev.YamaStream.UI
       _clipRect = _clip.GetComponent<RectTransform>();
       _restPosition = _titleRect.anchoredPosition;
       _restSize = _titleRect.sizeDelta;
+      _restClipMax = _clipRect.offsetMax;
     }
 
     private void Begin()
@@ -66,6 +75,8 @@ namespace Yamadev.YamaStream.UI
       Prepare();
       Rest();
       _text = _title.text;
+      _actionCount = ShownActions();
+      if (_actionCount > 0) _clipRect.offsetMax = new Vector2(-_actionCount * ActionStep, _restClipMax.y);
       float scale = _titleRect.localScale.x;
       _distance = _title.preferredWidth * scale - _clipRect.rect.width;
       _moving = _distance > 0f;
@@ -80,13 +91,25 @@ namespace Yamadev.YamaStream.UI
     }
 
     // The list drew another track on this row while it is pointed at (a
-    // scroll, a change to the list). The list is what writes the title, and
-    // it tells the row here, as a title too short to move has no _Step
-    // running that could notice (#353 review F1).
+    // scroll, a change to the list or of its page). The list is what writes
+    // the title and picks the actions, and it tells the row here, as a title
+    // too short to move has no _Step running that could notice (#353 review
+    // F1).
     public void TitleChanged()
     {
-      if (!_prepared || _title.text == _text) return;
+      if (!_prepared || (_title.text == _text && ShownActions() == _actionCount)) return;
       Begin();
+    }
+
+    private int ShownActions()
+    {
+      if (!Utilities.IsValid(_actions)) return 0;
+      int count = 0;
+      for (int i = 0; i < _actions.childCount; i++)
+      {
+        if (_actions.GetChild(i).gameObject.activeSelf) count++;
+      }
+      return count;
     }
 
     private void Stop()
@@ -100,6 +123,7 @@ namespace Yamadev.YamaStream.UI
     {
       _titleRect.anchoredPosition = _restPosition;
       _titleRect.sizeDelta = _restSize;
+      _clipRect.offsetMax = _restClipMax;
       _clip.enabled = false;
     }
 

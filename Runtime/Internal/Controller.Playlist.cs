@@ -78,8 +78,14 @@ namespace Yamadev.YamaStream
     public void PlayTrackFromQueue()
     {
       if (!Utilities.IsValid(_queue) || _queue.TrackCount == 0) return;
+      PlayQueueTrack(_shuffle ? GetRandomIndex(_queue.TrackCount) : 0);
+    }
 
-      int index = _shuffle ? GetRandomIndex(_queue.TrackCount) : 0;
+    // Plays the queue's track at index and takes it out of the queue: the
+    // next one, or the one a player pressed in the queue (#354).
+    public void PlayQueueTrack(int index)
+    {
+      if (!Utilities.IsValid(_queue) || index < 0 || index >= _queue.TrackCount) return;
 
       var track = _queue.GetTrack(index);
       PlayTrack(track);
