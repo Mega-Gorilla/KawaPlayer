@@ -308,11 +308,7 @@ namespace Yamadev.YamaStream.UI
       if (!Utilities.IsValid(_controller)) return;
       // The events of a track change come several to a frame, and to a UI
       // that may not show: the view is brought up to date once, here.
-      if (_uiUpdateWaiting)
-      {
-        _uiUpdateWaiting = false;
-        UpdateUI();
-      }
+      if (_uiUpdateWaiting) UpdateUI();
       if (_tracksRedrawWaiting && IsTracksPageVisible()) GeneratePlaylistTracks();
       if (Utilities.IsValid(_volumeTooltipText) && _volumeTooltipText.gameObject.activeInHierarchy) UpdateVolumeTooltip();
       if (IsProgressShown() && !_controller.Stopped && !_controller.IsLoading) UpdateProgressView();
@@ -1134,6 +1130,8 @@ namespace Yamadev.YamaStream.UI
 
     public void UpdateUI()
     {
+      // Whatever drew it, a redraw a track change asked for is done.
+      _uiUpdateWaiting = false;
       UpdatePlayerSelector();
       UpdateProgressView();
       UpdatePlaybackView();
@@ -1431,7 +1429,8 @@ namespace Yamadev.YamaStream.UI
     // A track change sends several of these in a frame (stopped and ended,
     // then ready, played and started), each of which redrew the whole view
     // at once, on every UI, shown or not (#356). They mark it to be redrawn
-    // in Update, once, and not until the UI is on.
+    // in Update, once, and not until the UI is on, unless an error or
+    // another redraw comes first.
     public override void AfterVideoReady() => RequestUpdateUI();
     public override void AfterVideoStarted() => RequestUpdateUI();
     public override void AfterVideoEnded() => RequestUpdateUI();
@@ -1448,11 +1447,7 @@ namespace Yamadev.YamaStream.UI
       // player in use may already be the fallback, not in error. So the
       // redraw asked for before it is done first, as each event drew at once
       // before: left for Update, it put the loading words back over the error.
-      if (_uiUpdateWaiting)
-      {
-        _uiUpdateWaiting = false;
-        UpdateUI();
-      }
+      if (_uiUpdateWaiting) UpdateUI();
       UpdateErrorView(videoError);
       // Stop clears an error, so it stays pressable after one.
       UpdateControlsView();
