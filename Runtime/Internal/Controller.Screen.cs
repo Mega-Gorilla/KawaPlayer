@@ -27,6 +27,11 @@ namespace Yamadev.YamaStream
     // what _propertyBlock put there. It is never filled, so one serves every
     // frame; a new one each frame while a video started was garbage (issue #195).
     private MaterialPropertyBlock _emptyPropertyBlock;
+    // The texture last passed on. A handler tells of a texture only when it
+    // changes (#356), so a screen or a listener that comes later is given
+    // this one as it comes, and a change of mirror flip or brightness puts
+    // it back.
+    private Texture _shownTexture;
 
     private void InitializeScreen()
     {
@@ -58,12 +63,18 @@ namespace Yamadev.YamaStream
       }
     }
 
+    // Mirror flip and brightness reach a renderer screen with its texture, in
+    // one property block, so the texture showing is put back with them: a
+    // handler tells of a texture only when it changes (#356).
     private void UpdateScreenMaterial()
     {
       InitializePropertyBlock();
 
       _propertyBlock.SetInt("_MirrorFlip", _mirrorFlip ? 1 : 0);
       _propertyBlock.SetFloat("_Brightness", _brightness);
+      if (!Utilities.IsValid(_shownTexture)) return;
+      int screenCount = _screens.Length;
+      for (int i = 0; i < screenCount; i++) ShowTexture(i, _shownTexture);
     }
 
     public Texture Texture
@@ -131,39 +142,43 @@ namespace Yamadev.YamaStream
 
     public override void AfterTextureUpdated(Texture texture)
     {
+      _shownTexture = texture;
       int screenCount = _screens.Length;
-      for (int i = 0; i < screenCount; i++)
-      {
-        if (!Utilities.IsValid(_screens[i])) continue;
-
-        string textureProperty = _textureProperties[i];
-        switch (_screenTypes[i])
-        {
-          case ScreenType.Renderer:
-            if (!Utilities.IsValid(texture))
-            {
-              if (!Utilities.IsValid(_emptyPropertyBlock)) _emptyPropertyBlock = new MaterialPropertyBlock();
-              ((Renderer)_screens[i]).SetPropertyBlock(_emptyPropertyBlock, 0);
-            }
-            else
-            {
-              _propertyBlock.SetTexture(textureProperty, texture);
-              ((Renderer)_screens[i]).SetPropertyBlock(_propertyBlock, 0);
-            }
-            break;
-          case ScreenType.RawImage:
-            ((RawImage)_screens[i]).texture = texture;
-            break;
-          case ScreenType.Material:
-            ((Material)_screens[i]).SetTexture(textureProperty, texture);
-            break;
-        }
-      }
+      for (int i = 0; i < screenCount; i++) ShowTexture(i, texture);
       int listenerCount = _listeners.Length;
       for (int i = 0; i < listenerCount; i++)
       {
         var listener = _listeners[i];
         if (Utilities.IsValid(listener)) listener.AfterTextureUpdated(texture);
+      }
+    }
+
+    private void ShowTexture(int index, Texture texture)
+    {
+      var screen = _screens[index];
+      if (!Utilities.IsValid(screen)) return;
+
+      string textureProperty = _textureProperties[index];
+      switch (_screenTypes[index])
+      {
+        case ScreenType.Renderer:
+          if (!Utilities.IsValid(texture))
+          {
+            if (!Utilities.IsValid(_emptyPropertyBlock)) _emptyPropertyBlock = new MaterialPropertyBlock();
+            ((Renderer)screen).SetPropertyBlock(_emptyPropertyBlock, 0);
+          }
+          else
+          {
+            _propertyBlock.SetTexture(textureProperty, texture);
+            ((Renderer)screen).SetPropertyBlock(_propertyBlock, 0);
+          }
+          break;
+        case ScreenType.RawImage:
+          ((RawImage)screen).texture = texture;
+          break;
+        case ScreenType.Material:
+          ((Material)screen).SetTexture(textureProperty, texture);
+          break;
       }
     }
 
@@ -187,6 +202,7 @@ namespace Yamadev.YamaStream
       _screenTypes = _screenTypes.Add(screenType);
       _screens = _screens.Add(screen);
       _textureProperties = _textureProperties.Add(textureProperty);
+      if (Utilities.IsValid(_shownTexture)) ShowTexture(ScreenCount - 1, _shownTexture);
     }
   }
 }

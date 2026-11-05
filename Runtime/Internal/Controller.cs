@@ -81,12 +81,14 @@ namespace Yamadev.YamaStream
       RegisterHandlerListeners();
     }
 
+    // The time is checked before the handler is asked: IsPlaying is a call
+    // into another behaviour, whose answer made garbage, and was asked every
+    // frame (#356). While not playing, it is asked again a second later.
     private void Update()
     {
-      if (IsPlaying && Time.time - _lastSync > SYNC_INTERVAL)
-      {
-        CheckVideoTime();
-      }
+      if (Time.time - _lastSync <= SYNC_INTERVAL) return;
+      if (IsPlaying) CheckVideoTime();
+      else _lastSync = Time.time;
     }
 
     public string Version => _version;
@@ -114,6 +116,7 @@ namespace Yamadev.YamaStream
     {
       if (!Utilities.IsValid(listener) || Array.IndexOf(_listeners, listener) >= 0) return;
       _listeners = _listeners.Add(listener);
+      if (Utilities.IsValid(_shownTexture)) listener.AfterTextureUpdated(_shownTexture);
     }
 
     public void SendCustomVideoEvent(string eventName)
