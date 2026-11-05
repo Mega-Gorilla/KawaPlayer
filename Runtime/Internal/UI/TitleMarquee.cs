@@ -92,9 +92,9 @@ namespace Yamadev.YamaStream.UI
 
     // The list drew another track on this row while it is pointed at (a
     // scroll, a change to the list or of its page). The list is what writes
-    // the title and picks the actions, and it tells the row here, as a title
-    // too short to move has no _Step running that could notice (#353 review
-    // F1).
+    // the title and picks the actions, and it tells the row here once both
+    // are set, as a title too short to move has no _Step running that could
+    // notice (#353 review F1).
     public void TitleChanged()
     {
       if (!_prepared || (_title.text == _text && ShownActions() == _actionCount)) return;

@@ -701,9 +701,6 @@ namespace Yamadev.YamaStream.UI
           }
           title.text = string.IsNullOrEmpty(trackTitle) ? trackUrl.Get() : trackTitle;
           title.color = isPlaying ? _primaryColor : _trackTitleColor;
-          // Only the row pointed at has its marquee on.
-          var marquee = _trackLineMarquees[i];
-          if (Utilities.IsValid(marquee) && marquee.gameObject.activeInHierarchy) marquee.TitleChanged();
         }
         var urlText = _trackLineUrls[i];
         if (Utilities.IsValid(urlText)) urlText.text = string.IsNullOrEmpty(trackTitle) ? string.Empty : trackUrl.Get();
@@ -722,6 +719,11 @@ namespace Yamadev.YamaStream.UI
         SetLineAction(at + 2, queuePage);
         SetLineAction(at + 3, queuePage);
         SetLineAction(at + 4, !queuePage);
+
+        // Only the row pointed at has its marquee on. It measures the title
+        // against the actions that show, so it is told after they are set.
+        var marquee = _trackLineMarquees[i];
+        if (Utilities.IsValid(marquee) && marquee.gameObject.activeInHierarchy) marquee.TitleChanged();
 
         var trigger = _trackLineTriggers[i];
         if (Utilities.IsValid(trigger)) trigger.SetProgramVariable("_variableObject", index);
