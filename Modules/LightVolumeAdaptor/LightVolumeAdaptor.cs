@@ -80,13 +80,14 @@ namespace Yamadev.YamaStream.Modules.LightVolumeAdaptor
       }
     }
 
+    // The colour the volumes were last given. Most readbacks of a video bring
+    // it again, between its frames, and they need not be told (#358).
+    private Color _shownColor;
+
     // Writing Color is all a volume needs: Light Volumes (2.0 to 3.0) hears
     // the change itself, works out the point light's range again and updates
     // the light. The manager's AutoUpdateVolumes is not needed for the colour,
-    // so it is left as the world set it (issue #195). Most readbacks of a
-    // video bring the colour already shown, between its frames (#358).
-    private Color _shownColor;
-
+    // so it is left as the world set it (issue #195).
     private void SetColor(Color color)
     {
       if (color == _shownColor) return;
@@ -116,7 +117,7 @@ namespace Yamadev.YamaStream.Modules.LightVolumeAdaptor
 
     // A player stopped by an error keeps its last frame and tells of no
     // texture: the light keeps its colour, without reading that frame back
-    // every frame until a retry or another video is ready.
+    // again and again until a retry or another video is ready.
     public override void AfterVideoErrorOccurred(VideoError videoError) => _texture = null;
 #endif
   }
