@@ -97,6 +97,10 @@ namespace Yamadev.YamaStream.UI
     private bool IsQueuePage => Utilities.IsValid(_queueTabToggle) && _queueTabToggle.isOn;
     private bool IsHistoryPage => Utilities.IsValid(_historyTabToggle) && _historyTabToggle.isOn;
 
+    // Whether the open list's track at index is the one that plays. Only a
+    // playlist's rows can be: the queue and the history hold no place in one.
+    private bool IsPlayingRow(int index) => !IsQueuePage && !IsHistoryPage && _playlistIndex == _controller.ActivePlaylistIndex && index == _controller.PlayingTrackIndex;
+
     // Empty playlists are dynamic slots waiting to be filled (issue #88);
     // static ones are dropped at build time when they have no tracks
     // (PlaylistBuildProcess), so an empty entry is never something the
@@ -676,7 +680,6 @@ namespace Yamadev.YamaStream.UI
 
       if (_trackLineTitles == null || _trackLineTitles.Length != _playlistTracksScroll.LineCount) FindTrackLineParts();
       bool queuePage = IsQueuePage;
-      bool historyPage = IsHistoryPage;
       // The URL action shows the track's URL in the dialog's copy field,
       // so a UI without a dialog (the Playlist Panel) does not offer it.
       bool urlAction = Utilities.IsValid(_modalDialog);
@@ -689,7 +692,7 @@ namespace Yamadev.YamaStream.UI
         var track = tracks[index];
         var trackTitle = TrackUtils.GetTitle(track);
         var trackUrl = TrackUtils.GetUrl(track);
-        bool isPlaying = !queuePage && !historyPage && _playlistIndex == _controller.ActivePlaylistIndex && index == _controller.PlayingTrackIndex;
+        bool isPlaying = IsPlayingRow(index);
 
         var title = _trackLineTitles[i];
         if (Utilities.IsValid(title))
@@ -801,8 +804,7 @@ namespace Yamadev.YamaStream.UI
     public void PressPlaylistTrack()
     {
       if (!_playlistTracksScroll || _playlistTrackIndex < 0) return;
-      bool isPlaying = !IsQueuePage && !IsHistoryPage && _playlistIndex == _controller.ActivePlaylistIndex && _playlistTrackIndex == _controller.PlayingTrackIndex;
-      if (isPlaying && !_controller.Stopped && !_controller.IsError) return;
+      if (IsPlayingRow(_playlistTrackIndex) && !_controller.Stopped && !_controller.IsError) return;
       if (!InvokeBeforeEvent("BeforeUserPlayTrack")) return;
 
       if (IsQueuePage)
