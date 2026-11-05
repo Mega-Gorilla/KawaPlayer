@@ -303,20 +303,18 @@ MARKS = {
         dict(box=(827, 272, 1253, 326), n=4, cap="流れている曲", at=(640, 299)),
     ]),
     "screen/track-actions": dict(scale=0.667, marks=[
-        dict(box=(859, 223, 901, 265), n=1),
-        dict(box=(962, 223, 1004, 265), n=2),
-        dict(box=(1064, 223, 1106, 265), n=3),
-        dict(box=(1165, 221, 1211, 267), n=4),
+        dict(box=(1148, 222, 1190, 264), n=1),
+        dict(box=(1203, 222, 1245, 264), n=2),
     ]),
     "screen/queue": dict(scale=0.667, marks=[
         dict(box=(968, 21, 1111, 67), n=1),
         dict(box=(822, 84, 1258, 247), n=2),
     ]),
     "screen/queue-actions": dict(scale=0.667, marks=[
-        dict(box=(859, 142, 901, 184), n=1),
-        dict(box=(962, 142, 1004, 184), n=2),
-        dict(box=(1064, 142, 1106, 184), n=3),
-        dict(box=(1167, 142, 1209, 184), n=4),
+        dict(box=(1040, 142, 1082, 184), n=1),
+        dict(box=(1094, 142, 1136, 184), n=2),
+        dict(box=(1148, 142, 1190, 184), n=3),
+        dict(box=(1203, 142, 1245, 184), n=4),
     ]),
     "screen/history": dict(scale=0.667, marks=[
         dict(box=(1115, 21, 1259, 67), n=1),
