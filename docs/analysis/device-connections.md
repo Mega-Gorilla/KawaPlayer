@@ -309,7 +309,7 @@ E3 の `SendCustomVideoEvent(名前)` は、リスナー全員に `SendCustomEve
 
   どちらも UIController の前の確認（E5）を通るので、権限がかかる。
 - **画面の状態は自分で同期する。** `TabletScreen`（`Manual`）が、開いているアプリ・画像の URL・一覧・画像を見ているかを同期する。本体の `Controller` の同期とは別である。
-- **ワールドに 1 つの物がある。** `TabletVisitorRecorder` は、ビルドで 1 つにまとめられ、シーンの一番上へ移される。`TabletReturnButton` は、`_tablets` に並べた `TabletPickup` を元の場所へ戻す。
+- **ワールドに 1 つの物がある。** `TabletVisitorRecorder` は、ビルドで 1 つにまとめられ、シーンの一番上へ移される。`TabletReturnButton` は、`_tablets` に並べた `TabletPickup` を元の場所へ戻す。スタンド（#349）があるときは、元の場所はスタンドの置き場（`TabletPickup._dock`）で、ビルドが本体をそこへ置く（`TabletStandBuildProcess`）。戻すボタンはスタンドに付いたもの（`Stand/Button`）を使い、別に置く `ReturnButton` はビルドで外す。
 
 ### 6.4 全員リロードボタン
 

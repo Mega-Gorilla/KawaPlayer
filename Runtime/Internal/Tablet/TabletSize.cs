@@ -113,6 +113,16 @@ namespace Yamadev.YamaStream.Tablet
       }
     }
 
+    // The middle of the tablet at the size it was made, in the body's space.
+    public Vector3 MadeCenter
+    {
+      get
+      {
+        Prepare();
+        return _colliderCenter;
+      }
+    }
+
     // The nearest point of the tablet, in the body's space, to a point there.
     public Vector3 NearestPoint(Vector3 point)
     {

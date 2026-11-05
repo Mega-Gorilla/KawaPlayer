@@ -153,6 +153,10 @@ MARKS = {
     "unity/tablet-player-field": dict(src="unity/tablet-inspector", scale=0.72, pad=dict(right=270), marks=[
         dict(box=(274, 430, 664, 456), cap="操作する KawaPlayer", at=(826, 443)),
     ]),
+    "unity/tablet-stand": dict(src="unity/tablet-inspector", crop=(0, 600, 690, 900), scale=0.72, pad=dict(right=300), marks=[
+        dict(box=(24, 744, 302, 770), n=1, cap="スタンドを付ける", at=(845, 757)),
+        dict(box=(44, 774, 684, 830), n=2, cap="デザインと色を選ぶ", at=(845, 802)),
+    ]),
     "unity/build": dict(scale=0.72, pad=dict(left=16), marks=[
         dict(box=(9, 257, 404, 288), n=1),
         dict(box=(10, 304, 631, 402), n=2),
@@ -288,35 +292,33 @@ MARKS = {
         dict(box=(821, 21, 964, 67), n=1),
         dict(box=(968, 21, 1111, 67), n=2),
         dict(box=(1115, 21, 1259, 67), n=3),
-        dict(box=(817, 84, 1260, 148), n=4, cap="押すと曲の一覧へ", at=(600, 116)),
-        dict(box=(817, 219, 1260, 283), n=5, cap="VHub のプレイリストを足す", at=(600, 251)),
+        dict(box=(817, 84, 1260, 138), n=4, cap="押すと曲の一覧へ", at=(600, 111)),
+        dict(box=(817, 193, 1260, 247), n=5, cap="VHub のプレイリストを足す", at=(600, 220)),
         dict(box=(1196, 620, 1262, 686), n=6, cap="閉じる", at=(1080, 560)),
     ]),
     "screen/playlist-tracks": dict(scale=0.667, marks=[
         dict(box=(829, 93, 873, 137), n=1),
         dict(box=(895, 98, 1145, 135), n=2),
-        dict(box=(827, 231, 1253, 297), n=3, cap="曲を押す", at=(640, 264)),
-        dict(box=(827, 298, 1253, 365), n=4, cap="流れている曲", at=(640, 332)),
+        dict(box=(827, 218, 1253, 271), n=3, cap="曲を押す", at=(640, 245)),
+        dict(box=(827, 272, 1253, 326), n=4, cap="流れている曲", at=(640, 299)),
     ]),
     "screen/track-actions": dict(scale=0.667, marks=[
-        dict(box=(853, 236, 905, 288), n=1),
-        dict(box=(957, 236, 1009, 288), n=2),
-        dict(box=(1059, 236, 1111, 288), n=3),
-        dict(box=(1161, 234, 1217, 290), n=4),
+        dict(box=(1148, 222, 1190, 264), n=1),
+        dict(box=(1203, 222, 1245, 264), n=2),
     ]),
     "screen/queue": dict(scale=0.667, marks=[
         dict(box=(968, 21, 1111, 67), n=1),
-        dict(box=(822, 84, 1258, 285), n=2),
+        dict(box=(822, 84, 1258, 247), n=2),
     ]),
     "screen/queue-actions": dict(scale=0.667, marks=[
-        dict(box=(854, 156, 906, 208), n=1),
-        dict(box=(957, 156, 1009, 208), n=2),
-        dict(box=(1060, 156, 1112, 208), n=3),
-        dict(box=(1163, 156, 1215, 208), n=4),
+        dict(box=(1040, 142, 1082, 184), n=1),
+        dict(box=(1094, 142, 1136, 184), n=2),
+        dict(box=(1148, 142, 1190, 184), n=3),
+        dict(box=(1203, 142, 1245, 184), n=4),
     ]),
     "screen/history": dict(scale=0.667, marks=[
         dict(box=(1115, 21, 1259, 67), n=1),
-        dict(box=(822, 84, 1258, 151), n=2),
+        dict(box=(822, 84, 1258, 138), n=2),
     ]),
     "screen/settings": dict(scale=0.667, marks=[
         dict(box=(38, 11, 105, 77), n=1),
@@ -369,7 +371,7 @@ MARKS = {
         dict(box=(40, 621, 104, 685), n=1, cap="ここに URL を入れる", at=(260, 540)),
     ]),
     "screen/playlist": dict(scale=0.667, marks=[
-        dict(box=(827, 164, 1253, 230), n=1, cap="曲を押す", at=(640, 197)),
+        dict(box=(827, 163, 1253, 217), n=1, cap="曲を押す", at=(640, 190)),
         dict(box=(1207, 93, 1251, 137), n=2),
     ]),
     "screen/playlist-vhub": dict(scale=0.667, marks=[
@@ -398,6 +400,8 @@ MARKS = {
         dict(box=(610, 710, 670, 770), n=2, cap="ホームへ戻る", at=(880, 740)),
     ]),
     "tablet/rotate": dict(scale=0.72, marks=[]),
+    "tablet/stands": dict(scale=0.72, marks=[]),
+    "tablet/stand-colors": dict(scale=0.72, marks=[]),
     "tablet/image": dict(scale=0.72, marks=[
         dict(box=(571, 74, 1176, 126), cap="画像の URL を入れる", at=(872, 184)),
     ]),

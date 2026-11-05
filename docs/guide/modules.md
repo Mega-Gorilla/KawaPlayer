@@ -137,7 +137,7 @@ KawaPlayer の音を、AudioLink に送るモジュールです。
   | **Point Light Volumes** | 色を変える Point Light Volume |
 
   どちらも、自分で入れます。ビルドのときに自動では入りません。
-- **ワールドの中:** 再生中は、入れた Light Volume の色が、映像の平均の色になります。止まると黒になります。効くのは、見ている人それぞれの画面です。
+- **ワールドの中:** 再生中は、入れた Light Volume の色が、映像の平均の色になります。動画を流す前と、止まったときは黒になります。効くのは、見ている人それぞれの画面です。
 - **注意:**
   - 入れた Light Volume の色は、このモジュールが上書きします。
   - このモジュールは、Light Volumes の **Light Volume Manager** の **Auto Update Volumes** を変えません。色を変えるだけなら、この設定は要りません。Dynamic にしたボリュームを動かす（移動・回転・拡大縮小する）ときは、Light Volume Manager でこの設定をオンにしてください。

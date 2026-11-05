@@ -20,6 +20,13 @@ namespace Yamadev.YamaStream
     private MaterialPropertyBlock _properties;
     private Texture _videoTexture;
     private RenderTexture _blitTexture;
+    // The texture the listener last heard of. It hears of one only when it
+    // changes, or when a video becomes ready (OnVideoReady forgets it): told
+    // every frame, the controller passed the same texture on to every screen
+    // and listener every frame (#356). Forgotten rather than cleared, so a
+    // stop before the first texture still clears the screens.
+    private Texture _notifiedTexture;
+    private bool _textureNotified;
     private bool _stopped = true;
     private bool _isError;
 
@@ -54,7 +61,7 @@ namespace Yamadev.YamaStream
 
       if (!Utilities.IsValid(_videoTexture))
       {
-        if (Utilities.IsValid(_listener)) _listener.AfterTextureUpdated(null);
+        NotifyTexture(null);
         return;
       }
 
@@ -66,7 +73,15 @@ namespace Yamadev.YamaStream
       }
 #endif
 
-      if (Utilities.IsValid(_listener)) _listener.AfterTextureUpdated(_videoTexture);
+      NotifyTexture(_videoTexture);
+    }
+
+    private void NotifyTexture(Texture texture)
+    {
+      if (_textureNotified && texture == _notifiedTexture) return;
+      _textureNotified = true;
+      _notifiedTexture = texture;
+      if (Utilities.IsValid(_listener)) _listener.AfterTextureUpdated(texture);
     }
 
     public override bool IsLoading => _loading;
@@ -233,7 +248,7 @@ namespace Yamadev.YamaStream
         _blitTexture = null;
       }
 
-      if (Utilities.IsValid(_listener)) _listener.AfterTextureUpdated(null);
+      NotifyTexture(null);
       if (Utilities.IsValid(_listener)) _listener.AfterVideoStopped();
     }
 
@@ -243,7 +258,7 @@ namespace Yamadev.YamaStream
     {
       if (!Utilities.IsValid(_videoTexture))
       {
-        if (Utilities.IsValid(_listener)) _listener.AfterTextureUpdated(null);
+        NotifyTexture(null);
         return;
       }
 
@@ -258,7 +273,7 @@ namespace Yamadev.YamaStream
       }
 
       VRCGraphics.Blit(_videoTexture, _blitTexture, _blitMaterial);
-      if (Utilities.IsValid(_listener)) _listener.AfterTextureUpdated(_blitTexture);
+      NotifyTexture(_blitTexture);
     }
 
     #region VRChat Video Events
@@ -271,6 +286,11 @@ namespace Yamadev.YamaStream
         return;
       }
 
+      // A video just ready tells its texture even when it is the one told
+      // before (a player reuses its texture): since then, an error stopped
+      // this player without telling, and the fallback player may have shown
+      // its own and cleared the screens as it stopped.
+      _textureNotified = false;
       if (Utilities.IsValid(_listener)) _listener.AfterVideoReady();
     }
 

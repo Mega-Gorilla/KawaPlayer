@@ -31,6 +31,13 @@ namespace Yamadev.YamaStream.Tablet
   // up or down, or on desktop the mouse wheel with the left button held.
   // TabletSize keeps the size. The holding hand stays where it is, and the
   // player does not walk meanwhile, as the left stick walks.
+  //
+  // With a stand (issue #349), the tablet's place is on the stand: the build
+  // puts the body on the stand's rest (_dock, the chosen design's), so that
+  // is where it starts and goes back to. Let go near the rest, it slides
+  // onto it and back to its own size, so it has somewhere to be put down.
+  // Only the holder, who owns it, moves it, and VRCObjectSync, when the
+  // world syncs the tablet's place, takes it to the others.
   [UdonBehaviourSyncMode(BehaviourSyncMode.NoVariableSync)]
   public class TabletPickup : YamaPlayerBehaviour
   {
@@ -42,6 +49,14 @@ namespace Yamadev.YamaStream.Tablet
 
     // The tablet's size, on its own object under this one.
     [SerializeField] private TabletSize _size;
+
+    // Where the tablet rests on its stand, or none without a stand.
+    [SerializeField] private Transform _dock;
+
+    // Let go this near the rest (metres, between the tablet's middle and the
+    // rest's), the tablet slides onto it, in this many seconds.
+    private const float DockReach = 0.3f;
+    private const float DockSeconds = 0.25f;
 
     // A stick pushed all the way doubles the size in this many seconds.
     private const float DoublingSeconds = 1f;
@@ -62,6 +77,11 @@ namespace Yamadev.YamaStream.Tablet
     private Vector3 _resizePoint;
     private float _lookVertical;
     private float _moveVertical;
+    private bool _docking;
+    private bool _dockLoopRunning;
+    private float _dockStartTime;
+    private Vector3 _dockFromPosition;
+    private Quaternion _dockFromRotation;
 
     private void Start()
     {
@@ -80,12 +100,69 @@ namespace Yamadev.YamaStream.Tablet
 
     public Font CurrentFont => Utilities.IsValid(_screen) ? _screen.CurrentFont : null;
 
-    public override void OnPickup() => Touch();
+    public override void OnPickup()
+    {
+      _docking = false;
+      Touch();
+    }
 
     public override void OnDrop()
     {
       StopResizing();
       Touch();
+      if (!IsNearDock()) return;
+      if (Utilities.IsValid(_size)) _size.ResetSize();
+      _dockFromPosition = transform.position;
+      _dockFromRotation = transform.rotation;
+      _dockStartTime = Time.time;
+      _docking = true;
+      if (_dockLoopRunning) return;
+      _dockLoopRunning = true;
+      SendCustomEventDelayedFrames(nameof(_DockFrame), 1);
+    }
+
+    // Let go by its holder, who owns it, near a stand's rest: the middle of
+    // the tablet as it shows (a resize moves it off the body's origin)
+    // against where its middle will be on the rest, both in the world, with
+    // the scale of the body and its parents, which the body keeps on the
+    // rest (the rest's own scale is the stand's, not the tablet's).
+    private bool IsNearDock()
+    {
+      if (!Utilities.IsValid(_dock) || !_dock.gameObject.activeInHierarchy) return false;
+      if (Utilities.IsValid(_objectSync) && !IsObjectOwner) return false;
+      Vector3 middle = transform.position, rest = _dock.position;
+      if (Utilities.IsValid(_size))
+      {
+        middle = transform.TransformPoint(_size.Center);
+        rest += _dock.rotation * Vector3.Scale(transform.lossyScale, _size.MadeCenter);
+      }
+      return (middle - rest).sqrMagnitude <= DockReach * DockReach;
+    }
+
+    // Runs each frame while the tablet slides onto the stand, and stops
+    // itself once it is there, picked up again, or taken by someone else
+    // (who becomes its owner, and whose pickup reaches only them).
+    public void _DockFrame()
+    {
+      if (!_docking || (Utilities.IsValid(_objectSync) && !IsObjectOwner))
+      {
+        _docking = false;
+        _dockLoopRunning = false;
+        return;
+      }
+      float t = Mathf.Clamp01((Time.time - _dockStartTime) / DockSeconds);
+      float eased = t * t * (3f - 2f * t);
+      transform.SetPositionAndRotation(
+        Vector3.Lerp(_dockFromPosition, _dock.position, eased),
+        Quaternion.Slerp(_dockFromRotation, _dock.rotation, eased));
+      if (t >= 1f)
+      {
+        _docking = false;
+        _dockLoopRunning = false;
+        Touch();
+        return;
+      }
+      SendCustomEventDelayedFrames(nameof(_DockFrame), 1);
     }
 
     public override void OnPickupUseDown()
@@ -161,6 +238,7 @@ namespace Yamadev.YamaStream.Tablet
     public void ReturnToSpawn()
     {
       if (IsHeld) return;
+      _docking = false;
       Touch();
       if (Utilities.IsValid(_size)) _size.ResetSize();
       if (!IsAwayFromSpawn()) return;
