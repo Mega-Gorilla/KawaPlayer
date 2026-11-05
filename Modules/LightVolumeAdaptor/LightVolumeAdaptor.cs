@@ -36,9 +36,10 @@ namespace Yamadev.YamaStream.Modules.LightVolumeAdaptor
       _downsampledTexture.autoGenerateMips = true;
       _downsampledTexture.Create();
       _pixels = new Color32[1];
-      // Dark until a video shows, whatever colour the scene gave the volumes
-      // (joining the listeners above tells of a video already showing).
-      if (!Utilities.IsValid(_texture)) SetColor(Color.black);
+      // Dark until a video's colour comes, whatever colour the scene gave the
+      // volumes. A video already showing, told of as this joined the listeners
+      // above, replaces it with its first readback.
+      SetColor(Color.black);
     }
 
     // The video's texture, sampled all the while a video shows. The
@@ -47,12 +48,10 @@ namespace Yamadev.YamaStream.Modules.LightVolumeAdaptor
     // the video stops or fails, and told again when a video is ready.
     private Texture _texture;
 
-    // A readback takes a few frames to come back, and one asked for meanwhile
-    // tells the colour no sooner. Each makes garbage in the SDK (#358), so one
-    // is on its way at a time. One that has not come back after a second
-    // (this object was switched off, say) is given up.
-    private const float ReadbackGiveUpSeconds = 1f;
-    private float _readbackWaitUntil;
+    // The readback last asked for. One takes a few frames to come back, and
+    // one asked for meanwhile tells the colour no sooner. Each makes garbage
+    // in the SDK (#358), so the next waits until this one is done.
+    private VRCAsyncGPUReadbackRequest _readback;
 
     public override void AfterTextureUpdated(Texture texture)
     {
@@ -62,15 +61,13 @@ namespace Yamadev.YamaStream.Modules.LightVolumeAdaptor
 
     private void Update()
     {
-      if (!Utilities.IsValid(_texture) || Time.time < _readbackWaitUntil) return;
-      _readbackWaitUntil = Time.time + ReadbackGiveUpSeconds;
+      if (!Utilities.IsValid(_texture) || (Utilities.IsValid(_readback) && !_readback.done)) return;
       VRCGraphics.Blit(_texture, _downsampledTexture);
-      VRCAsyncGPUReadback.Request(_downsampledTexture, _downsampledTexture.mipmapCount - 1, (IUdonEventReceiver)this);
+      _readback = VRCAsyncGPUReadback.Request(_downsampledTexture, _downsampledTexture.mipmapCount - 1, (IUdonEventReceiver)this);
     }
 
     public override void OnAsyncGpuReadbackComplete(VRCAsyncGPUReadbackRequest request)
     {
-      _readbackWaitUntil = 0f;
       // A readback asked for before the video stopped comes in a frame or
       // more after it, and lit the room with the last frame again.
       if (!Utilities.IsValid(_texture)) return;

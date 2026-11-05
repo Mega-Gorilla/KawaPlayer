@@ -410,19 +410,19 @@ MonoBehaviour:
       Data: 
     - Name: $k
       Entry: 1
-      Data: _readbackWaitUntil
+      Data: _readback
     - Name: $v
       Entry: 7
       Data: 26|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
     - Name: <Name>k__BackingField
       Entry: 1
-      Data: _readbackWaitUntil
+      Data: _readback
     - Name: <UserType>k__BackingField
       Entry: 7
       Data: 27|System.RuntimeType, mscorlib
     - Name: 
       Entry: 1
-      Data: System.Single, mscorlib
+      Data: VRC.SDK3.Rendering.VRCAsyncGPUReadbackRequest, VRCSDK3
     - Name: 
       Entry: 8
       Data: 
