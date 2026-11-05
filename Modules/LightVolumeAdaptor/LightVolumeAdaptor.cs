@@ -38,11 +38,18 @@ namespace Yamadev.YamaStream.Modules.LightVolumeAdaptor
       _pixels = new Color32[1];
     }
 
-    // The video's texture, sampled every frame while a video shows. The
+    // The video's texture, sampled all the while a video shows. The
     // controller tells of a texture only when it changes (#356), so the
     // sampling runs here rather than on each telling. It is forgotten when
     // the video stops or fails, and told again when a video is ready.
     private Texture _texture;
+
+    // A readback takes a few frames to come back, and one asked for meanwhile
+    // tells the colour no sooner. Each makes garbage in the SDK (#358), so one
+    // is on its way at a time. One that has not come back after a second
+    // (this object was switched off, say) is given up.
+    private const float ReadbackGiveUpSeconds = 1f;
+    private float _readbackWaitUntil;
 
     public override void AfterTextureUpdated(Texture texture)
     {
@@ -52,13 +59,15 @@ namespace Yamadev.YamaStream.Modules.LightVolumeAdaptor
 
     private void Update()
     {
-      if (!Utilities.IsValid(_texture)) return;
+      if (!Utilities.IsValid(_texture) || Time.time < _readbackWaitUntil) return;
+      _readbackWaitUntil = Time.time + ReadbackGiveUpSeconds;
       VRCGraphics.Blit(_texture, _downsampledTexture);
       VRCAsyncGPUReadback.Request(_downsampledTexture, _downsampledTexture.mipmapCount - 1, (IUdonEventReceiver)this);
     }
 
     public override void OnAsyncGpuReadbackComplete(VRCAsyncGPUReadbackRequest request)
     {
+      _readbackWaitUntil = 0f;
       // A readback asked for before the video stopped comes in a frame or
       // more after it, and lit the room with the last frame again.
       if (!Utilities.IsValid(_texture)) return;
@@ -71,9 +80,14 @@ namespace Yamadev.YamaStream.Modules.LightVolumeAdaptor
     // Writing Color is all a volume needs: Light Volumes (2.0 to 3.0) hears
     // the change itself, works out the point light's range again and updates
     // the light. The manager's AutoUpdateVolumes is not needed for the colour,
-    // so it is left as the world set it (issue #195).
+    // so it is left as the world set it (issue #195). Most readbacks of a
+    // video bring the colour already shown, between its frames (#358).
+    private Color _shownColor;
+
     private void SetColor(Color color)
     {
+      if (color == _shownColor) return;
+      _shownColor = color;
       for (int i = 0; i < _lightVolumes.Length; i++)
       {
         if (Utilities.IsValid(_lightVolumes[i]))
