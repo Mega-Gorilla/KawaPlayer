@@ -36,6 +36,9 @@ namespace Yamadev.YamaStream.Modules.LightVolumeAdaptor
       _downsampledTexture.autoGenerateMips = true;
       _downsampledTexture.Create();
       _pixels = new Color32[1];
+      // Dark until a video shows, whatever colour the scene gave the volumes
+      // (joining the listeners above tells of a video already showing).
+      if (!Utilities.IsValid(_texture)) SetColor(Color.black);
     }
 
     // The video's texture, sampled all the while a video shows. The
