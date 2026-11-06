@@ -1396,6 +1396,9 @@ namespace Yamadev.YamaStream.UI
       }
       else
       {
+        // The latest error says what is wrong now: a site's message kept from
+        // an earlier try would come back with the next redraw (see below).
+        ClearSiteMessage();
         string hint = GetErrorHint(videoError);
         if (!string.IsNullOrEmpty(hint)) message = $"{message}\n{hint}";
       }
@@ -1405,8 +1408,8 @@ namespace Yamadev.YamaStream.UI
 
     // Udon is told only PlayerError, whatever went wrong, so the viewer cannot
     // tell a fault from a site VRChat cannot play. A site that failed when
-    // tried is named as not supported (issue #361). False for any other URL,
-    // which leaves the site's message and copy URL as they are.
+    // tried is named as not supported (issue #361). False for any other URL
+    // or kind of error.
     private bool TrySetSiteMessage(VideoError videoError)
     {
       if (videoError != VideoError.PlayerError || _playbackImage) return false;
@@ -1427,9 +1430,9 @@ namespace Yamadev.YamaStream.UI
       return true;
     }
 
-    // A named site's message stays until another video loads or this one stops
-    // or gets ready: the retries would otherwise take it, and the field being
-    // copied from, away every few seconds.
+    // A named site's message stays until another video loads, this one stops or
+    // gets ready, or another kind of error comes: the retries would otherwise
+    // take it, and the field being copied from, away every few seconds.
     private string _siteMessage = string.Empty;
     private string _errorCopyUrl = string.Empty;
 
