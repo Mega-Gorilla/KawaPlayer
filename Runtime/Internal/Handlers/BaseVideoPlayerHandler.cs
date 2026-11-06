@@ -223,9 +223,11 @@ namespace Yamadev.YamaStream
       _isError = false;
     }
 
+    // Only if the embed code is still what is loading: it may have been stopped,
+    // or another URL loaded, in the frame it waited.
     public void _RefuseUrl()
     {
-      if (_loading) OnVideoError(VideoError.InvalidURL);
+      if (_loading && Utilities.IsValid(_loadedUrl) && UrlUtils.IsVimeoEmbedCode(_loadedUrl.Get())) OnVideoError(VideoError.InvalidURL);
     }
 
     public override void Play()
