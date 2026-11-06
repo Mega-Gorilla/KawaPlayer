@@ -4,6 +4,8 @@ namespace Yamadev.YamaStream
 {
   public static class UrlUtils
   {
+    private const string VimeoPlayerUrl = "https://player.vimeo.com/video/";
+
     public static string GetProtocolFromUrl(string url)
     {
       if (string.IsNullOrEmpty(url)) return string.Empty;
@@ -76,8 +78,9 @@ namespace Yamadev.YamaStream
     }
 
     // What a Vimeo video's address, vimeo.com/<number>, is on Vimeo's player,
-    // which VRChat's yt-dlp can read without logging in (issue #361). Empty
-    // when the URL names no video by its number alone, as a channel's does.
+    // which skips the login VRChat's yt-dlp asks for on vimeo.com, though not
+    // every video plays (issue #361). Empty when the URL names no video by its
+    // number alone, as a channel's does.
     public static string GetVimeoPlayerUrl(string url)
     {
       string id = GetPathFromUrl(url);
@@ -88,20 +91,19 @@ namespace Yamadev.YamaStream
       {
         if (id[i] < '0' || id[i] > '9') return string.Empty;
       }
-      return "https://player.vimeo.com/video/" + id;
+      return VimeoPlayerUrl + id;
     }
 
     // The player's URL in an embed code from Vimeo's Share, its &amp; undone, or
     // empty when the text holds none (issue #361).
     public static string GetVimeoEmbedUrl(string text)
     {
-      const string prefix = "https://player.vimeo.com/video/";
       if (string.IsNullOrEmpty(text)) return string.Empty;
-      int start = text.IndexOf(prefix);
+      int start = text.IndexOf(VimeoPlayerUrl);
       if (start < 0) return string.Empty;
-      int end = start + prefix.Length;
+      int end = start + VimeoPlayerUrl.Length;
       while (end < text.Length && text[end] != '"' && text[end] != '\'' && text[end] != ' ' && text[end] != '<' && text[end] != '>') end++;
-      if (end == start + prefix.Length) return string.Empty;
+      if (end == start + VimeoPlayerUrl.Length) return string.Empty;
       return text.Substring(start, end - start).Replace("&amp;", "&");
     }
 

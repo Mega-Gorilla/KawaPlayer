@@ -1354,11 +1354,17 @@ namespace Yamadev.YamaStream.UI
       if (Utilities.IsValid(_brightnessValueText)) _brightnessValueText.text = $"{Mathf.Ceil(_controller.Brightness * 100)}%";
     }
 
-    private void UpdateErrorView(VideoError videoError)
+    // What shows behind an error's message.
+    private void ShowErrorScreen()
     {
       if (Utilities.IsValid(_loadingIndicator)) _loadingIndicator.SetActive(true);
       if (Utilities.IsValid(_userUIAnimator)) _userUIAnimator.SetBool("Loading", false);
       UpdateIdleScreenShown(true);
+    }
+
+    private void UpdateErrorView(VideoError videoError)
+    {
+      ShowErrorScreen();
       if (!_statusMessageText) return;
       string message;
       switch (videoError)
@@ -1381,14 +1387,12 @@ namespace Yamadev.YamaStream.UI
         default:
           return;
       }
-      string siteMessage = GetUnsupportedSiteMessage(videoError);
-      if (!string.IsNullOrEmpty(siteMessage))
+      if (TrySetSiteMessage(videoError))
       {
         // Says more than the message it replaces, whose kind of error is still
         // in the details. The screen has room for three lines above them.
-        message = siteMessage;
-        _siteMessage = siteMessage;
-        ShowErrorCopyField();
+        message = _siteMessage;
+        UpdateErrorCopyField();
       }
       else
       {
@@ -1401,32 +1405,31 @@ namespace Yamadev.YamaStream.UI
 
     // Udon is told only PlayerError, whatever went wrong, so the viewer cannot
     // tell a fault from a site VRChat cannot play. A site that failed when
-    // tried is named as not supported (issue #361). A world keeps these as
-    // built, but they only show once a video has failed, so a site that later
-    // plays does not show them. Empty for any other URL, or if YouTube's own
-    // line applies.
-    private string GetUnsupportedSiteMessage(VideoError videoError)
+    // tried is named as not supported (issue #361). False for any other URL,
+    // which leaves the site's message and copy URL as they are.
+    private bool TrySetSiteMessage(VideoError videoError)
     {
-      if (videoError != VideoError.PlayerError || _playbackImage || ShouldShowYouTubeHint(videoError)) return string.Empty;
+      if (videoError != VideoError.PlayerError || _playbackImage) return false;
 
       string url = TrackUtils.GetUrl(_controller.Track).Get();
       string siteKey = UrlUtils.GetUnsupportedSiteKey(url);
-      if (string.IsNullOrEmpty(siteKey)) return string.Empty;
+      if (string.IsNullOrEmpty(siteKey)) return false;
 
-      string message = GetTranslation("error.siteUnsupported").Replace("{0}", GetTranslation(siteKey));
-      if (siteKey != "site.vimeo") return message;
+      _siteMessage = GetTranslation("error.siteUnsupported").Replace("{0}", GetTranslation(siteKey));
+      if (siteKey != "site.vimeo") return true;
 
       // Vimeo's player can play a video the page's address cannot, though not
       // all of those tried, and some with no sound. The screen's text cannot be
       // copied and a world cannot make a URL from text, so the viewer copies the
       // URL from a field and enters it (issue #361).
       _errorCopyUrl = UrlUtils.GetVimeoPlayerUrl(url);
-      return message + "\n" + GetTranslation(string.IsNullOrEmpty(_errorCopyUrl) ? "error.vimeoShareEmbed" : "error.vimeoShareEmbedOrCopy");
+      _siteMessage += "\n" + GetTranslation(string.IsNullOrEmpty(_errorCopyUrl) ? "error.vimeoShareEmbed" : "error.vimeoShareEmbedOrCopy");
+      return true;
     }
 
-    // A named site's message stays until another video loads or this one stops:
-    // the retries would otherwise take it, and the field being copied from,
-    // away every few seconds.
+    // A named site's message stays until another video loads or this one stops
+    // or gets ready: the retries would otherwise take it, and the field being
+    // copied from, away every few seconds.
     private string _siteMessage = string.Empty;
     private string _errorCopyUrl = string.Empty;
 
@@ -1434,10 +1437,10 @@ namespace Yamadev.YamaStream.UI
     {
       _siteMessage = string.Empty;
       _errorCopyUrl = string.Empty;
-      ShowErrorCopyField();
+      UpdateErrorCopyField();
     }
 
-    private void ShowErrorCopyField()
+    private void UpdateErrorCopyField()
     {
       if (!Utilities.IsValid(_errorCopyField)) return;
       bool shown = !string.IsNullOrEmpty(_errorCopyUrl);
@@ -1515,11 +1518,9 @@ namespace Yamadev.YamaStream.UI
     {
       if (!string.IsNullOrEmpty(_siteMessage))
       {
-        if (Utilities.IsValid(_loadingIndicator)) _loadingIndicator.SetActive(true);
-        if (Utilities.IsValid(_userUIAnimator)) _userUIAnimator.SetBool("Loading", false);
-        if (Utilities.IsValid(_statusMessageText)) _statusMessageText.text = _siteMessage;
+        ShowErrorScreen();
+        _statusMessageText.text = _siteMessage;
         SetErrorDetailsButtonShown(true);
-        UpdateIdleScreenShown(true);
         return;
       }
       if (Utilities.IsValid(_loadingIndicator)) _loadingIndicator.SetActive(_controller.IsLoading);
