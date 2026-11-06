@@ -58,6 +58,39 @@ namespace Yamadev.YamaStream
       return rest.Substring(slashIndex);
     }
 
+    // The translation key of the name of a site whose videos failed when tried
+    // on VRChat (issue #361), or empty for any other URL. Only the forms of URL
+    // that were tried: it is read after a video has failed, so a site that
+    // later plays simply never gets here, and a world keeps the list it was
+    // built with.
+    public static string GetFailingSiteKey(string url)
+    {
+      string host = GetHostFromUrl(url);
+      if (host == "www.nicovideo.jp") return "site.niconico";
+      if (host == "vimeo.com" || host == "www.vimeo.com") return "site.vimeo";
+      if (host == "www.tiktok.com") return "site.tiktok";
+      if (host == "www.dailymotion.com") return "site.dailymotion";
+      if (host == "v.youku.com") return "site.youku";
+      if (host == "twitcasting.tv" && GetPathFromUrl(url).Contains("/movie/")) return "site.twitcastingRecording";
+      return string.Empty;
+    }
+
+    // What a Vimeo video's address, vimeo.com/<number>, is on Vimeo's player,
+    // which VRChat's yt-dlp can read without logging in (issue #361). Empty
+    // when the URL names no video by its number alone, as a channel's does.
+    public static string GetVimeoPlayerUrl(string url)
+    {
+      string id = GetPathFromUrl(url);
+      if (id.EndsWith("/")) id = id.Substring(0, id.Length - 1);
+      if (id.Length < 2) return string.Empty;
+      id = id.Substring(1);
+      for (int i = 0; i < id.Length; i++)
+      {
+        if (id[i] < '0' || id[i] > '9') return string.Empty;
+      }
+      return "https://player.vimeo.com/video/" + id;
+    }
+
     public static bool IsYouTubeUrl(string url)
     {
       string host = GetHostFromUrl(url);

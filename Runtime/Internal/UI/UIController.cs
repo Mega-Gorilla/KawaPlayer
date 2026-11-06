@@ -1377,6 +1377,52 @@ namespace Yamadev.YamaStream.UI
         default:
           return;
       }
+      string siteHint = GetFailingSiteHint(videoError);
+      if (!string.IsNullOrEmpty(siteHint))
+      {
+        // The site's line says more than the message's second line, and the
+        // screen has room for three lines above the Details button.
+        int titleEnd = message.IndexOf('\n');
+        if (titleEnd >= 0) message = message.Substring(0, titleEnd);
+        message = $"{message}\n{siteHint}";
+      }
+      else
+      {
+        string hint = GetErrorHint(videoError);
+        if (!string.IsNullOrEmpty(hint)) message = $"{message}\n{hint}";
+      }
+      _statusMessageText.text = message;
+      SetErrorDetailsButtonShown(true);
+    }
+
+    // Udon is told only PlayerError, whatever went wrong, so the viewer cannot
+    // tell a fault from a site VRChat cannot play. A site that failed when
+    // tried is named (issue #361). A world keeps these as built, but they only
+    // show once a video has failed, so they say what seems to be so, not what
+    // is. Empty for any other URL, or if YouTube's own line applies.
+    private string GetFailingSiteHint(VideoError videoError)
+    {
+      if (videoError != VideoError.PlayerError || _playbackImage || ShouldShowYouTubeHint(videoError)) return string.Empty;
+
+      string url = TrackUtils.GetUrl(_controller.Track).Get();
+      string siteKey = UrlUtils.GetFailingSiteKey(url);
+      if (string.IsNullOrEmpty(siteKey)) return string.Empty;
+
+      string hint = GetTranslation("error.siteFails").Replace("{0}", GetTranslation(siteKey));
+      if (siteKey != "site.vimeo") return hint;
+
+      // Vimeo's player can show a video the page's address cannot, though of
+      // those tried only some did, and with no sound. No form of its URL was
+      // found that plays with sound, so this says only that.
+      string playerUrl = UrlUtils.GetVimeoPlayerUrl(url);
+      if (string.IsNullOrEmpty(playerUrl)) return hint;
+      return hint + "\n" + GetTranslation("error.vimeoPlayerUrl").Replace("{0}", playerUrl);
+    }
+
+    // YouTube has its own line, and any other failure the same one (a track
+    // from VHub comes by VHub's address, which names no site).
+    private string GetErrorHint(VideoError videoError)
+    {
       if (ShouldShowYouTubeHint(videoError))
       {
         // InvalidURL gets its own wording: a YouTube URL that passed the host
@@ -1384,12 +1430,10 @@ namespace Yamadev.YamaStream.UI
         // missing/private, or a yt-dlp failure - the editor resolver maps
         // empty yt-dlp output to InvalidURL). Retrying is not suggested there
         // because the video may simply not exist.
-        string hintKey = videoError == VideoError.InvalidURL ? "error.youtubeHintInvalidUrl" : "error.youtubeHint";
-        string hint = GetTranslation(hintKey);
-        if (!string.IsNullOrEmpty(hint)) message = $"{message}\n{hint}";
+        return GetTranslation(videoError == VideoError.InvalidURL ? "error.youtubeHintInvalidUrl" : "error.youtubeHint");
       }
-      _statusMessageText.text = message;
-      SetErrorDetailsButtonShown(true);
+      if (videoError != VideoError.PlayerError || _playbackImage) return string.Empty;
+      return GetTranslation("error.siteMayFail");
     }
 
     private bool ShouldShowYouTubeHint(VideoError videoError)
