@@ -91,6 +91,20 @@ namespace Yamadev.YamaStream
       return "https://player.vimeo.com/video/" + id;
     }
 
+    // The player's URL in an embed code from Vimeo's Share, its &amp; undone, or
+    // empty when the text holds none (issue #361).
+    public static string GetVimeoEmbedUrl(string text)
+    {
+      const string prefix = "https://player.vimeo.com/video/";
+      if (string.IsNullOrEmpty(text)) return string.Empty;
+      int start = text.IndexOf(prefix);
+      if (start < 0) return string.Empty;
+      int end = start + prefix.Length;
+      while (end < text.Length && text[end] != '"' && text[end] != '\'' && text[end] != ' ' && text[end] != '<' && text[end] != '>') end++;
+      if (end == start + prefix.Length) return string.Empty;
+      return text.Substring(start, end - start).Replace("&amp;", "&");
+    }
+
     public static bool IsYouTubeUrl(string url)
     {
       string host = GetHostFromUrl(url);

@@ -133,6 +133,8 @@ namespace Yamadev.YamaStream.UI
     [Header("Loading & Message")]
     [SerializeField] private GameObject _loadingIndicator;
     [SerializeField] private Text _statusMessageText;
+    [SerializeField, RegisterEvent(nameof(InputField.onValueChanged), nameof(RestoreErrorCopyUrl))] private InputField _errorCopyField;
+    [SerializeField] private Text _errorCopyLabel;
 
     [Header("Version Info")]
     [SerializeField] private TextAsset _updateLogTextAsset;
@@ -628,7 +630,9 @@ namespace Yamadev.YamaStream.UI
 
       if (_controller.FindHandlerIndexForUrl(urlInputField.GetUrl()) < 0)
       {
+        string entered = urlInputField.GetUrl().Get();
         urlInputField.SetUrl(VRCUrl.Empty);
+        ShowVimeoEmbedCodeUrl(entered);
         return;
       }
 
@@ -1383,6 +1387,8 @@ namespace Yamadev.YamaStream.UI
         // Says more than the message it replaces, whose kind of error is still
         // in the details. The screen has room for three lines above them.
         message = siteMessage;
+        _siteMessage = siteMessage;
+        ShowErrorCopyField();
       }
       else
       {
@@ -1410,14 +1416,56 @@ namespace Yamadev.YamaStream.UI
       string message = GetTranslation("error.siteUnsupported").Replace("{0}", GetTranslation(siteKey));
       if (siteKey != "site.vimeo") return message;
 
-      // Vimeo's player can show a video the page's address cannot, though of
-      // those tried only some did, and with no sound. No form of its URL was
-      // found that plays with sound, so this says only that, and how the URL
-      // is made from the page's. The screen's text cannot be copied, so it
-      // stands on its own line, to be typed.
-      string playerUrl = UrlUtils.GetVimeoPlayerUrl(url);
-      if (string.IsNullOrEmpty(playerUrl)) return message;
-      return message + "\n" + GetTranslation("error.vimeoPlayerUrl") + "\n" + playerUrl;
+      // Vimeo's player can play a video the page's address cannot, though not
+      // all of those tried, and some with no sound. The screen's text cannot be
+      // copied and a world cannot make a URL from text, so the viewer copies the
+      // URL from a field and enters it (issue #361).
+      _errorCopyUrl = UrlUtils.GetVimeoPlayerUrl(url);
+      return message + "\n" + GetTranslation(string.IsNullOrEmpty(_errorCopyUrl) ? "error.vimeoShareEmbed" : "error.vimeoShareEmbedOrCopy");
+    }
+
+    // A named site's message stays until another video loads or this one stops:
+    // the retries would otherwise take it, and the field being copied from,
+    // away every few seconds.
+    private string _siteMessage = string.Empty;
+    private string _errorCopyUrl = string.Empty;
+
+    private void ClearSiteMessage()
+    {
+      _siteMessage = string.Empty;
+      _errorCopyUrl = string.Empty;
+      ShowErrorCopyField();
+    }
+
+    private void ShowErrorCopyField()
+    {
+      if (!Utilities.IsValid(_errorCopyField)) return;
+      bool shown = !string.IsNullOrEmpty(_errorCopyUrl);
+      if (shown)
+      {
+        _errorCopyField.text = _errorCopyUrl;
+        if (Utilities.IsValid(_errorCopyLabel)) _errorCopyLabel.text = GetTranslation("button.copyUrl");
+      }
+      _errorCopyField.gameObject.SetActive(shown);
+    }
+
+    // The field is not read-only, so that VRChat treats it as any other field;
+    // what the viewer types in is undone, as in the dialog's.
+    public void RestoreErrorCopyUrl()
+    {
+      if (Utilities.IsValid(_errorCopyField) && _errorCopyField.text != _errorCopyUrl) _errorCopyField.text = _errorCopyUrl;
+    }
+
+    // An embed code pasted in the URL field is no URL, so nothing can play it,
+    // and a world cannot make one from its text. Only the player who pasted it
+    // is told, in the dialog, what to copy and enter instead.
+    private void ShowVimeoEmbedCodeUrl(string entered)
+    {
+      if (!Utilities.IsValid(_modalDialog)) return;
+      string url = UrlUtils.GetVimeoEmbedUrl(entered);
+      if (string.IsNullOrEmpty(url)) return;
+      if (!_modalDialog.TryShow(GetTranslation("msg.vimeoEmbedCodeTitle"), GetTranslation("msg.vimeoEmbedCode"), GetTranslation("button.close"), "", this, null, null)) return;
+      _modalDialog.ShowCopyField(url, GetTranslation("button.copyUrl"));
     }
 
     // YouTube has its own line, and any other failure the same one (a track
@@ -1465,6 +1513,15 @@ namespace Yamadev.YamaStream.UI
 
     private void UpdateLoadingView()
     {
+      if (!string.IsNullOrEmpty(_siteMessage))
+      {
+        if (Utilities.IsValid(_loadingIndicator)) _loadingIndicator.SetActive(true);
+        if (Utilities.IsValid(_userUIAnimator)) _userUIAnimator.SetBool("Loading", false);
+        if (Utilities.IsValid(_statusMessageText)) _statusMessageText.text = _siteMessage;
+        SetErrorDetailsButtonShown(true);
+        UpdateIdleScreenShown(true);
+        return;
+      }
       if (Utilities.IsValid(_loadingIndicator)) _loadingIndicator.SetActive(_controller.IsLoading);
       if (Utilities.IsValid(_userUIAnimator)) _userUIAnimator.SetBool("Loading", _controller.IsLoading);
       if (Utilities.IsValid(_statusMessageText)) _statusMessageText.text = GetTranslation("msg.videoLoading");
@@ -1517,13 +1574,18 @@ namespace Yamadev.YamaStream.UI
     // at once, on every UI, shown or not (#356). They mark it to be redrawn
     // in Update, once, and not until the UI is on, unless an error or
     // another redraw comes first.
-    public override void AfterVideoReady() => RequestUpdateUI();
+    public override void AfterVideoReady()
+    {
+      ClearSiteMessage();
+      RequestUpdateUI();
+    }
     public override void AfterVideoStarted() => RequestUpdateUI();
     public override void AfterVideoEnded() => RequestUpdateUI();
     public override void AfterVideoPlayed() => RequestUpdateUI();
     public override void AfterVideoPaused() => RequestUpdateUI();
     public override void AfterVideoStopped()
     {
+      ClearSiteMessage();
       RequestUpdateUI();
       RequestTracksRedraw();
     }
@@ -1549,6 +1611,7 @@ namespace Yamadev.YamaStream.UI
     public override void AfterShufflePlayChanged(bool shufflePlay) => UpdatePlaybackView();
     public override void AfterTrackLoaded()
     {
+      ClearSiteMessage();
       RequestUpdateUI();
       RequestTracksRedraw();
     }
