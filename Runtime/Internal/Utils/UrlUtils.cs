@@ -58,12 +58,12 @@ namespace Yamadev.YamaStream
       return rest.Substring(slashIndex);
     }
 
-    // The translation key of the name of a site whose videos failed when tried
-    // on VRChat (issue #361), or empty for any other URL. Only the forms of URL
-    // that were tried: it is read after a video has failed, so a site that
-    // later plays simply never gets here, and a world keeps the list it was
-    // built with.
-    public static string GetFailingSiteKey(string url)
+    // The translation key of the name of a site not supported, as its videos
+    // failed when tried on VRChat (issue #361), or empty for any other URL. Only
+    // the forms of URL that were tried: it is read after a video has failed, so
+    // a site that later plays simply never gets here, and a world keeps the list
+    // it was built with.
+    public static string GetUnsupportedSiteKey(string url)
     {
       string host = GetHostFromUrl(url);
       if (host == "www.nicovideo.jp") return "site.niconico";

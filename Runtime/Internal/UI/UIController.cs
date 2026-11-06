@@ -1377,14 +1377,12 @@ namespace Yamadev.YamaStream.UI
         default:
           return;
       }
-      string siteHint = GetFailingSiteHint(videoError);
-      if (!string.IsNullOrEmpty(siteHint))
+      string siteMessage = GetUnsupportedSiteMessage(videoError);
+      if (!string.IsNullOrEmpty(siteMessage))
       {
-        // The site's line says more than the message's second line, and the
-        // screen has room for three lines above the Details button.
-        int titleEnd = message.IndexOf('\n');
-        if (titleEnd >= 0) message = message.Substring(0, titleEnd);
-        message = $"{message}\n{siteHint}";
+        // Says more than the message it replaces, whose kind of error is still
+        // in the details. The screen has room for three lines above them.
+        message = siteMessage;
       }
       else
       {
@@ -1397,26 +1395,29 @@ namespace Yamadev.YamaStream.UI
 
     // Udon is told only PlayerError, whatever went wrong, so the viewer cannot
     // tell a fault from a site VRChat cannot play. A site that failed when
-    // tried is named (issue #361). A world keeps these as built, but they only
-    // show once a video has failed, so they say what seems to be so, not what
-    // is. Empty for any other URL, or if YouTube's own line applies.
-    private string GetFailingSiteHint(VideoError videoError)
+    // tried is named as not supported (issue #361). A world keeps these as
+    // built, but they only show once a video has failed, so a site that later
+    // plays does not show them. Empty for any other URL, or if YouTube's own
+    // line applies.
+    private string GetUnsupportedSiteMessage(VideoError videoError)
     {
       if (videoError != VideoError.PlayerError || _playbackImage || ShouldShowYouTubeHint(videoError)) return string.Empty;
 
       string url = TrackUtils.GetUrl(_controller.Track).Get();
-      string siteKey = UrlUtils.GetFailingSiteKey(url);
+      string siteKey = UrlUtils.GetUnsupportedSiteKey(url);
       if (string.IsNullOrEmpty(siteKey)) return string.Empty;
 
-      string hint = GetTranslation("error.siteFails").Replace("{0}", GetTranslation(siteKey));
-      if (siteKey != "site.vimeo") return hint;
+      string message = GetTranslation("error.siteUnsupported").Replace("{0}", GetTranslation(siteKey));
+      if (siteKey != "site.vimeo") return message;
 
       // Vimeo's player can show a video the page's address cannot, though of
       // those tried only some did, and with no sound. No form of its URL was
-      // found that plays with sound, so this says only that.
+      // found that plays with sound, so this says only that, and how the URL
+      // is made from the page's. The screen's text cannot be copied, so it
+      // stands on its own line, to be typed.
       string playerUrl = UrlUtils.GetVimeoPlayerUrl(url);
-      if (string.IsNullOrEmpty(playerUrl)) return hint;
-      return hint + "\n" + GetTranslation("error.vimeoPlayerUrl").Replace("{0}", playerUrl);
+      if (string.IsNullOrEmpty(playerUrl)) return message;
+      return message + "\n" + GetTranslation("error.vimeoPlayerUrl") + "\n" + playerUrl;
     }
 
     // YouTube has its own line, and any other failure the same one (a track
