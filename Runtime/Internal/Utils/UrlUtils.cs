@@ -94,6 +94,16 @@ namespace Yamadev.YamaStream
       return VimeoPlayerUrl + id;
     }
 
+    // Whether the text is an embed code from Vimeo's Share, not a URL. No player
+    // can play one, but it goes out as a track all the same, so that everyone is
+    // told what to enter instead, as with any other URL that fails (issue #361).
+    public static bool IsVimeoEmbedCode(string text)
+    {
+      if (string.IsNullOrEmpty(text)) return false;
+      string lower = text.ToLower();
+      return !lower.StartsWith("http://") && !lower.StartsWith("https://") && !string.IsNullOrEmpty(GetVimeoEmbedUrl(text));
+    }
+
     // The player's URL in an embed code from Vimeo's Share, its &amp; undone, or
     // empty when the text holds none (issue #361).
     public static string GetVimeoEmbedUrl(string text)

@@ -630,9 +630,7 @@ namespace Yamadev.YamaStream.UI
 
       if (_controller.FindHandlerIndexForUrl(urlInputField.GetUrl()) < 0)
       {
-        string entered = urlInputField.GetUrl().Get();
         urlInputField.SetUrl(VRCUrl.Empty);
-        ShowVimeoEmbedCodeUrl(entered);
         return;
       }
 
@@ -1293,6 +1291,7 @@ namespace Yamadev.YamaStream.UI
       var track = _controller.Track;
       var title = TrackUtils.GetTitle(track);
       var url = TrackUtils.GetUrl(track).Get();
+      if (UrlUtils.IsVimeoEmbedCode(url)) url = UrlUtils.GetVimeoEmbedUrl(url);
       bool empty = string.IsNullOrEmpty(title) && string.IsNullOrEmpty(url);
       // The name and version match the info panel's, so they never go stale.
       bool branding = empty && Utilities.IsValid(_trackInfoLogo);
@@ -1412,9 +1411,18 @@ namespace Yamadev.YamaStream.UI
     // or kind of error.
     private bool TrySetSiteMessage(VideoError videoError)
     {
+      string url = TrackUtils.GetUrl(_controller.Track).Get();
+
+      // An embed code never plays, whichever error it ends in.
+      if (UrlUtils.IsVimeoEmbedCode(url))
+      {
+        _errorCopyUrl = UrlUtils.GetVimeoEmbedUrl(url);
+        _siteMessage = GetTranslation("error.vimeoEmbedCode");
+        return true;
+      }
+
       if (videoError != VideoError.PlayerError || _playbackImage) return false;
 
-      string url = TrackUtils.GetUrl(_controller.Track).Get();
       string siteKey = UrlUtils.GetUnsupportedSiteKey(url);
       if (string.IsNullOrEmpty(siteKey)) return false;
 
@@ -1460,18 +1468,6 @@ namespace Yamadev.YamaStream.UI
     public void RestoreErrorCopyUrl()
     {
       if (Utilities.IsValid(_errorCopyField) && _errorCopyField.text != _errorCopyUrl) _errorCopyField.text = _errorCopyUrl;
-    }
-
-    // An embed code pasted in the URL field is no URL, so nothing can play it,
-    // and a world cannot make one from its text. Only the player who pasted it
-    // is told, in the dialog, what to copy and enter instead.
-    private void ShowVimeoEmbedCodeUrl(string entered)
-    {
-      if (!Utilities.IsValid(_modalDialog)) return;
-      string url = UrlUtils.GetVimeoEmbedUrl(entered);
-      if (string.IsNullOrEmpty(url)) return;
-      if (!_modalDialog.TryShow(GetTranslation("msg.vimeoEmbedCodeTitle"), GetTranslation("msg.vimeoEmbedCode"), GetTranslation("button.close"), "", this, null, null)) return;
-      _modalDialog.ShowCopyField(url, GetTranslation("button.copyUrl"));
     }
 
     // YouTube has its own line, and any other failure the same one (a track
