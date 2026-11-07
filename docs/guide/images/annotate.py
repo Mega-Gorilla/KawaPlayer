@@ -278,7 +278,7 @@ MARKS = {
     "screen/resync": dict(src="screen/controls", crop=(0, 450, 700, 720), scale=0.667, marks=[
         dict(box=(120, 621, 184, 685), cap="ReSync（押した人の画面だけ）", at=(400, 500)),
     ]),
-    "screen/volume": dict(crop=(700, 100, 1280, 720), scale=0.667, marks=[
+    "screen/volume": dict(crop=(700, 100, 1170, 720), scale=0.667, marks=[
         dict(box=(930, 158, 1004, 200), n=1),
         dict(box=(944, 208, 992, 456), n=2),
         dict(box=(942, 478, 994, 530), n=3),
