@@ -255,12 +255,13 @@ namespace Yamadev.YamaStream.UI
         }
       }
 
+      // Sound Only is the same in every language, in a font of its own.
       var texts = GetComponentsInChildren<Text>(true);
       int len = texts.Length;
       for (int i = 0; i < len; i++)
       {
         var text = texts[i];
-        if (Utilities.IsValid(text)) text.font = font;
+        if (Utilities.IsValid(text) && text != _soundOnlyText) text.font = font;
       }
     }
 

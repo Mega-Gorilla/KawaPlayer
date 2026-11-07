@@ -135,6 +135,7 @@ namespace Yamadev.YamaStream.UI
     [SerializeField] private Text _statusMessageText;
     [SerializeField, RegisterEvent(nameof(InputField.onValueChanged), nameof(RestoreErrorCopyUrl))] private InputField _errorCopyField;
     [SerializeField] private Text _errorCopyLabel;
+    [SerializeField] private Text _soundOnlyText;
 
     [Header("Version Info")]
     [SerializeField] private TextAsset _updateLogTextAsset;
@@ -192,6 +193,9 @@ namespace Yamadev.YamaStream.UI
         return;
       }
       _controller.AddListener(this);
+      // Started while a video plays (the tablet's player, first opened after
+      // it began), this UI heard no start.
+      RequestSoundOnlyCheck();
       _timeFormat = _controller.TimeFormat;
       _timesInWholeSeconds = _timeFormat != null && _timeFormat.Length > 1 && _timeFormat.IndexOf('f') < 0 && _timeFormat.IndexOf('F') < 0;
 
@@ -1545,6 +1549,51 @@ namespace Yamadev.YamaStream.UI
       if (Utilities.IsValid(_idleScreenImage) && Utilities.IsValid(_idleScreenSprite)) _idleScreenImage.sprite = _idleScreenSprite;
     }
 
+    // A video with no picture leaves the screen black while it plays, which
+    // looks broken (issue #362), as SoundCloud and Mixcloud do. A second after
+    // it starts, one with no size and no texture is taken to be sound only:
+    // both, as a player on another platform may not tell its size, and a video
+    // must never be covered. A texture that comes later ends it. Read at that
+    // moment and not every frame (#356).
+    private const float SoundOnlyCheckDelay = 1f;
+    private bool _soundOnly;
+    private bool _hasVideoTexture;
+    private float _soundOnlyCheckAt;
+    private bool _soundOnlyCheckWaiting;
+
+    // A start while a check waits moves that check, so that a video never has
+    // less than its second: its texture may not have come yet.
+    private void RequestSoundOnlyCheck()
+    {
+      if (!Utilities.IsValid(_soundOnlyText)) return;
+      _soundOnlyCheckAt = Time.time + SoundOnlyCheckDelay;
+      if (_soundOnlyCheckWaiting) return;
+      _soundOnlyCheckWaiting = true;
+      SendCustomEventDelayedSeconds(nameof(_CheckSoundOnly), SoundOnlyCheckDelay);
+    }
+
+    public void _CheckSoundOnly()
+    {
+      _soundOnlyCheckWaiting = false;
+      float left = _soundOnlyCheckAt - Time.time;
+      if (left > 0f)
+      {
+        _soundOnlyCheckWaiting = true;
+        SendCustomEventDelayedSeconds(nameof(_CheckSoundOnly), left);
+        return;
+      }
+      PlayerHandler handler = _controller.ActiveHandler;
+      SetSoundOnly(!_hasVideoTexture && !handler.IsStopped && !handler.IsLoading && !handler.IsError
+        && handler.Type != VideoPlayerType.ImageViewer && handler.VideoWidth == 0);
+    }
+
+    private void SetSoundOnly(bool soundOnly)
+    {
+      if (soundOnly == _soundOnly) return;
+      _soundOnly = soundOnly;
+      if (Utilities.IsValid(_soundOnlyText)) _soundOnlyText.gameObject.SetActive(soundOnly);
+    }
+
     // The idle screen shows while stopped, loading or showing an error, and
     // the logo and name over the default image. The loading icon and words,
     // and an error's message, are drawn where the name is (#332), so while
@@ -1579,12 +1628,22 @@ namespace Yamadev.YamaStream.UI
       ClearSiteMessage();
       RequestUpdateUI();
     }
-    public override void AfterVideoStarted() => RequestUpdateUI();
+    public override void AfterVideoStarted()
+    {
+      RequestUpdateUI();
+      RequestSoundOnlyCheck();
+    }
+    public override void AfterTextureUpdated(Texture texture)
+    {
+      _hasVideoTexture = Utilities.IsValid(texture);
+      if (_hasVideoTexture) SetSoundOnly(false);
+    }
     public override void AfterVideoEnded() => RequestUpdateUI();
     public override void AfterVideoPlayed() => RequestUpdateUI();
     public override void AfterVideoPaused() => RequestUpdateUI();
     public override void AfterVideoStopped()
     {
+      SetSoundOnly(false);
       ClearSiteMessage();
       RequestUpdateUI();
       RequestTracksRedraw();
@@ -1595,6 +1654,7 @@ namespace Yamadev.YamaStream.UI
       // player in use may already be the fallback, not in error. So the
       // redraw asked for before it is done first, as each event drew at once
       // before: left for Update, it put the loading words back over the error.
+      SetSoundOnly(false);
       if (_uiUpdateWaiting) UpdateUI();
       ReadPlaybackState();
       UpdateErrorView(videoError);
@@ -1611,6 +1671,7 @@ namespace Yamadev.YamaStream.UI
     public override void AfterShufflePlayChanged(bool shufflePlay) => UpdatePlaybackView();
     public override void AfterTrackLoaded()
     {
+      SetSoundOnly(false);
       ClearSiteMessage();
       RequestUpdateUI();
       RequestTracksRedraw();
@@ -1618,6 +1679,7 @@ namespace Yamadev.YamaStream.UI
     public override void AfterTrackUpdated() => UpdateTrackView();
     public override void AfterVideoRetry()
     {
+      SetSoundOnly(false);
       ReadPlaybackState();
       UpdateLoadingView();
       UpdateControlsView();

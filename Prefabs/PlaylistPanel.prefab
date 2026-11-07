@@ -427,6 +427,7 @@ MonoBehaviour:
   _statusMessageText: {fileID: 0}
   _errorCopyField: {fileID: 0}
   _errorCopyLabel: {fileID: 0}
+  _soundOnlyText: {fileID: 0}
   _updateLogTextAsset: {fileID: 0}
   _versionDisplayText: {fileID: 0}
   _updateLogText: {fileID: 0}
