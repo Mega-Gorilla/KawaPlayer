@@ -193,6 +193,9 @@ namespace Yamadev.YamaStream.UI
         return;
       }
       _controller.AddListener(this);
+      // Started while a video plays (the tablet's player, first opened after
+      // it began), this UI heard no start.
+      RequestSoundOnlyCheck();
       _timeFormat = _controller.TimeFormat;
       _timesInWholeSeconds = _timeFormat != null && _timeFormat.Length > 1 && _timeFormat.IndexOf('f') < 0 && _timeFormat.IndexOf('F') < 0;
 
@@ -1555,9 +1558,30 @@ namespace Yamadev.YamaStream.UI
     private const float SoundOnlyCheckDelay = 1f;
     private bool _soundOnly;
     private bool _hasVideoTexture;
+    private float _soundOnlyCheckAt;
+    private bool _soundOnlyCheckWaiting;
+
+    // A start while a check waits moves that check, so that a video never has
+    // less than its second: its texture may not have come yet.
+    private void RequestSoundOnlyCheck()
+    {
+      if (!Utilities.IsValid(_soundOnlyText)) return;
+      _soundOnlyCheckAt = Time.time + SoundOnlyCheckDelay;
+      if (_soundOnlyCheckWaiting) return;
+      _soundOnlyCheckWaiting = true;
+      SendCustomEventDelayedSeconds(nameof(_CheckSoundOnly), SoundOnlyCheckDelay);
+    }
 
     public void _CheckSoundOnly()
     {
+      _soundOnlyCheckWaiting = false;
+      float left = _soundOnlyCheckAt - Time.time;
+      if (left > 0f)
+      {
+        _soundOnlyCheckWaiting = true;
+        SendCustomEventDelayedSeconds(nameof(_CheckSoundOnly), left);
+        return;
+      }
       PlayerHandler handler = _controller.ActiveHandler;
       SetSoundOnly(!_hasVideoTexture && !_controller.Stopped && !_controller.IsLoading && !_controller.IsError
         && handler.Type != VideoPlayerType.ImageViewer && handler.VideoWidth == 0);
@@ -1607,7 +1631,7 @@ namespace Yamadev.YamaStream.UI
     public override void AfterVideoStarted()
     {
       RequestUpdateUI();
-      if (Utilities.IsValid(_soundOnlyText)) SendCustomEventDelayedSeconds(nameof(_CheckSoundOnly), SoundOnlyCheckDelay);
+      RequestSoundOnlyCheck();
     }
     public override void AfterTextureUpdated(Texture texture)
     {
