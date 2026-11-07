@@ -4,6 +4,8 @@ namespace Yamadev.YamaStream
 {
   public static class UrlUtils
   {
+    private const string VimeoPlayerUrl = "https://player.vimeo.com/video/";
+
     public static string GetProtocolFromUrl(string url)
     {
       if (string.IsNullOrEmpty(url)) return string.Empty;
@@ -56,6 +58,63 @@ namespace Yamadev.YamaStream
       int slashIndex = rest.IndexOf('/');
       if (slashIndex == -1) return "/";
       return rest.Substring(slashIndex);
+    }
+
+    // The translation key of the name of a site not supported, as its videos
+    // failed when tried on VRChat (issue #361), or empty for any other URL. Only
+    // the forms of URL that were tried: it is read after a video has failed, so
+    // a site that later plays simply never gets here, and a world keeps the list
+    // it was built with.
+    public static string GetUnsupportedSiteKey(string url)
+    {
+      string host = GetHostFromUrl(url);
+      if (host == "www.nicovideo.jp") return "site.niconico";
+      if (host == "vimeo.com" || host == "www.vimeo.com") return "site.vimeo";
+      if (host == "www.tiktok.com") return "site.tiktok";
+      if (host == "www.dailymotion.com") return "site.dailymotion";
+      if (host == "v.youku.com") return "site.youku";
+      if (host == "twitcasting.tv" && GetPathFromUrl(url).Contains("/movie/")) return "site.twitcastingRecording";
+      return string.Empty;
+    }
+
+    // What a Vimeo video's address, vimeo.com/<number>, is on Vimeo's player,
+    // which skips the login VRChat's yt-dlp asks for on vimeo.com, though not
+    // every video plays (issue #361). Empty when the URL names no video by its
+    // number alone, as a channel's does.
+    public static string GetVimeoPlayerUrl(string url)
+    {
+      string id = GetPathFromUrl(url);
+      if (id.EndsWith("/")) id = id.Substring(0, id.Length - 1);
+      if (id.Length < 2) return string.Empty;
+      id = id.Substring(1);
+      for (int i = 0; i < id.Length; i++)
+      {
+        if (id[i] < '0' || id[i] > '9') return string.Empty;
+      }
+      return VimeoPlayerUrl + id;
+    }
+
+    // Whether the text is an embed code from Vimeo's Share, not a URL. No player
+    // can play one, but it goes out as a track all the same, so that everyone is
+    // told what to enter instead, as with any other URL that fails (issue #361).
+    public static bool IsVimeoEmbedCode(string text)
+    {
+      if (string.IsNullOrEmpty(text)) return false;
+      string lower = text.ToLower();
+      return !lower.StartsWith("http://") && !lower.StartsWith("https://") && !string.IsNullOrEmpty(GetVimeoEmbedUrl(text));
+    }
+
+    // The player's URL in an embed code from Vimeo's Share, its &amp; undone, or
+    // empty when the text holds none (issue #361).
+    public static string GetVimeoEmbedUrl(string text)
+    {
+      if (string.IsNullOrEmpty(text)) return string.Empty;
+      int start = text.IndexOf(VimeoPlayerUrl);
+      if (start < 0) return string.Empty;
+      int end = start + VimeoPlayerUrl.Length;
+      while (end < text.Length && text[end] != '"' && text[end] != '\'' && text[end] != ' ' && text[end] != '<' && text[end] != '>') end++;
+      if (end == start + VimeoPlayerUrl.Length) return string.Empty;
+      return text.Substring(start, end - start).Replace("&amp;", "&");
     }
 
     public static bool IsYouTubeUrl(string url)
