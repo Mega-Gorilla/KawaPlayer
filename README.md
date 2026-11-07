@@ -50,6 +50,8 @@ YamaPlayer と KawaPlayer は、同じプロジェクトに一緒には入れら
 
 ロゴとクイックスタートのポスター（[`Media~/`](Media~/)）は、この利用規約とは別の [KawaPlayer 素材ライセンス](Media~/LICENSE.md) に従います。KawaPlayer を置いたワールドへの掲示（販売するワールドへの同梱を含む）や紹介に使えますが、著作権フリーではありません。パッケージの中のロゴ（`Assets/Images/kawaplayer-logo.png`）も同じ条件です。
 
+フォント（[`Assets/Fonts/`](Assets/Fonts/)）は、この利用規約とは別の [SIL Open Font License 1.1](https://openfontlicense.org/) に従います。フォント単体での販売はできません。
+
 ## クレジット
 
 - [YamaPlayer](https://github.com/koorimizuw/YamaPlayer) by [kwxxw](https://yamadev.booth.pm)
