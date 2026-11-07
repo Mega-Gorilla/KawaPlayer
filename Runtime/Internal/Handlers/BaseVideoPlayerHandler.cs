@@ -41,8 +41,9 @@ namespace Yamadev.YamaStream
 
     protected override bool IsValidUrl(VRCUrl url)
     {
-      if (_type != VideoPlayerType.AVProVideoPlayer) return base.IsValidUrl(url);
       if (!Utilities.IsValid(url)) return false;
+      if (UrlUtils.IsVimeoEmbedCode(url.Get())) return true;
+      if (_type != VideoPlayerType.AVProVideoPlayer) return base.IsValidUrl(url);
       string u = url.Get().ToLower();
       return u.StartsWith("http://") || u.StartsWith("https://")
         || u.StartsWith("rtsp://") || u.StartsWith("rtspt://") || u.StartsWith("rtspu://")
@@ -211,11 +212,22 @@ namespace Yamadev.YamaStream
     {
       if (!Utilities.IsValid(_baseVideoPlayer)) return;
 
-      _baseVideoPlayer.LoadURL(url);
+      // VRChat refuses an embed code from inside LoadURL, so its error would come
+      // before the load had finished, and the load's end would wipe it. It fails
+      // a frame later instead, like any other URL (issue #361).
+      if (UrlUtils.IsVimeoEmbedCode(url.Get())) SendCustomEventDelayedFrames(nameof(_RefuseUrl), 1);
+      else _baseVideoPlayer.LoadURL(url);
       _loadedUrl = url;
       _stopped = false;
       _loading = true;
       _isError = false;
+    }
+
+    // Only if the embed code is still what is loading: it may have been stopped,
+    // or another URL loaded, in the frame it waited.
+    public void _RefuseUrl()
+    {
+      if (_loading && Utilities.IsValid(_loadedUrl) && UrlUtils.IsVimeoEmbedCode(_loadedUrl.Get())) OnVideoError(VideoError.InvalidURL);
     }
 
     public override void Play()

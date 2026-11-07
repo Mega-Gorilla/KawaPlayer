@@ -12,7 +12,7 @@ VRChat のワールドに置く、無料の動画プレイヤーです。[VHub P
 - **タブレット：** 手元で動画を操作し、写真を見せたり、スクリーンに送ったりできます。誰が来たかも分かります。
 - **自動再生(Owner)：** インスタンスを作った人が、入ったときに流す動画を VRChat の中で決めておけます（自分で作った Invite・Friends などのインスタンスで使えます）。
 - **全員リロードボタン：** ライブ配信のイベントで、全員の動画を一度に読み込み直せます。
-- **YamaPlayer の機能：** YouTube・Twitch・ライブ配信の再生、キューと履歴、カラオケ、AudioLink・LTCGI・Light Volume、9 言語など。
+- **YamaPlayer の機能：** YouTube・Twitch・ライブ配信などの再生（[再生できるサイト](https://github.com/Mega-Gorilla/KawaPlayer/blob/develop/docs/guide/playing.md#再生できるサイト)）、キューと履歴、カラオケ、AudioLink・LTCGI・Light Volume、9 言語など。
 
 ## 入れ方
 
@@ -49,6 +49,8 @@ YamaPlayer と KawaPlayer は、同じプロジェクトに一緒には入れら
 クレジット記載は任意ですが、**販売ワールドアセットに取り組む場合はクレジット記載が必須**です。
 
 ロゴとクイックスタートのポスター（[`Media~/`](Media~/)）は、この利用規約とは別の [KawaPlayer 素材ライセンス](Media~/LICENSE.md) に従います。KawaPlayer を置いたワールドへの掲示（販売するワールドへの同梱を含む）や紹介に使えますが、著作権フリーではありません。パッケージの中のロゴ（`Assets/Images/kawaplayer-logo.png`）も同じ条件です。
+
+フォント（[`Assets/Fonts/`](Assets/Fonts/)）は、この利用規約とは別の [SIL Open Font License 1.1](https://openfontlicense.org/) に従います。フォント単体での販売はできません。
 
 ## クレジット
 

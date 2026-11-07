@@ -133,6 +133,9 @@ namespace Yamadev.YamaStream.UI
     [Header("Loading & Message")]
     [SerializeField] private GameObject _loadingIndicator;
     [SerializeField] private Text _statusMessageText;
+    [SerializeField, RegisterEvent(nameof(InputField.onValueChanged), nameof(RestoreErrorCopyUrl))] private InputField _errorCopyField;
+    [SerializeField] private Text _errorCopyLabel;
+    [SerializeField] private Text _soundOnlyText;
 
     [Header("Version Info")]
     [SerializeField] private TextAsset _updateLogTextAsset;
@@ -190,6 +193,9 @@ namespace Yamadev.YamaStream.UI
         return;
       }
       _controller.AddListener(this);
+      // Started while a video plays (the tablet's player, first opened after
+      // it began), this UI heard no start.
+      RequestSoundOnlyCheck();
       _timeFormat = _controller.TimeFormat;
       _timesInWholeSeconds = _timeFormat != null && _timeFormat.Length > 1 && _timeFormat.IndexOf('f') < 0 && _timeFormat.IndexOf('F') < 0;
 
@@ -1289,6 +1295,7 @@ namespace Yamadev.YamaStream.UI
       var track = _controller.Track;
       var title = TrackUtils.GetTitle(track);
       var url = TrackUtils.GetUrl(track).Get();
+      if (UrlUtils.IsVimeoEmbedCode(url)) url = UrlUtils.GetVimeoEmbedUrl(url);
       bool empty = string.IsNullOrEmpty(title) && string.IsNullOrEmpty(url);
       // The name and version match the info panel's, so they never go stale.
       bool branding = empty && Utilities.IsValid(_trackInfoLogo);
@@ -1350,11 +1357,17 @@ namespace Yamadev.YamaStream.UI
       if (Utilities.IsValid(_brightnessValueText)) _brightnessValueText.text = $"{Mathf.Ceil(_controller.Brightness * 100)}%";
     }
 
-    private void UpdateErrorView(VideoError videoError)
+    // What shows behind an error's message.
+    private void ShowErrorScreen()
     {
       if (Utilities.IsValid(_loadingIndicator)) _loadingIndicator.SetActive(true);
       if (Utilities.IsValid(_userUIAnimator)) _userUIAnimator.SetBool("Loading", false);
       UpdateIdleScreenShown(true);
+    }
+
+    private void UpdateErrorView(VideoError videoError)
+    {
+      ShowErrorScreen();
       if (!_statusMessageText) return;
       string message;
       switch (videoError)
@@ -1377,6 +1390,94 @@ namespace Yamadev.YamaStream.UI
         default:
           return;
       }
+      if (TrySetSiteMessage(videoError))
+      {
+        // Says more than the message it replaces, whose kind of error is still
+        // in the details. The screen has room for three lines above them.
+        message = _siteMessage;
+        UpdateErrorCopyField();
+      }
+      else
+      {
+        // The latest error says what is wrong now: a site's message kept from
+        // an earlier try would come back with the next redraw (see below).
+        ClearSiteMessage();
+        string hint = GetErrorHint(videoError);
+        if (!string.IsNullOrEmpty(hint)) message = $"{message}\n{hint}";
+      }
+      _statusMessageText.text = message;
+      SetErrorDetailsButtonShown(true);
+    }
+
+    // Udon is told only PlayerError, whatever went wrong, so the viewer cannot
+    // tell a fault from a site VRChat cannot play. A site that failed when
+    // tried is named as not supported (issue #361). False for any other URL
+    // or kind of error.
+    private bool TrySetSiteMessage(VideoError videoError)
+    {
+      string url = TrackUtils.GetUrl(_controller.Track).Get();
+
+      // An embed code never plays, whichever error it ends in.
+      if (UrlUtils.IsVimeoEmbedCode(url))
+      {
+        _errorCopyUrl = UrlUtils.GetVimeoEmbedUrl(url);
+        _siteMessage = GetTranslation("error.vimeoEmbedCode");
+        return true;
+      }
+
+      if (videoError != VideoError.PlayerError || _playbackImage) return false;
+
+      string siteKey = UrlUtils.GetUnsupportedSiteKey(url);
+      if (string.IsNullOrEmpty(siteKey)) return false;
+
+      _siteMessage = GetTranslation("error.siteUnsupported").Replace("{0}", GetTranslation(siteKey));
+      if (siteKey != "site.vimeo") return true;
+
+      // Vimeo's player can play a video the page's address cannot, though not
+      // all of those tried, and some with no sound. The screen's text cannot be
+      // copied and a world cannot make a URL from text, so the viewer copies the
+      // URL from a field and enters it (issue #361).
+      _errorCopyUrl = UrlUtils.GetVimeoPlayerUrl(url);
+      _siteMessage += "\n" + GetTranslation(string.IsNullOrEmpty(_errorCopyUrl) ? "error.vimeoShareEmbed" : "error.vimeoShareEmbedOrCopy");
+      return true;
+    }
+
+    // A named site's message stays until another video loads, this one stops or
+    // gets ready, or another kind of error comes: the retries would otherwise
+    // take it, and the field being copied from, away every few seconds.
+    private string _siteMessage = string.Empty;
+    private string _errorCopyUrl = string.Empty;
+
+    private void ClearSiteMessage()
+    {
+      _siteMessage = string.Empty;
+      _errorCopyUrl = string.Empty;
+      UpdateErrorCopyField();
+    }
+
+    private void UpdateErrorCopyField()
+    {
+      if (!Utilities.IsValid(_errorCopyField)) return;
+      bool shown = !string.IsNullOrEmpty(_errorCopyUrl);
+      if (shown)
+      {
+        _errorCopyField.text = _errorCopyUrl;
+        if (Utilities.IsValid(_errorCopyLabel)) _errorCopyLabel.text = GetTranslation("button.copyUrl");
+      }
+      _errorCopyField.gameObject.SetActive(shown);
+    }
+
+    // The field is not read-only, so that VRChat treats it as any other field;
+    // what the viewer types in is undone, as in the dialog's.
+    public void RestoreErrorCopyUrl()
+    {
+      if (Utilities.IsValid(_errorCopyField) && _errorCopyField.text != _errorCopyUrl) _errorCopyField.text = _errorCopyUrl;
+    }
+
+    // YouTube has its own line, and any other failure the same one (a track
+    // from VHub comes by VHub's address, which names no site).
+    private string GetErrorHint(VideoError videoError)
+    {
       if (ShouldShowYouTubeHint(videoError))
       {
         // InvalidURL gets its own wording: a YouTube URL that passed the host
@@ -1384,12 +1485,10 @@ namespace Yamadev.YamaStream.UI
         // missing/private, or a yt-dlp failure - the editor resolver maps
         // empty yt-dlp output to InvalidURL). Retrying is not suggested there
         // because the video may simply not exist.
-        string hintKey = videoError == VideoError.InvalidURL ? "error.youtubeHintInvalidUrl" : "error.youtubeHint";
-        string hint = GetTranslation(hintKey);
-        if (!string.IsNullOrEmpty(hint)) message = $"{message}\n{hint}";
+        return GetTranslation(videoError == VideoError.InvalidURL ? "error.youtubeHintInvalidUrl" : "error.youtubeHint");
       }
-      _statusMessageText.text = message;
-      SetErrorDetailsButtonShown(true);
+      if (videoError != VideoError.PlayerError || _playbackImage) return string.Empty;
+      return GetTranslation("error.siteMayFail");
     }
 
     private bool ShouldShowYouTubeHint(VideoError videoError)
@@ -1420,6 +1519,13 @@ namespace Yamadev.YamaStream.UI
 
     private void UpdateLoadingView()
     {
+      if (!string.IsNullOrEmpty(_siteMessage))
+      {
+        ShowErrorScreen();
+        _statusMessageText.text = _siteMessage;
+        SetErrorDetailsButtonShown(true);
+        return;
+      }
       if (Utilities.IsValid(_loadingIndicator)) _loadingIndicator.SetActive(_controller.IsLoading);
       if (Utilities.IsValid(_userUIAnimator)) _userUIAnimator.SetBool("Loading", _controller.IsLoading);
       if (Utilities.IsValid(_statusMessageText)) _statusMessageText.text = GetTranslation("msg.videoLoading");
@@ -1441,6 +1547,51 @@ namespace Yamadev.YamaStream.UI
     private void UpdateIdleScreenView()
     {
       if (Utilities.IsValid(_idleScreenImage) && Utilities.IsValid(_idleScreenSprite)) _idleScreenImage.sprite = _idleScreenSprite;
+    }
+
+    // A video with no picture leaves the screen black while it plays, which
+    // looks broken (issue #362), as SoundCloud and Mixcloud do. A second after
+    // it starts, one with no size and no texture is taken to be sound only:
+    // both, as a player on another platform may not tell its size, and a video
+    // must never be covered. A texture that comes later ends it. Read at that
+    // moment and not every frame (#356).
+    private const float SoundOnlyCheckDelay = 1f;
+    private bool _soundOnly;
+    private bool _hasVideoTexture;
+    private float _soundOnlyCheckAt;
+    private bool _soundOnlyCheckWaiting;
+
+    // A start while a check waits moves that check, so that a video never has
+    // less than its second: its texture may not have come yet.
+    private void RequestSoundOnlyCheck()
+    {
+      if (!Utilities.IsValid(_soundOnlyText)) return;
+      _soundOnlyCheckAt = Time.time + SoundOnlyCheckDelay;
+      if (_soundOnlyCheckWaiting) return;
+      _soundOnlyCheckWaiting = true;
+      SendCustomEventDelayedSeconds(nameof(_CheckSoundOnly), SoundOnlyCheckDelay);
+    }
+
+    public void _CheckSoundOnly()
+    {
+      _soundOnlyCheckWaiting = false;
+      float left = _soundOnlyCheckAt - Time.time;
+      if (left > 0f)
+      {
+        _soundOnlyCheckWaiting = true;
+        SendCustomEventDelayedSeconds(nameof(_CheckSoundOnly), left);
+        return;
+      }
+      PlayerHandler handler = _controller.ActiveHandler;
+      SetSoundOnly(!_hasVideoTexture && !handler.IsStopped && !handler.IsLoading && !handler.IsError
+        && handler.Type != VideoPlayerType.ImageViewer && handler.VideoWidth == 0);
+    }
+
+    private void SetSoundOnly(bool soundOnly)
+    {
+      if (soundOnly == _soundOnly) return;
+      _soundOnly = soundOnly;
+      if (Utilities.IsValid(_soundOnlyText)) _soundOnlyText.gameObject.SetActive(soundOnly);
     }
 
     // The idle screen shows while stopped, loading or showing an error, and
@@ -1472,13 +1623,28 @@ namespace Yamadev.YamaStream.UI
     // at once, on every UI, shown or not (#356). They mark it to be redrawn
     // in Update, once, and not until the UI is on, unless an error or
     // another redraw comes first.
-    public override void AfterVideoReady() => RequestUpdateUI();
-    public override void AfterVideoStarted() => RequestUpdateUI();
+    public override void AfterVideoReady()
+    {
+      ClearSiteMessage();
+      RequestUpdateUI();
+    }
+    public override void AfterVideoStarted()
+    {
+      RequestUpdateUI();
+      RequestSoundOnlyCheck();
+    }
+    public override void AfterTextureUpdated(Texture texture)
+    {
+      _hasVideoTexture = Utilities.IsValid(texture);
+      if (_hasVideoTexture) SetSoundOnly(false);
+    }
     public override void AfterVideoEnded() => RequestUpdateUI();
     public override void AfterVideoPlayed() => RequestUpdateUI();
     public override void AfterVideoPaused() => RequestUpdateUI();
     public override void AfterVideoStopped()
     {
+      SetSoundOnly(false);
+      ClearSiteMessage();
       RequestUpdateUI();
       RequestTracksRedraw();
     }
@@ -1488,6 +1654,7 @@ namespace Yamadev.YamaStream.UI
       // player in use may already be the fallback, not in error. So the
       // redraw asked for before it is done first, as each event drew at once
       // before: left for Update, it put the loading words back over the error.
+      SetSoundOnly(false);
       if (_uiUpdateWaiting) UpdateUI();
       ReadPlaybackState();
       UpdateErrorView(videoError);
@@ -1504,12 +1671,15 @@ namespace Yamadev.YamaStream.UI
     public override void AfterShufflePlayChanged(bool shufflePlay) => UpdatePlaybackView();
     public override void AfterTrackLoaded()
     {
+      SetSoundOnly(false);
+      ClearSiteMessage();
       RequestUpdateUI();
       RequestTracksRedraw();
     }
     public override void AfterTrackUpdated() => UpdateTrackView();
     public override void AfterVideoRetry()
     {
+      SetSoundOnly(false);
       ReadPlaybackState();
       UpdateLoadingView();
       UpdateControlsView();

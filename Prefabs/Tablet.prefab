@@ -14687,6 +14687,9 @@ MonoBehaviour:
   _maxResolution4320Toggle: {fileID: 356924684321021373}
   _loadingIndicator: {fileID: 0}
   _statusMessageText: {fileID: 0}
+  _errorCopyField: {fileID: 0}
+  _errorCopyLabel: {fileID: 0}
+  _soundOnlyText: {fileID: 0}
   _updateLogTextAsset: {fileID: 4900000, guid: 011c1aa791634cf45b66a6811ad47c8a, type: 3}
   _versionDisplayText: {fileID: 9133801436393976236}
   _updateLogText: {fileID: 7475062757572090855}
