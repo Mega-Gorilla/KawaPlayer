@@ -1583,7 +1583,7 @@ namespace Yamadev.YamaStream.UI
         return;
       }
       PlayerHandler handler = _controller.ActiveHandler;
-      SetSoundOnly(!_hasVideoTexture && !_controller.Stopped && !_controller.IsLoading && !_controller.IsError
+      SetSoundOnly(!_hasVideoTexture && !handler.IsStopped && !handler.IsLoading && !handler.IsError
         && handler.Type != VideoPlayerType.ImageViewer && handler.VideoWidth == 0);
     }
 
