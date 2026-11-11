@@ -206,16 +206,23 @@ Editor が焼き込む前に確かめるため、`_validate` で `resolve` プ�
 
 ### 5.1 部品
 
-結果は、スクリーンの一覧の板（`Prefabs/UI/ListPanel.prefab`）の中に出す。図にすると、次の流れになる。
+結果は、スクリーンの一覧の板（`Prefabs/UI/ListPanel.prefab`）の中に出す。図にすると、次の流れになる。結果を出したあとも検索の表示は残り、戻るボタンでプレイリストの一覧に戻る。
 
 ```mermaid
-flowchart LR
-  A["プレイリストのタブ<br>検索の入口の行"] -->|押す| B["検索の表示<br>戻る・検索欄・結果の行"]
-  B -->|検索語を打って送る| C["VHub<br>GET /r/search"]
-  C -->|結果 60 件まで| B
-  B -->|結果の行を押す| D["VHub<br>GET /vrcurl/resolve/番号"]
-  D -->|id を照合| E["プレイリストの一覧に足す"]
-  B -->|戻る| A
+sequenceDiagram
+  participant U as 見る人
+  participant K as KawaPlayer（一覧の板）
+  participant V as VHub
+  U->>K: プレイリストのタブで、検索の入口の行を押す
+  K-->>U: 検索の表示に替える（戻る・検索欄・結果の行）
+  U->>K: 検索欄の末尾に語を打って送る
+  K->>V: GET /r/search?q=…
+  V-->>K: 結果（60 件まで）と、それぞれの番号
+  K-->>U: 結果の行を並べる（スクロール）
+  U->>K: 結果の行を押す
+  K->>V: GET /vrcurl/resolve/番号
+  V-->>K: プレイリストの曲と id
+  K-->>U: id を照合して、プレイリストの一覧に足す
 ```
 
 **図 1** 一覧の板の中の検索の流れ
