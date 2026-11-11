@@ -1,0 +1,292 @@
+using UdonSharp;
+using UnityEngine;
+using VRC.SDK3.Components;
+using VRC.SDK3.Data;
+using VRC.SDK3.StringLoading;
+using VRC.SDKBase;
+using VRC.Udon.Common.Interfaces;
+
+// Temporary, for stage 0 of the VHub search (#145): a URL field that starts with the search URL and a hint, as
+// the plan has it. Part A needs no input: what a field holds when it is set while off, how the start of the URL
+// reaches a server as it is, and how long Udon takes to read 60 results. Part B asks the test's runner to click
+// the field, type and press Enter, slot by slot, and writes what the field then holds and what comes back.
+[UdonBehaviourSyncMode(BehaviourSyncMode.None)]
+public class SearchProbe : UdonSharpBehaviour
+{
+  public VRCUrlInputField field;
+  public VRCUrlInputField hiddenField;
+  public Transform panel;
+  public Transform view;
+  public VRCUrl[] initials;
+  public int[] initialOf;
+  public UnityEngine.UI.Text note;
+  public UnityEngine.UI.Text fieldText;
+  public UnityEngine.UI.Text hiddenText;
+
+  private const float Step = 0.5f;
+
+  private int _i = -1;
+  private int _stage;
+  private int _ticks;
+  private bool _entered;
+  private bool _loading;
+  private float _loadStart;
+  private int _partA;
+  private bool _escSent;
+
+  private void Start()
+  {
+    Debug.Log("[KSP] ready slots=" + initialOf.Length + " initial0=[" + initials[0].Get() + "] len=" + initials[0].Get().Length + " initial1=[" + initials[1].Get() + "]");
+    SendCustomEventDelayedSeconds(nameof(_Place), 12f);
+    SendCustomEventDelayedSeconds(nameof(_PartA), 18f);
+  }
+
+  public void _Place()
+  {
+    Networking.LocalPlayer.TeleportTo(view.position, view.rotation);
+  }
+
+  private string Codes(string s)
+  {
+    int from = s.IndexOf("?q=");
+    from = from < 0 ? 0 : from + 3;
+    string o = "";
+    for (int k = from; k < s.Length; k++) o += ((int)s[k]).ToString("X4") + " ";
+    return o;
+  }
+
+  private void AlignGaze()
+  {
+    VRCPlayerApi.TrackingData head = Networking.LocalPlayer.GetTrackingData(VRCPlayerApi.TrackingDataType.Head);
+    Vector3 dir = head.rotation * Vector3.forward;
+    Vector3 normal = panel.forward;
+    float along = Vector3.Dot(dir, normal);
+    if (along <= 0.01f)
+    {
+      Debug.Log("[KSP] aim away");
+      return;
+    }
+    Vector3 target = field.transform.position;
+    float distance = Vector3.Dot(target - head.position, normal) / along;
+    Vector3 hit = head.position + dir * distance;
+    Vector3 delta = hit - target;
+    panel.position = panel.position + delta;
+    Debug.Log("[KSP] aim moved " + delta.magnitude.ToString("0.000"));
+  }
+
+  // Part A: nothing is pressed or typed.
+  public void _PartA()
+  {
+    _partA++;
+    if (_partA == 1)
+    {
+      AlignGaze();
+      Debug.Log("[KSP] hidden never-shown=[" + hiddenField.GetUrl().Get() + "]");
+      hiddenField.SetUrl(initials[0]);
+      Debug.Log("[KSP] hidden set-while-off=[" + hiddenField.GetUrl().Get() + "]");
+      hiddenField.gameObject.SetActive(true);
+    }
+    else if (_partA == 2)
+    {
+      Debug.Log("[KSP] hidden shown-after-set=[" + hiddenField.GetUrl().Get() + "] text=[" + hiddenText.text + "]");
+      Debug.Log("[KSP] shot 50");
+    }
+    else if (_partA == 4)
+    {
+      hiddenField.SetUrl(initials[0]);
+      Debug.Log("[KSP] hidden set-while-on=[" + hiddenField.GetUrl().Get() + "] text=[" + hiddenText.text + "]");
+      hiddenField.gameObject.SetActive(false);
+      hiddenField.gameObject.SetActive(true);
+    }
+    else if (_partA == 5)
+    {
+      Debug.Log("[KSP] hidden off-and-on=[" + hiddenField.GetUrl().Get() + "] text=[" + hiddenText.text + "]");
+      Debug.Log("[KSP] shot 51");
+      field.SetUrl(initials[0]);
+      Debug.Log("[KSP] direct 0 url=[" + field.GetUrl().Get() + "] text=[" + fieldText.text + "]");
+      _i = -2;
+      Load(field.GetUrl());
+    }
+    else if (_partA == 20)
+    {
+      field.SetUrl(initials[1]);
+      Debug.Log("[KSP] direct 1 url=[" + field.GetUrl().Get() + "]");
+      _i = -3;
+      Load(field.GetUrl());
+    }
+    else if (_partA == 34)
+    {
+      Debug.Log("[KSP] partA done");
+      _i = -1;
+      SendCustomEventDelayedSeconds(nameof(_Tick), Step);
+      return;
+    }
+    SendCustomEventDelayedSeconds(nameof(_PartA), Step);
+  }
+
+  private void Load(VRCUrl url)
+  {
+    _loading = true;
+    _loadStart = Time.realtimeSinceStartup;
+    VRCStringDownloader.LoadUrl(url, (IUdonEventReceiver)this);
+  }
+
+  // Part B: one slot at a time. The runner acts on the lines "focus", "press", "pre", "type", "enter", "esc" and "shot".
+  public void _Tick()
+  {
+    _ticks++;
+    if (_stage == 0)
+    {
+      _i++;
+      if (_i >= initialOf.Length)
+      {
+        Debug.Log("[KSP] done");
+        return;
+      }
+      _entered = false;
+      _loading = false;
+      _escSent = false;
+      field.SetUrl(initials[initialOf[_i]]);
+      note.text = "slot " + _i;
+      Debug.Log("[KSP] begin " + _i + " url=[" + field.GetUrl().Get() + "] text=[" + fieldText.text + "]");
+      _stage = 1;
+      _ticks = 0;
+    }
+    else if (_stage == 1)
+    {
+      if (_ticks == 1) Debug.Log("[KSP] focus " + _i);
+      if (_ticks >= 4 && _ticks <= 9) AlignGaze();
+      if (_ticks == 10) Debug.Log("[KSP] shot " + (100 + _i));
+      if (_ticks == 13)
+      {
+        Debug.Log("[KSP] press " + _i);
+        _stage = 2;
+        _ticks = 0;
+      }
+    }
+    else if (_stage == 2)
+    {
+      if (_ticks == 10) Debug.Log("[KSP] shot " + (200 + _i));
+      if (_ticks == 13) Debug.Log("[KSP] pre " + _i);
+      if (_ticks == 18) Debug.Log("[KSP] type " + _i);
+      if (_ticks == 32) Debug.Log("[KSP] shot " + (300 + _i));
+      if (_ticks == 36)
+      {
+        Debug.Log("[KSP] enter " + _i);
+        _stage = 3;
+        _ticks = 0;
+      }
+    }
+    else if (_stage == 3)
+    {
+      if (_entered && !_loading)
+      {
+        _stage = 4;
+        _ticks = 0;
+      }
+      else if (!_entered && _ticks == 12 && !_escSent)
+      {
+        _escSent = true;
+        Debug.Log("[KSP] esc " + _i);
+      }
+      else if (_ticks >= 30)
+      {
+        Debug.Log("[KSP] timeout " + _i + " entered=" + _entered + " loading=" + _loading + " url=[" + field.GetUrl().Get() + "]");
+        _stage = 4;
+        _ticks = 0;
+      }
+    }
+    else if (_stage == 4)
+    {
+      if (_ticks == 1) Debug.Log("[KSP] after " + _i + " url=[" + field.GetUrl().Get() + "] text=[" + fieldText.text + "]");
+      if (_ticks >= 12) _stage = 0;
+    }
+    SendCustomEventDelayedSeconds(nameof(_Tick), Step);
+  }
+
+  // The field's onEndEdit.
+  public void Entered()
+  {
+    bool canceled = field.wasCanceled;
+    VRCUrl url = field.GetUrl();
+    string s = url.Get();
+    Debug.Log("[KSP] entered " + _i + " canceled=" + canceled + " len=" + s.Length + " url=[" + s + "]");
+    Debug.Log("[KSP] codes " + _i + " " + Codes(s));
+    _entered = true;
+    if (canceled || _i < 0) return;
+    Load(url);
+  }
+
+  public override void OnStringLoadSuccess(IVRCStringDownload result)
+  {
+    float took = (Time.realtimeSinceStartup - _loadStart) * 1000f;
+    string json = result.Result;
+    Debug.Log("[KSP] loaded " + _i + " ms=" + took.ToString("0") + " chars=" + json.Length);
+    System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
+    string parse = "";
+    sw.Start();
+    bool ok = VRCJson.TryDeserializeFromJson(json, out DataToken root);
+    sw.Stop();
+    parse += sw.Elapsed.TotalMilliseconds.ToString("0.00") + " ";
+    for (int k = 0; k < 4; k++)
+    {
+      sw.Reset();
+      sw.Start();
+      VRCJson.TryDeserializeFromJson(json, out DataToken again);
+      sw.Stop();
+      parse += sw.Elapsed.TotalMilliseconds.ToString("0.00") + " ";
+    }
+    if (!ok || root.TokenType != TokenType.DataDictionary)
+    {
+      Debug.Log("[KSP] json " + _i + " not an object, parse=" + parse);
+      _loading = false;
+      return;
+    }
+    sw.Reset();
+    sw.Start();
+    DataDictionary d = root.DataDictionary;
+    string query = d["query"].String;
+    bool truncated = d["truncated"].Boolean;
+    DataList items = d["items"].DataList;
+    int count = items.Count;
+    string[] ids = new string[count];
+    string[] names = new string[count];
+    string[] owners = new string[count];
+    int[] tracks = new int[count];
+    int[] indexes = new int[count];
+    string[] matched = new string[count];
+    int withTrack = 0;
+    for (int j = 0; j < count; j++)
+    {
+      DataDictionary item = items[j].DataDictionary;
+      ids[j] = item["id"].String;
+      names[j] = item["name"].String;
+      owners[j] = item["ownerName"].String;
+      tracks[j] = (int)item["trackCount"].Number;
+      indexes[j] = (int)item["resolveIndex"].Number;
+      if (item.TryGetValue("matchedTrack", TokenType.String, out DataToken track))
+      {
+        matched[j] = track.String;
+        withTrack++;
+      }
+    }
+    sw.Stop();
+    Debug.Log("[KSP] json " + _i + " items=" + count + " withTrack=" + withTrack + " truncated=" + truncated + " parse_ms=" + parse + "walk_ms=" + sw.Elapsed.TotalMilliseconds.ToString("0.00") + " last=" + names[count - 1] + " query=[" + query + "]");
+    Debug.Log("[KSP] qcodes " + _i + " " + QueryCodes(query));
+    _loading = false;
+  }
+
+  private string QueryCodes(string s)
+  {
+    string o = "";
+    for (int k = 0; k < s.Length; k++) o += ((int)s[k]).ToString("X4") + " ";
+    return o;
+  }
+
+  public override void OnStringLoadError(IVRCStringDownload result)
+  {
+    float took = (Time.realtimeSinceStartup - _loadStart) * 1000f;
+    Debug.Log("[KSP] loaderror " + _i + " ms=" + took.ToString("0") + " code=" + result.ErrorCode + " error=[" + result.Error + "]");
+    _loading = false;
+  }
+}
