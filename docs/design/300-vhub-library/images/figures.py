@@ -228,6 +228,36 @@ def key_lifetime():
     figure("key-lifetime.svg", 650, "連携キーの寿命と、経路の記録", "計画案（D1） — 鍵は経路に入るので、短い寿命で記録の影響を抑える", "".join(parts))
 
 
+def key_input():
+    """D8: what the user has to type for the link URL, in three ways. The code shown is a made-up sample."""
+    def field(x, y, w, fixed, typed, hint):
+        # an input field: what is there already (grey), what the user types (blue, underlined), and a caret
+        fx = x + 14
+        parts = [f'<rect x="{x}" y="{y}" width="{w}" height="46" rx="8" fill="#FFFFFF" stroke="#8798A8" stroke-width="2"/>']
+        if fixed:
+            parts.append(text(fx, y + 30, fixed, 16, MUTED))
+            fx += sum(7.4 if ord(c) < 128 else 17.5 for c in fixed) + 10
+        parts.append(text(fx, y + 30, typed, 17, BLUE, 700))
+        tw = 10.6 * len(typed)
+        parts.append(f'<line x1="{fx}" y1="{y + 37}" x2="{fx + tw}" y2="{y + 37}" stroke="{BLUE}" stroke-width="2"/>')
+        parts.append(f'<line x1="{fx + tw + 5}" y1="{y + 10}" x2="{fx + tw + 5}" y2="{y + 36}" stroke="{INK}" stroke-width="2"/>')
+        parts.append(text(x, y + 72, hint, 16, INK))
+        return "".join(parts)
+
+    parts = [
+        text(40, 128, "青い下線が、使う人が入力する部分。灰色は、はじめから欄に入っている部分。コードは架空の例。", 17, MUTED),
+        box(40, 150, 1120, 150, "A. 連携 URL を丸ごと貼る", []),
+        field(60, 198, 1080, "", "https://playlist.vrc-hub.com/r/library/Xq7ZL0aB9cDeFgHiJkLmNoPqRsTu", "PC は貼り付けで済む。VR・Quest では打てない長さ（60 文字前後）。"),
+        box(40, 320, 1120, 150, "B. 前半を入れておき、短いコードだけ打つ", [], "#EFF8F4", GREEN),
+        field(60, 368, 1080, "https://playlist.vrc-hub.com/r/library/", "ABCD-EFGH-JKLM", "打つのは 12 文字ほど。大文字と小文字は区別しない。PC は丸ごと貼ってもよい。"),
+        box(40, 490, 1120, 150, "C. 検索の欄にコードを打つ（検索の計画 #145 と共用）", []),
+        field(60, 538, 1080, "…/r/search?q=　検索語を入力 →", "ABCD-EFGH-JKLM", "専用の欄を作らない。自分の一覧が、検索の結果と同じ形で出る。コードを検索語として表示しない扱いが要る。"),
+        note(665, ["どの案でも、入力は訪問ごとに 1 回。VRChat では URL を保存して次回に使うことができないため。",
+                   "読み込んだら欄をすぐ元に戻し、コードを画面に残さない。板を開き直したときも、欄に前半を入れ直す。"]),
+    ]
+    figure("key-input.svg", 775, "連携 URL の入力を軽くする（D8）", "判断待ち — VRChat の制約で入力は無くせない。打つ量を減らし、コードを打てる長さにする", "".join(parts))
+
+
 if __name__ == "__main__":
     journey()
     scope()
@@ -235,5 +265,6 @@ if __name__ == "__main__":
     key_lifetime()
     requests()
     numbers()
+    key_input()
     roadmap()
-    print("Generated journey.svg, scope.svg, boundaries.svg, key-lifetime.svg, requests.svg, numbers.svg, roadmap.svg")
+    print("Generated journey.svg, scope.svg, boundaries.svg, key-lifetime.svg, requests.svg, numbers.svg, key-input.svg, roadmap.svg")
