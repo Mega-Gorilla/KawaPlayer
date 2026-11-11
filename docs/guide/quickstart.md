@@ -112,7 +112,7 @@ Friends・Invite などのインスタンスでは、この設定がなくても
 
 ## 8. ワールドの中で動画を流す
 
-1. スクリーンを指して、左上の **URL を入力**（①）を押します。デスクトップでは視線（画面の中央）を、VR ではコントローラーのレーザーを向けてください。
+1. スクリーンを指して、左下の **URL を入力**（①、鎖のボタン）を押します。デスクトップでは視線（画面の中央）を、VR ではコントローラーのレーザーを向けてください。
 2. 動画の URL（YouTube など）か、[VHub Playlist](https://playlist.vrc-hub.com) のプレイリストの **VRChat用URL** を貼って、確定します。VRChat用URL のコピーのしかたは、[VHub Playlist の使い方](vhub.md#vrchat用url-をコピーする) にあります。
 
 ![「プレイリストを追加しました」の表示。『作業用BGM』の 12 曲を読み込んだ。URL を入れるボタンに印がある](images/screen/playlist-loaded.webp)

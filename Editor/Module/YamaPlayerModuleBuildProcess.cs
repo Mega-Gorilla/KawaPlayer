@@ -184,14 +184,14 @@ namespace Yamadev.YamaStream.Editor
           if (uiSlot == null || uiSlot.content == null) continue;
           if (string.IsNullOrEmpty(uiSlot.targetPath)) continue;
 
-          var targetTransform = uiController.transform.Find(uiSlot.targetPath);
-          if (targetTransform == null) continue;
+          foreach (var targetTransform in FindSlotTargets(uiController, uiSlot))
+          {
+            var copy = Object.Instantiate(uiSlot.content, targetTransform);
+            copy.name = uiSlot.content.name;
+            instantiatedSlots.Add((uiSlot, copy, targetTransform));
 
-          var copy = Object.Instantiate(uiSlot.content, targetTransform);
-          copy.name = uiSlot.content.name;
-          instantiatedSlots.Add((uiSlot, copy, targetTransform));
-
-          BuildObjectMapping(uiSlot.content, copy, objectMapping);
+            BuildObjectMapping(uiSlot.content, copy, objectMapping);
+          }
         }
 
         foreach (var (_, copy, _) in instantiatedSlots)
@@ -232,6 +232,25 @@ namespace Yamadev.YamaStream.Editor
         {
           Object.DestroyImmediate(uiSlot.content);
         }
+      }
+    }
+
+    // A slot in the settings is found from each settings panel of the UI, so
+    // one path reaches the screen's settings page and the tablet's settings
+    // app alike; any other slot is found from the UIController.
+    private static IEnumerable<Transform> FindSlotTargets(UIController uiController, ModuleUISlot uiSlot)
+    {
+      if (!uiSlot.inSettings)
+      {
+        var target = uiController.transform.Find(uiSlot.targetPath);
+        if (target != null) yield return target;
+        yield break;
+      }
+      foreach (var panel in uiController.GetComponentsInChildren<SettingsPanel>(true))
+      {
+        if (panel.GetComponentInParent<UIController>(true) != uiController) continue;
+        var target = panel.transform.Find(uiSlot.targetPath);
+        if (target != null) yield return target;
       }
     }
 

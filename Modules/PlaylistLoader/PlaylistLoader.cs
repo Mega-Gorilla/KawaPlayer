@@ -76,6 +76,10 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
     // slot is written. See LoadPlaylistFromUrlWithFeedback.
     private DynamicPlaylist _expectedReplaced;
     private string _expectedReplacedSourceUrl = string.Empty;
+    // Whether this load starts the playlist when nothing plays. Only a load
+    // with feedback can turn it off (the list's "+", #335); DefaultUrl and
+    // auto load always start it.
+    private bool _playWhenStopped = true;
 
     public VRCUrl[] RedirectPool => _redirectPool;
     public string PoolId => _poolId;
@@ -145,9 +149,10 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
     // lose, with the source URL that identified it. Both are re-checked at
     // the moment the slot is written, because the download sits in the
     // middle and anyone on any client can refill a slot while it runs. Pass
-    // null when no such promise was made.
+    // null when no such promise was made. playWhenStopped false adds the
+    // playlist without starting it, even when nothing plays.
     public void LoadPlaylistFromUrlWithFeedback(VRCUrl resolveUrl, PlaylistLoaderUI feedbackUi,
-        DynamicPlaylist expectedReplaced, string expectedReplacedSourceUrl)
+        DynamicPlaylist expectedReplaced, string expectedReplacedSourceUrl, bool playWhenStopped)
     {
       if (_isLoading)
       {
@@ -157,6 +162,7 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
       _feedbackUi = feedbackUi;
       _expectedReplaced = expectedReplaced;
       _expectedReplacedSourceUrl = expectedReplacedSourceUrl;
+      _playWhenStopped = playWhenStopped;
       LoadPlaylistFromUrl(resolveUrl);
     }
 
@@ -204,6 +210,7 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
     {
       _expectedReplaced = null;
       _expectedReplacedSourceUrl = string.Empty;
+      _playWhenStopped = true;
       if (_feedbackUi == null) return;
       var ui = _feedbackUi;
       _feedbackUi = null;
@@ -422,11 +429,12 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
       // - プレイヤーが停止中 (Stopped) の場合のみ自動再生する
       // - 停止中は読み込んだプレイリストの先頭 (シャッフル時はランダム) から再生
       // - 既に再生中・一時停止中の場合は読み込むのみ
+      // - 一覧の「＋」から足したときは、停止中でも読み込むのみ (#335)
       // Queue には触れないため、ユーザーが手動で積んだキューの挙動は変わらない。
       // ただし Queue に曲がある間は Forward() が Queue を優先し、
       // Controller.PlayTrack(object[]) が ClearPlaylistIndexes() を呼ぶため、
       // Queue 消化後にプレイリストへは自動復帰しない (上流と同じ挙動)。
-      if (_controller.Stopped)
+      if (_playWhenStopped && _controller.Stopped)
       {
         if (_controller.ShufflePlay) _controller.PlayRandomTrack(slot.Playlist);
         else _controller.PlayTrack(slot.Playlist, 0);

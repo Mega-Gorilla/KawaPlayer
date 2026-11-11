@@ -252,10 +252,10 @@ Controller.Start()
 ### 1. プレイリストからの直接再生
 
 ```
-ユーザー操作: プレイリスト内のトラックをクリック
+ユーザー操作: プレイリスト内のトラックの行をクリック（#354 から、行を押すと再生）
     │
     ▼
-UIController.PlayPlaylistTrack()
+UIController.PressPlaylistTrack()           （再生中の曲の行は、止まっているかエラーのときだけ再生）
     │
     ▼
 Controller.PlayTrack(Playlist playlist, int index)
@@ -281,15 +281,19 @@ Controller.PlayTrack(Playlist playlist, int index)
 ### 2. キューからの再生
 
 ```
-Controller.PlayTrackFromQueue()              (Controller.Playlist.cs:78-86)
+Controller.PlayTrackFromQueue()              (Controller.Playlist.cs:78-82)
     │
     ├── _queue.TrackCount == 0 → return
     │
-    ├── track = _queue.GetTrack(0)          先頭トラック取得
+    └── PlayQueueTrack(シャッフルなら無作為、でなければ 0)
+
+Controller.PlayQueueTrack(int index)          (Controller.Playlist.cs:86-94、#354)
+    │                                        キューの行を押したときは UIController.PressPlaylistTrack() からその行の番号で
+    ├── track = _queue.GetTrack(index)
     ├── PlayTrack(track)                    再生開始
     │   └── ClearPlaylistIndexes()          プレイリストインデックスクリア
     │
-    └── _queue.RemoveTrack(0)               キューから削除
+    └── _queue.RemoveTrack(index)           キューから削除
         └── RequestSerialization()          他クライアントに同期
 ```
 

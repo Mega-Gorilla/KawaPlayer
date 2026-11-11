@@ -20,13 +20,13 @@ namespace Yamadev.YamaStream.Tablet
   [UdonBehaviourSyncMode(BehaviourSyncMode.Manual)]
   public class TabletScreen : YamaPlayerBehaviour
   {
-    // The synced app numbers. The home screen is not an app.
+    // The synced app numbers. The home screen is not an app. The version
+    // and update log are in the settings' About category (issue #341).
     private const int Home = -1;
-    private const int VersionApp = 0;
-    private const int KawaPlayerApp = 1;
-    private const int ImageApp = 2;
-    private const int SettingsApp = 3;
-    private const int VisitorsApp = 4;
+    private const int KawaPlayerApp = 0;
+    private const int ImageApp = 1;
+    private const int SettingsApp = 2;
+    private const int VisitorsApp = 3;
 
     private const float DistanceCheckInterval = 0.5f;
     private const float OrientationCheckInterval = 0.2f;
@@ -41,7 +41,7 @@ namespace Yamadev.YamaStream.Tablet
     [SerializeField] private UIController _uiController;
     [SerializeField] private TabletPickup _tablet;
     [SerializeField] private TabletImageApp _imageApp;
-    [SerializeField] private TabletSettingsApp _settingsApp;
+    [SerializeField] private SettingsPanel _settingsApp;
     [SerializeField] private TabletVisitorsApp _visitorsApp;
 
     [Header("Screens")]
@@ -53,7 +53,6 @@ namespace Yamadev.YamaStream.Tablet
     [SerializeField, RegisterEvent(nameof(Button.onClick), nameof(GoHome))] private Button _homeButton;
     // The LED around the home button.
     [SerializeField] private GameObject _homeButtonLight;
-    [SerializeField, RegisterEvent(nameof(Button.onClick), nameof(OpenVersionApp))] private Button _versionAppButton;
     [SerializeField, RegisterEvent(nameof(Button.onClick), nameof(OpenKawaPlayerApp))] private Button _kawaPlayerAppButton;
     [SerializeField, RegisterEvent(nameof(Button.onClick), nameof(OpenImageApp))] private Button _imageAppButton;
     [SerializeField, RegisterEvent(nameof(Button.onClick), nameof(OpenSettingsApp))] private Button _settingsAppButton;
@@ -62,16 +61,9 @@ namespace Yamadev.YamaStream.Tablet
     [Header("Home")]
     [SerializeField] private Text _clockText;
     [SerializeField] private Text _dateText;
-    [SerializeField] private Text _versionAppLabel;
     [SerializeField] private Text _imageAppLabel;
     [SerializeField] private Text _settingsAppLabel;
     [SerializeField] private Text _visitorsAppLabel;
-
-    [Header("Version App")]
-    [SerializeField] private Text _versionAppTitle;
-    [SerializeField] private Text _updateLogText;
-    [SerializeField] private TextAsset _updateLogTextAsset;
-    [SerializeField] private ScrollRect _updateLogScroll;
 
     // Every canvas on the tablet: its own, and the player's ScreenUI in the
     // KawaPlayer app.
@@ -100,8 +92,9 @@ namespace Yamadev.YamaStream.Tablet
     [SerializeField] private LayoutGroup[] _landscapeLayouts = new LayoutGroup[0];
     // The KawaPlayer app stays landscape, so that its controls keep their
     // size; it turns over with the tablet, around the middle of its screen.
-    [SerializeField] private Transform _kawaPlayerApp;
-    [SerializeField] private Transform _kawaPlayerScreen;
+    // TabletSize places it, as it also sizes it (issue #342): this says how
+    // far it turns.
+    [SerializeField] private TabletSize _size;
 
     [UdonSynced] private int _appIndex = Home;
     [UdonSynced] private VRCUrl _imageUrl = VRCUrl.Empty;
@@ -118,17 +111,12 @@ namespace Yamadev.YamaStream.Tablet
     private bool _layoutApplied;
     private Vector2 _displaySize;
     private float _kawaPlayerTurn;
-    private Vector3 _kawaPlayerPosition;
-    private Quaternion _kawaPlayerRotation;
-    private Vector3 _kawaPlayerCenter;
-    private Vector3 _kawaPlayerAxis;
 
     private void Start()
     {
       if (Utilities.IsValid(_uiController)) _uiController.AddListener(this);
       StartOrientation();
       UpdateTranslation();
-      UpdateUpdateLog();
       ShowApp();
       _OnMinute();
       _CheckDistance();
@@ -145,8 +133,6 @@ namespace Yamadev.YamaStream.Tablet
     public Font CurrentFont => Utilities.IsValid(_clockText) ? _clockText.font : null;
 
     public void GoHome() => OpenApp(Home);
-
-    public void OpenVersionApp() => OpenApp(VersionApp);
 
     public void OpenKawaPlayerApp() => OpenApp(KawaPlayerApp);
 
@@ -245,7 +231,6 @@ namespace Yamadev.YamaStream.Tablet
       // one would only take the screen over and sync it for nothing.
       if (Utilities.IsValid(_homeButtonLight)) _homeButtonLight.SetActive(app != Home);
       if (Utilities.IsValid(_homeButton)) _homeButton.interactable = app != Home;
-      if (app == VersionApp && Utilities.IsValid(_updateLogScroll)) _updateLogScroll.verticalNormalizedPosition = 1f;
     }
 
     public void AfterLanguageChanged()
@@ -253,17 +238,14 @@ namespace Yamadev.YamaStream.Tablet
       UpdateTranslation();
       UpdateClockView();
       if (Utilities.IsValid(_imageApp)) _imageApp.UpdateTranslation();
-      if (Utilities.IsValid(_settingsApp)) _settingsApp.UpdateTranslation();
       if (Utilities.IsValid(_visitorsApp)) _visitorsApp.UpdateTranslation();
     }
 
     private void UpdateTranslation()
     {
-      SetTranslatedText(_versionAppLabel, "tablet.app.version");
       SetTranslatedText(_imageAppLabel, "tablet.app.image");
       SetTranslatedText(_settingsAppLabel, "menu.settings");
       SetTranslatedText(_visitorsAppLabel, "tablet.app.visitors");
-      SetTranslatedText(_versionAppTitle, "tablet.app.version");
     }
 
     // A missing key leaves the text the prefab was saved with. The apps
@@ -273,15 +255,6 @@ namespace Yamadev.YamaStream.Tablet
       if (!Utilities.IsValid(text)) return;
       string value = GetTranslation(key);
       if (!string.IsNullOrEmpty(value)) text.text = value;
-    }
-
-    // UI Text wraps only at spaces, so a Japanese line with an early space
-    // breaks there and leaves a stub of a line. Spaces that do not break
-    // let every line run to the edge.
-    private void UpdateUpdateLog()
-    {
-      if (!Utilities.IsValid(_updateLogText) || !Utilities.IsValid(_updateLogTextAsset)) return;
-      _updateLogText.text = _updateLogTextAsset.text.Replace(" ", " ");
     }
 
     // Runs once a minute, just after the minute turns, instead of every
@@ -321,17 +294,6 @@ namespace Yamadev.YamaStream.Tablet
     private void StartOrientation()
     {
       if (Utilities.IsValid(_display)) _displaySize = _display.sizeDelta;
-      if (Utilities.IsValid(_kawaPlayerApp))
-      {
-        _kawaPlayerPosition = _kawaPlayerApp.localPosition;
-        _kawaPlayerRotation = _kawaPlayerApp.localRotation;
-        Transform parent = _kawaPlayerApp.parent;
-        if (Utilities.IsValid(parent))
-        {
-          _kawaPlayerCenter = parent.InverseTransformPoint(Utilities.IsValid(_kawaPlayerScreen) ? _kawaPlayerScreen.position : _kawaPlayerApp.position);
-          _kawaPlayerAxis = parent.InverseTransformDirection(transform.forward);
-        }
-      }
       _turn = FindTurn(true);
       ApplyOrientation();
     }
@@ -379,11 +341,15 @@ namespace Yamadev.YamaStream.Tablet
       if (Utilities.IsValid(_tablet)) _tablet.Touch();
     }
 
-    // In portrait, the layout groups stop first, so they do not move what the
+    // The layout groups stop first, so in portrait they do not move what the
     // parts place; in landscape they start last, and place their children.
+    // They stop in landscape too: a group already on and switched on again
+    // does not lay its children out, and they would stay where the stored
+    // rects put them (the home's tiles all in the middle; until #341 the
+    // version app's name changing with the language happened to lay them out).
     private void ApplyLayout(bool portrait)
     {
-      if (portrait) SetLayoutsEnabled(false);
+      SetLayoutsEnabled(false);
       Vector4[] anchors = portrait ? _portraitAnchors : _landscapeAnchors;
       Vector4[] rects = portrait ? _portraitRects : _landscapeRects;
       int count = Mathf.Min(_layoutParts.Length, Mathf.Min(anchors.Length, rects.Length));
@@ -402,6 +368,7 @@ namespace Yamadev.YamaStream.Tablet
 
       if (Utilities.IsValid(_imageApp)) _imageApp.OnLayoutChanged();
       if (Utilities.IsValid(_visitorsApp)) _visitorsApp.SetPortrait(portrait);
+      if (Utilities.IsValid(_settingsApp)) _settingsApp.SetPortrait(portrait);
     }
 
     private void SetLayoutsEnabled(bool enabled)
@@ -414,10 +381,7 @@ namespace Yamadev.YamaStream.Tablet
 
     private void TurnKawaPlayer(float turn)
     {
-      if (!Utilities.IsValid(_kawaPlayerApp)) return;
-      Quaternion rotation = Quaternion.AngleAxis(turn, _kawaPlayerAxis);
-      _kawaPlayerApp.localRotation = rotation * _kawaPlayerRotation;
-      _kawaPlayerApp.localPosition = _kawaPlayerCenter + rotation * (_kawaPlayerPosition - _kawaPlayerCenter);
+      if (Utilities.IsValid(_size)) _size.TurnApp(turn, transform.forward);
     }
 
     #endregion

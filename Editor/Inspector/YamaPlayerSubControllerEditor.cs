@@ -36,6 +36,7 @@ namespace Yamadev.YamaStream.Editor
     private const float DefaultIdleReturnMinutes = 5f;
     private const float MinIdleReturnMinutes = 1f;
     private TabletReturnButton _tabletReturnButton;
+    private Transform _stand;
     private SerializedObject _visitorRecorderSerializedObject;
     private SerializedProperty _visitorPhotosEnabled;
 
@@ -81,7 +82,12 @@ namespace Yamadev.YamaStream.Editor
         _tabletPickupSerializedObject = new SerializedObject(_tabletPickup);
         _idleReturnSeconds = _tabletPickupSerializedObject.FindProperty("_idleReturnSeconds");
       }
-      _tabletReturnButton = _target.GetComponentInChildren<TabletReturnButton>(true);
+      // The return button that stands apart: a stand has one of its own.
+      _stand = _tabletPickup != null && _tabletPickup.transform.parent != null ? _tabletPickup.transform.parent.Find(TabletStandDesigns.StandName) : null;
+      foreach (var button in _target.GetComponentsInChildren<TabletReturnButton>(true))
+      {
+        if (_stand == null || !button.transform.IsChildOf(_stand)) _tabletReturnButton = button;
+      }
       var visitorRecorder = _target.GetComponentInChildren<TabletVisitorRecorder>(true);
       if (visitorRecorder != null)
       {
@@ -216,30 +222,108 @@ namespace Yamadev.YamaStream.Editor
     private void DrawPickupSettings()
     {
       if (_vrcPickup == null || _pickupable == null) return;
+      if (_tabletPickup != null)
+      {
+        DrawTabletSettings();
+        return;
+      }
 
+      // A Sub Screen: whether it can be held, and its place shared.
       EditorGUILayout.Space(SpaceMedium);
       EditorGUILayout.LabelField(EditorLocalization.Get("settings.pickUp.label"), EditorStyles.boldLabel);
-
       EditorGUILayout.PropertyField(_pickupable, EditorLocalization.GetLayout("settings.pickUp.label", "settings.pickUp.tooltip"));
+      if (_pickupable.boolValue) DrawGlobalSync("settings.globalSync.label", "settings.globalSync.tooltip");
+    }
 
-      if (_pickupable.boolValue)
+    // The tablet's own settings, in two groups (issue #349): how it is held
+    // (whether it can be, and its place and size shared), and where it rests
+    // (its stand, its design and colour, or else the return button that
+    // stands apart; and going back when left alone).
+    private void DrawTabletSettings()
+    {
+      EditorGUILayout.Space(SpaceMedium);
+      EditorGUILayout.LabelField(EditorLocalization.Get("tablet.section.holding"), EditorStyles.boldLabel);
+      EditorGUILayout.PropertyField(_pickupable, EditorLocalization.GetLayout("tablet.pickup.label", "tablet.pickup.tooltip"));
+      bool held = _pickupable.boolValue;
+      if (held)
       {
-        VRCObjectSync objectSync = _vrcPickup.gameObject.GetComponent<VRCObjectSync>();
-        _globalSync = objectSync != null;
+        using (new EditorGUI.IndentLevelScope()) DrawGlobalSync("tablet.globalSync.label", "tablet.globalSync.tooltip");
+      }
 
+      EditorGUILayout.Space(SpaceMedium);
+      EditorGUILayout.LabelField(EditorLocalization.Get("tablet.section.place"), EditorStyles.boldLabel);
+      bool stand = DrawStandSettings(held);
+      if (!held) return;
+      if (!stand) DrawReturnButton();
+      DrawIdleReturn();
+    }
+
+    // A VRCObjectSync on the held object shares its place (and the tablet's
+    // size, which follows it).
+    private void DrawGlobalSync(string labelKey, string tooltipKey)
+    {
+      VRCObjectSync objectSync = _vrcPickup.gameObject.GetComponent<VRCObjectSync>();
+      _globalSync = objectSync != null;
+      using (var check = new EditorGUI.ChangeCheckScope())
+      {
+        _globalSync = EditorGUILayout.Toggle(EditorLocalization.GetLayout(labelKey, tooltipKey), _globalSync);
+        if (check.changed)
+        {
+          if (_globalSync && objectSync == null) _vrcPickup.gameObject.AddComponent<VRCObjectSync>();
+          if (!_globalSync && objectSync != null) GameObject.DestroyImmediate(objectSync);
+        }
+      }
+    }
+
+    // The stand on or off, and its design and colour. Returns whether it is on.
+    private bool DrawStandSettings(bool held)
+    {
+      if (_stand == null) return false;
+      bool on = _stand.gameObject.activeSelf;
+      using (var check = new EditorGUI.ChangeCheckScope())
+      {
+        on = EditorGUILayout.Toggle(EditorLocalization.GetLayout("tablet.stand.label", "tablet.stand.tooltip"), on);
+        if (check.changed)
+        {
+          Undo.RecordObject(_stand.gameObject, "Toggle Tablet Stand");
+          _stand.gameObject.SetActive(on);
+          if (on)
+          {
+            TabletStandDesigns.Current(_stand, out int current, out int currentColor);
+            TabletStandDesigns.Apply(_stand, _tabletPickup, current, currentColor);
+            if (_tabletReturnButton != null && _tabletReturnButton.gameObject.activeSelf)
+            {
+              Undo.RecordObject(_tabletReturnButton.gameObject, "Toggle Tablet Stand");
+              _tabletReturnButton.gameObject.SetActive(false);
+            }
+          }
+          else TabletStandDesigns.SetDock(_tabletPickup, null);
+          _tabletPickupSerializedObject?.Update();
+        }
+      }
+      if (!on) return false;
+
+      using (new EditorGUI.IndentLevelScope())
+      {
+        TabletStandDesigns.Current(_stand, out int design, out int color);
+        var designs = new string[TabletStandDesigns.All.Length];
+        for (int i = 0; i < designs.Length; i++) designs[i] = EditorLocalization.Get("tablet.standDesign." + TabletStandDesigns.All[i].Key);
+        var colorNames = TabletStandDesigns.All[design].Colors;
+        var colors = new string[colorNames.Length];
+        for (int i = 0; i < colors.Length; i++) colors[i] = EditorLocalization.Get(TabletStandDesigns.ColorKey(colorNames[i]));
         using (var check = new EditorGUI.ChangeCheckScope())
         {
-          _globalSync = EditorGUILayout.Toggle(EditorLocalization.GetLayout("settings.globalSync.label", "settings.globalSync.tooltip"), _globalSync);
-
+          int newDesign = EditorGUILayout.Popup(EditorLocalization.Get("tablet.standDesign.label"), design, designs);
+          int newColor = EditorGUILayout.Popup(EditorLocalization.Get("tablet.standColor.label"), color, colors);
           if (check.changed)
           {
-            if (_globalSync && objectSync == null) _vrcPickup.gameObject.AddComponent<VRCObjectSync>();
-            if (!_globalSync && objectSync != null) GameObject.DestroyImmediate(objectSync);
+            TabletStandDesigns.Apply(_stand, _tabletPickup, newDesign, newDesign == design ? newColor : 0);
+            _tabletPickupSerializedObject?.Update();
           }
         }
-
-        DrawTabletReturnSettings();
+        if (held) EditorGUILayout.LabelField(" ", EditorLocalization.Get("tablet.standButton.note"), EditorStyles.wordWrappedMiniLabel);
       }
+      return true;
     }
 
     // The visitors app's photos (issue #153). The world keeps one record for
@@ -250,35 +334,39 @@ namespace Yamadev.YamaStream.Editor
       EditorGUILayout.Space(SpaceMedium);
       EditorGUILayout.LabelField(EditorLocalization.Get("settings.visitors.label"), EditorStyles.boldLabel);
       _visitorRecorderSerializedObject.Update();
-      EditorGUILayout.PropertyField(_visitorPhotosEnabled, EditorLocalization.GetLayout("settings.visitorPhotos.label", "settings.visitorPhotos.tooltip"));
+      // A toggle rather than the property, whose [Header] would add a heading of its own.
+      _visitorPhotosEnabled.boolValue = EditorGUILayout.Toggle(EditorLocalization.GetLayout("settings.visitorPhotos.label", "settings.visitorPhotos.tooltip"), _visitorPhotosEnabled.boolValue);
     }
 
-    // The tablet's two ways back to where it was placed (issue #108, D1).
-    // Going back when left alone is a toggle and a time in minutes, drawn
-    // over the one value TabletPickup keeps, in seconds, where 0 is off
-    // (issue #206). A world that set seconds before shows them in minutes,
-    // unchanged until edited.
-    private void DrawTabletReturnSettings()
+    // The tablet's ways back to where it was placed (issue #108, D1): going
+    // back when left alone, and a return button, on the stand or, without
+    // one, standing apart. Going back when left alone is a toggle and a time
+    // in minutes, drawn over the one value TabletPickup keeps, in seconds,
+    // where 0 is off (issue #206). A world that set seconds before shows them
+    // in minutes, unchanged until edited.
+    private void DrawIdleReturn()
     {
-      if (_idleReturnSeconds != null)
+      if (_idleReturnSeconds == null) return;
+      _tabletPickupSerializedObject.Update();
+      float seconds = _idleReturnSeconds.floatValue;
+      bool on = EditorGUILayout.Toggle(EditorLocalization.GetLayout("settings.idleReturn.label", "settings.idleReturn.tooltip"), seconds > 0f);
+      if (!on) seconds = 0f;
+      else
       {
-        _tabletPickupSerializedObject.Update();
-        float seconds = _idleReturnSeconds.floatValue;
-        bool on = EditorGUILayout.Toggle(EditorLocalization.GetLayout("settings.idleReturn.label", "settings.idleReturn.tooltip"), seconds > 0f);
-        if (!on) seconds = 0f;
-        else
+        if (seconds <= 0f) seconds = DefaultIdleReturnMinutes * 60f;
+        using (new EditorGUI.IndentLevelScope())
+        using (var check = new EditorGUI.ChangeCheckScope())
         {
-          if (seconds <= 0f) seconds = DefaultIdleReturnMinutes * 60f;
-          using (new EditorGUI.IndentLevelScope())
-          using (var check = new EditorGUI.ChangeCheckScope())
-          {
-            float minutes = EditorGUILayout.FloatField(EditorLocalization.GetLayout("settings.idleReturnMinutes.label", "settings.idleReturnMinutes.tooltip"), seconds / 60f);
-            if (check.changed) seconds = Mathf.Max(MinIdleReturnMinutes, minutes) * 60f;
-          }
+          float minutes = EditorGUILayout.FloatField(EditorLocalization.GetLayout("settings.idleReturnMinutes.label", "settings.idleReturnMinutes.tooltip"), seconds / 60f);
+          if (check.changed) seconds = Mathf.Max(MinIdleReturnMinutes, minutes) * 60f;
         }
-        if (seconds != _idleReturnSeconds.floatValue) _idleReturnSeconds.floatValue = seconds;
       }
+      if (seconds != _idleReturnSeconds.floatValue) _idleReturnSeconds.floatValue = seconds;
+    }
 
+    // The return button that stands apart, for a tablet without a stand.
+    private void DrawReturnButton()
+    {
       if (_tabletReturnButton == null) return;
       var buttonObject = _tabletReturnButton.gameObject;
       using (var check = new EditorGUI.ChangeCheckScope())

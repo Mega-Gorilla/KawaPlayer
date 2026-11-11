@@ -20,6 +20,13 @@ namespace Yamadev.YamaStream
     private MaterialPropertyBlock _properties;
     private Texture _videoTexture;
     private RenderTexture _blitTexture;
+    // The texture the listener last heard of. It hears of one only when it
+    // changes, or when a video becomes ready (OnVideoReady forgets it): told
+    // every frame, the controller passed the same texture on to every screen
+    // and listener every frame (#356). Forgotten rather than cleared, so a
+    // stop before the first texture still clears the screens.
+    private Texture _notifiedTexture;
+    private bool _textureNotified;
     private bool _stopped = true;
     private bool _isError;
 
@@ -34,8 +41,9 @@ namespace Yamadev.YamaStream
 
     protected override bool IsValidUrl(VRCUrl url)
     {
-      if (_type != VideoPlayerType.AVProVideoPlayer) return base.IsValidUrl(url);
       if (!Utilities.IsValid(url)) return false;
+      if (UrlUtils.IsVimeoEmbedCode(url.Get())) return true;
+      if (_type != VideoPlayerType.AVProVideoPlayer) return base.IsValidUrl(url);
       string u = url.Get().ToLower();
       return u.StartsWith("http://") || u.StartsWith("https://")
         || u.StartsWith("rtsp://") || u.StartsWith("rtspt://") || u.StartsWith("rtspu://")
@@ -54,7 +62,7 @@ namespace Yamadev.YamaStream
 
       if (!Utilities.IsValid(_videoTexture))
       {
-        if (Utilities.IsValid(_listener)) _listener.AfterTextureUpdated(null);
+        NotifyTexture(null);
         return;
       }
 
@@ -66,7 +74,15 @@ namespace Yamadev.YamaStream
       }
 #endif
 
-      if (Utilities.IsValid(_listener)) _listener.AfterTextureUpdated(_videoTexture);
+      NotifyTexture(_videoTexture);
+    }
+
+    private void NotifyTexture(Texture texture)
+    {
+      if (_textureNotified && texture == _notifiedTexture) return;
+      _textureNotified = true;
+      _notifiedTexture = texture;
+      if (Utilities.IsValid(_listener)) _listener.AfterTextureUpdated(texture);
     }
 
     public override bool IsLoading => _loading;
@@ -196,11 +212,22 @@ namespace Yamadev.YamaStream
     {
       if (!Utilities.IsValid(_baseVideoPlayer)) return;
 
-      _baseVideoPlayer.LoadURL(url);
+      // VRChat refuses an embed code from inside LoadURL, so its error would come
+      // before the load had finished, and the load's end would wipe it. It fails
+      // a frame later instead, like any other URL (issue #361).
+      if (UrlUtils.IsVimeoEmbedCode(url.Get())) SendCustomEventDelayedFrames(nameof(_RefuseUrl), 1);
+      else _baseVideoPlayer.LoadURL(url);
       _loadedUrl = url;
       _stopped = false;
       _loading = true;
       _isError = false;
+    }
+
+    // Only if the embed code is still what is loading: it may have been stopped,
+    // or another URL loaded, in the frame it waited.
+    public void _RefuseUrl()
+    {
+      if (_loading && Utilities.IsValid(_loadedUrl) && UrlUtils.IsVimeoEmbedCode(_loadedUrl.Get())) OnVideoError(VideoError.InvalidURL);
     }
 
     public override void Play()
@@ -233,7 +260,7 @@ namespace Yamadev.YamaStream
         _blitTexture = null;
       }
 
-      if (Utilities.IsValid(_listener)) _listener.AfterTextureUpdated(null);
+      NotifyTexture(null);
       if (Utilities.IsValid(_listener)) _listener.AfterVideoStopped();
     }
 
@@ -243,7 +270,7 @@ namespace Yamadev.YamaStream
     {
       if (!Utilities.IsValid(_videoTexture))
       {
-        if (Utilities.IsValid(_listener)) _listener.AfterTextureUpdated(null);
+        NotifyTexture(null);
         return;
       }
 
@@ -258,7 +285,7 @@ namespace Yamadev.YamaStream
       }
 
       VRCGraphics.Blit(_videoTexture, _blitTexture, _blitMaterial);
-      if (Utilities.IsValid(_listener)) _listener.AfterTextureUpdated(_blitTexture);
+      NotifyTexture(_blitTexture);
     }
 
     #region VRChat Video Events
@@ -271,6 +298,11 @@ namespace Yamadev.YamaStream
         return;
       }
 
+      // A video just ready tells its texture even when it is the one told
+      // before (a player reuses its texture): since then, an error stopped
+      // this player without telling, and the fallback player may have shown
+      // its own and cleared the screens as it stopped.
+      _textureNotified = false;
       if (Utilities.IsValid(_listener)) _listener.AfterVideoReady();
     }
 

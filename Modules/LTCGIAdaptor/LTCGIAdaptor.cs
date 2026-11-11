@@ -13,14 +13,18 @@ namespace Yamadev.YamaStream.Modules.LTCGIAdaptor
 
     public override void Start()
     {
+      if (Utilities.IsValid(_ltcgiAdapter))
+      {
+        _blackTexture = new Texture2D(1, 1);
+        _blackTexture.SetPixel(0, 0, Color.black);
+        _blackTexture.Apply();
+
+        _ltcgiAdapter._SetVideoTexture(_blackTexture);
+      }
+      // Joining the controller's listeners after the black one is set: a video
+      // already showing is passed on as this joins, and only when its texture
+      // changes after that (#356).
       base.Start();
-      if (!Utilities.IsValid(_ltcgiAdapter)) return;
-      
-      _blackTexture = new Texture2D(1, 1);
-      _blackTexture.SetPixel(0, 0, Color.black);
-      _blackTexture.Apply();
-      
-      _ltcgiAdapter._SetVideoTexture(_blackTexture);
     }
 
     public override void AfterTextureUpdated(Texture texture)

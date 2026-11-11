@@ -5,6 +5,7 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using VRC.SDK3.Components;
 using VRC.SDK3.Components.Video;
+using VRC.SDK3.Video.Components.Base;
 using VRC.SDKBase;
 
 namespace Yamadev.YamaStream.UI
@@ -32,6 +33,12 @@ namespace Yamadev.YamaStream.UI
     [Header("Animator")]
     [SerializeField] private Animator _userUIAnimator;
     [SerializeField] private Animator _systemUIAnimator;
+    // The press over the whole screen that shows and hides its controls.
+    [SerializeField, RegisterEvent(nameof(Toggle.onValueChanged), nameof(ToggleUI))] private Toggle _uiToggle;
+    // The controls hide this many seconds after the screen was last used,
+    // whether a video plays or not; 0 leaves them up (#340). Set in the
+    // KawaPlayer inspector.
+    [SerializeField] private float _controlsHideSeconds = 10f;
 
     [Header("Modal Dialog")]
     [SerializeField] private Modal _modalDialog;
@@ -43,18 +50,20 @@ namespace Yamadev.YamaStream.UI
     // Wired at build time by PlaylistLoaderBuildProcess when the module is
     // present; see the contract in PlayUrlField.
     [SerializeField] private UdonSharpBehaviour _urlInterceptor;
-    // Line shown in the (otherwise empty) track info bar while nothing is
-    // loaded: the player name and version, optionally followed by what the
-    // URL input accepts. The trailing sentence's key is supplied by an
-    // interceptor module's build process (issue #84); empty means the
-    // branding shows on its own.
+    // Line shown under the player's name in the (otherwise empty) title card
+    // while nothing is loaded: what the URL input accepts. Its key is
+    // supplied by an interceptor module's build process (issue #84); empty
+    // means the name shows on its own.
     [SerializeField] private Text _urlHintText;
     [SerializeField, HideInInspector] private string _urlHintKey;
 
     [Header("Track Info Display (Top Bar)")]
-    [SerializeField, RegisterEvent(nameof(VRCUrlInputField.onEndEdit), nameof(PlayUrlTop))] private VRCUrlInputField _urlInputFieldTop;
     [SerializeField] private Text _trackTitleText;
     [SerializeField] private Text _trackUrlText;
+    // Shown beside the player's name and version, which take the title's
+    // place while nothing is loaded. A UI without it (the Controller Bar)
+    // leaves its title empty then (issue #258).
+    [SerializeField] private GameObject _trackInfoLogo;
 
     [Header("Playback Control Buttons (Left Side)")]
     [SerializeField, RegisterEvent(nameof(VRCUrlInputField.onEndEdit), nameof(PlayUrl))] private VRCUrlInputField _urlInputField;
@@ -77,6 +86,12 @@ namespace Yamadev.YamaStream.UI
     [SerializeField] private SliderHelper _volumeSliderHelper;
     [SerializeField, RegisterEvent(nameof(Button.onClick), nameof(SetVolumeByHelper))] private Button _volumeTooltipButton;
     [SerializeField] private Text _volumeTooltipText;
+    // The volume panel above the bar's volume button (issue #258) shows the
+    // volume as a percentage, and the button shows one of its two icons by
+    // whether the sound is muted.
+    [SerializeField] private Text _volumePercentText;
+    [SerializeField] private GameObject _volumeIcon;
+    [SerializeField] private GameObject _mutedIcon;
     [SerializeField]
     [RegisterEventTrigger(EventTriggerType.BeginDrag, nameof(BeginProgressDrag))]
     [RegisterEventTrigger(EventTriggerType.EndDrag, nameof(SetTime))]
@@ -118,6 +133,9 @@ namespace Yamadev.YamaStream.UI
     [Header("Loading & Message")]
     [SerializeField] private GameObject _loadingIndicator;
     [SerializeField] private Text _statusMessageText;
+    [SerializeField, RegisterEvent(nameof(InputField.onValueChanged), nameof(RestoreErrorCopyUrl))] private InputField _errorCopyField;
+    [SerializeField] private Text _errorCopyLabel;
+    [SerializeField] private Text _soundOnlyText;
 
     [Header("Version Info")]
     [SerializeField] private TextAsset _updateLogTextAsset;
@@ -153,6 +171,20 @@ namespace Yamadev.YamaStream.UI
     // where before the two wrote over each other every frame (issue #195).
     private bool _progressHeld;
 
+    // What the seek row shows of the video, read from the controller when the
+    // video's state changes (ReadPlaybackState), not each frame: each read of
+    // another behaviour makes garbage, and the Controller Bar shows its seek
+    // row all the time (#356). The time, which changes each frame, is read
+    // from the video player itself, a call out of Udon that makes none.
+    private bool _playbackStopped = true;
+    private bool _playbackLoading;
+    private bool _playbackLive;
+    private bool _playbackImage;
+    private float _playbackDuration;
+    private BaseVRCVideoPlayer _videoPlayer;
+    private string _timeFormat;
+    private float _reloadCheckedAt;
+
     private void Start()
     {
       if (!_controller)
@@ -161,11 +193,15 @@ namespace Yamadev.YamaStream.UI
         return;
       }
       _controller.AddListener(this);
-      string timeFormat = _controller.TimeFormat;
-      _timesInWholeSeconds = timeFormat != null && timeFormat.Length > 1 && timeFormat.IndexOf('f') < 0 && timeFormat.IndexOf('F') < 0;
+      // Started while a video plays (the tablet's player, first opened after
+      // it began), this UI heard no start.
+      RequestSoundOnlyCheck();
+      _timeFormat = _controller.TimeFormat;
+      _timesInWholeSeconds = _timeFormat != null && _timeFormat.Length > 1 && _timeFormat.IndexOf('f') < 0 && _timeFormat.IndexOf('F') < 0;
 
       InitializeTranslation();
       UpdateTranslation();
+      UpdateAddPlaylistButton();
       GeneratePlaylistView();
 
       UpdateUI();
@@ -177,7 +213,99 @@ namespace Yamadev.YamaStream.UI
       {
         _repeatRangeSlider.SetUp(this, nameof(SetRepeatStart), nameof(SetRepeatEnd));
       }
-      if (Utilities.IsValid(_userUIAnimator) && _defaultPlaylistOpen) _userUIAnimator.SetTrigger("TogglePlaylist");
+    }
+
+    // A press on the screen shows or hides its controls, and they show with
+    // the list open where _defaultPlaylistOpen is on (#335).
+    public void ToggleUI()
+    {
+      if (!Utilities.IsValid(_userUIAnimator)) return;
+      bool showing = !IsUserUIState("ToggleUI", "UIOn");
+      _userUIAnimator.SetTrigger("ToggleUI");
+      if (showing)
+      {
+        RefreshShownControls();
+        SwitchOffHiddenListPage();
+        OpenListWithControls();
+        TouchControls();
+      }
+    }
+
+    // When the controls were last shown or the screen last used, and whether
+    // a check for hiding them is waiting (#340).
+    private float _controlsTouchedAt;
+    private bool _controlsHideCheckWaiting;
+
+    // The controls were shown or used: they stay up _controlsHideSeconds
+    // from now. A UI without controls to hide (the Playlist Panel) has no
+    // animator.
+    private void TouchControls()
+    {
+      if (_controlsHideSeconds <= 0f || !Utilities.IsValid(_userUIAnimator)) return;
+      _controlsTouchedAt = Time.time;
+      if (_controlsHideCheckWaiting) return;
+      _controlsHideCheckWaiting = true;
+      SendCustomEventDelayedSeconds(nameof(_CheckControlsHide), _controlsHideSeconds);
+    }
+
+    // Hides the controls, as a press on the screen would, once they have gone
+    // unused for _controlsHideSeconds, whether a video plays, is stopped,
+    // paused or loading. While a press on the screen is held, or a dialog, a
+    // page or a URL field is open, they stay, and the count starts again.
+    // What ends those counts the time again too (a press let go, a URL
+    // entered; a dialog and a page close with a press), so the controls stay
+    // a whole period after it.
+    public void _CheckControlsHide()
+    {
+      _controlsHideCheckWaiting = false;
+      if (_controlsHideSeconds <= 0f || !Utilities.IsValid(_userUIAnimator) || !IsUserUIState("ToggleUI", "UIOn")) return;
+      float left = _controlsTouchedAt + _controlsHideSeconds - Time.time;
+      if (left > 0f)
+      {
+        _controlsHideCheckWaiting = true;
+        SendCustomEventDelayedSeconds(nameof(_CheckControlsHide), left);
+        return;
+      }
+      if (CanHideControls())
+      {
+        _userUIAnimator.SetTrigger("ToggleUI");
+        return;
+      }
+      TouchControls();
+    }
+
+    // The screen was used while its controls show: a press on it let go, a
+    // scroll of the list that brought other lines in, or a URL entered.
+    private void TouchShownControls()
+    {
+      if (Utilities.IsValid(_userUIAnimator) && IsUserUIState("ToggleUI", "UIOn")) TouchControls();
+    }
+
+    private bool CanHideControls()
+    {
+      if (_screenPressedRight || _screenPressedLeft || _progressDrag) return false;
+      if (Utilities.IsValid(_modalDialog) && _modalDialog.gameObject.activeSelf) return false;
+      if (IsUserUIState("Page", "ShowPage")) return false;
+      if (Utilities.IsValid(_urlInputField) && _urlInputField.isFocused) return false;
+      if (Utilities.IsValid(_addPlaylistUrlInputField) && _addPlaylistUrlInputField.isFocused) return false;
+      return true;
+    }
+
+    private void OpenListWithControls()
+    {
+      if (!_defaultPlaylistOpen || !Utilities.IsValid(_userUIAnimator)) return;
+      // A close left waiting would shut it again at once.
+      _userUIAnimator.ResetTrigger("HidePlaylist");
+      if (!IsUserUIState("Playlists", "PlaylistOn")) _userUIAnimator.SetTrigger("TogglePlaylist");
+    }
+
+    // The state a layer of the controls' animator is in, or is going to.
+    private bool IsUserUIState(string layer, string state)
+    {
+      int index = _userUIAnimator.GetLayerIndex(layer);
+      if (index < 0) return false;
+      var info = _userUIAnimator.IsInTransition(index) ? _userUIAnimator.GetNextAnimatorStateInfo(index) : _userUIAnimator.GetCurrentAnimatorStateInfo(index);
+      return info.IsName(state);
     }
 
     // The UI's path in the Hierarchy, so that the log names the device it is
@@ -190,29 +318,129 @@ namespace Yamadev.YamaStream.UI
       return path;
     }
 
+    // Only what shows is kept up to date each frame. The controls are hidden
+    // most of the time a video plays, and reading the controller's state for
+    // them every frame, each read a call into another behaviour, made the
+    // most garbage of any Udon in a world (#356). What shows again is
+    // brought up to date as it shows (RefreshShownControls), or here the
+    // next frame. What shows is drawn from what the UI keeps of the video
+    // (ReadPlaybackState), so a UI that always shows, as the Controller Bar
+    // does, makes no garbage either.
     private void Update()
     {
       if (!Utilities.IsValid(_controller)) return;
-      if (Utilities.IsValid(_volumeSliderHelper) && Utilities.IsValid(_volumeTooltipText))
+      // The events of a track change come several to a frame, and to a UI
+      // that may not show: the view is brought up to date once, here.
+      if (_uiUpdateWaiting) UpdateUI();
+      if (_tracksRedrawWaiting && IsTracksPageVisible()) GeneratePlaylistTracks();
+      if (Utilities.IsValid(_volumeTooltipText) && _volumeTooltipText.gameObject.activeInHierarchy) UpdateVolumeTooltip();
+      if (IsProgressShown() && !_playbackStopped && !_playbackLoading) UpdateProgressView();
+      if (Utilities.IsValid(_reloadButton) && _reloadButton.gameObject.activeInHierarchy && Time.time - _reloadCheckedAt >= 1f) UpdateReloadButton();
+    }
+
+    private bool _uiUpdateWaiting;
+
+    private void RequestUpdateUI() => _uiUpdateWaiting = true;
+
+    // Each part is checked by its own field, with no method taking any of
+    // them: a U# method's parameter is one slot on the Udon heap, which the
+    // VM makes anew whenever a value of another type is copied into it. One
+    // IsShown(Component) given a Text, a Slider and a Button made 256 B of
+    // garbage each frame on every UI (#356).
+    private bool IsProgressShown()
+    {
+      if (Utilities.IsValid(_progressSlider) && _progressSlider.gameObject.activeInHierarchy) return true;
+      if (Utilities.IsValid(_currentTimeText) && _currentTimeText.gameObject.activeInHierarchy) return true;
+      return Utilities.IsValid(_totalDurationText) && _totalDurationText.gameObject.activeInHierarchy;
+    }
+
+    private void UpdateVolumeTooltip()
+    {
+      if (!Utilities.IsValid(_volumeSliderHelper)) return;
+      int percent = Mathf.CeilToInt(_volumeSliderHelper.Percent * 100);
+      if (percent == _shownVolumePercent && _volumeTooltipText.text == _shownVolumeText) return;
+      _shownVolumePercent = percent;
+      _shownVolumeText = $"{percent}%";
+      _volumeTooltipText.text = _shownVolumeText;
+    }
+
+    // The controls about to show: what Update leaves alone while they are
+    // hidden, brought up to date before they are drawn.
+    private void RefreshShownControls()
+    {
+      if (!Utilities.IsValid(_controller)) return;
+      ReadPlaybackState();
+      if (Utilities.IsValid(_volumeTooltipText)) UpdateVolumeTooltip();
+      UpdateProgressView();
+      UpdateReloadButton();
+    }
+
+    // Read when the video's state changes: every track event that redraws
+    // the view goes through UpdateUI, and an error and a retry, which do not,
+    // read it themselves. The player in use, and so the video player read
+    // for the time, changes only with these too.
+    private void ReadPlaybackState()
+    {
+      _playbackStopped = _controller.Stopped;
+      _playbackLoading = _controller.IsLoading;
+      _playbackImage = _controller.Handler.Type == VideoPlayerType.ImageViewer;
+      _playbackLive = _controller.IsLive;
+      _playbackDuration = _playbackLive ? 0f : _controller.Duration;
+      var handler = _controller.ActiveHandler;
+      _videoPlayer = Utilities.IsValid(handler) ? handler.GetComponent<BaseVRCVideoPlayer>() : null;
+    }
+
+    // Pressable only when a reload would do anything: it did nothing, while
+    // looking pressable, when everyone was stopped or a load was under way
+    // (issue #232). Checked with the video's state, and once a second while
+    // it shows, as the wait while loading ends with no event.
+    private void UpdateReloadButton()
+    {
+      _reloadCheckedAt = Time.time;
+      if (Utilities.IsValid(_reloadButton)) SetPressable(_reloadButton, _controller.CanReload);
+    }
+
+    // The bar's other buttons follow the same rule, pressable only when
+    // pressing would do anything (#258 P5b): play and stop do nothing while
+    // stopped (stop still clears an error), back needs a place in a playlist,
+    // and next a place or a track in the queue. While stopped, the URL field
+    // is the main action and shows its filled ground (its child Emphasis).
+    private void UpdateControlsView()
+    {
+      bool stopped = _controller.Stopped;
+      var playlist = _controller.ActivePlaylist;
+      bool inPlaylist = Utilities.IsValid(playlist) && _controller.PlayingTrackIndex >= 0 && playlist.TrackCount > 0;
+      var queue = _controller.Queue;
+      bool queued = Utilities.IsValid(queue) && queue.TrackCount > 0;
+      SetPressable(_playButton, !stopped);
+      SetPressable(_stopButton, !stopped || _controller.IsError);
+      SetPressable(_backwardButton, inPlaylist);
+      SetPressable(_forwardButton, inPlaylist || queued);
+      if (Utilities.IsValid(_urlInputField))
       {
-        int percent = Mathf.CeilToInt(_volumeSliderHelper.Percent * 100);
-        if (percent != _shownVolumePercent || _volumeTooltipText.text != _shownVolumeText)
-        {
-          _shownVolumePercent = percent;
-          _shownVolumeText = $"{percent}%";
-          _volumeTooltipText.text = _shownVolumeText;
-        }
+        var emphasis = _urlInputField.transform.Find("Emphasis");
+        if (Utilities.IsValid(emphasis)) emphasis.gameObject.SetActive(stopped);
       }
-      if (!_controller.Stopped && !_controller.IsLoading) UpdateProgressView();
-      // Pressable only when a reload would do anything: it did nothing, while
-      // looking pressable, when everyone was stopped or a load was under way
-      // (issue #232). The wait while loading ends with no event, so it is
-      // checked here.
-      if (Utilities.IsValid(_reloadButton))
+    }
+
+    // A ring's ground is clear until pointed at, so its icon (the child
+    // Image) shows that it cannot be pressed. A filled ground (play) fades
+    // itself, as its icon is the Selectable's target, which its tint fades.
+    private void SetPressable(Button button, bool pressable)
+    {
+      if (!Utilities.IsValid(button) || button.interactable == pressable) return;
+      button.interactable = pressable;
+      var ground = button.GetComponent<Image>();
+      Graphic faded = ground;
+      if (Utilities.IsValid(ground) && button.targetGraphic == ground)
       {
-        bool canReload = _controller.CanReload;
-        if (_reloadButton.interactable != canReload) _reloadButton.interactable = canReload;
+        var icon = button.transform.Find("Image");
+        faded = Utilities.IsValid(icon) ? icon.GetComponent<Image>() : null;
       }
+      if (!Utilities.IsValid(faded)) return;
+      var color = faded.color;
+      color.a = pressable ? 1f : 0.3f;
+      faded.color = color;
     }
 
     public bool ProgressHeld
@@ -359,9 +587,33 @@ namespace Yamadev.YamaStream.UI
       _controller.SetPlayerType(VideoPlayerType.ImageViewer);
     }
 
-    public void PlayUrl() => PlayUrlField(_urlInputField);
+    public void PlayUrl()
+    {
+      UrlEntryEnded();
+      PlayUrlField(_urlInputField);
+    }
 
-    public void PlayUrlTop() => PlayUrlField(_urlInputFieldTop);
+    // Optional URL interceptor (issue #82): a module (PlaylistLoader) can
+    // claim an entered URL before the video path sees it. Wired by the
+    // module's build process; unassigned means the hook is inert. This is a
+    // dedicated slot rather than a Before event because _actionCancelled is
+    // a single shared flag — the interceptor itself invokes
+    // InvokeBeforeEvent("BeforeUserLoadPlaylist"), and nesting that inside
+    // another InvokeBeforeEvent would race the flag. addOnly asks it to add a
+    // playlist without playing it (the list's "+", #335). Returns whether it
+    // took the URL.
+    private bool HandToUrlInterceptor(VRCUrl url, bool addOnly)
+    {
+      if (!Utilities.IsValid(_urlInterceptor)) return false;
+      _urlInterceptor.SetProgramVariable("interceptUrl", url);
+      // Pass the calling UIController so a shared interceptor talks back to
+      // the panel the URL was entered on, not a fixed one.
+      _urlInterceptor.SetProgramVariable("interceptSource", this);
+      _urlInterceptor.SetProgramVariable("interceptAddOnly", addOnly);
+      _urlInterceptor.SetProgramVariable("interceptHandled", false);
+      _urlInterceptor.SendCustomEvent("OnUrlSubmitted");
+      return (bool)_urlInterceptor.GetProgramVariable("interceptHandled");
+    }
 
     private void PlayUrlField(VRCUrlInputField urlInputField)
     {
@@ -374,26 +626,10 @@ namespace Yamadev.YamaStream.UI
       // would otherwise load a VHub URL left there.
       if (urlInputField.wasCanceled) return;
 
-      // Optional URL interceptor (issue #82): a module (PlaylistLoader) can
-      // claim the entered URL before the video path sees it. Wired by the
-      // module's build process; unassigned means the hook is inert. This is a
-      // dedicated slot rather than a Before event because _actionCancelled is
-      // a single shared flag — the interceptor itself invokes
-      // InvokeBeforeEvent("BeforeUserLoadPlaylist"), and nesting that inside
-      // another InvokeBeforeEvent would race the flag.
-      if (Utilities.IsValid(_urlInterceptor))
+      if (HandToUrlInterceptor(urlInputField.GetUrl(), false))
       {
-        _urlInterceptor.SetProgramVariable("interceptUrl", urlInputField.GetUrl());
-        // Pass the calling UIController so a shared interceptor talks back
-        // to the panel the URL was entered on, not a fixed one.
-        _urlInterceptor.SetProgramVariable("interceptSource", this);
-        _urlInterceptor.SetProgramVariable("interceptHandled", false);
-        _urlInterceptor.SendCustomEvent("OnUrlSubmitted");
-        if ((bool)_urlInterceptor.GetProgramVariable("interceptHandled"))
-        {
-          urlInputField.SetUrl(VRCUrl.Empty);
-          return;
-        }
+        urlInputField.SetUrl(VRCUrl.Empty);
+        return;
       }
 
       if (_controller.FindHandlerIndexForUrl(urlInputField.GetUrl()) < 0)
@@ -721,11 +957,7 @@ namespace Yamadev.YamaStream.UI
         return;
       }
 
-      if (Utilities.IsValid(_repeatStartTimeText))
-      {
-        var value = Mathf.Clamp(_controller.Duration * _repeatRangeSlider.LeftValue, 0f, _controller.Duration);
-        _repeatStartTimeText.text = $"{GetTranslation("label.start")}(A): {TimeSpan.FromSeconds(value).ToString(_controller.TimeFormat)}";
-      }
+      UpdateRepeatTimeTexts();
     }
 
     public void SetRepeatEnd()
@@ -738,11 +970,31 @@ namespace Yamadev.YamaStream.UI
         return;
       }
 
-      if (Utilities.IsValid(_repeatEndTimeText))
+      UpdateRepeatTimeTexts();
+    }
+
+    // The repeat range's start and end as their texts show them: the shared
+    // range while repeat is on, else where the handles stand, which the
+    // player may still be choosing. The video's start and end, and anything
+    // while repeat is on but nothing plays, read "not set"; so does all of a
+    // live stream, which has no range to set and whose length (infinite or
+    // NaN) would make the handles' times no time at all.
+    private void UpdateRepeatTimeTexts()
+    {
+      if (!Utilities.IsValid(_repeatRangeSlider) || !Utilities.IsValid(_repeatStartTimeText) || !Utilities.IsValid(_repeatEndTimeText)) return;
+      string notSet = GetTranslation("label.notSet");
+      string startText = notSet;
+      string endText = notSet;
+      bool on = RepeatUtils.IsOn(_controller.Repeat);
+      if (!_controller.Stopped && !_controller.IsLive && (_controller.IsPlaying || !on))
       {
-        var value = Mathf.Clamp(_controller.Duration * _repeatRangeSlider.RightValue, 0f, _controller.Duration);
-        _repeatEndTimeText.text = $"{GetTranslation("label.end")}(B): {TimeSpan.FromSeconds(value).ToString(_controller.TimeFormat)}";
+        float start = on ? RepeatUtils.GetStartTime(_controller.Repeat) : _controller.Duration * _repeatRangeSlider.LeftValue;
+        float end = on ? RepeatUtils.GetEndTime(_controller.Repeat) : _controller.Duration * _repeatRangeSlider.RightValue;
+        if (start > 0f) startText = TimeSpan.FromSeconds(start).ToString(_controller.TimeFormat);
+        if (end < _controller.Duration) endText = TimeSpan.FromSeconds(end).ToString(_controller.TimeFormat);
       }
+      _repeatStartTimeText.text = $"{GetTranslation("label.start")}(A): {startText}";
+      _repeatEndTimeText.text = $"{GetTranslation("label.end")}(B): {endText}";
     }
 
     public void SetShuffle()
@@ -923,6 +1175,9 @@ namespace Yamadev.YamaStream.UI
 
     public void UpdateUI()
     {
+      // Whatever drew it, a redraw a track change asked for is done.
+      _uiUpdateWaiting = false;
+      ReadPlaybackState();
       UpdatePlayerSelector();
       UpdateProgressView();
       UpdatePlaybackView();
@@ -930,26 +1185,28 @@ namespace Yamadev.YamaStream.UI
       UpdateTrackView();
       UpdateLoadingView();
       UpdateAudioView();
-      if (Utilities.IsValid(_idleScreenImage) && Utilities.IsValid(_idleScreenSprite))
-      {
-        _idleScreenImage.gameObject.SetActive(_controller.Stopped || _controller.IsLoading);
-      }
+      UpdateReloadButton();
     }
 
+    // Runs every frame while the seek row shows, so it reads nothing of the
+    // controller: the video's state is what ReadPlaybackState kept, and the
+    // time comes from the video player (#356).
     private void UpdateProgressView()
     {
       if (_progressHeld) return;
 
+      float videoTime = Utilities.IsValid(_videoPlayer) ? _videoPlayer.GetTime() : 0f;
+
       if (Utilities.IsValid(_currentTimeText))
       {
-        if (_controller.IsLive) _currentTimeText.text = string.Empty;
+        if (_playbackLive) _currentTimeText.text = string.Empty;
         else
         {
-          int second = Mathf.FloorToInt(_controller.VideoTime);
+          int second = Mathf.FloorToInt(videoTime);
           if (!_timesInWholeSeconds || second != _shownVideoSecond || _currentTimeText.text != _shownVideoTimeText)
           {
             _shownVideoSecond = second;
-            _shownVideoTimeText = _controller.FormatedVideoTime;
+            _shownVideoTimeText = TimeSpan.FromSeconds(videoTime).ToString(_timeFormat);
             _currentTimeText.text = _shownVideoTimeText;
           }
         }
@@ -957,15 +1214,15 @@ namespace Yamadev.YamaStream.UI
 
       if (Utilities.IsValid(_totalDurationText))
       {
-        if (_controller.Handler.Type == VideoPlayerType.ImageViewer) _totalDurationText.text = "Image";
-        else if (_controller.IsLive) _totalDurationText.text = "Live";
+        if (_playbackImage) _totalDurationText.text = "Image";
+        else if (_playbackLive) _totalDurationText.text = "Live";
         else
         {
-          int second = Mathf.FloorToInt(_controller.Duration);
+          int second = Mathf.FloorToInt(_playbackDuration);
           if (!_timesInWholeSeconds || second != _shownDurationSecond || _totalDurationText.text != _shownDurationText)
           {
             _shownDurationSecond = second;
-            _shownDurationText = _controller.FormatedDuration;
+            _shownDurationText = TimeSpan.FromSeconds(_playbackDuration).ToString(_timeFormat);
             _totalDurationText.text = _shownDurationText;
           }
         }
@@ -973,23 +1230,27 @@ namespace Yamadev.YamaStream.UI
 
       if (Utilities.IsValid(_progressSlider) && !_progressDrag)
       {
-        var progressValue = _controller.IsLive ? 1f : Mathf.Clamp(_controller.Duration == 0f ? 0f : _controller.VideoTime / _controller.Duration, 0f, 1f);
+        var progressValue = _playbackLive ? 1f : Mathf.Clamp(_playbackDuration == 0f ? 0f : videoTime / _playbackDuration, 0f, 1f);
         _progressSlider.SetValueWithoutNotify(progressValue);
       }
 
       UpdateTooltip();
     }
 
+    // The tooltip's time is that of the place pointed at, which the helper
+    // knows: read only while the tooltip shows, as each read of the helper
+    // is a call into another behaviour.
     private void UpdateTooltip()
     {
       if (!Utilities.IsValid(_progressSliderHelper) || !Utilities.IsValid(_progressTooltipText)) return;
 
-      var showTooltip = !_controller.Stopped && !_controller.IsLive && _controller.Handler.Type != VideoPlayerType.ImageViewer;
-      _progressSliderHelper.gameObject.SetActive(showTooltip);
+      var showTooltip = !_playbackLive && !_playbackImage && !_playbackStopped;
+      var helper = _progressSliderHelper.gameObject;
+      if (helper.activeSelf != showTooltip) helper.SetActive(showTooltip);
 
-      if (!showTooltip) return;
+      if (!showTooltip || !_progressTooltipText.gameObject.activeInHierarchy) return;
 
-      var seekSeconds = _controller.Duration * _progressSliderHelper.Percent;
+      var seekSeconds = _playbackDuration * _progressSliderHelper.Percent;
       if (float.IsInfinity(seekSeconds) || float.IsNaN(seekSeconds))
       {
         _progressTooltipText.text = "Live";
@@ -999,12 +1260,13 @@ namespace Yamadev.YamaStream.UI
       int second = Mathf.FloorToInt(seekSeconds);
       if (_timesInWholeSeconds && second == _shownSeekSecond && _progressTooltipText.text == _shownSeekText) return;
       _shownSeekSecond = second;
-      _shownSeekText = TimeSpan.FromSeconds(seekSeconds).ToString(_controller.TimeFormat);
+      _shownSeekText = TimeSpan.FromSeconds(seekSeconds).ToString(_timeFormat);
       _progressTooltipText.text = _shownSeekText;
     }
 
     private void UpdatePlaybackView()
     {
+      UpdateControlsView();
       var repeat = RepeatUtils.NewRepeatStatus(_controller.Repeat);
       if (Utilities.IsValid(_playButton)) _playButton.gameObject.SetActive(!_controller.IsPlaying);
       if (Utilities.IsValid(_pauseButton)) _pauseButton.gameObject.SetActive(_controller.IsPlaying);
@@ -1014,29 +1276,15 @@ namespace Yamadev.YamaStream.UI
       if (Utilities.IsValid(_speedValueText)) _speedValueText.text = $"{_controller.Speed:F2}x";
       if (Utilities.IsValid(_repeatOffToggle)) _repeatOffToggle.SetIsOnWithoutNotify(!RepeatUtils.IsOn(_controller.Repeat));
       if (Utilities.IsValid(_repeatOnToggle)) _repeatOnToggle.SetIsOnWithoutNotify(RepeatUtils.IsOn(_controller.Repeat));
-      if (Utilities.IsValid(_repeatRangeSlider) && Utilities.IsValid(_repeatStartTimeText) && Utilities.IsValid(_repeatEndTimeText))
+      // While nothing plays, or repeat is on, the handles go back to the
+      // shared range; while a video plays with repeat off, they stay where
+      // the player put them.
+      if (Utilities.IsValid(_repeatRangeSlider) && (!_controller.IsPlaying || RepeatUtils.IsOn(_controller.Repeat)))
       {
-        if (!_controller.IsPlaying || RepeatUtils.IsOn(_controller.Repeat))
-        {
-          string notSetText = GetTranslation("label.notSet");
-          string startText, endText;
-          if (!_controller.IsPlaying)
-          {
-            startText = notSetText;
-            endText = notSetText;
-          }
-          else
-          {
-            startText = RepeatUtils.GetStartTime(_controller.Repeat) == 0 ? notSetText : TimeSpan.FromSeconds(RepeatUtils.GetStartTime(_controller.Repeat)).ToString(_controller.TimeFormat);
-            endText = RepeatUtils.GetEndTime(_controller.Repeat) >= _controller.Duration || _controller.IsLive ? notSetText : TimeSpan.FromSeconds(RepeatUtils.GetEndTime(_controller.Repeat)).ToString(_controller.TimeFormat);
-          }
-          _repeatStartTimeText.text = $"{GetTranslation("label.start")}(A): {startText}";
-          _repeatEndTimeText.text = $"{GetTranslation("label.end")}(B): {endText}";
-
-          _repeatRangeSlider.SetLeftValueWithoutNotify(_controller.IsLive || !_controller.IsPlaying ? 0f : Mathf.Clamp(RepeatUtils.GetStartTime(_controller.Repeat) / _controller.Duration, 0f, 1f));
-          _repeatRangeSlider.SetRightValueWithoutNotify(_controller.IsLive || !_controller.IsPlaying ? 1f : Mathf.Clamp(RepeatUtils.GetEndTime(_controller.Repeat) / _controller.Duration, 0f, 1f));
-        }
+        _repeatRangeSlider.SetLeftValueWithoutNotify(_controller.IsLive || !_controller.IsPlaying ? 0f : Mathf.Clamp(RepeatUtils.GetStartTime(_controller.Repeat) / _controller.Duration, 0f, 1f));
+        _repeatRangeSlider.SetRightValueWithoutNotify(_controller.IsLive || !_controller.IsPlaying ? 1f : Mathf.Clamp(RepeatUtils.GetEndTime(_controller.Repeat) / _controller.Duration, 0f, 1f));
       }
+      UpdateRepeatTimeTexts();
       if (Utilities.IsValid(_localDelayValueText)) _localDelayValueText.text = (Mathf.Round(_controller.LocalDelay * 100) / 100).ToString();
       if (Utilities.IsValid(_shufflePlayButton)) _shufflePlayButton.gameObject.SetActive(!_controller.ShufflePlay);
       if (Utilities.IsValid(_shufflePlayOffButton)) _shufflePlayOffButton.gameObject.SetActive(_controller.ShufflePlay);
@@ -1047,29 +1295,40 @@ namespace Yamadev.YamaStream.UI
       var track = _controller.Track;
       var title = TrackUtils.GetTitle(track);
       var url = TrackUtils.GetUrl(track).Get();
-      if (Utilities.IsValid(_trackTitleText)) _trackTitleText.text = !string.IsNullOrEmpty(title) ? title : url;
-      if (Utilities.IsValid(_trackUrlText)) _trackUrlText.text = !string.IsNullOrEmpty(title) ? url : string.Empty;
-      UpdateUrlHintView(string.IsNullOrEmpty(title) && string.IsNullOrEmpty(url));
+      if (UrlUtils.IsVimeoEmbedCode(url)) url = UrlUtils.GetVimeoEmbedUrl(url);
+      bool empty = string.IsNullOrEmpty(title) && string.IsNullOrEmpty(url);
+      // The name and version match the info panel's, so they never go stale.
+      bool branding = empty && Utilities.IsValid(_trackInfoLogo);
+      if (Utilities.IsValid(_trackInfoLogo)) _trackInfoLogo.SetActive(empty);
+      if (Utilities.IsValid(_trackTitleText)) _trackTitleText.text = branding ? $"KawaPlayer v{_controller.Version}" : !string.IsNullOrEmpty(title) ? title : url;
+      if (Utilities.IsValid(_trackUrlText))
+      {
+        // The playlist and the place in it while one of its tracks plays,
+        // else the URL under a title. Hidden while empty, so the title card,
+        // sized to what it shows, keeps no room for it.
+        string place = empty ? string.Empty : PlaylistPlace();
+        _trackUrlText.text = !string.IsNullOrEmpty(place) ? place : !string.IsNullOrEmpty(title) ? url : string.Empty;
+        _trackUrlText.gameObject.SetActive(!string.IsNullOrEmpty(_trackUrlText.text));
+      }
+      UpdateUrlHintView(empty);
+    }
+
+    // "Playlist · 3 / 8"; empty for a URL entered or a track from the queue,
+    // which leave no playlist playing.
+    private string PlaylistPlace()
+    {
+      Playlist playlist = _controller.ActivePlaylist;
+      int index = _controller.PlayingTrackIndex;
+      if (!Utilities.IsValid(playlist) || index < 0 || index >= playlist.TrackCount) return string.Empty;
+      return $"{playlist.PlaylistName} · {index + 1} / {playlist.TrackCount}";
     }
 
     private void UpdateUrlHintView(bool trackInfoEmpty)
     {
       if (!Utilities.IsValid(_urlHintText)) return;
-      string hint = string.Empty;
-      if (trackInfoEmpty)
-      {
-        // The branding always shows while idle, matching the version string
-        // in the info panel so it never goes stale. An interceptor module
-        // appends what its URL input accepts; a missing key resolves to an
-        // empty string, so an unwired module or a stale key leaves the
-        // branding alone instead of adding a blank tail.
-        hint = $"KawaPlayer v{_controller.Version}";
-        if (!string.IsNullOrEmpty(_urlHintKey))
-        {
-          string accepts = GetTranslation(_urlHintKey);
-          if (!string.IsNullOrEmpty(accepts)) hint = $"{hint} / {accepts}";
-        }
-      }
+      // A missing key resolves to an empty string, so an unwired module or a
+      // stale key leaves the name on its own instead of adding a blank line.
+      string hint = trackInfoEmpty && !string.IsNullOrEmpty(_urlHintKey) ? GetTranslation(_urlHintKey) : string.Empty;
       _urlHintText.text = hint;
       _urlHintText.gameObject.SetActive(!string.IsNullOrEmpty(hint));
     }
@@ -1079,6 +1338,9 @@ namespace Yamadev.YamaStream.UI
       if (Utilities.IsValid(_muteButton)) _muteButton.gameObject.SetActive(!_controller.Mute);
       if (Utilities.IsValid(_unmuteButton)) _unmuteButton.gameObject.SetActive(_controller.Mute);
       if (Utilities.IsValid(_volumeSlider)) _volumeSlider.SetValueWithoutNotify(_controller.Volume);
+      if (Utilities.IsValid(_volumePercentText)) _volumePercentText.text = $"{Mathf.RoundToInt(_controller.Volume * 100)}%";
+      if (Utilities.IsValid(_volumeIcon)) _volumeIcon.SetActive(!_controller.Mute);
+      if (Utilities.IsValid(_mutedIcon)) _mutedIcon.SetActive(_controller.Mute);
     }
 
     private void UpdateScreenView()
@@ -1095,10 +1357,17 @@ namespace Yamadev.YamaStream.UI
       if (Utilities.IsValid(_brightnessValueText)) _brightnessValueText.text = $"{Mathf.Ceil(_controller.Brightness * 100)}%";
     }
 
-    private void UpdateErrorView(VideoError videoError)
+    // What shows behind an error's message.
+    private void ShowErrorScreen()
     {
       if (Utilities.IsValid(_loadingIndicator)) _loadingIndicator.SetActive(true);
       if (Utilities.IsValid(_userUIAnimator)) _userUIAnimator.SetBool("Loading", false);
+      UpdateIdleScreenShown(true);
+    }
+
+    private void UpdateErrorView(VideoError videoError)
+    {
+      ShowErrorScreen();
       if (!_statusMessageText) return;
       string message;
       switch (videoError)
@@ -1121,6 +1390,94 @@ namespace Yamadev.YamaStream.UI
         default:
           return;
       }
+      if (TrySetSiteMessage(videoError))
+      {
+        // Says more than the message it replaces, whose kind of error is still
+        // in the details. The screen has room for three lines above them.
+        message = _siteMessage;
+        UpdateErrorCopyField();
+      }
+      else
+      {
+        // The latest error says what is wrong now: a site's message kept from
+        // an earlier try would come back with the next redraw (see below).
+        ClearSiteMessage();
+        string hint = GetErrorHint(videoError);
+        if (!string.IsNullOrEmpty(hint)) message = $"{message}\n{hint}";
+      }
+      _statusMessageText.text = message;
+      SetErrorDetailsButtonShown(true);
+    }
+
+    // Udon is told only PlayerError, whatever went wrong, so the viewer cannot
+    // tell a fault from a site VRChat cannot play. A site that failed when
+    // tried is named as not supported (issue #361). False for any other URL
+    // or kind of error.
+    private bool TrySetSiteMessage(VideoError videoError)
+    {
+      string url = TrackUtils.GetUrl(_controller.Track).Get();
+
+      // An embed code never plays, whichever error it ends in.
+      if (UrlUtils.IsVimeoEmbedCode(url))
+      {
+        _errorCopyUrl = UrlUtils.GetVimeoEmbedUrl(url);
+        _siteMessage = GetTranslation("error.vimeoEmbedCode");
+        return true;
+      }
+
+      if (videoError != VideoError.PlayerError || _playbackImage) return false;
+
+      string siteKey = UrlUtils.GetUnsupportedSiteKey(url);
+      if (string.IsNullOrEmpty(siteKey)) return false;
+
+      _siteMessage = GetTranslation("error.siteUnsupported").Replace("{0}", GetTranslation(siteKey));
+      if (siteKey != "site.vimeo") return true;
+
+      // Vimeo's player can play a video the page's address cannot, though not
+      // all of those tried, and some with no sound. The screen's text cannot be
+      // copied and a world cannot make a URL from text, so the viewer copies the
+      // URL from a field and enters it (issue #361).
+      _errorCopyUrl = UrlUtils.GetVimeoPlayerUrl(url);
+      _siteMessage += "\n" + GetTranslation(string.IsNullOrEmpty(_errorCopyUrl) ? "error.vimeoShareEmbed" : "error.vimeoShareEmbedOrCopy");
+      return true;
+    }
+
+    // A named site's message stays until another video loads, this one stops or
+    // gets ready, or another kind of error comes: the retries would otherwise
+    // take it, and the field being copied from, away every few seconds.
+    private string _siteMessage = string.Empty;
+    private string _errorCopyUrl = string.Empty;
+
+    private void ClearSiteMessage()
+    {
+      _siteMessage = string.Empty;
+      _errorCopyUrl = string.Empty;
+      UpdateErrorCopyField();
+    }
+
+    private void UpdateErrorCopyField()
+    {
+      if (!Utilities.IsValid(_errorCopyField)) return;
+      bool shown = !string.IsNullOrEmpty(_errorCopyUrl);
+      if (shown)
+      {
+        _errorCopyField.text = _errorCopyUrl;
+        if (Utilities.IsValid(_errorCopyLabel)) _errorCopyLabel.text = GetTranslation("button.copyUrl");
+      }
+      _errorCopyField.gameObject.SetActive(shown);
+    }
+
+    // The field is not read-only, so that VRChat treats it as any other field;
+    // what the viewer types in is undone, as in the dialog's.
+    public void RestoreErrorCopyUrl()
+    {
+      if (Utilities.IsValid(_errorCopyField) && _errorCopyField.text != _errorCopyUrl) _errorCopyField.text = _errorCopyUrl;
+    }
+
+    // YouTube has its own line, and any other failure the same one (a track
+    // from VHub comes by VHub's address, which names no site).
+    private string GetErrorHint(VideoError videoError)
+    {
       if (ShouldShowYouTubeHint(videoError))
       {
         // InvalidURL gets its own wording: a YouTube URL that passed the host
@@ -1128,12 +1485,10 @@ namespace Yamadev.YamaStream.UI
         // missing/private, or a yt-dlp failure - the editor resolver maps
         // empty yt-dlp output to InvalidURL). Retrying is not suggested there
         // because the video may simply not exist.
-        string hintKey = videoError == VideoError.InvalidURL ? "error.youtubeHintInvalidUrl" : "error.youtubeHint";
-        string hint = GetTranslation(hintKey);
-        if (!string.IsNullOrEmpty(hint)) message = $"{message}\n{hint}";
+        return GetTranslation(videoError == VideoError.InvalidURL ? "error.youtubeHintInvalidUrl" : "error.youtubeHint");
       }
-      _statusMessageText.text = message;
-      SetErrorDetailsButtonShown(true);
+      if (videoError != VideoError.PlayerError || _playbackImage) return string.Empty;
+      return GetTranslation("error.siteMayFail");
     }
 
     private bool ShouldShowYouTubeHint(VideoError videoError)
@@ -1164,25 +1519,92 @@ namespace Yamadev.YamaStream.UI
 
     private void UpdateLoadingView()
     {
+      if (!string.IsNullOrEmpty(_siteMessage))
+      {
+        ShowErrorScreen();
+        _statusMessageText.text = _siteMessage;
+        SetErrorDetailsButtonShown(true);
+        return;
+      }
       if (Utilities.IsValid(_loadingIndicator)) _loadingIndicator.SetActive(_controller.IsLoading);
       if (Utilities.IsValid(_userUIAnimator)) _userUIAnimator.SetBool("Loading", _controller.IsLoading);
       if (Utilities.IsValid(_statusMessageText)) _statusMessageText.text = GetTranslation("msg.videoLoading");
       SetErrorDetailsButtonShown(false);
+      // UpdateUI and a retry after an error both come here.
+      UpdateIdleScreenShown(false);
     }
 
+    // The settings' About category (issue #341). UI Text wraps only at
+    // spaces, so a Japanese line of the update log with an early space
+    // broke there and left a stub of a line: spaces that do not break let
+    // every line run to the edge.
     private void GenerateVersionView()
     {
       if (Utilities.IsValid(_versionDisplayText)) _versionDisplayText.text = $"KawaPlayer v{_controller.Version}";
-      if (Utilities.IsValid(_updateLogText) && Utilities.IsValid(_updateLogTextAsset)) _updateLogText.text = _updateLogTextAsset.text;
+      if (Utilities.IsValid(_updateLogText) && Utilities.IsValid(_updateLogTextAsset)) _updateLogText.text = _updateLogTextAsset.text.Replace(" ", " ");
     }
 
     private void UpdateIdleScreenView()
     {
       if (Utilities.IsValid(_idleScreenImage) && Utilities.IsValid(_idleScreenSprite)) _idleScreenImage.sprite = _idleScreenSprite;
-      if (Utilities.IsValid(_idleScreenLogo))
+    }
+
+    // A video with no picture leaves the screen black while it plays, which
+    // looks broken (issue #362), as SoundCloud and Mixcloud do. A second after
+    // it starts, one with no size and no texture is taken to be sound only:
+    // both, as a player on another platform may not tell its size, and a video
+    // must never be covered. A texture that comes later ends it. Read at that
+    // moment and not every frame (#356).
+    private const float SoundOnlyCheckDelay = 1f;
+    private bool _soundOnly;
+    private bool _hasVideoTexture;
+    private float _soundOnlyCheckAt;
+    private bool _soundOnlyCheckWaiting;
+
+    // A start while a check waits moves that check, so that a video never has
+    // less than its second: its texture may not have come yet.
+    private void RequestSoundOnlyCheck()
+    {
+      if (!Utilities.IsValid(_soundOnlyText)) return;
+      _soundOnlyCheckAt = Time.time + SoundOnlyCheckDelay;
+      if (_soundOnlyCheckWaiting) return;
+      _soundOnlyCheckWaiting = true;
+      SendCustomEventDelayedSeconds(nameof(_CheckSoundOnly), SoundOnlyCheckDelay);
+    }
+
+    public void _CheckSoundOnly()
+    {
+      _soundOnlyCheckWaiting = false;
+      float left = _soundOnlyCheckAt - Time.time;
+      if (left > 0f)
       {
-        _idleScreenLogo.SetActive(Utilities.IsValid(_idleScreenSprite) && _idleScreenSprite == _defaultIdleScreenSprite);
+        _soundOnlyCheckWaiting = true;
+        SendCustomEventDelayedSeconds(nameof(_CheckSoundOnly), left);
+        return;
       }
+      PlayerHandler handler = _controller.ActiveHandler;
+      SetSoundOnly(!_hasVideoTexture && !handler.IsStopped && !handler.IsLoading && !handler.IsError
+        && handler.Type != VideoPlayerType.ImageViewer && handler.VideoWidth == 0);
+    }
+
+    private void SetSoundOnly(bool soundOnly)
+    {
+      if (soundOnly == _soundOnly) return;
+      _soundOnly = soundOnly;
+      if (Utilities.IsValid(_soundOnlyText)) _soundOnlyText.gameObject.SetActive(soundOnly);
+    }
+
+    // The idle screen shows while stopped, loading or showing an error, and
+    // the logo and name over the default image. The loading icon and words,
+    // and an error's message, are drawn where the name is (#332), so while
+    // either shows, the logo and name give way and the background stays.
+    private void UpdateIdleScreenShown(bool error)
+    {
+      bool message = error || _controller.IsLoading;
+      if (Utilities.IsValid(_idleScreenLogo))
+        _idleScreenLogo.SetActive(Utilities.IsValid(_idleScreenSprite) && _idleScreenSprite == _defaultIdleScreenSprite && !message);
+      if (Utilities.IsValid(_idleScreenImage) && Utilities.IsValid(_idleScreenSprite))
+        _idleScreenImage.gameObject.SetActive(message || _controller.Stopped);
     }
 
     // The player a URL entered next plays on, which is not always the one in
@@ -1196,17 +1618,50 @@ namespace Yamadev.YamaStream.UI
 
     #region Event Handlers
 
-    public override void AfterVideoReady() => UpdateUI();
-    public override void AfterVideoStarted() => UpdateUI();
-    public override void AfterVideoEnded() => UpdateUI();
-    public override void AfterVideoPlayed() => UpdateUI();
-    public override void AfterVideoPaused() => UpdateUI();
+    // A track change sends several of these in a frame (stopped and ended,
+    // then ready, played and started), each of which redrew the whole view
+    // at once, on every UI, shown or not (#356). They mark it to be redrawn
+    // in Update, once, and not until the UI is on, unless an error or
+    // another redraw comes first.
+    public override void AfterVideoReady()
+    {
+      ClearSiteMessage();
+      RequestUpdateUI();
+    }
+    public override void AfterVideoStarted()
+    {
+      RequestUpdateUI();
+      RequestSoundOnlyCheck();
+    }
+    public override void AfterTextureUpdated(Texture texture)
+    {
+      _hasVideoTexture = Utilities.IsValid(texture);
+      if (_hasVideoTexture) SetSoundOnly(false);
+    }
+    public override void AfterVideoEnded() => RequestUpdateUI();
+    public override void AfterVideoPlayed() => RequestUpdateUI();
+    public override void AfterVideoPaused() => RequestUpdateUI();
     public override void AfterVideoStopped()
     {
-      UpdateUI();
-      GeneratePlaylistTracks();
+      SetSoundOnly(false);
+      ClearSiteMessage();
+      RequestUpdateUI();
+      RequestTracksRedraw();
     }
-    public override void AfterVideoErrorOccurred(VideoError videoError) => UpdateErrorView(videoError);
+    public override void AfterVideoErrorOccurred(VideoError videoError)
+    {
+      // The error is drawn from this event, not from the controller, whose
+      // player in use may already be the fallback, not in error. So the
+      // redraw asked for before it is done first, as each event drew at once
+      // before: left for Update, it put the loading words back over the error.
+      SetSoundOnly(false);
+      if (_uiUpdateWaiting) UpdateUI();
+      ReadPlaybackState();
+      UpdateErrorView(videoError);
+      // Stop clears an error, so it stays pressable after one.
+      UpdateControlsView();
+      UpdateReloadButton();
+    }
     public override void AfterPlayerHandlerChanged(VideoPlayerType playerType) => UpdateUI();
     public override void AfterTimeChanged(float time) => UpdateProgressView();
     public override void AfterLoopChanged(bool loop) => UpdatePlaybackView();
@@ -1216,14 +1671,25 @@ namespace Yamadev.YamaStream.UI
     public override void AfterShufflePlayChanged(bool shufflePlay) => UpdatePlaybackView();
     public override void AfterTrackLoaded()
     {
-      UpdateUI();
-      GeneratePlaylistTracks();
+      SetSoundOnly(false);
+      ClearSiteMessage();
+      RequestUpdateUI();
+      RequestTracksRedraw();
     }
     public override void AfterTrackUpdated() => UpdateTrackView();
-    public override void AfterVideoRetry() => UpdateLoadingView();
+    public override void AfterVideoRetry()
+    {
+      SetSoundOnly(false);
+      ReadPlaybackState();
+      UpdateLoadingView();
+      UpdateControlsView();
+      UpdateReloadButton();
+    }
     public override void AfterQueueUpdated()
     {
       if (Utilities.IsValid(_queueTabToggle) && _queueTabToggle.isOn) GeneratePlaylistTracks();
+      // Next plays from the queue, so a track in it makes next pressable.
+      UpdateControlsView();
     }
     public override void AfterHistoryUpdated()
     {
@@ -1237,6 +1703,19 @@ namespace Yamadev.YamaStream.UI
       ClearSelectionIfEmptied();
       GeneratePlaylistView();
       GeneratePlaylistTracks();
+      // The card names the playing playlist and the place in it, which a
+      // refresh (a new name or count) or a delete changes while the track
+      // stays the same; back and next follow the place in it too.
+      UpdateTrackView();
+      UpdateControlsView();
+    }
+    // The playlist indexes can change without the track (deleting the
+    // playlist that plays drops them), and reach this player apart from the
+    // playlist's own sync, so the card, back and next follow every sync too.
+    public override void AfterTrackSynced()
+    {
+      UpdateTrackView();
+      UpdateControlsView();
     }
     public override void AfterVolumeChanged(float volume) => UpdateAudioView();
     public override void AfterMuteChanged(bool mute) => UpdateAudioView();

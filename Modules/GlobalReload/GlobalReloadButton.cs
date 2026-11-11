@@ -38,6 +38,7 @@ namespace Yamadev.YamaStream.Modules.GlobalReload
     private float _sentAt = -1000f;
     private float _checkedAt = -1000f;
     private bool _allowed = true;
+    private bool _canSend;
 
     private void Start()
     {
@@ -70,6 +71,8 @@ namespace Yamadev.YamaStream.Modules.GlobalReload
     // message (PermissionManagement shows one only where there is a dialog).
     // It cannot be pressed then, nor while waiting after a send, nor while
     // everyone is stopped, when there is nothing to reload; its words say which.
+    // Whether there is is asked once a second too: each ask is a call into
+    // other behaviours, whose answer made garbage every frame (#356).
     private void UpdateState()
     {
       float now = Time.time;
@@ -77,10 +80,11 @@ namespace Yamadev.YamaStream.Modules.GlobalReload
       {
         _checkedAt = now;
         _allowed = AskPermission();
+        _canSend = _module.CanSend;
       }
       bool denied = !_allowed;
       bool busy = !denied && now - _sentAt < Controller.RELOAD_WAIT_WHILE_LOADING;
-      bool idle = !denied && !busy && !_module.CanSend;
+      bool idle = !denied && !busy && !_canSend;
       bool ready = !denied && !busy && !idle;
       if (_button.interactable != ready) _button.interactable = ready;
       Show(_ready, ready);

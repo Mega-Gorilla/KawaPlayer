@@ -56,7 +56,7 @@ namespace Yamadev.YamaStream.Editor
 
       _uiSlotsList.elementHeightCallback = index =>
       {
-        return EditorGUIUtility.singleLineHeight * 3 + EditorGUIUtility.standardVerticalSpacing * 4 + 4;
+        return EditorGUIUtility.singleLineHeight * 4 + EditorGUIUtility.standardVerticalSpacing * 5 + 4;
       };
 
       _uiSlotsList.drawElementCallback = (rect, index, isActive, isFocused) =>
@@ -65,6 +65,7 @@ namespace Yamadev.YamaStream.Editor
         var targetPath = element.FindPropertyRelative("targetPath");
         var content = element.FindPropertyRelative("content");
         var siblingIndex = element.FindPropertyRelative("siblingIndex");
+        var inSettings = element.FindPropertyRelative("inSettings");
 
         rect.y += 2;
         var lineHeight = EditorGUIUtility.singleLineHeight;
@@ -89,6 +90,12 @@ namespace Yamadev.YamaStream.Editor
         var indexFieldRect = new Rect(fieldRect.x + labelWidth, fieldRect.y, fieldRect.width - labelWidth, lineHeight);
         EditorGUI.LabelField(indexLabelRect, "Index");
         EditorGUI.PropertyField(indexFieldRect, siblingIndex, GUIContent.none);
+
+        fieldRect.y += lineHeight + spacing;
+        var settingsLabelRect = new Rect(fieldRect.x, fieldRect.y, labelWidth, lineHeight);
+        var settingsFieldRect = new Rect(fieldRect.x + labelWidth, fieldRect.y, fieldRect.width - labelWidth, lineHeight);
+        EditorGUI.LabelField(settingsLabelRect, "In Settings");
+        EditorGUI.PropertyField(settingsFieldRect, inSettings, GUIContent.none);
       };
 
       _uiSlotsList.drawElementBackgroundCallback = (rect, index, isActive, isFocused) =>
@@ -113,6 +120,7 @@ namespace Yamadev.YamaStream.Editor
         element.FindPropertyRelative("targetPath").stringValue = "";
         element.FindPropertyRelative("content").objectReferenceValue = null;
         element.FindPropertyRelative("siblingIndex").intValue = 0;
+        element.FindPropertyRelative("inSettings").boolValue = false;
       };
     }
 

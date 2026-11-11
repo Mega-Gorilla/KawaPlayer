@@ -565,7 +565,6 @@ MonoBehaviour:
   _urlInterceptor: {fileID: 0}
   _urlHintText: {fileID: 0}
   _urlHintKey: 
-  _urlInputFieldTop: {fileID: 0}
   _trackTitleText: {fileID: 0}
   _trackUrlText: {fileID: 0}
   _urlInputField: {fileID: 0}
@@ -618,6 +617,9 @@ MonoBehaviour:
   _maxResolution4320Toggle: {fileID: 0}
   _loadingIndicator: {fileID: 0}
   _statusMessageText: {fileID: 0}
+  _errorCopyField: {fileID: 0}
+  _errorCopyLabel: {fileID: 0}
+  _soundOnlyText: {fileID: 0}
   _updateLogTextAsset: {fileID: 0}
   _versionDisplayText: {fileID: 0}
   _updateLogText: {fileID: 0}
@@ -642,7 +644,6 @@ MonoBehaviour:
   _shuffleLabel: {fileID: 0}
   _shuffleLabel2: {fileID: 0}
   _settingsLabel: {fileID: 0}
-  _versionLabel: {fileID: 0}
   _lockUiLabel: {fileID: 0}
   _tabQueueLabel: {fileID: 0}
   _tabHistoryLabel: {fileID: 0}
@@ -677,7 +678,7 @@ MonoBehaviour:
   _modalImageViewerLabel: {fileID: 0}
   _lockDetectionRect: {fileID: 0}
   _unlockProgressText: {fileID: 0}
-  _unlockHoldDuration: 1
+  _unlockClickWindow: 1.5
   _defaultPlaylistOpen: 0
   _currentPlaylistNameText: {fileID: 0}
   _playlistsListScroll: {fileID: 0}
@@ -691,9 +692,7 @@ MonoBehaviour:
   _dynamicPlaylists: []
   _playlistRefreshHandler: {fileID: 0}
   _playlistRefreshButton: {fileID: 0}
-  _playlistRefreshButtonLabel: {fileID: 0}
   _playlistDeleteButton: {fileID: 0}
-  _playlistDeleteButtonLabel: {fileID: 0}
 --- !u!1 &2674547577491387992
 GameObject:
   m_ObjectHideFlags: 0

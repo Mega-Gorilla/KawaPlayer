@@ -150,7 +150,7 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_RaycastPadding: {x: -12.5, y: -12.5, z: -12.5, w: -12.5}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -322,7 +322,7 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 0.7019608, g: 0.8980392, b: 0.9882353, a: 0.25}
   m_RaycastTarget: 1
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_RaycastPadding: {x: 0, y: -15, z: 0, w: -15}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -478,7 +478,7 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 0.30980393, g: 0.7647059, b: 0.96862745, a: 1}
   m_RaycastTarget: 1
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_RaycastPadding: {x: -10, y: -10, z: -10, w: -10}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -567,7 +567,7 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_RaycastPadding: {x: -7.5, y: -7.5, z: -7.5, w: -7.5}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -777,7 +777,7 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 0.7019608, g: 0.8980392, b: 0.9882353, a: 0.25}
   m_RaycastTarget: 1
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_RaycastPadding: {x: 0, y: -17.5, z: 0, w: -17.5}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -1081,7 +1081,7 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_RaycastPadding: {x: -12.5, y: -12.5, z: -12.5, w: -12.5}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -1201,7 +1201,7 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_RaycastPadding: {x: -12.5, y: -12.5, z: -12.5, w: -12.5}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -1321,7 +1321,7 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_RaycastPadding: {x: -7.5, y: -7.5, z: -7.5, w: -7.5}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -1623,7 +1623,6 @@ MonoBehaviour:
   _urlInterceptor: {fileID: 0}
   _urlHintText: {fileID: 0}
   _urlHintKey: 
-  _urlInputFieldTop: {fileID: 0}
   _trackTitleText: {fileID: 7994911014622825578}
   _trackUrlText: {fileID: 0}
   _urlInputField: {fileID: 3991003263611000464}
@@ -1676,6 +1675,9 @@ MonoBehaviour:
   _maxResolution4320Toggle: {fileID: 0}
   _loadingIndicator: {fileID: 0}
   _statusMessageText: {fileID: 0}
+  _errorCopyField: {fileID: 0}
+  _errorCopyLabel: {fileID: 0}
+  _soundOnlyText: {fileID: 0}
   _updateLogTextAsset: {fileID: 0}
   _versionDisplayText: {fileID: 0}
   _updateLogText: {fileID: 0}
@@ -1698,7 +1700,6 @@ MonoBehaviour:
   _shuffleLabel: {fileID: 0}
   _shuffleLabel2: {fileID: 0}
   _settingsLabel: {fileID: 0}
-  _versionLabel: {fileID: 0}
   _lockUiLabel: {fileID: 0}
   _tabQueueLabel: {fileID: 0}
   _tabHistoryLabel: {fileID: 0}
@@ -1733,7 +1734,7 @@ MonoBehaviour:
   _modalImageViewerLabel: {fileID: 0}
   _lockDetectionRect: {fileID: 0}
   _unlockProgressText: {fileID: 0}
-  _unlockHoldDuration: 1
+  _unlockClickWindow: 1.5
   _defaultPlaylistOpen: 0
   _currentPlaylistNameText: {fileID: 0}
   _playlistsListScroll: {fileID: 0}
@@ -1747,9 +1748,7 @@ MonoBehaviour:
   _dynamicPlaylists: []
   _playlistRefreshHandler: {fileID: 0}
   _playlistRefreshButton: {fileID: 0}
-  _playlistRefreshButtonLabel: {fileID: 0}
   _playlistDeleteButton: {fileID: 0}
-  _playlistDeleteButtonLabel: {fileID: 0}
 --- !u!1 &5301090629003387738
 GameObject:
   m_ObjectHideFlags: 0
@@ -1970,7 +1969,7 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_RaycastPadding: {x: -17.5, y: -17.5, z: -17.5, w: -17.5}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -2304,7 +2303,7 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_RaycastPadding: {x: -7.5, y: -7.5, z: -7.5, w: -7.5}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -2460,7 +2459,7 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_RaycastPadding: {x: -7.5, y: -7.5, z: -7.5, w: -7.5}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -2861,7 +2860,7 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_RaycastPadding: {x: -12.5, y: -12.5, z: -12.5, w: -12.5}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -2981,7 +2980,7 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_RaycastPadding: {x: -7.5, y: -7.5, z: -7.5, w: -7.5}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -3102,7 +3101,7 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 0.30980393, g: 0.7647059, b: 0.96862745, a: 1}
   m_RaycastTarget: 1
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_RaycastPadding: {x: -12.5, y: -12.5, z: -12.5, w: -12.5}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -3235,7 +3234,7 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_RaycastPadding: {x: -12.5, y: -12.5, z: -12.5, w: -12.5}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -3355,7 +3354,7 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_RaycastPadding: {x: -12.5, y: -12.5, z: -12.5, w: -12.5}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:

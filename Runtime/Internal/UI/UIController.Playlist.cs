@@ -2,6 +2,7 @@ using System;
 using UdonSharp;
 using UnityEngine;
 using UnityEngine.UI;
+using VRC.SDK3.Components;
 using VRC.SDKBase;
 
 namespace Yamadev.YamaStream.UI
@@ -9,25 +10,26 @@ namespace Yamadev.YamaStream.UI
   public partial class UIController
   {
     [Header("Playlist - Settings")]
+    // The list opens whenever the controls show (#335): the playlists are
+    // what players open most. On for the screen.
     [SerializeField] private bool _defaultPlaylistOpen;
 
     [Header("Playlist - UI Components")]
     [SerializeField] private Text _currentPlaylistNameText;
+    // Beside the name: how many tracks the open playlist has (issue #258).
+    [SerializeField] private Text _currentPlaylistTrackCountText;
     [SerializeField] private LoopScroll _playlistsListScroll;
     [SerializeField] private LoopScroll _playlistTracksScroll;
-    // The two halves of the panel where one replaces the other. Not the
-    // scrolls themselves: they are the same object as the page on the main
-    // screen but sit inside it on the playlist panel, where hiding the
-    // scroll would leave the header behind.
-    //
-    // Left unwired where both halves are on screen at once -- the playlist
-    // panel puts the list and the tracks side by side, so there is nowhere
-    // to go back to and nothing to switch.
+    // The two halves of the list, where one replaces the other: the
+    // playlists, and the tracks (a playlist's, the queue or the history).
+    // Each is a canvas of its own, shown and hidden by its canvas rather
+    // than by switching the page (ShowTracksPage). A UI without the list
+    // (the Controller Bar, the Global Reload Button) leaves them unwired.
     [SerializeField] private GameObject _playlistListPage;
     [SerializeField] private GameObject _playlistTracksPage;
     [SerializeField, RegisterEvent(nameof(Toggle.onValueChanged), nameof(GenerateQueueView))] private Toggle _queueTabToggle;
     [SerializeField, RegisterEvent(nameof(Toggle.onValueChanged), nameof(GenerateHistoryView))] private Toggle _historyTabToggle;
-    [SerializeField] private Toggle _playlistsTabToggle;
+    [SerializeField, RegisterEvent(nameof(Toggle.onValueChanged), nameof(OpenPlaylistsTab))] private Toggle _playlistsTabToggle;
 
     [Header("Playlist - Actions")]
     // Back to the playlist list. Wired the way the delete and refresh
@@ -43,9 +45,22 @@ namespace Yamadev.YamaStream.UI
     // _urlInterceptor is; core never learns what a VHub playlist is.
     [SerializeField, HideInInspector] private UdonSharpBehaviour _playlistRefreshHandler;
     [SerializeField, RegisterEvent(nameof(Button.onClick), nameof(RefreshPlaylist))] private Button _playlistRefreshButton;
-    [SerializeField] private Text _playlistRefreshButtonLabel;
     [SerializeField, RegisterEvent(nameof(Button.onClick), nameof(DeletePlaylist))] private Button _playlistDeleteButton;
-    [SerializeField] private Text _playlistDeleteButtonLabel;
+    // The header over a playlist's tracks (back, name, count, "…") and the
+    // strip of its actions under it (issue #258). Shown and hidden here
+    // rather than by an animator, so that the list works the same wherever
+    // it is placed: the screen and the Playlist Panel share it.
+    [SerializeField] private GameObject _playlistHeader;
+    [SerializeField] private GameObject _playlistActionStrip;
+    // The "…" that opens that strip, shown only when one of its actions can
+    // be used.
+    [SerializeField, RegisterEvent(nameof(Button.onClick), nameof(TogglePlaylistActions))] private Button _playlistActionsButton;
+    // Shows the URL a playlist loaded in the world came from, to copy.
+    [SerializeField, RegisterEvent(nameof(Button.onClick), nameof(ShowPlaylistUrl))] private Button _playlistUrlButton;
+    // The "+" under the playlists, for a VHub playlist's VRChat URL (#335),
+    // and the name shown while it is pointed at.
+    [SerializeField, RegisterEvent(nameof(VRCUrlInputField.onEndEdit), nameof(AddPlaylistUrl))] private VRCUrlInputField _addPlaylistUrlInputField;
+    [SerializeField] private Text _addPlaylistUrlLabel;
 
     private int _playlistIndex = -1;
     private int _playlistTrackIndex = -1;
@@ -62,9 +77,29 @@ namespace Yamadev.YamaStream.UI
     // off the first title before any of them is recoloured (issue #163).
     private Color _trackTitleColor;
     private bool _trackTitleColorRead;
+    // The parts of the lines, found once when the lines are first drawn
+    // rather than again for every line drawn, which took about a tenth of
+    // opening a playlist and a third of scrolling by a line (#326). A part
+    // a line lacks stays null. A track's actions are TrackActionCount to a
+    // line, in the order of FindTrackLineParts.
+    private Text[] _trackLineTitles;
+    private Text[] _trackLineUrls;
+    private Text[] _trackLineNumbers;
+    private GameObject[] _trackLineMarks;
+    private GameObject[] _trackLineActions;
+    private IndexTrigger[] _trackLineTriggers;
+    private TitleMarquee[] _trackLineMarquees;
+    private Text[] _playlistLineNames;
+    private Text[] _playlistLineCounts;
+    private IndexTrigger[] _playlistLineTriggers;
+    private const int TrackActionCount = 5;
 
     private bool IsQueuePage => Utilities.IsValid(_queueTabToggle) && _queueTabToggle.isOn;
     private bool IsHistoryPage => Utilities.IsValid(_historyTabToggle) && _historyTabToggle.isOn;
+
+    // Whether the open list's track at index is the one that plays. Only a
+    // playlist's rows can be: the queue and the history hold no place in one.
+    private bool IsPlayingRow(int index) => !IsQueuePage && !IsHistoryPage && _playlistIndex == _controller.ActivePlaylistIndex && index == _controller.PlayingTrackIndex;
 
     // Empty playlists are dynamic slots waiting to be filled (issue #88);
     // static ones are dropped at build time when they have no tracks
@@ -168,6 +203,43 @@ namespace Yamadev.YamaStream.UI
       if (Utilities.IsValid(_playlistDeleteButton)) _playlistDeleteButton.gameObject.SetActive(isDynamic);
       if (Utilities.IsValid(_playlistRefreshButton))
         _playlistRefreshButton.gameObject.SetActive(isDynamic && Utilities.IsValid(_playlistRefreshHandler) && slot.CanRefresh);
+      if (Utilities.IsValid(_playlistUrlButton)) _playlistUrlButton.gameObject.SetActive(isDynamic && slot.CanRefresh);
+      // Delete shows with any of them, so the strip is never empty.
+      if (Utilities.IsValid(_playlistActionsButton)) _playlistActionsButton.gameObject.SetActive(isDynamic);
+    }
+
+    // The "+" takes a VHub playlist's VRChat URL and adds the playlist to the
+    // list, without playing it, saying nothing unless it fails (#335). It
+    // needs the module that reads such a URL (the interceptor) and a dialog
+    // for a failure, so the Playlist Panel, which has none, does not show
+    // it. Any other URL is turned back with a word on what it takes.
+    private void UpdateAddPlaylistButton()
+    {
+      if (Utilities.IsValid(_addPlaylistUrlInputField))
+        _addPlaylistUrlInputField.gameObject.SetActive(Utilities.IsValid(_urlInterceptor) && Utilities.IsValid(_modalDialog));
+    }
+
+    public void AddPlaylistUrl()
+    {
+      UrlEntryEnded();
+      var field = _addPlaylistUrlInputField;
+      if (!Utilities.IsValid(field) || field.wasCanceled) return;
+      var url = field.GetUrl();
+      field.SetUrl(VRCUrl.Empty);
+      if (HandToUrlInterceptor(url, true)) return;
+      ShowMessage(GetTranslation("label.addPlaylistUrl"), GetTranslation("msg.playlistUrlOnly"));
+    }
+
+    // A playlist baked into the world keeps no URL at run time, so the
+    // button shows only for one loaded in the world, whose source is the
+    // URL it was loaded from (the VRChat URL VHub gives it).
+    public void ShowPlaylistUrl()
+    {
+      var slot = FindDynamicPlaylist(_playlistIndex);
+      if (!Utilities.IsValid(slot) || slot.IsEmpty || !slot.CanRefresh || !Utilities.IsValid(_modalDialog)) return;
+      string title = Utilities.IsValid(_currentPlaylistNameText) ? _currentPlaylistNameText.text : string.Empty;
+      if (!_modalDialog.TryShow(title, string.Empty, GetTranslation("button.close"), "", this, null, null)) return;
+      _modalDialog.ShowCopyField(slot.SourceUrl.Get(), GetTranslation("button.copyUrl"));
     }
 
     public void RefreshPlaylist()
@@ -209,6 +281,7 @@ namespace Yamadev.YamaStream.UI
       _playlistIndex = -1;
       _playlistTrackIndex = -1;
       if (Utilities.IsValid(_currentPlaylistNameText)) _currentPlaylistNameText.text = string.Empty;
+      if (Utilities.IsValid(_currentPlaylistTrackCountText)) _currentPlaylistTrackCountText.text = string.Empty;
       // GeneratePlaylistTracks returns early with no selection, so the rows
       // have to be dropped here. The queue and history pages feed the same
       // scroll and are redrawn right after, so leave them alone.
@@ -220,8 +293,7 @@ namespace Yamadev.YamaStream.UI
       // exists (issue #113). Only when that view is what is on screen: the
       // queue and history pages borrow the same object, and the list page is
       // already where this would go.
-      if (!IsQueuePage && !IsHistoryPage &&
-          Utilities.IsValid(_playlistTracksPage) && _playlistTracksPage.activeSelf)
+      if (!IsQueuePage && !IsHistoryPage && IsTracksPageShown())
         ReturnToPlaylistList();
     }
 
@@ -242,10 +314,103 @@ namespace Yamadev.YamaStream.UI
       if (!Utilities.IsValid(_playlistListPage)) return;
       if (!Utilities.IsValid(_playlistTracksPage)) return;
 
-      _playlistTracksPage.SetActive(false);
-      _playlistListPage.SetActive(true);
-      // Takes the title bar -- name, delete, refresh -- away with it.
-      if (Utilities.IsValid(_userUIAnimator)) _userUIAnimator.SetTrigger("HidePlaylistTitle");
+      ShowTracksPage(false);
+      HidePlaylistHeader();
+    }
+
+    // The tracks' page, or the playlists'. A page is shown and hidden by its
+    // canvas, and stays on while hidden until the controls next show
+    // (SwitchOffHiddenListPage): switching a page off and on ran OnDisable
+    // and OnEnable on all it holds, which took most of the time of going
+    // back and of opening a playlist (#326). A canvas switched off draws
+    // nothing, and nothing in it takes a press.
+    private void ShowTracksPage(bool shown)
+    {
+      SetPageShown(_playlistListPage, !shown);
+      SetPageShown(_playlistTracksPage, shown);
+    }
+
+    // A page switched off as the controls showed is switched on to show.
+    private void SetPageShown(GameObject page, bool shown)
+    {
+      if (!Utilities.IsValid(page)) return;
+      if (shown && !page.activeSelf) page.SetActive(true);
+      var canvas = page.GetComponent<Canvas>();
+      if (Utilities.IsValid(canvas)) canvas.enabled = shown;
+    }
+
+    // As the controls start to show, everything under them is still off, and
+    // switching off the page hidden by its canvas costs nothing: left on, it
+    // would be switched on with the controls, every time they show (#326).
+    private void SwitchOffHiddenListPage()
+    {
+      SwitchOffIfHidden(_playlistListPage);
+      SwitchOffIfHidden(_playlistTracksPage);
+    }
+
+    private void SwitchOffIfHidden(GameObject page)
+    {
+      if (!Utilities.IsValid(page) || !page.activeSelf) return;
+      var canvas = page.GetComponent<Canvas>();
+      if (Utilities.IsValid(canvas) && !canvas.enabled) page.SetActive(false);
+    }
+
+    private bool IsTracksPageShown()
+    {
+      if (!Utilities.IsValid(_playlistTracksPage)) return false;
+      var canvas = _playlistTracksPage.GetComponent<Canvas>();
+      return Utilities.IsValid(canvas) && canvas.enabled;
+    }
+
+    // Whether the tracks' page can be seen now: its page shown, and the list
+    // itself on (the screen's controls switch it off with them).
+    private bool IsTracksPageVisible() => Utilities.IsValid(_playlistTracksPage) && _playlistTracksPage.activeInHierarchy && IsTracksPageShown();
+
+    // A track stopping or loading moves the playing mark in the list. The list
+    // is drawn again in Update, once for all such events, and not until it
+    // can be seen: a list that cannot is drawn again whenever it shows
+    // anyway, or by Update when it does (#356). A UI with no list (the
+    // Controller Bar, the Global Reload Button) waits for nothing.
+    private bool _tracksRedrawWaiting;
+
+    private void RequestTracksRedraw() => _tracksRedrawWaiting = Utilities.IsValid(_playlistTracksPage);
+
+    // The playlist tab goes back to the playlist list the way the back button
+    // does, so its page and the header never part. Pressed again while a
+    // playlist's tracks show it reports on again (a toggle on in its group
+    // still calls back); leaving it for the queue or history reports off,
+    // which must leave their page alone.
+    public void OpenPlaylistsTab()
+    {
+      if (!Utilities.IsValid(_playlistsTabToggle) || !_playlistsTabToggle.isOn) return;
+      ReturnToPlaylistList();
+    }
+
+    // A playlist pressed in the list: its tracks, under its header with the
+    // strip of its actions closed. The list's row calls this through its
+    // IndexTrigger, after setting _playlistIndex.
+    public void OpenPlaylist()
+    {
+      ShowTracksPage(true);
+      ShowPlaylistTracks(true);
+      if (Utilities.IsValid(_playlistHeader)) _playlistHeader.SetActive(true);
+      if (Utilities.IsValid(_playlistActionStrip)) _playlistActionStrip.SetActive(false);
+    }
+
+    public void TogglePlaylistActions()
+    {
+      if (!Utilities.IsValid(_playlistActionStrip)) return;
+      _playlistActionStrip.SetActive(!_playlistActionStrip.activeSelf);
+    }
+
+    // Leaving a playlist's tracks -- back, the queue or history tab, or the
+    // playlist taken away -- closes its header (name, count, "…") and the
+    // strip of its actions. The tabs stay in view over the header (issue
+    // #258), so a tab can be pressed while they show.
+    private void HidePlaylistHeader()
+    {
+      if (Utilities.IsValid(_playlistHeader)) _playlistHeader.SetActive(false);
+      if (Utilities.IsValid(_playlistActionStrip)) _playlistActionStrip.SetActive(false);
     }
 
     public void DeletePlaylist()
@@ -326,49 +491,119 @@ namespace Yamadev.YamaStream.UI
       _playlistsListScroll.SetUp(VisiblePlaylistCount(), this, nameof(UpdatePlaylistsContent));
     }
 
+    // Called by the list's LoopScroll when its lines are drawn: on a scroll
+    // that brings other lines in too, which counts the controls' time again
+    // (#340).
     public void UpdatePlaylistsContent()
     {
+      TouchShownControls();
+      if (_playlistLineNames == null || _playlistLineNames.Length != _playlistsListScroll.LineCount) FindPlaylistLineParts();
       for (int i = 0; i < _playlistsListScroll.LineCount; i++)
       {
         if (_playlistsListScroll.Indexes[i] == _playlistsListScroll.LastIndexes[i] || _playlistsListScroll.Indexes[i] == -1) continue;
         int realIndex = ToRealPlaylistIndex(_playlistsListScroll.Indexes[i]);
         if (realIndex < 0) continue;
-        var cell = _playlistsListScroll.GetComponent<ScrollRect>().content.GetChild(i);
         var playlist = _controller.Playlists[realIndex];
 
-        var n = cell.Find("Text");
-        if (Utilities.IsValid(n))
-        {
-          var name = n.GetComponent<Text>();
-          if (Utilities.IsValid(name))
-            name.text = playlist.PlaylistName;
-        }
-
-        var tr = cell.Find("TrackCount");
-        if (Utilities.IsValid(tr))
-        {
-          var trackCount = tr.GetComponent<Text>();
-          if (Utilities.IsValid(trackCount))
-            trackCount.text = playlist.TrackCount > 0 ? $"{GetTranslation("label.total")} {playlist.TrackCount} {GetTranslation("label.tracks")}" : string.Empty;
-        }
-
-        var trigger = cell.GetComponent<IndexTrigger>();
+        var name = _playlistLineNames[i];
+        if (Utilities.IsValid(name)) name.text = playlist.PlaylistName;
+        var trackCount = _playlistLineCounts[i];
+        // As the header writes it ("8 tracks"): with "total" before it, the
+        // count wrapped onto two lines in Japanese (#332).
+        if (Utilities.IsValid(trackCount))
+          trackCount.text = playlist.TrackCount > 0 ? $"{playlist.TrackCount} {GetTranslation("label.tracks")}" : string.Empty;
+        var trigger = _playlistLineTriggers[i];
         if (Utilities.IsValid(trigger)) trigger.SetProgramVariable("_variableObject", realIndex);
       }
     }
 
+    private void FindPlaylistLineParts()
+    {
+      int count = _playlistsListScroll.LineCount;
+      var content = _playlistsListScroll.GetComponent<ScrollRect>().content;
+      _playlistLineNames = new Text[count];
+      _playlistLineCounts = new Text[count];
+      _playlistLineTriggers = new IndexTrigger[count];
+      for (int i = 0; i < count; i++)
+      {
+        var line = content.GetChild(i);
+        _playlistLineNames[i] = TextAt(line, "Text");
+        _playlistLineCounts[i] = TextAt(line, "TrackCount");
+        _playlistLineTriggers[i] = line.GetComponent<IndexTrigger>();
+      }
+    }
+
+    private void FindTrackLineParts()
+    {
+      int count = _playlistTracksScroll.LineCount;
+      var content = _playlistTracksScroll.GetComponent<ScrollRect>().content;
+      _trackLineTitles = new Text[count];
+      _trackLineUrls = new Text[count];
+      _trackLineNumbers = new Text[count];
+      _trackLineMarks = new GameObject[count];
+      _trackLineActions = new GameObject[count * TrackActionCount];
+      _trackLineTriggers = new IndexTrigger[count];
+      _trackLineMarquees = new TitleMarquee[count];
+      for (int i = 0; i < count; i++)
+      {
+        var line = content.GetChild(i);
+        var info = line.Find("Info");
+        if (Utilities.IsValid(info))
+        {
+          // In the clip it moves in while the row is pointed at (TitleMarquee, #352).
+          _trackLineTitles[i] = TextAt(info, "TitleClip/Title");
+          var marquee = info.Find("TitleClip/Marquee");
+          if (Utilities.IsValid(marquee)) _trackLineMarquees[i] = marquee.GetComponent<TitleMarquee>();
+          _trackLineUrls[i] = TextAt(info, "Url");
+          _trackLineNumbers[i] = TextAt(info, "No");
+          var mark = info.Find("PlayingMark");
+          if (Utilities.IsValid(mark)) _trackLineMarks[i] = mark.gameObject;
+        }
+        // Shown at the row's right end while it is pointed at (#354).
+        var actions = line.Find("Actions");
+        if (Utilities.IsValid(actions))
+        {
+          int at = i * TrackActionCount;
+          _trackLineActions[at] = ObjectAt(actions, "Copy");
+          _trackLineActions[at + 1] = ObjectAt(actions, "Up");
+          _trackLineActions[at + 2] = ObjectAt(actions, "Down");
+          _trackLineActions[at + 3] = ObjectAt(actions, "Remove");
+          _trackLineActions[at + 4] = ObjectAt(actions, "Add");
+        }
+        _trackLineTriggers[i] = line.GetComponent<IndexTrigger>();
+      }
+    }
+
+    private Text TextAt(Transform parent, string name)
+    {
+      var child = parent.Find(name);
+      return Utilities.IsValid(child) ? child.GetComponent<Text>() : null;
+    }
+
+    private GameObject ObjectAt(Transform parent, string name)
+    {
+      var child = parent.Find(name);
+      return Utilities.IsValid(child) ? child.gameObject : null;
+    }
+
+    // The queue and history tabs show their list on the tracks' page, from
+    // the top, drawn once.
     public void GenerateQueueView()
     {
       UpdatePlaylistActionButtons();
       if (!IsQueuePage || !Utilities.IsValid(_playlistTracksScroll)) return;
-      _playlistTracksScroll.SetUp(_controller.Queue.TrackCount, this, nameof(UpdatePlaylistTracksContent));
+      ShowTracksPage(true);
+      HidePlaylistHeader();
+      _playlistTracksScroll.SetUpAtTop(_controller.Queue.TrackCount, this, nameof(UpdatePlaylistTracksContent));
     }
 
     public void GenerateHistoryView()
     {
       UpdatePlaylistActionButtons();
       if (!IsHistoryPage || !Utilities.IsValid(_playlistTracksScroll)) return;
-      _playlistTracksScroll.SetUp(_controller.History.TrackCount, this, nameof(UpdatePlaylistTracksContent));
+      ShowTracksPage(true);
+      HidePlaylistHeader();
+      _playlistTracksScroll.SetUpAtTop(_controller.History.TrackCount, this, nameof(UpdatePlaylistTracksContent));
     }
 
     public void GeneratePlaylistsView()
@@ -377,8 +612,23 @@ namespace Yamadev.YamaStream.UI
       _playlistsListScroll.SetUp(VisiblePlaylistCount(), this, nameof(UpdatePlaylistsContent));
     }
 
-    public void GeneratePlaylistTracks()
+    // Redraws the tracks where they are scrolled to, as a change to their
+    // list (the queue, the history or the playlist) needs.
+    public void GeneratePlaylistTracks() => ShowPlaylistTracks(false);
+
+    // The open playlist's track count in its header, which carries a word
+    // and so is written again when the language changes.
+    private void UpdatePlaylistTrackCountText()
     {
+      if (!Utilities.IsValid(_currentPlaylistTrackCountText)) return;
+      if (_playlistIndex < 0 || _playlistIndex >= _controller.Playlists.Length) return;
+      _currentPlaylistTrackCountText.text = $"{_controller.Playlists[_playlistIndex].TrackCount} {GetTranslation("label.tracks")}";
+    }
+
+    // fromTop: a playlist just opened, shown from its first track.
+    private void ShowPlaylistTracks(bool fromTop)
+    {
+      _tracksRedrawWaiting = false;
       UpdatePlaylistActionButtons();
       if (!Utilities.IsValid(_playlistsListScroll) || !Utilities.IsValid(_playlistTracksScroll)) return;
       if (!IsQueuePage && !IsHistoryPage && _playlistIndex < 0) return;
@@ -401,14 +651,18 @@ namespace Yamadev.YamaStream.UI
         {
           _currentPlaylistNameText.text = playlist.PlaylistName;
         }
+        UpdatePlaylistTrackCountText();
       }
       else return;
 
-      _playlistTracksScroll.SetUp(trackCount, this, nameof(UpdatePlaylistTracksContent));
+      if (fromTop) _playlistTracksScroll.SetUpAtTop(trackCount, this, nameof(UpdatePlaylistTracksContent));
+      else _playlistTracksScroll.SetUp(trackCount, this, nameof(UpdatePlaylistTracksContent));
     }
 
+    // Called by the list's LoopScroll as UpdatePlaylistsContent is.
     public void UpdatePlaylistTracksContent()
     {
+      TouchShownControls();
       object[][] tracks;
       if (IsQueuePage)
       {
@@ -424,88 +678,65 @@ namespace Yamadev.YamaStream.UI
       }
       else return;
 
+      if (_trackLineTitles == null || _trackLineTitles.Length != _playlistTracksScroll.LineCount) FindTrackLineParts();
+      bool queuePage = IsQueuePage;
+      // The URL action shows the track's URL in the dialog's copy field,
+      // so a UI without a dialog (the Playlist Panel) does not offer it.
+      bool urlAction = Utilities.IsValid(_modalDialog);
       for (int i = 0; i < _playlistTracksScroll.LineCount; i++)
       {
-        if (_playlistTracksScroll.Indexes[i] == _playlistTracksScroll.LastIndexes[i] || _playlistTracksScroll.Indexes[i] == -1) continue;
-        if (_playlistTracksScroll.Indexes[i] >= tracks.Length) continue;
+        int index = _playlistTracksScroll.Indexes[i];
+        if (index == _playlistTracksScroll.LastIndexes[i] || index == -1) continue;
+        if (index >= tracks.Length) continue;
 
-        var track = tracks[_playlistTracksScroll.Indexes[i]];
+        var track = tracks[index];
         var trackTitle = TrackUtils.GetTitle(track);
         var trackUrl = TrackUtils.GetUrl(track);
-        bool isPlaying = !IsQueuePage && !IsHistoryPage && _playlistIndex == _controller.ActivePlaylistIndex && _playlistTracksScroll.Indexes[i] == _controller.PlayingTrackIndex;
+        bool isPlaying = IsPlayingRow(index);
 
-        var cell = _playlistTracksScroll.GetComponent<ScrollRect>().content.GetChild(i);
-        var info = cell.Find("Info");
-        if (Utilities.IsValid(info))
+        var title = _trackLineTitles[i];
+        if (Utilities.IsValid(title))
         {
-          var ti = info.Find("Title");
-          if (Utilities.IsValid(ti))
+          if (!_trackTitleColorRead)
           {
-            var title = ti.GetComponent<Text>();
-            if (Utilities.IsValid(title))
-            {
-              if (!_trackTitleColorRead)
-              {
-                _trackTitleColor = title.color;
-                _trackTitleColorRead = true;
-              }
-              title.text = string.IsNullOrEmpty(trackTitle) ? trackUrl.Get() : trackTitle;
-              title.color = isPlaying ? _primaryColor : _trackTitleColor;
-            }
+            _trackTitleColor = title.color;
+            _trackTitleColorRead = true;
           }
-          var u = info.Find("Url");
-          if (Utilities.IsValid(u))
-          {
-            var urlText = u.GetComponent<Text>();
-            if (Utilities.IsValid(urlText))
-              urlText.text = string.IsNullOrEmpty(trackTitle) ? string.Empty : trackUrl.Get();
-          }
-          var no = info.Find("No");
-          if (Utilities.IsValid(no))
-          {
-            var numberText = no.GetComponent<Text>();
-            if (Utilities.IsValid(numberText))
-            {
-              numberText.text = $"{_playlistTracksScroll.Indexes[i] + 1}";
-              numberText.gameObject.SetActive(!isPlaying);
-            }
-          }
-          var playingMark = info.Find("PlayingMark");
-          if (Utilities.IsValid(playingMark)) playingMark.gameObject.SetActive(isPlaying);
+          title.text = string.IsNullOrEmpty(trackTitle) ? trackUrl.Get() : trackTitle;
+          title.color = isPlaying ? _primaryColor : _trackTitleColor;
         }
-        var actions = cell.Find("Actions");
-        if (Utilities.IsValid(actions))
+        var urlText = _trackLineUrls[i];
+        if (Utilities.IsValid(urlText)) urlText.text = string.IsNullOrEmpty(trackTitle) ? string.Empty : trackUrl.Get();
+        var numberText = _trackLineNumbers[i];
+        if (Utilities.IsValid(numberText))
         {
-          var upMark = actions.Find("Up");
-          if (Utilities.IsValid(upMark)) upMark.gameObject.SetActive(IsQueuePage);
-          var downMark = actions.Find("Down");
-          if (Utilities.IsValid(downMark)) downMark.gameObject.SetActive(IsQueuePage);
-          var removeMark = actions.Find("Remove");
-          if (Utilities.IsValid(removeMark)) removeMark.gameObject.SetActive(IsQueuePage);
-          var copyUrl = actions.Find("Copy");
-          if (Utilities.IsValid(copyUrl))
-          {
-            var urlTransform = copyUrl.Find("URL");
-            if (Utilities.IsValid(urlTransform))
-            {
-              var trackUrlText = urlTransform.GetComponent<InputField>();
-              if (Utilities.IsValid(trackUrlText))
-              {
-                copyUrl.gameObject.SetActive(!IsQueuePage);
-                trackUrlText.text = trackUrl.Get();
-              }
-            }
-          }
-          var addMark = actions.Find("Add");
-          if (Utilities.IsValid(addMark)) addMark.gameObject.SetActive(!IsQueuePage);
-          var PlayMark = actions.Find("Play");
-          if (Utilities.IsValid(PlayMark)) PlayMark.gameObject.SetActive(!IsQueuePage);
+          numberText.text = $"{index + 1}";
+          numberText.gameObject.SetActive(!isPlaying);
         }
-        var ani = cell.GetComponent<Animator>();
-        if (Utilities.IsValid(ani)) ani.SetTrigger("Reset");
-        var trigger = cell.GetComponent<IndexTrigger>();
-        if (Utilities.IsValid(trigger)) trigger.SetProgramVariable("_variableObject", _playlistTracksScroll.Indexes[i]);
+        var playingMark = _trackLineMarks[i];
+        if (Utilities.IsValid(playingMark)) playingMark.SetActive(isPlaying);
+
+        int at = i * TrackActionCount;
+        SetLineAction(at, urlAction);
+        SetLineAction(at + 1, queuePage);
+        SetLineAction(at + 2, queuePage);
+        SetLineAction(at + 3, queuePage);
+        SetLineAction(at + 4, !queuePage);
+
+        // Only the row pointed at has its marquee on. It measures the title
+        // against the actions that show, so it is told after they are set.
+        var marquee = _trackLineMarquees[i];
+        if (Utilities.IsValid(marquee) && marquee.gameObject.activeInHierarchy) marquee.TitleChanged();
+
+        var trigger = _trackLineTriggers[i];
+        if (Utilities.IsValid(trigger)) trigger.SetProgramVariable("_variableObject", index);
       }
+    }
+
+    private void SetLineAction(int at, bool shown)
+    {
+      var action = _trackLineActions[at];
+      if (Utilities.IsValid(action)) action.SetActive(shown);
     }
 
     public void RemoveFromQueue()
@@ -517,24 +748,39 @@ namespace Yamadev.YamaStream.UI
       if (_playlistTrackIndex < _controller.Queue.TrackCount) _controller.Queue.RemoveTrack(_playlistTrackIndex);
     }
 
+    // The track whose row or action was pressed, in the queue, the history
+    // or the open playlist. Null when there is none.
+    private object[] SelectedTrack()
+    {
+      if (!_playlistTracksScroll || _playlistTrackIndex < 0) return null;
+      if (IsQueuePage) return _playlistTrackIndex < _controller.Queue.TrackCount ? _controller.Queue.GetTrack(_playlistTrackIndex) : null;
+      if (IsHistoryPage) return _controller.History.GetTrack(_playlistTrackIndex);
+      if (_playlistIndex >= 0 && _playlistIndex < _controller.Playlists.Length)
+        return _controller.Playlists[_playlistIndex].GetTrack(_playlistTrackIndex);
+      return null;
+    }
+
     public void AddPlaylistTrackToQueue()
     {
       if (!InvokeBeforeEvent("BeforeUserAddTrackToQueue")) return;
-      if (!_playlistTracksScroll || _playlistTrackIndex < 0) return;
-
-      object[] track;
-      if (IsHistoryPage)
-      {
-        track = _controller.History.GetTrack(_playlistTrackIndex);
-      }
-      else if (_playlistIndex >= 0 && _playlistIndex < _controller.Playlists.Length)
-      {
-        track = _controller.Playlists[_playlistIndex].GetTrack(_playlistTrackIndex);
-      }
-      else return;
+      var track = SelectedTrack();
+      if (track == null) return;
 
       _controller.TakeOwnership();
       _controller.Queue.AddTrack(track);
+    }
+
+    // Shows a track's URL in the dialog's copy field, as the strip under "…"
+    // shows a playlist's: a world cannot open a link, but the viewer can copy
+    // what the field holds.
+    public void ShowPlaylistTrackUrl()
+    {
+      var track = SelectedTrack();
+      if (track == null || !Utilities.IsValid(_modalDialog)) return;
+      var url = TrackUtils.GetUrl(track);
+      var title = TrackUtils.GetTitle(track);
+      if (!_modalDialog.TryShow(string.IsNullOrEmpty(title) ? url.Get() : title, string.Empty, GetTranslation("button.close"), "", this, null, null)) return;
+      _modalDialog.ShowCopyField(url.Get(), GetTranslation("button.copyUrl"));
     }
 
     public void MoveUp()
@@ -551,10 +797,22 @@ namespace Yamadev.YamaStream.UI
       _controller.Queue.MoveDown(_playlistTrackIndex);
     }
 
-    public void PlayPlaylistTrack()
+    // A track's row pressed plays it (#354). In the queue it plays that
+    // track now and takes it out of the queue. The row of the track that
+    // plays, or is loading or paused, does nothing, so that a stray press
+    // does not start everyone's video again.
+    public void PressPlaylistTrack()
     {
-      if (!InvokeBeforeEvent("BeforeUserPlayTrack")) return;
       if (!_playlistTracksScroll || _playlistTrackIndex < 0) return;
+      if (IsPlayingRow(_playlistTrackIndex) && !_controller.Stopped && !_controller.IsError) return;
+      if (!InvokeBeforeEvent("BeforeUserPlayTrack")) return;
+
+      if (IsQueuePage)
+      {
+        _controller.Queue.TakeOwnership();
+        _controller.PlayQueueTrack(_playlistTrackIndex);
+        return;
+      }
 
       if (IsHistoryPage)
       {
