@@ -35,10 +35,11 @@ namespace Yamadev.YamaStream
 
     private void InitializeScreen()
     {
-      // Said, and no more: a screen without its type or its property is left
-      // out (ShowTexture), the others show. Giving up here left the property
-      // block unmade, and the first texture then stopped the whole Controller:
-      // sound, no picture, and no control answering (issue #373).
+      // A difference in the counts is reported, and the setup goes on: a
+      // screen without its type or its property is left out (ShowTexture),
+      // the others show. Returning here left the property block unmade, and
+      // the first texture then stopped the whole Controller: sound, no
+      // picture, and no control answering (issue #373).
       if (_screenTypes.Length != ScreenCount || _textureProperties.Length != ScreenCount)
         PrintError($"Screen types or texture properties count does not match the screen count in {name}");
 
