@@ -69,7 +69,7 @@ def journey():
         if i < 3:
             parts.append(arrow(f"{x + 244},238 {x + 280},238", GREEN if i == 2 else BLUE))
     parts.append('<rect x="40" y="373" width="1120" height="100" rx="12" fill="#F4F6F8"/>')
-    parts.append(text(62, 407, "最初は公開プレイリストの読み取りだけ。自動ログイン・編集・自動更新は対象外。", 20, INK, 700))
+    parts.append(text(62, 407, "読み取りだけ。非公開リストを含めるかは D7 で決める。自動ログイン・編集・自動更新は対象外。", 20, INK, 700))
     parts.append(text(62, 443, "これは利用の流れの設計図です。新機能の画面や実機での動作確認が済んだことを示す画像ではありません。", 17, MUTED))
     figure("journey.svg", 510, "使う人から見た VHub Library 連携", "計画案 / issue #300 — Web で認証し、VRChat では選んで共有する", "".join(parts))
 
@@ -102,12 +102,13 @@ def boundaries():
 def roadmap():
     parts = [
         box(40, 230, 245, 180, "1  PoC と契約  #301", ["PC / Quest の取得・容量", "鍵・ログ・同期の漏れ", "通った契約を文書化"]),
-        box(390, 120, 320, 170, "2a  VHub 側  #317", ["連携 URL 発行・失効 UI", "個人 API / 公開の選択先", "制限・キャッシュ・運用"]),
+        box(390, 120, 320, 170, "2a  VHub 側  #317", ["連携 URL 発行・失効 UI", "個人 API・番号は #145 と共用", "制限・キャッシュ・運用"]),
         box(390, 355, 320, 170, "2b  KawaPlayer 側  #302", ["任意モジュールと個人 UI", "選んだリストだけ共有", "既存処理と権限を再利用"]),
         box(835, 230, 325, 180, "3  統合 QA と公開  #300", ["2 アカウント / PC・Quest", "従来の URL 入力の回帰", "ガイド・運用手順・停止手段"], "#EFF8F4", GREEN),
         arrow("295,315 335,315 335,205 375,205"),
         arrow("335,315 335,440 375,440"),
         text(297, 102, "Gate A：PoC 成功後だけ進む", 18, BLUE, 700),
+        text(40, 448, ["D7（非公開の扱い）は", "PoC の前に決める"], 17, RED, 700),
         arrow("720,205 773,205 773,315 820,315", GREEN),
         arrow("720,440 773,440 773,315", GREEN),
         '<rect x="40" y="565" width="1120" height="72" rx="12" fill="#FFF5E8"/>',
@@ -117,8 +118,122 @@ def roadmap():
     figure("roadmap.svg", 665, "両リポジトリの分担と、実装する順序", "計画案 — PoC → 共通契約 → サーバーとクライアント → 統合 QA。製品コードと本番設定はまだ変更しない", "".join(parts))
 
 
+GREY = "#F4F6F8"
+AMBER = "#FFF5E8"
+
+
+def note(y, lines, tint=GREY, height=None):
+    lines = [lines] if isinstance(lines, str) else lines
+    h = height or 26 + 30 * len(lines)
+    return f'<rect x="40" y="{y}" width="1120" height="{h}" rx="12" fill="{tint}"/>' + text(62, y + 34, lines, 18, INK)
+
+
+def requests():
+    """The two GETs, who sends them, and what goes out to everyone."""
+    parts = [
+        text(40, 132, "ブラウザ（PC・スマホ）", 22, BLUE, 700),
+        text(440, 132, "各自の KawaPlayer（VRChat）", 22, BLUE, 700),
+        text(840, 132, "VHub（サーバー）", 22, BLUE, 700),
+        # 1: issue the key
+        box(40, 155, 300, 120, "① 連携 URL を発行", ["VChat にログインした画面", "期限つきの閲覧用の鍵"]),
+        box(840, 155, 320, 120, "鍵を作って記録", ["ハッシュだけを保存", "寿命と失効を毎回判定"]),
+        arrow("350,215 825,215"),
+        text(560, 205, "発行", 17, BLUE, 700),
+        # 2: the catalogue
+        box(440, 305, 300, 130, "② 自分の一覧を読む", ["貼った連携 URL で取得", "GET /r/library/{鍵}"]),
+        box(840, 305, 320, 130, "本人の一覧（概要だけ）", ["載せたリストに番号を付ける", "200 JSON・保存させない"]),
+        arrow("750,345 825,345"),
+        arrow("825,395 750,395"),
+        text(760, 385, "一覧と番号", 15, BLUE, 700),
+        # 3: the chosen playlist
+        box(440, 465, 300, 130, "③ 選んだ 1 件を読む", ["焼き込み済みの番号の URL", "GET /vrcurl/resolve/{番号}"], "#EFF8F4", GREEN),
+        box(840, 465, 320, 130, "曲の一覧（公開分）", ["今の公開の状態を確かめる", "今の resolve と同じ JSON"], "#EFF8F4", GREEN),
+        arrow("750,505 825,505", GREEN),
+        arrow("825,555 750,555", GREEN),
+        text(765, 545, "曲と id", 15, GREEN, 700),
+        # 4: share
+        box(440, 625, 720, 120, "④ 照合して全員へ共有", ["応答の id が選んだリストと同じときだけ、既存の権限と入替確認を通す", "全員へ同期するのは 番号の URL と 識別 default/{id}。鍵は含めない"], "#EFF8F4", GREEN),
+        arrow("590,605 590,617", GREEN),
+        arrow("190,285 190,370 425,370"),
+        text(200, 355, "利用者が URL を貼る", 16, BLUE, 700),
+        note(775, ["経路を /r/ と /vrcurl/ の下に置くのは、VRChat からの取得が今の構成でそこだけ届くため（/api/ の下は届かない）。",
+                   "③ の番号は検索（#145）と共用する。経路の名前は案で、PoC のあとに確定する。"]),
+    ]
+    figure("requests.svg", 880, "2 つの GET と、全員へ届くもの", "計画案 — 鍵を使うのは ② だけ。③ と ④ には鍵が無いので、後から入った人も同じ枠で再生できる", "".join(parts))
+
+
+def numbers():
+    """Why the plan reuses the search plan's numbers and checks the id, instead of numbering playlists for good."""
+    parts = [
+        box(40, 155, 470, 395, "採らない：リストごとの永久の番号", [
+            "番号 1 つにリスト 1 つを永久に割り当てる",
+            "焼き込んだ数よりリストが増えると、",
+            "新しいリストが読めない（作り直しが要る）",
+            "廃止した PlaylistViewer 用のプールと",
+            "同じ作り。検索の計画でも採らなかった",
+        ], "#FFF1F1", RED),
+        text(560, 132, "採る：使い回す番号 ＋ id の照合", 22, GREEN, 700),
+        box(560, 155, 600, 125, "1. 選ぶ", ["番号 12 → リスト A を読む", "枠に残す：番号の URL …/resolve/12 と 識別 default/A"], "#EFF8F4", GREEN),
+        box(560, 310, 600, 95, "2. しばらくして", ["番号 12 が、別の人の操作でリスト B に使い回される"], GREY, MUTED),
+        box(560, 435, 600, 125, "3. 枠を更新する", ["…/resolve/12 の応答の id は B。識別 A と違う", "→ 枠は書き換えない（A のまま）。一覧の更新を案内"], "#EFF8F4", GREEN),
+        arrow("860,284 860,302", GREEN),
+        arrow("860,409 860,427", GREEN),
+        note(590, ["番号の URL は取り出しにだけ使い、どのリストかは応答の id で見分ける。選んだときも、あとの更新でも同じ照合を通す。",
+                   "プール（4,096 個）、焼き込む配列、照合の手順は、検索の計画（#145）と 1 つにする。"]),
+    ]
+    figure("numbers.svg", 695, "番号は使い回し、id で照合する", "計画案（D4） — 永久の番号を作らず、検索と同じ resolve プールを共用する", "".join(parts))
+
+
+def scope():
+    """D7: how many people a public-only first version leaves with an empty list, and the three options."""
+    def bar(y, label, left, left_text, right_text):
+        w = 1120 - 260
+        lw = int(w * left)
+        return (
+            text(40, y + 30, label, 19, INK, 700)
+            + f'<rect x="260" y="{y + 6}" width="{lw}" height="38" rx="6" fill="#D7ECE3"/>'
+            + f'<rect x="{260 + lw}" y="{y + 6}" width="{w - lw}" height="38" rx="6" fill="#F6DADB"/>'
+            + text(276, y + 32, left_text, 17, GREEN, 700)
+            + text(276 + lw, y + 32, right_text, 17, RED, 700)
+        )
+
+    parts = [
+        text(40, 128, "本番の割合（2026-11-11、おおよそ）", 19, MUTED, 700),
+        bar(140, "プレイリスト", 0.53, "公開　約半分", "非公開（URL 限定）　約半分"),
+        bar(200, "作成した人", 0.55, "公開のリストがある　約半分", "非公開だけ　約半分 → 案 A では一覧が空"),
+        box(40, 290, 355, 270, "A. 公開だけ", ["一覧：公開のリストだけ", "＋ 今の計画のまま", "＋ 作りがいちばん小さい", "－ 作成者の約半分は", "　 一覧が空になる"]),
+        box(422, 290, 356, 270, "B. 非公開も選べる", ["一覧：非公開も出して選べる", "＋ 全員の役に立つ", "－ 鍵のない取得先が無く、", "　 共有後の更新と後入りを", "　 別に決める必要がある"], "#EFF8F4", GREEN),
+        box(805, 290, 355, 270, "C. 非公開は名前だけ", ["一覧：非公開は名前だけ", "＋ 作りが小さい", "－ 一覧に出ても選べない", "　（今までどおり", "　  VRChat用URL を貼る）"]),
+        note(590, ["お気に入りを使っている人はごく少ないので、この機能の中心は「作成したプレイリスト」になる。",
+                   "どれにするかで通信の作り（6.1）と共有の境界（4 章）が変わる。PoC（Gate A）の前に決める。"], AMBER),
+    ]
+    figure("scope.svg", 700, "非公開リストをどう扱うか（D7）", "判断待ち — 公開だけにすると、作成者のほぼ半分はワールドで一覧が空になる", "".join(parts))
+
+
+def key_lifetime():
+    """D1: the key is short-lived, while request paths stay in access logs much longer."""
+    parts = [
+        text(40, 140, "発行", 18, BLUE, 700),
+        f'<rect x="40" y="155" width="230" height="40" rx="6" fill="#DCE9F7"/>',
+        text(56, 182, "鍵が使える（案：60 分）", 17, BLUE, 700),
+        text(280, 182, "← 失効", 18, BLUE, 700),
+        f'<rect x="40" y="215" width="1120" height="40" rx="6" fill="#ECEFF2"/>',
+        text(56, 242, "経路の記録が残る（途中のプロキシのアクセスログ。数十日）", 17, MUTED, 700),
+        text(40, 300, "失効したあとの鍵は、記録に残っていても使えない。寿命を延ばすほど、記録の中の鍵が使える時間も延びる。", 17, INK),
+        box(40, 340, 545, 175, "受け入れる", ["寿命を短いまま保つ（延ばさない）", "記録の設定は変えない", "→ D1 の寿命の上限になる"]),
+        box(615, 340, 545, 175, "外す", ["一覧の経路だけ、アクセスログから外す", "サーバー側の作業（VHub #317）", "→ 寿命を延ばす余地ができる"]),
+        note(545, ["どちらでも、アプリのログには鍵を出さない。VRChat や CDN の記録は制御できないので、残るリスクとして説明する。",
+                   "失効で止まるのは後の取得だけ。取得済みの一覧や、共有済みのリストは消えない。"]),
+    ]
+    figure("key-lifetime.svg", 650, "連携キーの寿命と、経路の記録", "計画案（D1） — 鍵は経路に入るので、短い寿命で記録の影響を抑える", "".join(parts))
+
+
 if __name__ == "__main__":
     journey()
+    scope()
     boundaries()
+    key_lifetime()
+    requests()
+    numbers()
     roadmap()
-    print("Generated journey.svg, boundaries.svg, roadmap.svg")
+    print("Generated journey.svg, scope.svg, boundaries.svg, key-lifetime.svg, requests.svg, numbers.svg, roadmap.svg")
