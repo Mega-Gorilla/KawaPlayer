@@ -35,11 +35,12 @@ namespace Yamadev.YamaStream
 
     private void InitializeScreen()
     {
+      // Said, and no more: a screen without its type or its property is left
+      // out (ShowTexture), the others show. Giving up here left the property
+      // block unmade, and the first texture then stopped the whole Controller:
+      // sound, no picture, and no control answering (issue #373).
       if (_screenTypes.Length != ScreenCount || _textureProperties.Length != ScreenCount)
-      {
         PrintError($"Screen types or texture properties count does not match the screen count in {name}");
-        return;
-      }
 
       UpdateScreenMaterial();
       UpdateHandlerMaxResolution();
@@ -55,23 +56,20 @@ namespace Yamadev.YamaStream
       }
     }
 
-    private void InitializePropertyBlock()
+    // Mirror flip and brightness reach a renderer screen with its texture, in
+    // one property block.
+    private void SetUpPropertyBlock()
     {
-      if (!Utilities.IsValid(_propertyBlock))
-      {
-        _propertyBlock = new MaterialPropertyBlock();
-      }
+      if (!Utilities.IsValid(_propertyBlock)) _propertyBlock = new MaterialPropertyBlock();
+      _propertyBlock.SetInt("_MirrorFlip", _mirrorFlip ? 1 : 0);
+      _propertyBlock.SetFloat("_Brightness", _brightness);
     }
 
-    // Mirror flip and brightness reach a renderer screen with its texture, in
-    // one property block, so the texture showing is put back with them: a
+    // The texture showing is put back with mirror flip and brightness: a
     // handler tells of a texture only when it changes (#356).
     private void UpdateScreenMaterial()
     {
-      InitializePropertyBlock();
-
-      _propertyBlock.SetInt("_MirrorFlip", _mirrorFlip ? 1 : 0);
-      _propertyBlock.SetFloat("_Brightness", _brightness);
+      SetUpPropertyBlock();
       if (!Utilities.IsValid(_shownTexture)) return;
       int screenCount = _screens.Length;
       for (int i = 0; i < screenCount; i++) ShowTexture(i, _shownTexture);
@@ -157,6 +155,7 @@ namespace Yamadev.YamaStream
     {
       var screen = _screens[index];
       if (!Utilities.IsValid(screen)) return;
+      if (index >= _screenTypes.Length || index >= _textureProperties.Length) return;
 
       string textureProperty = _textureProperties[index];
       switch (_screenTypes[index])
@@ -169,6 +168,8 @@ namespace Yamadev.YamaStream
           }
           else
           {
+            // Whatever order the texture and the screens' setup come in (issue #373).
+            if (!Utilities.IsValid(_propertyBlock)) SetUpPropertyBlock();
             _propertyBlock.SetTexture(textureProperty, texture);
             ((Renderer)screen).SetPropertyBlock(_propertyBlock, 0);
           }
