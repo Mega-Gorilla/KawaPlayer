@@ -1,0 +1,226 @@
+[KSP] ready slots=10 initial0=[http://127.0.0.1:18080/r/search?q= 検索語を入力 → ] len=44 initial1=[http://127.0.0.1:18080/r/search?q=]
+[KSP] aim moved 0.157
+[KSP] hidden never-shown=[]
+[KSP] hidden set-while-off=[http://127.0.0.1:18080/r/search?q= 検索語を入力 → ]
+[KSP] hidden shown-after-set=[] text=[]
+[KSP] shot 50
+[KSP] hidden set-while-on=[http://127.0.0.1:18080/r/search?q= 検索語を入力 → ] text=[http://127.0.0.1:18080/r/search?q= 検索語を入力 → ]
+[KSP] hidden off-and-on=[http://127.0.0.1:18080/r/search?q= 検索語を入力 → ] text=[http://127.0.0.1:18080/r/search?q= 検索語を入力 → ]
+[KSP] shot 51
+[KSP] direct 0 url=[http://127.0.0.1:18080/r/search?q= 検索語を入力 → ] text=[http://127.0.0.1:18080/r/search?q= 検索語を入力 → ]
+[KSP] loaded -2 ms=43 chars=12250
+[KSP] json -2 items=60 withTrack=20 truncated=True parse_ms=0.14 0.12 0.12 0.12 0.12 walk_ms=1.53 last=サンプルのプレイリスト 59 Sample Playlist query=[]
+[KSP] qcodes -2
+[KSP] direct 1 url=[http://127.0.0.1:18080/r/search?q=]
+[KSP] loaded -3 ms=43 chars=12250
+[KSP] json -3 items=60 withTrack=20 truncated=True parse_ms=0.17 0.16 0.14 0.14 0.14 walk_ms=0.70 last=サンプルのプレイリスト 59 Sample Playlist query=[]
+[KSP] qcodes -3
+[KSP] partA done
+[KSP] begin 0 url=[http://127.0.0.1:18080/r/search?q= 検索語を入力 → ] text=[http://127.0.0.1:18080/r/search?q= 検索語を入力 → ]
+[KSP] focus 0
+[KSP] aim moved 0.000
+[KSP] aim moved 0.000
+[KSP] aim moved 0.000
+[KSP] aim moved 0.000
+[KSP] aim moved 0.000
+[KSP] aim moved 0.000
+[KSP] shot 100
+[KSP] press 0
+[KSP] shot 200
+[KSP] pre 0
+[KSP] type 0
+[KSP] shot 300
+[KSP] enter 0
+[KSP] entered 0 canceled=False len=49 url=[http://127.0.0.1:18080/r/search?q= 検索語を入力 → disco]
+[KSP] codes 0 0020 691C 7D22 8A9E 3092 5165 529B 0020 2192 0020 0064 0069 0073 0063 006F
+[KSP] loaded 0 ms=54 chars=12255
+[KSP] json 0 items=60 withTrack=20 truncated=True parse_ms=0.14 0.12 0.13 0.15 0.15 walk_ms=0.72 last=サンプルのプレイリスト 59 Sample Playlist query=[disco]
+[KSP] qcodes 0 0064 0069 0073 0063 006F
+[KSP] after 0 url=[http://127.0.0.1:18080/r/search?q= 検索語を入力 → disco] text=[http://127.0.0.1:18080/r/search?q= 検索語を入力 → disco]
+[KSP] begin 1 url=[http://127.0.0.1:18080/r/search?q= 検索語を入力 → ] text=[http://127.0.0.1:18080/r/search?q= 検索語を入力 → ]
+[KSP] focus 1
+[KSP] aim moved 0.000
+[KSP] aim moved 0.000
+[KSP] aim moved 0.000
+[KSP] aim moved 0.000
+[KSP] aim moved 0.000
+[KSP] aim moved 0.000
+[KSP] shot 101
+[KSP] press 1
+[KSP] shot 201
+[KSP] pre 1
+[KSP] type 1
+[KSP] shot 301
+[KSP] enter 1
+[KSP] entered 1 canceled=False len=57 url=[http://127.0.0.1:18080/r/search?q= 検索語を入力 → Night Drive 夜]
+[KSP] codes 1 0020 691C 7D22 8A9E 3092 5165 529B 0020 2192 0020 004E 0069 0067 0068 0074 0020 0044 0072 0069 0076 0065 0020 591C
+[KSP] loaded 1 ms=57 chars=12263
+[KSP] json 1 items=60 withTrack=20 truncated=True parse_ms=0.17 0.15 0.13 0.13 0.13 walk_ms=0.63 last=サンプルのプレイリスト 59 Sample Playlist query=[Night Drive 夜]
+[KSP] qcodes 1 004E 0069 0067 0068 0074 0020 0044 0072 0069 0076 0065 0020 591C
+[KSP] after 1 url=[http://127.0.0.1:18080/r/search?q= 検索語を入力 → Night Drive 夜] text=[http://127.0.0.1:18080/r/search?q= 検索語を入力 → Night Drive 夜]
+[KSP] begin 2 url=[http://127.0.0.1:18080/r/search?q= 検索語を入力 → ] text=[http://127.0.0.1:18080/r/search?q= 検索語を入力 → ]
+[KSP] focus 2
+[KSP] aim moved 0.000
+[KSP] aim moved 0.000
+[KSP] aim moved 0.000
+[KSP] aim moved 0.000
+[KSP] aim moved 0.000
+[KSP] aim moved 0.000
+[KSP] shot 102
+[KSP] press 2
+[KSP] shot 202
+[KSP] pre 2
+[KSP] type 2
+[KSP] shot 302
+[KSP] enter 2
+[KSP] entered 2 canceled=False len=55 url=[http://127.0.0.1:18080/r/search?q= 検索語を入力 → night drive]
+[KSP] codes 2 0020 691C 7D22 8A9E 3092 5165 529B 0020 2192 0020 006E 0069 0067 0068 0074 0020 0064 0072 0069 0076 0065
+[KSP] loaded 2 ms=56 chars=12261
+[KSP] json 2 items=60 withTrack=20 truncated=True parse_ms=0.21 0.15 0.14 0.16 0.16 walk_ms=0.65 last=サンプルのプレイリスト 59 Sample Playlist query=[night drive]
+[KSP] qcodes 2 006E 0069 0067 0068 0074 0020 0064 0072 0069 0076 0065
+[KSP] after 2 url=[http://127.0.0.1:18080/r/search?q= 検索語を入力 → night drive] text=[http://127.0.0.1:18080/r/search?q= 検索語を入力 → night drive]
+[KSP] begin 3 url=[http://127.0.0.1:18080/r/search?q= 検索語を入力 → ] text=[http://127.0.0.1:18080/r/search?q= 検索語を入力 → ]
+[KSP] focus 3
+[KSP] aim moved 0.000
+[KSP] aim moved 0.000
+[KSP] aim moved 0.000
+[KSP] aim moved 0.000
+[KSP] aim moved 0.000
+[KSP] aim moved 0.000
+[KSP] shot 103
+[KSP] press 3
+[KSP] shot 203
+[KSP] pre 3
+[KSP] type 3
+[KSP] shot 303
+[KSP] enter 3
+[KSP] entered 3 canceled=False len=47 url=[http://127.0.0.1:18080/r/search?q= 検索語を入力 → 作業用]
+[KSP] codes 3 0020 691C 7D22 8A9E 3092 5165 529B 0020 2192 0020 4F5C 696D 7528
+[KSP] loaded 3 ms=64 chars=12253
+[KSP] json 3 items=60 withTrack=20 truncated=True parse_ms=0.15 0.13 0.13 0.13 0.13 walk_ms=0.63 last=サンプルのプレイリスト 59 Sample Playlist query=[作業用]
+[KSP] qcodes 3 4F5C 696D 7528
+[KSP] after 3 url=[http://127.0.0.1:18080/r/search?q= 検索語を入力 → 作業用] text=[http://127.0.0.1:18080/r/search?q= 検索語を入力 → 作業用]
+[KSP] begin 4 url=[http://127.0.0.1:18080/r/search?q= 検索語を入力 → ] text=[http://127.0.0.1:18080/r/search?q= 検索語を入力 → ]
+[KSP] focus 4
+[KSP] aim moved 0.000
+[KSP] aim moved 0.000
+[KSP] aim moved 0.000
+[KSP] aim moved 0.000
+[KSP] aim moved 0.000
+[KSP] aim moved 0.000
+[KSP] shot 104
+[KSP] press 4
+[KSP] shot 204
+[KSP] pre 4
+[KSP] type 4
+[KSP] shot 304
+[KSP] enter 4
+[KSP] entered 4 canceled=False len=49 url=[http://127.0.0.1:18080/r/search?q= 検索語を入力 → a&b=c]
+[KSP] codes 4 0020 691C 7D22 8A9E 3092 5165 529B 0020 2192 0020 0061 0026 0062 003D 0063
+[KSP] loaded 4 ms=53 chars=12255
+[KSP] json 4 items=60 withTrack=20 truncated=True parse_ms=0.14 0.13 0.12 0.12 0.12 walk_ms=0.72 last=サンプルのプレイリスト 59 Sample Playlist query=[a&b=c]
+[KSP] qcodes 4 0061 0026 0062 003D 0063
+[KSP] after 4 url=[http://127.0.0.1:18080/r/search?q= 検索語を入力 → a&b=c] text=[http://127.0.0.1:18080/r/search?q= 検索語を入力 → a&b=c]
+[KSP] begin 5 url=[http://127.0.0.1:18080/r/search?q= 検索語を入力 → ] text=[http://127.0.0.1:18080/r/search?q= 検索語を入力 → ]
+[KSP] focus 5
+[KSP] aim moved 0.000
+[KSP] aim moved 0.000
+[KSP] aim moved 0.000
+[KSP] aim moved 0.000
+[KSP] aim moved 0.000
+[KSP] aim moved 0.000
+[KSP] shot 105
+[KSP] press 5
+[KSP] shot 205
+[KSP] pre 5
+[KSP] type 5
+[KSP] shot 305
+[KSP] enter 5
+[KSP] entered 5 canceled=False len=51 url=[http://127.0.0.1:18080/r/search?q= 検索語を入力 → c#major]
+[KSP] codes 5 0020 691C 7D22 8A9E 3092 5165 529B 0020 2192 0020 0063 0023 006D 0061 006A 006F 0072
+[KSP] loaded 5 ms=60 chars=12251
+[KSP] json 5 items=60 withTrack=20 truncated=True parse_ms=0.14 0.13 0.13 0.13 0.12 walk_ms=0.64 last=サンプルのプレイリスト 59 Sample Playlist query=[c]
+[KSP] qcodes 5 0063
+[KSP] after 5 url=[http://127.0.0.1:18080/r/search?q= 検索語を入力 → c#major] text=[http://127.0.0.1:18080/r/search?q= 検索語を入力 → c#major]
+[KSP] begin 6 url=[http://127.0.0.1:18080/r/search?q= 検索語を入力 → ] text=[http://127.0.0.1:18080/r/search?q= 検索語を入力 → ]
+[KSP] focus 6
+[KSP] aim moved 0.000
+[KSP] aim moved 0.000
+[KSP] aim moved 0.000
+[KSP] aim moved 0.000
+[KSP] aim moved 0.000
+[KSP] aim moved 0.000
+[KSP] shot 106
+[KSP] press 6
+[KSP] shot 206
+[KSP] pre 6
+[KSP] type 6
+[KSP] shot 306
+[KSP] enter 6
+[KSP] entered 6 canceled=False len=51 url=[http://127.0.0.1:18080/r/search?q= 検索語を入力 → 100% ok]
+[KSP] codes 6 0020 691C 7D22 8A9E 3092 5165 529B 0020 2192 0020 0031 0030 0030 0025 0020 006F 006B
+[KSP] loaderror 6 ms=34 code=0 error=[Malformed URL]
+[KSP] after 6 url=[http://127.0.0.1:18080/r/search?q= 検索語を入力 → 100% ok] text=[http://127.0.0.1:18080/r/search?q= 検索語を入力 → 100% ok]
+[KSP] begin 7 url=[http://127.0.0.1:18080/r/search?q= 検索語を入力 → ] text=[http://127.0.0.1:18080/r/search?q= 検索語を入力 → ]
+[KSP] focus 7
+[KSP] aim moved 0.000
+[KSP] aim moved 0.000
+[KSP] aim moved 0.000
+[KSP] aim moved 0.000
+[KSP] aim moved 0.000
+[KSP] aim moved 0.000
+[KSP] shot 107
+[KSP] press 7
+[KSP] shot 207
+[KSP] pre 7
+[KSP] type 7
+[KSP] shot 307
+[KSP] enter 7
+[KSP] entered 7 canceled=False len=47 url=[http://127.0.0.1:18080/r/search?q= 検索語を入力 → c++]
+[KSP] codes 7 0020 691C 7D22 8A9E 3092 5165 529B 0020 2192 0020 0063 002B 002B
+[KSP] loaded 7 ms=54 chars=12253
+[KSP] json 7 items=60 withTrack=20 truncated=True parse_ms=0.20 0.18 0.18 0.18 0.18 walk_ms=0.61 last=サンプルのプレイリスト 59 Sample Playlist query=[c++]
+[KSP] qcodes 7 0063 002B 002B
+[KSP] after 7 url=[http://127.0.0.1:18080/r/search?q= 検索語を入力 → c++] text=[http://127.0.0.1:18080/r/search?q= 検索語を入力 → c++]
+[KSP] begin 8 url=[http://127.0.0.1:18080/r/search?q=] text=[http://127.0.0.1:18080/r/search?q=]
+[KSP] focus 8
+[KSP] aim moved 0.000
+[KSP] aim moved 0.000
+[KSP] aim moved 0.000
+[KSP] aim moved 0.000
+[KSP] aim moved 0.000
+[KSP] aim moved 0.000
+[KSP] shot 108
+[KSP] press 8
+[KSP] shot 208
+[KSP] pre 8
+[KSP] type 8
+[KSP] shot 308
+[KSP] enter 8
+[KSP] entered 8 canceled=False len=39 url=[http://127.0.0.1:18080/r/search?q=disco]
+[KSP] codes 8 0064 0069 0073 0063 006F
+[KSP] loaded 8 ms=54 chars=12255
+[KSP] json 8 items=60 withTrack=20 truncated=True parse_ms=0.20 0.18 0.18 0.14 0.12 walk_ms=0.66 last=サンプルのプレイリスト 59 Sample Playlist query=[disco]
+[KSP] qcodes 8 0064 0069 0073 0063 006F
+[KSP] after 8 url=[http://127.0.0.1:18080/r/search?q=disco] text=[http://127.0.0.1:18080/r/search?q=disco]
+[KSP] begin 9 url=[http://127.0.0.1:18080/r/search?q=] text=[http://127.0.0.1:18080/r/search?q=]
+[KSP] focus 9
+[KSP] aim moved 0.000
+[KSP] aim moved 0.000
+[KSP] aim moved 0.000
+[KSP] aim moved 0.000
+[KSP] aim moved 0.000
+[KSP] aim moved 0.000
+[KSP] shot 109
+[KSP] press 9
+[KSP] shot 209
+[KSP] pre 9
+[KSP] type 9
+[KSP] shot 309
+[KSP] enter 9
+[KSP] entered 9 canceled=False len=41 url=[http://127.0.0.1:18080/r/search?q=ＤＩＳＣＯ　夜]
+[KSP] codes 9 FF24 FF29 FF33 FF23 FF2F 3000 591C
+[KSP] loaded 9 ms=54 chars=12257
+[KSP] json 9 items=60 withTrack=20 truncated=True parse_ms=0.18 0.17 0.17 0.16 0.14 walk_ms=0.71 last=サンプルのプレイリスト 59 Sample Playlist query=[ＤＩＳＣＯ　夜]
+[KSP] qcodes 9 FF24 FF29 FF33 FF23 FF2F 3000 591C
+[KSP] after 9 url=[http://127.0.0.1:18080/r/search?q=ＤＩＳＣＯ　夜] text=[http://127.0.0.1:18080/r/search?q=ＤＩＳＣＯ　夜]

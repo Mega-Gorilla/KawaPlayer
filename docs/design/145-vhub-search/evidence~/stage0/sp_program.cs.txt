@@ -1,0 +1,20 @@
+// Imports the temporary probe and makes its U# program asset. Saves nothing else.
+if (UnityEditor.EditorApplication.isPlaying) return "playing; abort";
+var s0 = UnityEngine.SceneManagement.SceneManager.GetActiveScene();
+foreach (var r in s0.GetRootGameObjects()) if (r.name.StartsWith("__Spock_")) return "another session is using Unity: " + r.name;
+if (s0.isDirty) return "scene dirty: " + s0.path;
+const string path = "Assets/__SearchTest/SearchProbe";
+UnityEditor.AssetDatabase.ImportAsset(path + ".cs", UnityEditor.ImportAssetOptions.ForceSynchronousImport);
+var script = UnityEditor.AssetDatabase.LoadAssetAtPath<UnityEditor.MonoScript>(path + ".cs");
+if (script == null) return "no script";
+var cls = script.GetClass();
+if (cls == null) return "script not compiled yet";
+var program = UnityEditor.AssetDatabase.LoadAssetAtPath<UdonSharp.UdonSharpProgramAsset>(path + ".asset");
+if (program == null) {
+  program = UnityEngine.ScriptableObject.CreateInstance<UdonSharp.UdonSharpProgramAsset>();
+  program.sourceCsScript = script;
+  UnityEditor.AssetDatabase.CreateAsset(program, path + ".asset");
+}
+UdonSharp.Compiler.UdonSharpCompilerV1.CompileSync(new UdonSharp.Compiler.UdonSharpCompileOptions());
+var real = program.GetRealProgram();
+return "class " + cls.FullName + " program " + (real != null) + " exported " + (real == null ? -1 : real.SymbolTable.GetExportedSymbols().Length);

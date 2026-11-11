@@ -1,0 +1,82 @@
+// A throwaway copy of Room N as saved, with a panel that holds two URL fields and the stage 0 probe. Room N itself stays as saved.
+if (UnityEditor.EditorApplication.isPlaying) return "playing; abort";
+var s0 = UnityEngine.SceneManagement.SceneManager.GetActiveScene();
+const string copyPath = "Assets/__SearchTest/__SearchTest.unity";
+if (s0.path != "Assets/Scenes/Room N.unity" && s0.path != copyPath) return "scene " + s0.path;
+if (s0.isDirty) return "scene dirty: " + s0.path;
+var probeScript = UnityEditor.AssetDatabase.LoadAssetAtPath<UnityEditor.MonoScript>("Assets/__SearchTest/SearchProbe.cs");
+var type = probeScript != null ? probeScript.GetClass() : null;
+if (type == null || type.GetField("hiddenText") == null || UnityEditor.EditorApplication.isCompiling) return "probe not compiled yet";
+if (s0.path == copyPath) UnityEditor.SceneManagement.EditorSceneManager.OpenScene("Assets/Scenes/Room N.unity", UnityEditor.SceneManagement.OpenSceneMode.Single);
+if (UnityEditor.AssetDatabase.LoadAssetAtPath<UnityEditor.SceneAsset>(copyPath) != null) UnityEditor.AssetDatabase.MoveAssetToTrash(copyPath);
+if (!UnityEditor.AssetDatabase.CopyAsset("Assets/Scenes/Room N.unity", copyPath)) return "copy failed";
+var scene = UnityEditor.SceneManagement.EditorSceneManager.OpenScene(copyPath, UnityEditor.SceneManagement.OpenSceneMode.Single);
+
+var view = new UnityEngine.GameObject("__SearchView");
+view.transform.position = new UnityEngine.Vector3(0.6f, 0f, 2.55f);
+view.transform.rotation = UnityEngine.Quaternion.LookRotation(new UnityEngine.Vector3(0f, 0f, -1f));
+
+var font = UnityEngine.Resources.GetBuiltinResource<UnityEngine.Font>("LegacyRuntime.ttf");
+var panel = new UnityEngine.GameObject("__SearchPanel", typeof(UnityEngine.RectTransform));
+panel.layer = 0;
+var canvas = panel.AddComponent<UnityEngine.Canvas>();
+canvas.renderMode = UnityEngine.RenderMode.WorldSpace;
+panel.AddComponent<UnityEngine.UI.CanvasScaler>().dynamicPixelsPerUnit = 4f;
+panel.AddComponent<UnityEngine.UI.GraphicRaycaster>();
+panel.AddComponent<VRC.SDK3.Components.VRCUiShape>();
+var prt = (UnityEngine.RectTransform)panel.transform;
+prt.sizeDelta = new UnityEngine.Vector2(1500f, 420f);
+prt.localScale = UnityEngine.Vector3.one * 0.001f;
+prt.position = view.transform.position + view.transform.forward * 1.2f + UnityEngine.Vector3.up * 1.5f;
+prt.rotation = view.transform.rotation;
+var ground = new UnityEngine.GameObject("Ground", typeof(UnityEngine.RectTransform));
+ground.transform.SetParent(panel.transform, false);
+var grt = (UnityEngine.RectTransform)ground.transform; grt.anchorMin = UnityEngine.Vector2.zero; grt.anchorMax = UnityEngine.Vector2.one; grt.offsetMin = UnityEngine.Vector2.zero; grt.offsetMax = UnityEngine.Vector2.zero;
+var gi = ground.AddComponent<UnityEngine.UI.Image>(); gi.color = new UnityEngine.Color(0.1f, 0.12f, 0.15f, 1f); gi.raycastTarget = false;
+
+UnityEngine.UI.Text MakeText(UnityEngine.Transform parent, string name, UnityEngine.Vector2 pos, UnityEngine.Vector2 size, int fontSize, UnityEngine.Color color)
+{
+  var g = new UnityEngine.GameObject(name, typeof(UnityEngine.RectTransform));
+  g.transform.SetParent(parent, false);
+  var rt = (UnityEngine.RectTransform)g.transform; rt.anchoredPosition = pos; rt.sizeDelta = size;
+  var t = g.AddComponent<UnityEngine.UI.Text>();
+  t.font = font; t.fontSize = fontSize; t.color = color; t.alignment = UnityEngine.TextAnchor.MiddleLeft;
+  t.horizontalOverflow = UnityEngine.HorizontalWrapMode.Overflow; t.verticalOverflow = UnityEngine.VerticalWrapMode.Overflow;
+  t.supportRichText = false; t.raycastTarget = false;
+  return t;
+}
+VRC.SDK3.Components.VRCUrlInputField MakeField(string name, float y, out UnityEngine.UI.Text text)
+{
+  var g = new UnityEngine.GameObject(name, typeof(UnityEngine.RectTransform));
+  g.transform.SetParent(panel.transform, false);
+  var rt = (UnityEngine.RectTransform)g.transform; rt.anchoredPosition = new UnityEngine.Vector2(0f, y); rt.sizeDelta = new UnityEngine.Vector2(1400f, 90f);
+  var img = g.AddComponent<UnityEngine.UI.Image>(); img.color = UnityEngine.Color.white;
+  text = MakeText(g.transform, "Text", UnityEngine.Vector2.zero, new UnityEngine.Vector2(1360f, 80f), 30, UnityEngine.Color.black);
+  var f = g.AddComponent<VRC.SDK3.Components.VRCUrlInputField>();
+  f.targetGraphic = img; f.textComponent = text; f.lineType = VRC.SDK3.Components.VRCUrlInputField.LineType.SingleLine;
+  f.transition = UnityEngine.UI.Selectable.Transition.None;
+  return f;
+}
+var note = MakeText(panel.transform, "Note", new UnityEngine.Vector2(0f, 160f), new UnityEngine.Vector2(1400f, 60f), 34, UnityEngine.Color.white);
+note.text = "stage 0";
+var field = MakeField("Field", 0f, out var fieldText);
+var hidden = MakeField("HiddenField", -130f, out var hiddenText);
+hidden.gameObject.SetActive(false);
+
+var go = new UnityEngine.GameObject("__SearchProbe");
+var proxy = UdonSharpEditor.UdonSharpComponentExtensions.AddUdonSharpComponent(go, type);
+void Set(string n, object v) { var fi = type.GetField(n); if (fi == null) throw new System.Exception("no field " + n); fi.SetValue(proxy, v); }
+Set("field", field); Set("hiddenField", hidden); Set("panel", panel.transform); Set("view", view.transform);
+Set("note", note); Set("fieldText", fieldText); Set("hiddenText", hiddenText);
+const string host = "http://127.0.0.1:__PORT__";
+Set("initials", new[] { new VRC.SDKBase.VRCUrl(host + "/r/search?q= 検索語を入力 → "), new VRC.SDKBase.VRCUrl(host + "/r/search?q=") });
+var slots = new int[10]; slots[8] = 1; slots[9] = 1;
+Set("initialOf", slots);
+UdonSharpEditor.UdonSharpEditorUtility.CopyProxyToUdon(proxy);
+var udon = UdonSharpEditor.UdonSharpEditorUtility.GetBackingUdonBehaviour((UdonSharp.UdonSharpBehaviour)proxy);
+UnityEngine.Events.UnityAction<string> send = udon.SendCustomEvent;
+UnityEditor.Events.UnityEventTools.AddStringPersistentListener(field.onEndEdit, send, "Entered");
+UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(scene);
+var saved = UnityEditor.SceneManagement.EditorSceneManager.SaveScene(scene, copyPath);
+var got = ((VRC.SDKBase.VRCUrl[])type.GetField("initials").GetValue(proxy))[0].Get();
+return "root copy of Room N, saved " + saved + ", scene " + UnityEngine.SceneManagement.SceneManager.GetActiveScene().path + ", calls " + field.onEndEdit.GetPersistentEventCount() + ", initial0 len " + got.Length + " [" + got + "]";
