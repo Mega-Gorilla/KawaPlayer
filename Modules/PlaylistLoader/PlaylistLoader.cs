@@ -102,7 +102,6 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
     private bool _playWhenStopped = true;
 
     public VRCUrl[] RedirectPool => _redirectPool;
-    public VRCUrl[] ResolvePool => _resolvePool;
     public string PoolId => _poolId;
     public bool IsLoading => _isLoading;
 

@@ -29,12 +29,10 @@ namespace Yamadev.YamaStream
     [SerializeField] private Controller _controller;
     [SerializeField] private Playlist _playlist;
     [UdonSynced] private string _playlistName = string.Empty;
-    // Where the contents came from, kept so the slot can be re-fetched and so
-    // reloading the same source reuses its slot instead of consuming a fresh
-    // one. Stored as the URL rather than a derived key because a string
-    // cannot be turned back into a VRCUrl at runtime; whoever fills the slot
-    // derives whatever comparison key it needs. Only meaningful while the
-    // slot holds tracks -- see CanRefresh.
+    // Where the contents came from, kept so the slot can be re-fetched. Kept
+    // as the URL because a string cannot be turned back into a VRCUrl at
+    // runtime; which playlist the slot holds is _sourceKey, not this. Only
+    // meaningful while the slot holds tracks -- see CanRefresh.
     [UdonSynced] private VRCUrl _sourceUrl = VRCUrl.Empty;
     // Which playlist the slot holds, as the module that filled it names it
     // (issue #145). Kept beside the URL because the URL alone no longer says:
@@ -84,7 +82,8 @@ namespace Yamadev.YamaStream
 
     // An empty slot's _sourceUrl is meaningless, and reading it is actively
     // unsafe in ClientSim, where VRCUrl.Empty.Get() returns a stale URL from
-    // elsewhere in the session. Gate every read of SourceUrl on this.
+    // elsewhere in the session. Gate every read of SourceUrl and SourceKey on
+    // this.
     public bool CanRefresh => _tracks.Length > 0 && Utilities.IsValid(_sourceUrl) && !string.IsNullOrEmpty(_sourceUrl.Get());
 
     public int Sequence => _sequence;
