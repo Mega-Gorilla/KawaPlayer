@@ -68,10 +68,10 @@ namespace Yamadev.YamaStream.UI
     // identity: anyone can overwrite that slot while the dialog is up (LRU
     // replacement, or a reload into a slot freed a moment ago), and the
     // confirm would then delete a playlist the player never saw. Hold the
-    // slot itself and the source it was showing, and re-check both.
+    // slot itself and which playlist it was showing, and re-check both.
     private int _pendingDeletePlaylistIndex = -1;
     private DynamicPlaylist _pendingDeleteSlot;
-    private string _pendingDeleteSourceUrl = string.Empty;
+    private string _pendingDeleteSourceKey = string.Empty;
     // The colour a track's title has while it is not playing: the one the
     // build gave the row (its role's colour, with the prefab's alpha), read
     // off the first title before any of them is recoloured (issue #163).
@@ -255,6 +255,7 @@ namespace Yamadev.YamaStream.UI
       // Hand over the panel that asked, so the result modal opens here
       // rather than wherever a URL was last typed.
       _playlistRefreshHandler.SetProgramVariable("refreshUrl", slot.SourceUrl);
+      _playlistRefreshHandler.SetProgramVariable("refreshKey", slot.SourceKey);
       _playlistRefreshHandler.SetProgramVariable("refreshSource", this);
       _playlistRefreshHandler.SendCustomEvent("OnPlaylistRefreshRequested");
     }
@@ -438,26 +439,26 @@ namespace Yamadev.YamaStream.UI
 
       _pendingDeletePlaylistIndex = _playlistIndex;
       _pendingDeleteSlot = slot;
-      _pendingDeleteSourceUrl = slot.CanRefresh ? slot.SourceUrl.Get() : string.Empty;
+      _pendingDeleteSourceKey = slot.CanRefresh ? slot.SourceKey : string.Empty;
     }
 
     public void DeletePlaylistInternal()
     {
       int index = _pendingDeletePlaylistIndex;
       var expectedSlot = _pendingDeleteSlot;
-      string expectedSourceUrl = _pendingDeleteSourceUrl;
+      string expectedSourceKey = _pendingDeleteSourceKey;
       _pendingDeletePlaylistIndex = -1;
       _pendingDeleteSlot = null;
-      _pendingDeleteSourceUrl = string.Empty;
+      _pendingDeleteSourceKey = string.Empty;
 
       var slot = FindDynamicPlaylist(index);
-      string currentSourceUrl = Utilities.IsValid(slot) && slot.CanRefresh ? slot.SourceUrl.Get() : string.Empty;
+      string currentSourceKey = Utilities.IsValid(slot) && slot.CanRefresh ? slot.SourceKey : string.Empty;
 
       // Anything other than the exact playlist the dialog was opened on is
       // left alone: the slot may have been refilled by someone else while
       // the dialog was up. Sequence is no help as an identity, because
       // deleting resets it to 0 and the same value comes back around.
-      if (!Utilities.IsValid(slot) || slot != expectedSlot || slot.IsEmpty || currentSourceUrl != expectedSourceUrl)
+      if (!Utilities.IsValid(slot) || slot != expectedSlot || slot.IsEmpty || currentSourceKey != expectedSourceKey)
       {
         GeneratePlaylistView();
         GeneratePlaylistTracks();

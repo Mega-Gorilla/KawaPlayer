@@ -49,7 +49,7 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
       // player when the player is local. Anyone else asks anyway, since
       // their own download says nothing about the master's.
       if (_playlistLoader.IsLoading && (Networking.IsMaster || _controller.IsLocal)) return null;
-      return _playlistLoader.GetSlotToBeReplaced(url);
+      return _playlistLoader.GetSlotToBeReplaced(_playlistLoader.GetExpectedKey(url));
     }
 
     public int PlaylistSlotCount => _playlistLoader == null ? 0 : _playlistLoader.UsableSlotCount;

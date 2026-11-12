@@ -33,6 +33,7 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
     // writes these before sending OnPlaylistRefreshRequested. refreshSource
     // is the panel the button was pressed on, so the result lands there.
     public VRCUrl refreshUrl;
+    public string refreshKey;
     public UIController refreshSource;
 
     // The UI that initiated the load currently in flight; OnLoadResult
@@ -47,12 +48,13 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
     // one), so a second question would overwrite the first and let one
     // panel's confirm load the other panel's URL.
     //
-    // The slot and the URL that identified it travel with the request, so
+    // The slot and the key that identified it travel with the request, so
     // the load can refuse to overwrite anything else -- see
-    // PlaylistLoader.LoadPlaylistFromUrlWithFeedback.
+    // PlaylistLoader.LoadPlaylistWithFeedback.
     private VRCUrl _pendingLoadUrl;
+    private string _pendingExpectedKey = string.Empty;
     private DynamicPlaylist _pendingReplaced;
-    private string _pendingReplacedSourceUrl = string.Empty;
+    private string _pendingReplacedKey = string.Empty;
     private bool _pendingAddOnly;
     private bool _awaitingConfirm;
     // Which panel is being asked. _resultUi cannot stand in for it: a
@@ -95,14 +97,35 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
       }
       if (kind != PlaylistLoader.UrlKindOwnPlaylist)
       {
-        // Web-page URL (/playlists/{id}) or malformed /r/ path: guide the
-        // user to the URL VHub's "VRChat用URLをコピー" copies. Rewriting to
-        // /r/... is impossible at runtime (string -> VRCUrl conversion is
-        // editor-only).
+        // Web-page URL (/playlists/{id}), malformed /r/ path, or a search
+        // number (a number the server reuses, never a URL to give anyone):
+        // guide the user to the URL VHub's "VRChat用URLをコピー" copies.
+        // Rewriting to /r/... is impossible at runtime (string -> VRCUrl
+        // conversion is editor-only).
         ShowError(ui, "errorSharePageUrl");
         return;
       }
 
+      RequestLoad(ui, interceptUrl, _loader.GetExpectedKey(interceptUrl), interceptAddOnly);
+    }
+
+    // Loads a playlist the caller already knows (issue #145): a search
+    // result, and VHub Library's list later. url is what fetches it -- a
+    // search number from PlaylistLoader.GetResolveUrl -- and expectedKey
+    // which playlist it is, from the same result. Goes the same way as a URL
+    // typed into the field: permission, busy, and the question before a
+    // playlist is replaced, with the result reported on ui.
+    public void LoadPlaylist(UIController ui, VRCUrl url, string expectedKey, bool addOnly)
+    {
+      if (!Utilities.IsValid(_loader) || !Utilities.IsValid(url) || string.IsNullOrEmpty(expectedKey)) return;
+      if (!Utilities.IsValid(ui)) ui = _uiController;
+      // The panel being asked is told nothing -- see OnUrlSubmitted.
+      if (_awaitingConfirm && ui == _pendingUi) return;
+      RequestLoad(ui, url, expectedKey, addOnly);
+    }
+
+    private void RequestLoad(UIController ui, VRCUrl url, string expectedKey, bool addOnly)
+    {
       // Permission first so a viewer without rights sees the permission
       // modal (shown by PermissionManagementUI) rather than a busy message.
       if (Utilities.IsValid(ui) && !ui.InvokeBeforeEvent("BeforeUserLoadPlaylist"))
@@ -123,17 +146,16 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
         return;
       }
 
-      bool addOnly = interceptAddOnly;
       _resultUi = ui;
       _resultAddOnly = addOnly;
 
       // Every slot full means this load costs the player a playlist they
       // already had. Show which one before it goes (issue #125) rather than
       // reporting an addition and letting them find out later.
-      var replaced = _loader.GetSlotToBeReplaced(interceptUrl);
+      var replaced = _loader.GetSlotToBeReplaced(expectedKey);
       if (Utilities.IsValid(replaced))
       {
-        if (AskBeforeReplacing(ui, interceptUrl, replaced, addOnly)) return;
+        if (AskBeforeReplacing(ui, url, expectedKey, replaced, addOnly)) return;
 
         // Asking failed, and why decides what happens next. A panel with a
         // dialog could have asked and did not only because that dialog is
@@ -148,19 +170,20 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
       // Either nothing is lost, or there is no modal to ask with. Loading
       // anyway is what happens today, and refusing instead would strand a
       // player whose panel has no way to delete anything either.
-      _loader.LoadPlaylistFromUrlWithFeedback(interceptUrl, this, null, string.Empty, !addOnly);
+      _loader.LoadPlaylistWithFeedback(url, expectedKey, this, null, string.Empty, !addOnly);
     }
 
-    private bool AskBeforeReplacing(UIController ui, VRCUrl url, DynamicPlaylist replaced, bool addOnly)
+    private bool AskBeforeReplacing(UIController ui, VRCUrl url, string expectedKey, DynamicPlaylist replaced, bool addOnly)
     {
       if (!Utilities.IsValid(ui)) return false;
 
       _pendingLoadUrl = url;
+      _pendingExpectedKey = expectedKey;
       _pendingUi = ui;
       _pendingReplaced = replaced;
       _pendingAddOnly = addOnly;
-      // Reading SourceUrl is only safe on a slot that holds something.
-      _pendingReplacedSourceUrl = replaced.CanRefresh ? replaced.SourceUrl.Get() : string.Empty;
+      // A slot's key means something only while it holds something.
+      _pendingReplacedKey = replaced.CanRefresh ? replaced.SourceKey : string.Empty;
       _awaitingConfirm = true;
 
       // A playlist the server gave no name for still has to be named in the
@@ -187,9 +210,10 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
     public void ConfirmReplaceOldest()
     {
       var url = _pendingLoadUrl;
+      string expectedKey = _pendingExpectedKey;
       var ui = _pendingUi;
       var replaced = _pendingReplaced;
-      string replacedSourceUrl = _pendingReplacedSourceUrl;
+      string replacedKey = _pendingReplacedKey;
       bool addOnly = _pendingAddOnly;
       ClearPendingConfirm();
       if (!Utilities.IsValid(_loader) || !Utilities.IsValid(url)) return;
@@ -211,7 +235,7 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
       // was asked, not to whatever touched the loader while they read.
       if (Utilities.IsValid(ui)) _resultUi = ui;
       _resultAddOnly = addOnly;
-      _loader.LoadPlaylistFromUrlWithFeedback(url, this, replaced, replacedSourceUrl, !addOnly);
+      _loader.LoadPlaylistWithFeedback(url, expectedKey, this, replaced, replacedKey, !addOnly);
     }
 
     // Answered no. Nothing happens, but the question has to be let go of or
@@ -221,9 +245,10 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
     private void ClearPendingConfirm()
     {
       _pendingLoadUrl = null;
+      _pendingExpectedKey = string.Empty;
       _pendingUi = null;
       _pendingReplaced = null;
-      _pendingReplacedSourceUrl = string.Empty;
+      _pendingReplacedKey = string.Empty;
       _pendingAddOnly = false;
       _awaitingConfirm = false;
     }
@@ -246,9 +271,21 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
         return;
       }
 
-      if (_loader.ClassifyUrl(refreshUrl.Get()) != PlaylistLoader.UrlKindOwnPlaylist)
+      // A slot holds its playlist's own URL, or a search number when it was
+      // only ever picked from the search (issue #145).
+      int kind = _loader.ClassifyUrl(refreshUrl.Get());
+      if (kind != PlaylistLoader.UrlKindOwnPlaylist && kind != PlaylistLoader.UrlKindResolveSlot)
       {
         ShowError(ui, "errorPoolMismatch");
+        return;
+      }
+
+      // The slot's own key says which playlist it holds; the response has to
+      // be that one, or the slot keeps what it has.
+      string expectedKey = string.IsNullOrEmpty(refreshKey) ? _loader.GetExpectedKey(refreshUrl) : refreshKey;
+      if (string.IsNullOrEmpty(expectedKey))
+      {
+        ShowError(ui, "errorIdentityChanged");
         return;
       }
 
@@ -264,7 +301,7 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
       _resultAddOnly = false;
       // A refresh takes back the slot it already owns, so it never costs
       // anyone a playlist and makes no promise to check.
-      _loader.LoadPlaylistFromUrlWithFeedback(refreshUrl, this, null, string.Empty, true);
+      _loader.LoadPlaylistWithFeedback(refreshUrl, expectedKey, this, null, string.Empty, true);
     }
 
     // Called by PlaylistLoader exactly once per feedback load, on every
@@ -343,6 +380,11 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
       if (resultCode == PlaylistLoader.LoadResultReplacementChanged)
       {
         ShowError(ui, "errorReplacementChanged");
+        return;
+      }
+      if (resultCode == PlaylistLoader.LoadResultIdentityChanged)
+      {
+        ShowError(ui, "errorIdentityChanged");
         return;
       }
       ShowError(ui, "errorInvalidResponse");

@@ -17,6 +17,7 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
     public const int UrlKindOtherPool = PlaylistUrlUtils.KindOtherPool;
     public const int UrlKindWebPage = PlaylistUrlUtils.KindWebPage;
     public const int UrlKindMalformed = PlaylistUrlUtils.KindMalformed;
+    public const int UrlKindResolveSlot = PlaylistUrlUtils.KindResolveSlot;
 
     // OnLoadResult codes reported to PlaylistLoaderUI (issue #82).
     public const int LoadResultSuccess = 0;
@@ -32,6 +33,10 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
     // The playlist the player agreed to lose is no longer the one that would
     // go (issue #125). Nothing is written; they are asked to try again.
     public const int LoadResultReplacementChanged = 8;
+    // The playlist that came back is not the one asked for (issue #145): a
+    // search number now points at another playlist. Nothing is written; a
+    // slot being refreshed keeps what it had.
+    public const int LoadResultIdentityChanged = 9;
 
     // What a playlist the server gave no name for is called, wherever it has
     // to be named: in PlaylistLoaderUI's load message, and in the question
@@ -45,6 +50,16 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
     // the compiler sees no reader and warns (issue #43).
 #pragma warning disable CS0414
     [SerializeField] private int _poolSize = 100000;
+#pragma warning restore CS0414
+    // The search's numbers, /vrcurl/resolve/{i} (issue #145). A string cannot
+    // be made into a VRCUrl at run time, so every number the server can hand
+    // out is baked in, as _redirectPool is. A search result names its number;
+    // the playlist it stands for comes back from fetching it.
+    [SerializeField] private VRCUrl[] _resolvePool = new VRCUrl[0];
+    // Only PlaylistLoaderEditor reads this, to generate _resolvePool. The
+    // server's resolve pool has the same size.
+#pragma warning disable CS0414
+    [SerializeField] private int _resolvePoolSize = 4096;
 #pragma warning restore CS0414
     // Instance-lifetime playlist slots this loader may fill (issue #88).
     // Wired at build time by PlaylistLoaderBuildProcess from the Controller
@@ -68,14 +83,19 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
 
     private bool _isLoading;
     private VRCUrl _pendingResolveUrl;
-    // Set only by LoadPlaylistFromUrlWithFeedback; notified exactly once per
+    // Which playlist the load in flight is meant to bring, decided before
+    // the download (issue #145). The response has to be that playlist, or
+    // nothing is written. Empty asks nothing of it, which only a URL that
+    // names no playlist of ours gives (Auto Load set to something else).
+    private string _pendingExpectedKey = string.Empty;
+    // Set only by LoadPlaylistWithFeedback; notified exactly once per
     // load on every terminal path, then cleared. Null for DefaultUrl / auto
     // load, which keep the log-only behavior.
     private PlaylistLoaderUI _feedbackUi;
     // What the player agreed to lose, held from the confirmation until the
-    // slot is written. See LoadPlaylistFromUrlWithFeedback.
+    // slot is written. See LoadPlaylistWithFeedback.
     private DynamicPlaylist _expectedReplaced;
-    private string _expectedReplacedSourceUrl = string.Empty;
+    private string _expectedReplacedKey = string.Empty;
     // Whether this load starts the playlist when nothing plays. Only a load
     // with feedback can turn it off (the list's "+", #335); DefaultUrl and
     // auto load always start it.
@@ -90,6 +110,24 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
     public int ClassifyUrl(string url) => PlaylistUrlUtils.Classify(url, _poolBaseUrl, _poolId);
 
     public bool IsOwnPlaylistUrl(string url) => ClassifyUrl(url) == UrlKindOwnPlaylist;
+
+    // Which playlist a URL of ours names, before anything is fetched: the
+    // "{pool}/{id}" of /r/{pool}/{id}. Empty for anything else, a search
+    // number included -- what one stands for is known only from the search
+    // that gave it, so its caller says (issue #145).
+    public string GetExpectedKey(VRCUrl url)
+    {
+      if (!Utilities.IsValid(url) || !IsOwnPlaylistUrl(url.Get())) return string.Empty;
+      return PlaylistUrlUtils.GetSourceKey(url.Get());
+    }
+
+    // The URL of a search number, or null when the number is outside the
+    // baked pool.
+    public VRCUrl GetResolveUrl(int index)
+    {
+      if (index < 0 || index >= _resolvePool.Length) return null;
+      return _resolvePool[index];
+    }
 
     public override void Start()
     {
@@ -108,6 +146,7 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
       LoadPlaylistFromUrl(_autoLoadUrl);
     }
 
+    // DefaultUrl and Auto Load: a URL of ours names its playlist itself.
     public void LoadPlaylistFromUrl(VRCUrl resolveUrl)
     {
       if (_isLoading)
@@ -115,6 +154,11 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
         PrintWarning("Already loading a playlist.");
         return;
       }
+      StartLoad(resolveUrl, GetExpectedKey(resolveUrl));
+    }
+
+    private void StartLoad(VRCUrl resolveUrl, string expectedKey)
+    {
 
       // Every caller funnels through here -- the URL field, DefaultUrl, Auto
       // Load -- so this is where a URL that cannot be fetched is turned away.
@@ -136,23 +180,39 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
         return;
       }
 
+      // A search number with no playlist expected of it could bring
+      // whichever playlist the number now points at.
+      if (string.IsNullOrEmpty(expectedKey) && ClassifyUrl(resolveUrl.Get()) == UrlKindResolveSlot)
+      {
+        PrintError("Refusing a search number with no playlist expected of it.");
+        NotifyResult(LoadResultIdentityChanged, "", 0, 0, 0, false);
+        return;
+      }
+
       _isLoading = true;
       _pendingResolveUrl = resolveUrl;
+      _pendingExpectedKey = expectedKey == null ? string.Empty : expectedKey;
       VRCStringDownloader.LoadUrl(resolveUrl, (IUdonEventReceiver)this);
       PrintLog($"Downloading playlist from {resolveUrl.Get()}...");
     }
 
-    // Same as LoadPlaylistFromUrl, but reports the outcome back to the UI
-    // (issue #82). The busy case is checked by the caller; guarding here too
-    // keeps a stray call from leaking feedback into an unrelated load.
+    // Loads and reports the outcome back to the UI (issue #82). The busy case
+    // is checked by the caller; guarding here too keeps a stray call from
+    // leaking feedback into an unrelated load.
+    //
+    // expectedKey is which playlist this is meant to bring (issue #145): from
+    // the URL for a URL of ours (GetExpectedKey), from the search for a
+    // search number, from the slot for a refresh. The response has to be
+    // that playlist, or nothing is written.
+    //
     // expectedReplaced names the playlist the player was shown and agreed to
-    // lose, with the source URL that identified it. Both are re-checked at
-    // the moment the slot is written, because the download sits in the
-    // middle and anyone on any client can refill a slot while it runs. Pass
-    // null when no such promise was made. playWhenStopped false adds the
-    // playlist without starting it, even when nothing plays.
-    public void LoadPlaylistFromUrlWithFeedback(VRCUrl resolveUrl, PlaylistLoaderUI feedbackUi,
-        DynamicPlaylist expectedReplaced, string expectedReplacedSourceUrl, bool playWhenStopped)
+    // lose, with the key that identified it. Both are re-checked at the
+    // moment the slot is written, because the download sits in the middle and
+    // anyone on any client can refill a slot while it runs. Pass null when no
+    // such promise was made. playWhenStopped false adds the playlist without
+    // starting it, even when nothing plays.
+    public void LoadPlaylistWithFeedback(VRCUrl resolveUrl, string expectedKey, PlaylistLoaderUI feedbackUi,
+        DynamicPlaylist expectedReplaced, string expectedReplacedKey, bool playWhenStopped)
     {
       if (_isLoading)
       {
@@ -161,9 +221,9 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
       }
       _feedbackUi = feedbackUi;
       _expectedReplaced = expectedReplaced;
-      _expectedReplacedSourceUrl = expectedReplacedSourceUrl;
+      _expectedReplacedKey = expectedReplacedKey == null ? string.Empty : expectedReplacedKey;
       _playWhenStopped = playWhenStopped;
-      LoadPlaylistFromUrl(resolveUrl);
+      StartLoad(resolveUrl, expectedKey);
     }
 
     public override void OnStringLoadSuccess(IVRCStringDownload result)
@@ -174,9 +234,18 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
 
       _isLoading = false;
 
-      if (!TryParseResponse(result.Result, out DataList tracks, out string playlistName, out int failCode))
+      if (!TryParseResponse(result.Result, out DataList tracks, out string playlistName, out string sourceKey, out int failCode))
       {
         NotifyResult(failCode, "", 0, 0, 0, false);
+        return;
+      }
+
+      // Before anything is built: a playlist other than the one asked for is
+      // not loaded at all, however good its tracks.
+      if (!string.IsNullOrEmpty(_pendingExpectedKey) && sourceKey != _pendingExpectedKey)
+      {
+        PrintWarning($"Expected playlist '{_pendingExpectedKey}', got '{sourceKey}'. Nothing was loaded.");
+        NotifyResult(LoadResultIdentityChanged, playlistName, 0, 0, 0, false);
         return;
       }
 
@@ -187,7 +256,7 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
         return;
       }
 
-      LoadIntoSlot(builtTracks, tracks.Count, failedCount, playlistName);
+      LoadIntoSlot(builtTracks, tracks.Count, failedCount, playlistName, sourceKey);
     }
 
     public override void OnStringLoadError(IVRCStringDownload result)
@@ -209,7 +278,8 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
         int httpErrorCode, bool reusedExistingSlot)
     {
       _expectedReplaced = null;
-      _expectedReplacedSourceUrl = string.Empty;
+      _expectedReplacedKey = string.Empty;
+      _pendingExpectedKey = string.Empty;
       _playWhenStopped = true;
       if (_feedbackUi == null) return;
       var ui = _feedbackUi;
@@ -218,10 +288,12 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
         ui.OnLoadResult(resultCode, playlistName, added, skipped, httpErrorCode, reusedExistingSlot);
     }
 
-    private bool TryParseResponse(string json, out DataList tracks, out string playlistName, out int failCode)
+    private bool TryParseResponse(string json, out DataList tracks, out string playlistName,
+        out string sourceKey, out int failCode)
     {
       tracks = null;
       playlistName = "";
+      sourceKey = "";
       failCode = 0;
 
       if (!VRCJson.TryDeserializeFromJson(json, out DataToken root)
@@ -248,17 +320,30 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
         return false;
       }
 
+      // Which playlist this is comes from the response, whatever URL fetched
+      // it (issue #145): a search number says nothing by itself. Without its
+      // pool and id there is nothing to tell it by, so it is not loaded.
+      if (!rootDict.TryGetValue("pool", out DataToken poolToken)
+          || poolToken.TokenType != TokenType.String
+          || string.IsNullOrEmpty(poolToken.String)
+          || !rootDict.TryGetValue("id", out DataToken idToken)
+          || idToken.TokenType != TokenType.String
+          || string.IsNullOrEmpty(idToken.String))
+      {
+        PrintError("Playlist response names no pool or id.");
+        failCode = LoadResultInvalidResponse;
+        return false;
+      }
+
       // A playlist resolved for a different pool would map indices into the
-      // wrong redirect URLs, playing unrelated videos. Reject on an explicit
-      // mismatch; a missing pool field is tolerated (server version drift).
-      if (rootDict.TryGetValue("pool", out DataToken poolToken)
-          && poolToken.TokenType == TokenType.String
-          && poolToken.String != _poolId)
+      // wrong redirect URLs, playing unrelated videos.
+      if (poolToken.String != _poolId)
       {
         PrintError($"Playlist pool mismatch: expected '{_poolId}', got '{poolToken.String}'.");
         failCode = LoadResultPoolMismatch;
         return false;
       }
+      sourceKey = PlaylistUrlUtils.MakeSourceKey(poolToken.String, idToken.String);
 
       if (rootDict.TryGetValue("name", out DataToken nameToken)
           && nameToken.TokenType == TokenType.String)
@@ -378,20 +463,16 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
     // so a playlist loaded there vanished as it played and could not be
     // browsed or replayed. A slot behaves like any built-in playlist:
     // browsable, replayable, and looping at the end via Controller.Forward.
-    private void LoadIntoSlot(object[][] tracks, int totalCount, int failedCount, string playlistName)
+    private void LoadIntoSlot(object[][] tracks, int totalCount, int failedCount, string playlistName, string sourceKey)
     {
-      // Normalized so http/https, a trailing slash, or a re-pasted link all
-      // land on the slot that already holds this playlist.
-      string sourceKey = Utilities.IsValid(_pendingResolveUrl)
-          ? PlaylistUrlUtils.GetSourceKey(_pendingResolveUrl.Get())
-          : string.Empty;
-
       // Reloading the same playlist reuses its slot; anything else takes a
       // fresh one. Which of the two happened is what the message the user
       // sees turns on, so it is decided here rather than guessed from which
       // button was pressed -- re-entering a URL that is already loaded is a
-      // refresh too, and no button says so.
-      var existing = FindSlotBySource(sourceKey);
+      // refresh too, and no button says so. The playlist is told by the key
+      // the response gave, so one entered by its URL and picked from the
+      // search are the same playlist, in either order (issue #145).
+      var existing = FindSlotByKey(sourceKey);
       bool reusedExistingSlot = Utilities.IsValid(existing);
       var slot = reusedExistingSlot ? existing : SelectFreeOrOldestSlot();
       if (!Utilities.IsValid(slot))
@@ -408,8 +489,8 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
       // empty costs nothing, so only an occupied one is checked.
       if (!reusedExistingSlot && Utilities.IsValid(_expectedReplaced) && !slot.IsEmpty)
       {
-        string currentSourceUrl = slot.CanRefresh ? slot.SourceUrl.Get() : string.Empty;
-        if (slot != _expectedReplaced || currentSourceUrl != _expectedReplacedSourceUrl)
+        string currentKey = slot.CanRefresh ? slot.SourceKey : string.Empty;
+        if (slot != _expectedReplaced || currentKey != _expectedReplacedKey)
         {
           PrintWarning("The playlist that would be replaced changed while the download was running.");
           NotifyResult(LoadResultReplacementChanged, playlistName, 0, 0, 0, false);
@@ -422,8 +503,18 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
       // into a slot freed in the middle or taken from the oldest playlist
       // (issue #128).
       int addedOrder = reusedExistingSlot && slot.AddedOrder > 0 ? slot.AddedOrder : NextAddedOrder();
+
+      // The slot keeps a URL that always means this playlist when it has
+      // one: a search number fetched it this time, but the number can come to
+      // point at another playlist, and a refresh from it would then be
+      // turned away. Fetched by its own URL, the slot takes that one.
+      VRCUrl sourceUrl = _pendingResolveUrl;
+      if (reusedExistingSlot && PlaylistUrlUtils.IsResolveUrl(sourceUrl.Get())
+          && !PlaylistUrlUtils.IsResolveUrl(slot.SourceUrl.Get()))
+        sourceUrl = slot.SourceUrl;
+
       _controller.TakeOwnership();
-      slot.Fill(_pendingResolveUrl, playlistName, tracks, NextSequence(), addedOrder);
+      slot.Fill(sourceUrl, sourceKey, playlistName, tracks, NextSequence(), addedOrder);
 
       // 自動再生仕様:
       // - プレイヤーが停止中 (Stopped) の場合のみ自動再生する
@@ -462,19 +553,18 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
       }
     }
 
-    // The slot that loading this URL would push out, or null when nothing
-    // would be lost -- the URL is already held (a refresh) or a slot is
-    // free. Answerable before the download because a slot is matched on the
-    // URL that was typed, not on anything the server sends back.
+    // The slot that loading this playlist would push out, or null when
+    // nothing would be lost -- the playlist is already held (a refresh) or a
+    // slot is free. Answerable before the download because the caller knows
+    // which playlist it means (GetExpectedKey for a URL, the search for a
+    // search number); the load then refuses anything else (issue #145).
     //
     // Returns the slot rather than its name: a playlist whose name the
     // server omitted has an empty one, and a caller reading "" as "nothing
     // to lose" would replace it without asking (issue #125).
-    public DynamicPlaylist GetSlotToBeReplaced(VRCUrl url)
+    public DynamicPlaylist GetSlotToBeReplaced(string expectedKey)
     {
-      if (!Utilities.IsValid(url)) return null;
-
-      var existing = FindSlotBySource(PlaylistUrlUtils.GetSourceKey(url.Get()));
+      var existing = FindSlotByKey(expectedKey);
       if (Utilities.IsValid(existing)) return null;
 
       var slot = SelectFreeOrOldestSlot();
@@ -489,11 +579,9 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
     // user whether the list grew or the playlist they already had was
     // refreshed (issue #117).
     //
-    // Only filled slots are considered: an empty slot's source URL says
-    // nothing about what it holds, and reading it is unsafe in ClientSim
-    // where VRCUrl.Empty resolves to a stale URL from elsewhere in the
-    // session.
-    private DynamicPlaylist FindSlotBySource(string sourceKey)
+    // Only filled slots are considered: an empty slot's key says nothing
+    // about what it holds.
+    private DynamicPlaylist FindSlotByKey(string sourceKey)
     {
       if (string.IsNullOrEmpty(sourceKey)) return null;
 
@@ -502,7 +590,7 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
         var slot = _dynamicPlaylists[i];
         if (!Utilities.IsValid(slot)) continue;
         if (!slot.CanRefresh) continue;
-        if (PlaylistUrlUtils.GetSourceKey(slot.SourceUrl.Get()) == sourceKey) return slot;
+        if (slot.SourceKey == sourceKey) return slot;
       }
 
       return null;

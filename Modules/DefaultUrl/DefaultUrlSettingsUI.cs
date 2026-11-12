@@ -78,7 +78,7 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
     // the oldest?" (issue #129), and what the question named.
     private VRCUrl _pendingSaveUrl;
     private DynamicPlaylist _pendingReplaced;
-    private string _pendingReplacedSourceUrl = string.Empty;
+    private string _pendingReplacedKey = string.Empty;
 
     // The card is this module's own row in the settings, put there when the
     // world is built only if the module is on (ModuleUISlot.inSettings).
@@ -332,8 +332,8 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
     {
       if (_uiController == null) return false;
 
-      // Reading SourceUrl is only safe on a slot that holds something.
-      string replacedSourceUrl = replaced.CanRefresh ? replaced.SourceUrl.Get() : string.Empty;
+      // A slot's key means something only while it holds something.
+      string replacedKey = replaced.CanRefresh ? replaced.SourceKey : string.Empty;
       // PlaylistLoader alone names the module's namespace here, not its class.
       string name = string.IsNullOrEmpty(replaced.PlaylistName) ? PlaylistLoader.PlaylistLoader.UnnamedPlaylistName : replaced.PlaylistName;
       if (!_uiController.ShowConfirm(
@@ -350,7 +350,7 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
       // cannot overwrite or let go of a save still waiting on its answer.
       _pendingSaveUrl = url;
       _pendingReplaced = replaced;
-      _pendingReplacedSourceUrl = replacedSourceUrl;
+      _pendingReplacedKey = replacedKey;
       return true;
     }
 
@@ -373,7 +373,7 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
     {
       var url = _pendingSaveUrl;
       var replaced = _pendingReplaced;
-      string replacedSourceUrl = _pendingReplacedSourceUrl;
+      string replacedKey = _pendingReplacedKey;
       ClearPendingSave();
       if (!CanEdit() || !Utilities.IsValid(url))
       {
@@ -384,8 +384,8 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
       var now = _controller.GetSlotReplacedBySaving(url);
       if (Utilities.IsValid(now))
       {
-        string nowSourceUrl = now.CanRefresh ? now.SourceUrl.Get() : string.Empty;
-        if (now != replaced || nowSourceUrl != replacedSourceUrl)
+        string nowKey = now.CanRefresh ? now.SourceKey : string.Empty;
+        if (now != replaced || nowKey != replacedKey)
         {
           if (!AskBeforeReplacing(url, now)) ResyncInputField();
           return;
@@ -406,7 +406,7 @@ namespace Yamadev.YamaStream.Modules.DefaultUrl
     {
       _pendingSaveUrl = null;
       _pendingReplaced = null;
-      _pendingReplacedSourceUrl = string.Empty;
+      _pendingReplacedKey = string.Empty;
     }
 
     // Puts the saved URL back into the field after an entry that did not save.
