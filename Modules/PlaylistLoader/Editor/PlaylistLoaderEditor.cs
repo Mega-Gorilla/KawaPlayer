@@ -14,6 +14,8 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader.Editor
     private SerializedProperty _poolId;
     private SerializedProperty _poolBaseUrl;
     private SerializedProperty _poolSize;
+    private SerializedProperty _resolvePool;
+    private SerializedProperty _resolvePoolSize;
     private SerializedProperty _maxTracks;
     private SerializedProperty _maxSyncBytes;
     private SerializedProperty _autoLoadOnStart;
@@ -30,6 +32,8 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader.Editor
       _poolId = serializedObject.FindProperty("_poolId");
       _poolBaseUrl = serializedObject.FindProperty("_poolBaseUrl");
       _poolSize = serializedObject.FindProperty("_poolSize");
+      _resolvePool = serializedObject.FindProperty("_resolvePool");
+      _resolvePoolSize = serializedObject.FindProperty("_resolvePoolSize");
       _maxTracks = serializedObject.FindProperty("_maxTracks");
       _maxSyncBytes = serializedObject.FindProperty("_maxSyncBytes");
       _autoLoadOnStart = serializedObject.FindProperty("_autoLoadOnStart");
@@ -76,6 +80,7 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader.Editor
       {
         EditorGUILayout.PropertyField(_poolBaseUrl, new GUIContent("Pool Base URL"));
         EditorGUILayout.PropertyField(_poolSize, new GUIContent("Pool Size"));
+        EditorGUILayout.PropertyField(_resolvePoolSize, new GUIContent("Search Pool Size"));
       }
       EditorGUILayout.PropertyField(_poolId, new GUIContent("Pool ID"));
       if (string.IsNullOrEmpty(_poolId.stringValue))
@@ -108,6 +113,12 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader.Editor
           }
         }
       }
+
+      // 検索の番号 (/vrcurl/resolve/{i}、issue #145)。数がサーバーと違うと、届かない番号ができる
+      int resolveSize = _resolvePool != null ? _resolvePool.arraySize : 0;
+      EditorGUILayout.LabelField("Current Search Pool Size", resolveSize.ToString());
+      if (resolveSize != _resolvePoolSize.intValue)
+        EditorGUILayout.HelpBox("検索の番号の数が Search Pool Size と一致しません。[Generate Pool] を再実行してください。", MessageType.Warning);
     }
 
     private void DrawPoolActions()
@@ -185,21 +196,31 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader.Editor
       {
         return;
       }
+      if (!ValidatePoolIdWithServer(baseUrl, PlaylistUrlUtils.ResolvePoolId))
+      {
+        return;
+      }
 
-      var urls = new VRCUrl[poolSize];
-      for (int i = 0; i < poolSize; i++)
+      int resolvePoolSize = _resolvePoolSize.intValue;
+      var loader = (PlaylistLoader)target;
+      SetPool(loader, "_redirectPool", baseUrl, poolId, poolSize);
+      SetPool(loader, "_resolvePool", baseUrl, PlaylistUrlUtils.ResolvePoolId, resolvePoolSize);
+      EditorUtility.SetDirty(target);
+
+      Debug.Log($"[PlaylistLoader] Generated {poolSize} + {resolvePoolSize} VRCUrl entries");
+      EditorUtility.DisplayDialog("Success", $"Generated {poolSize} VRCUrl entries, and {resolvePoolSize} for the search.", "OK");
+    }
+
+    private static void SetPool(PlaylistLoader loader, string fieldName, string baseUrl, string poolId, int size)
+    {
+      var urls = new VRCUrl[size];
+      for (int i = 0; i < size; i++)
       {
         urls[i] = new VRCUrl($"{baseUrl}/vrcurl/{poolId}/{i}");
       }
-
-      var loader = (PlaylistLoader)target;
-      var field = typeof(PlaylistLoader).GetField("_redirectPool",
+      var field = typeof(PlaylistLoader).GetField(fieldName,
         System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
       field.SetValue(loader, urls);
-      EditorUtility.SetDirty(target);
-
-      Debug.Log($"[PlaylistLoader] Generated {poolSize} VRCUrl entries");
-      EditorUtility.DisplayDialog("Success", $"Generated {poolSize} VRCUrl entries.", "OK");
     }
 
     // サーバーは知らない Pool ID に "Unknown pool" と答える。そのときはダイアログで知らせて true を返す

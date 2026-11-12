@@ -36,6 +36,14 @@ namespace Yamadev.YamaStream
     // derives whatever comparison key it needs. Only meaningful while the
     // slot holds tracks -- see CanRefresh.
     [UdonSynced] private VRCUrl _sourceUrl = VRCUrl.Empty;
+    // Which playlist the slot holds, as the module that filled it names it
+    // (issue #145). Kept beside the URL because the URL alone no longer says:
+    // a playlist can come in by more than one URL, and one of them can come
+    // to point at another playlist later. Opaque here -- only the module
+    // reads it -- and synced so that a refresh by someone who did not fill
+    // the slot checks against the same playlist. Only meaningful while the
+    // slot holds tracks -- see CanRefresh.
+    [UdonSynced] private string _sourceKey = string.Empty;
     // Fill order, assigned by the caller. 0 means never filled, which makes
     // empty slots sort first when picking the least recently filled one.
     [UdonSynced] private int _sequence = 0;
@@ -72,6 +80,8 @@ namespace Yamadev.YamaStream
 
     public VRCUrl SourceUrl => _sourceUrl;
 
+    public string SourceKey => _sourceKey;
+
     // An empty slot's _sourceUrl is meaningless, and reading it is actively
     // unsafe in ClientSim, where VRCUrl.Empty.Get() returns a stale URL from
     // elsewhere in the session. Gate every read of SourceUrl on this.
@@ -90,13 +100,14 @@ namespace Yamadev.YamaStream
     // Replaces the slot contents. The caller owns sequencing and the added
     // order so that a single load can compare every slot before deciding
     // which one to overwrite, and whether it is new to the list.
-    public void Fill(VRCUrl sourceUrl, string playlistName, object[][] tracks, int sequence, int addedOrder)
+    public void Fill(VRCUrl sourceUrl, string sourceKey, string playlistName, object[][] tracks, int sequence, int addedOrder)
     {
       if (!Utilities.IsValid(_playlist)) return;
 
       TakeOwnership();
 
       _sourceUrl = Utilities.IsValid(sourceUrl) ? sourceUrl : VRCUrl.Empty;
+      _sourceKey = sourceKey == null ? string.Empty : sourceKey;
       _playlistName = playlistName == null ? string.Empty : playlistName;
       _sequence = sequence;
       _addedOrder = addedOrder;
@@ -120,6 +131,7 @@ namespace Yamadev.YamaStream
       TakeOwnership();
 
       _sourceUrl = VRCUrl.Empty;
+      _sourceKey = string.Empty;
       _playlistName = string.Empty;
       _sequence = 0;
       _addedOrder = 0;

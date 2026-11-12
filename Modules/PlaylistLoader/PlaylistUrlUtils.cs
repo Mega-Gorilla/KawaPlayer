@@ -10,10 +10,19 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
     public const int KindOtherPool = 2;
     public const int KindWebPage = 3;
     public const int KindMalformed = 4;
+    // /vrcurl/resolve/{i}: a number the search hands out for a playlist
+    // (issue #145). The server reuses numbers, so it is never a URL a player
+    // is given: the URL field turns it away, and only the loader's own
+    // callers (a search result, a refresh) fetch it, with the playlist they
+    // expect.
+    public const int KindResolveSlot = 5;
 
     // The fork targets the VHub service; used when no loader (and therefore
     // no _poolBaseUrl config) is available.
     public const string DefaultPoolBaseUrl = "https://playlist.vrc-hub.com";
+
+    // The pool the search's numbers are in, at /vrcurl/{ResolvePoolId}/{i}.
+    public const string ResolvePoolId = "resolve";
 
     // Accepts http and https so a pasted http playlist URL surfaces a
     // playlist-flavored error instead of a video-player error. Pass an empty
@@ -29,6 +38,7 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
       string path = GetTrimmedPath(url);
 
       if (path.StartsWith("/playlists/")) return KindWebPage;
+      if (IsResolvePath(path)) return KindResolveSlot;
       if (path == "/r") return KindMalformed;
       if (!path.StartsWith("/r/")) return KindNotOurs;
 
@@ -58,6 +68,32 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
       int slashIndex = rest.IndexOf('/');
       if (slashIndex <= 0 || slashIndex == rest.Length - 1) return path;
       return rest;
+    }
+
+    // Whether the URL is one of the search's numbers, on any host: the
+    // loader asks this of a slot's own URL, which only it put there.
+    public static bool IsResolveUrl(string url)
+    {
+      if (string.IsNullOrEmpty(url)) return false;
+      return IsResolvePath(GetTrimmedPath(url));
+    }
+
+    // Which playlist a response is, as "{pool}/{id}": the same form
+    // GetSourceKey gives a /r/{pool}/{id} URL, so a playlist entered by its
+    // URL and one picked from the search are the same playlist.
+    public static string MakeSourceKey(string pool, string id) => pool + "/" + id;
+
+    // /vrcurl/resolve/{i}, with a number and nothing after it.
+    private static bool IsResolvePath(string path)
+    {
+      string prefix = "/vrcurl/" + ResolvePoolId + "/";
+      if (!path.StartsWith(prefix) || path.Length == prefix.Length) return false;
+      for (int i = prefix.Length; i < path.Length; i++)
+      {
+        char c = path[i];
+        if (c < '0' || c > '9') return false;
+      }
+      return true;
     }
 
     // The URL's path without its trailing slashes, but never shorter than "/".
