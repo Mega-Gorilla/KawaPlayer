@@ -35,6 +35,7 @@
     "module.playlistLoader.searchAddHint": "「追加」を押すと、このプレイリストを一覧に追加します。",
     "module.playlistLoader.searchAlreadyAdded": "このプレイリストは、すでに一覧にあります。",
     "module.playlistLoader.searchAdded": "一覧に追加しました。",
+    "module.playlistLoader.searchAddedNamed": "『{0}』を一覧に追加しました。",
     "module.playlistLoader.errorInternal": "プレイヤー内部エラーで読み込み先を確保できませんでした。"
   },
   "en": {
@@ -73,6 +74,7 @@
     "module.playlistLoader.searchAddHint": "Press Add to add this playlist to the list.",
     "module.playlistLoader.searchAlreadyAdded": "This playlist is already in the list.",
     "module.playlistLoader.searchAdded": "Added to the list.",
+    "module.playlistLoader.searchAddedNamed": "Added \"{0}\" to the list.",
     "module.playlistLoader.errorInternal": "An internal player error prevented loading the playlist."
   },
   "ko": {
@@ -111,6 +113,7 @@
     "module.playlistLoader.searchAddHint": "「추가」를 누르면 이 플레이리스트가 목록에 추가됩니다.",
     "module.playlistLoader.searchAlreadyAdded": "이 플레이리스트는 이미 목록에 있습니다.",
     "module.playlistLoader.searchAdded": "목록에 추가했습니다.",
+    "module.playlistLoader.searchAddedNamed": "『{0}』을(를) 목록에 추가했습니다.",
     "module.playlistLoader.errorInternal": "플레이어 내부 오류로 플레이리스트를 불러오지 못했습니다."
   },
   "zh-CN": {
@@ -149,6 +152,7 @@
     "module.playlistLoader.searchAddHint": "按「添加」可将此播放列表加入列表。",
     "module.playlistLoader.searchAlreadyAdded": "此播放列表已在列表中。",
     "module.playlistLoader.searchAdded": "已加入列表。",
+    "module.playlistLoader.searchAddedNamed": "已将《{0}》加入列表。",
     "module.playlistLoader.errorInternal": "播放器内部错误，无法载入播放列表。"
   },
   "zh-HK": {
@@ -187,6 +191,7 @@
     "module.playlistLoader.searchAddHint": "按「加入」可將此播放清單加入清單。",
     "module.playlistLoader.searchAlreadyAdded": "此播放清單已在清單中。",
     "module.playlistLoader.searchAdded": "已加入清單。",
+    "module.playlistLoader.searchAddedNamed": "已將《{0}》加入清單。",
     "module.playlistLoader.errorInternal": "播放器內部錯誤，無法載入播放清單。"
   },
   "es": {
@@ -225,6 +230,7 @@
     "module.playlistLoader.searchAddHint": "Pulsa Añadir para añadir esta lista.",
     "module.playlistLoader.searchAlreadyAdded": "Esta lista ya está añadida.",
     "module.playlistLoader.searchAdded": "Añadida a la lista.",
+    "module.playlistLoader.searchAddedNamed": "«{0}» añadida a la lista.",
     "module.playlistLoader.errorInternal": "Un error interno del reproductor impidió cargar la lista de reproducción."
   },
   "it": {
@@ -263,6 +269,7 @@
     "module.playlistLoader.searchAddHint": "Premi Aggiungi per aggiungere questa playlist.",
     "module.playlistLoader.searchAlreadyAdded": "Questa playlist è già nell'elenco.",
     "module.playlistLoader.searchAdded": "Aggiunta all'elenco.",
+    "module.playlistLoader.searchAddedNamed": "«{0}» aggiunta all'elenco.",
     "module.playlistLoader.errorInternal": "Un errore interno del player ha impedito il caricamento della playlist."
   },
   "ru": {
@@ -301,6 +308,7 @@
     "module.playlistLoader.searchAddHint": "Нажмите «Добавить», чтобы добавить этот плейлист в список.",
     "module.playlistLoader.searchAlreadyAdded": "Этот плейлист уже есть в списке.",
     "module.playlistLoader.searchAdded": "Добавлено в список.",
+    "module.playlistLoader.searchAddedNamed": "«{0}» добавлен в список.",
     "module.playlistLoader.errorInternal": "Внутренняя ошибка плеера: не удалось загрузить плейлист."
   },
   "uk": {
@@ -339,6 +347,7 @@
     "module.playlistLoader.searchAddHint": "Натисніть «Додати», щоб додати цей плейлист до списку.",
     "module.playlistLoader.searchAlreadyAdded": "Цей плейлист уже є у списку.",
     "module.playlistLoader.searchAdded": "Додано до списку.",
+    "module.playlistLoader.searchAddedNamed": "«{0}» додано до списку.",
     "module.playlistLoader.errorInternal": "Внутрішня помилка плеєра: не вдалося завантажити плейлист."
   }
 }

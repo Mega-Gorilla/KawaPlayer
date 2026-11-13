@@ -8,6 +8,7 @@
   "label.searchHelp": "В окне ввода не удаляйте URL, а введите запрос после него.",
   "label.addPlaylist": "Добавить",
   "label.playlistAdded": "Добавлен",
+  "label.playlistDetails": "Подробнее",
   "tab.playback": "Плеер",
   "label.videoPlayer": "Видеоплеер",
   "label.imageViewer": "Просмотр изображений",

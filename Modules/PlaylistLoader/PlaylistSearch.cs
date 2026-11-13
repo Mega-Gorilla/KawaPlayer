@@ -34,7 +34,8 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
 
     // Contract with SearchPage: it reads searchFieldUrl for its box, writes
     // searchSource and searchInput before OnSearchSubmitted, searchSource,
-    // searchPickKey and searchPickNumber before OnSearchResultPicked, and
+    // searchPickKey and searchPickNumber before OnSearchResultPicked and
+    // OnSearchResultAddPicked, and
     // searchSource and searchPickKey before OnSearchAddPressed and
     // OnSearchPlaylistsChanged.
     [HideInInspector] public VRCUrl searchFieldUrl;
@@ -47,6 +48,8 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
     // asked, what it asked with and for.
     private bool _searching;
     private bool _opening;
+    // The playlist being fetched is to be added as it comes, not shown.
+    private bool _addWhenFetched;
     private string _pendingKey = string.Empty;
     // The playlist last fetched to be shown: its response, kept so that
     // adding it fetches nothing, what fetched it, and which playlist it is.
@@ -211,6 +214,7 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
     {
       _searching = false;
       _opening = false;
+      _addWhenFetched = false;
       _pendingView = null;
       _pendingUrl = null;
       _pendingQuery = string.Empty;
@@ -229,7 +233,13 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
     // shown before it is added, and its key says which playlist that has to
     // be: a number is used again, and if it has come to stand for another
     // playlist, nothing is shown.
-    public void OnSearchResultPicked()
+    public void OnSearchResultPicked() => Fetch(false);
+
+    // A result's own add button: the playlist is fetched the same way and
+    // added as it comes, without being shown.
+    public void OnSearchResultAddPicked() => Fetch(true);
+
+    private void Fetch(bool addWhenFetched)
     {
       var view = searchSource;
       if (!Utilities.IsValid(view) || !Utilities.IsValid(_loader) || !Utilities.IsValid(view.Ui)) return;
@@ -242,7 +252,15 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
         return;
       }
 
+      // Nothing to fetch for one that is in the list already.
+      if (addWhenFetched && _loader.HasPlaylist(searchPickKey))
+      {
+        view.ShowNote(ui.GetTranslation("module.playlistLoader.searchAlreadyAdded"));
+        return;
+      }
+
       _opening = true;
+      _addWhenFetched = addWhenFetched;
       _pendingView = view;
       _pendingUrl = url;
       _pendingKey = searchPickKey;
@@ -258,6 +276,7 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
       var view = _pendingView;
       var url = _pendingUrl;
       string key = _pendingKey;
+      bool addNow = _addWhenFetched;
       EndSearch();
       if (!Utilities.IsValid(view) || !Utilities.IsValid(view.Ui)) return;
       var ui = view.Ui;
@@ -271,8 +290,20 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
       _shownJson = json;
       _shownUrl = url;
       _shownKey = key;
+      string name = string.IsNullOrEmpty(playlistName) ? PlaylistLoader.UnnamedPlaylistName : playlistName;
+      if (addNow)
+      {
+        // The results come back, and the line under the box says it is
+        // added once it is: at once, unless a question is asked first or
+        // the load is refused, which the dialog then says.
+        view.BackToResults();
+        if (Utilities.IsValid(_loaderUi)) _loaderUi.LoadPlaylist(ui, url, json, key, true);
+        if (_loader.HasPlaylist(key))
+          view.ShowNote(ui.GetTranslation("module.playlistLoader.searchAddedNamed").Replace("{0}", name));
+        return;
+      }
       bool added = _loader.HasPlaylist(key);
-      view.ShowPlaylist(string.IsNullOrEmpty(playlistName) ? PlaylistLoader.UnnamedPlaylistName : playlistName,
+      view.ShowPlaylist(name,
           $"{titles.Length} {ui.GetTranslation("label.tracks")}", titles, titles.Length, key, added);
       view.ShowNote(ui.GetTranslation(added ? "module.playlistLoader.searchAlreadyAdded" : "module.playlistLoader.searchAddHint"));
     }

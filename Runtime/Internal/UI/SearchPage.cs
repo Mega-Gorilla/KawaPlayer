@@ -10,6 +10,8 @@ namespace Yamadev.YamaStream.UI
   // over the whole screen, as the settings are, with a box to type into and
   // the results as rows. A row pressed opens the playlist it stands for: its
   // tracks, with a button that adds it and one that goes back to the results.
+  // A row pointed at shows two buttons of its own: one that opens it as a
+  // press on the row does, and one that adds the playlist without opening it.
   //
   // This is only the view. What is searched, and what a result is, belong to
   // the module that answers (_handler, wired when the world is built, as the
@@ -110,8 +112,14 @@ namespace Yamadev.YamaStream.UI
     private Text[] _lineDetails;
     private Text[] _lineCounts;
     private IndexTrigger[] _lineTriggers;
+    // The two buttons a line shows while pointed at, and their words.
+    private IndexTrigger[] _lineDetailsTriggers;
+    private IndexTrigger[] _lineAddTriggers;
+    private Text[] _lineDetailsLabels;
+    private Text[] _lineAddLabels;
 
-    // Set by a result's row (its IndexTrigger) before it sends PickResult.
+    // Set by a result's row or one of its two buttons (their IndexTriggers)
+    // before PickResult or AddResult.
     [HideInInspector] public int pickedIndex = -1;
 
     public UIController Ui => _uiController;
@@ -138,6 +146,21 @@ namespace Yamadev.YamaStream.UI
       UpdateBoxText();
       UpdateHelp();
       UpdateAddLabel();
+      UpdateLineLabels();
+    }
+
+    // The words of the lines' own buttons, which the lines do not get with
+    // their rows.
+    private void UpdateLineLabels()
+    {
+      if (_lineDetailsLabels == null || !Utilities.IsValid(_uiController)) return;
+      string details = _uiController.GetTranslation("label.playlistDetails");
+      string add = _uiController.GetTranslation("label.addPlaylist");
+      for (int i = 0; i < _lineDetailsLabels.Length; i++)
+      {
+        if (Utilities.IsValid(_lineDetailsLabels[i])) _lineDetailsLabels[i].text = details;
+        if (Utilities.IsValid(_lineAddLabels[i])) _lineAddLabels[i].text = add;
+      }
     }
 
     private void UpdateBoxText()
@@ -409,6 +432,8 @@ namespace Yamadev.YamaStream.UI
         if (Utilities.IsValid(_lineDetails[i])) _lineDetails[i].text = _details[index];
         if (Utilities.IsValid(_lineCounts[i])) _lineCounts[i].text = _counts[index];
         if (Utilities.IsValid(_lineTriggers[i])) _lineTriggers[i].SetProgramVariable("_variableObject", index);
+        if (Utilities.IsValid(_lineDetailsTriggers[i])) _lineDetailsTriggers[i].SetProgramVariable("_variableObject", index);
+        if (Utilities.IsValid(_lineAddTriggers[i])) _lineAddTriggers[i].SetProgramVariable("_variableObject", index);
       }
     }
 
@@ -420,6 +445,10 @@ namespace Yamadev.YamaStream.UI
       _lineDetails = new Text[count];
       _lineCounts = new Text[count];
       _lineTriggers = new IndexTrigger[count];
+      _lineDetailsTriggers = new IndexTrigger[count];
+      _lineAddTriggers = new IndexTrigger[count];
+      _lineDetailsLabels = new Text[count];
+      _lineAddLabels = new Text[count];
       for (int i = 0; i < count && i < content.childCount; i++)
       {
         Transform line = content.GetChild(i);
@@ -430,7 +459,20 @@ namespace Yamadev.YamaStream.UI
         Transform trackCount = line.Find("TrackCount");
         if (Utilities.IsValid(trackCount)) _lineCounts[i] = trackCount.GetComponent<Text>();
         _lineTriggers[i] = line.GetComponent<IndexTrigger>();
+        Transform details = line.Find("Actions/Details");
+        if (Utilities.IsValid(details))
+        {
+          _lineDetailsTriggers[i] = details.GetComponent<IndexTrigger>();
+          _lineDetailsLabels[i] = details.GetComponentInChildren<Text>(true);
+        }
+        Transform add = line.Find("Actions/Add");
+        if (Utilities.IsValid(add))
+        {
+          _lineAddTriggers[i] = add.GetComponent<IndexTrigger>();
+          _lineAddLabels[i] = add.GetComponentInChildren<Text>(true);
+        }
       }
+      UpdateLineLabels();
     }
 
     // A result's row was pressed: its key and number go back to the handler,
@@ -444,6 +486,17 @@ namespace Yamadev.YamaStream.UI
       _handler.SetProgramVariable("searchPickKey", _keys[pickedIndex]);
       _handler.SetProgramVariable("searchPickNumber", _numbers[pickedIndex]);
       _handler.SendCustomEvent("OnSearchResultPicked");
+    }
+
+    // A result's own add button: the same goes back, for the handler to add
+    // the playlist without showing it.
+    public void AddResult()
+    {
+      if (!Utilities.IsValid(_handler) || pickedIndex < 0 || pickedIndex >= _resultCount) return;
+      _handler.SetProgramVariable("searchSource", this);
+      _handler.SetProgramVariable("searchPickKey", _keys[pickedIndex]);
+      _handler.SetProgramVariable("searchPickNumber", _numbers[pickedIndex]);
+      _handler.SendCustomEvent("OnSearchResultAddPicked");
     }
   }
 }
