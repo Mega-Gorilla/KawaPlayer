@@ -281,6 +281,18 @@ namespace Yamadev.YamaStream.UI
       if (Utilities.IsValid(_userUIAnimator) && IsUserUIState("ToggleUI", "UIOn")) TouchControls();
     }
 
+    // A part of the list with a field of its own to type into (the search,
+    // #145) names it, so that the controls stay while it is typed into, and
+    // tells when its entry ended and when its lines were scrolled, as the
+    // UI's own fields and lists do.
+    private VRCUrlInputField _listEntryField;
+
+    public void SetListEntryField(VRCUrlInputField field) => _listEntryField = field;
+
+    public void ListEntryEnded() => UrlEntryEnded();
+
+    public void TouchList() => TouchShownControls();
+
     private bool CanHideControls()
     {
       if (_screenPressedRight || _screenPressedLeft || _progressDrag) return false;
@@ -288,6 +300,7 @@ namespace Yamadev.YamaStream.UI
       if (IsUserUIState("Page", "ShowPage")) return false;
       if (Utilities.IsValid(_urlInputField) && _urlInputField.isFocused) return false;
       if (Utilities.IsValid(_addPlaylistUrlInputField) && _addPlaylistUrlInputField.isFocused) return false;
+      if (Utilities.IsValid(_listEntryField) && _listEntryField.isFocused) return false;
       return true;
     }
 

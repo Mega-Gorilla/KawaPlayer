@@ -1,18 +1,21 @@
 using System.Linq;
 using UnityEngine;
+using UnityEngine.UI;
+using VRC.SDKBase;
 using Yamadev.YamaStream.Editor;
 using Yamadev.YamaStream.UI;
 using VRC.SDK3.Components;
 
 namespace Yamadev.YamaStream.Modules.PlaylistLoader.Editor
 {
-  // Wires three independent things. Runs at scene build and on play-mode entry
+  // Wires four independent things. Runs at scene build and on play-mode entry
   // (IProcessSceneWithReport), after YamaPlayerModuleBuildProcess (-3000) has
   // tagged inactive modules EditorOnly.
   //
   // - Playlist slots (issue #88), per PlaylistLoader
   // - The URL interceptor (issue #82), per PlaylistLoaderUI
   // - The playlist refresh handler (issue #91), per PlaylistLoaderUI
+  // - The search page (issue #145), per PlaylistSearch
   public class PlaylistLoaderBuildProcess : IYamaPlayerBuildProcess
   {
     public int callbackOrder => -2500;
@@ -35,6 +38,43 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader.Editor
         var uiControllers = FindPlayerUIControllers(loaderUi);
         ProcessInterceptor(loaderUi, uiControllers);
         ProcessRefreshHandler(loaderUi, uiControllers);
+      }
+
+      var searches = Object.FindObjectsByType<PlaylistSearch>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+      foreach (var search in searches)
+      {
+        ProcessSearch(search);
+      }
+    }
+
+    // The search page (issue #145). Its box holds the address of the
+    // loader's server's search, made here because only the editor can make
+    // a URL from text. A UI gets the search where it can take a
+    // typed URL and has a dialog to report a load with: the same UIs the
+    // list's "+" shows on, so not the Playlist Panel. There the row that
+    // opens the search stays off, as it is in the prefab.
+    private static void ProcessSearch(PlaylistSearch search)
+    {
+      if (search == null || !search.gameObject.activeInHierarchy) return;
+      var loader = search.GetProgramVariable("_loader") as PlaylistLoader;
+      var loaderUi = search.GetProgramVariable("_loaderUi") as PlaylistLoaderUI;
+      if (loader == null || loaderUi == null || !loaderUi.gameObject.activeInHierarchy) return;
+
+      string baseUrl = loader.GetProgramVariable("_poolBaseUrl") as string;
+      if (string.IsNullOrEmpty(baseUrl)) return;
+      search.SetProgramVariable("searchFieldUrl", new VRCUrl($"{baseUrl.TrimEnd('/')}{PlaylistUrlUtils.SearchPath}"));
+
+      foreach (var uiController in FindPlayerUIControllers(loaderUi))
+      {
+        if (uiController.GetProgramVariable("_urlInputField") as VRCUrlInputField == null) continue;
+        if (uiController.GetProgramVariable("_modalDialog") as Component == null) continue;
+
+        foreach (var searchPage in uiController.GetComponentsInChildren<SearchPage>(true))
+        {
+          searchPage.SetProgramVariable("_handler", search);
+          var entry = searchPage.GetProgramVariable("_entryButton") as Button;
+          if (entry != null) entry.gameObject.SetActive(true);
+        }
       }
     }
 

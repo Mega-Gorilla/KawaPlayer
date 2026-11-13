@@ -58,8 +58,10 @@ KawaPlayer の機能の一部は、モジュールとして分かれていて、
   | --- | --- |
   | **Controller** | KawaPlayer の本体。初めからつながっている |
   | **Pool Base URL**・**Pool Size** | VHub の URL を読み込むための、URL の束（プール）の設定。変えられない |
+  | **Search Pool Size** | 検索の結果を読み込むための、番号の束の件数。変えられない |
   | **Pool ID** | VHub 側のプールの名前。`default` から変えない |
   | **Current Pool Size**・**Estimated File Size** | 入っているプールの件数と、およその大きさ |
+  | **Current Search Pool Size** | 入っている、検索の番号の件数 |
   | **Generate Pool** | プールを作り直すボタン。押さない（**Pool ID** を変えたときに使うもので、今の VHub では使わない） |
   | **Max Tracks** | 1 つのプレイリストから読み込む曲の上限（1〜500、初めは 200） |
   | **Max Sync Bytes** | 1 つのプレイリストで全員に送るデータの上限（4096〜65536、初めは 32768）。大きくすると、全員に行き渡るまでの時間が延びる |

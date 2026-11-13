@@ -36,6 +36,13 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
     public string refreshKey;
     public UIController refreshSource;
 
+    // Contract with UIController.IsUrlToHandOut (issue #145): the caller
+    // writes shareUrl, sends OnShareUrlAsked, and reads shareUrlOk: whether
+    // a slot's URL is one to show for copying. A playlist's own URL is; a
+    // search number is not, as the server uses it again for another.
+    public VRCUrl shareUrl;
+    public bool shareUrlOk;
+
     // The UI that initiated the load currently in flight; OnLoadResult
     // reports back to it. A load from the list's "+" reports a failure only:
     // the playlist appearing in the list is what says it worked.
@@ -251,6 +258,11 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
       _pendingReplacedKey = string.Empty;
       _pendingAddOnly = false;
       _awaitingConfirm = false;
+    }
+
+    public void OnShareUrlAsked()
+    {
+      shareUrlOk = Utilities.IsValid(_loader) && Utilities.IsValid(shareUrl) && _loader.IsOwnPlaylistUrl(shareUrl.Get());
     }
 
     // Refetches a slot from the URL that filled it (issue #91). Deliberately

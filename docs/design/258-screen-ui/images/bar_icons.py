@@ -87,6 +87,12 @@ d.rounded_rectangle(p(48, 48, 464, 464), radius=96 * S, outline=255, width=30 * 
 stroke(d, (256, 168), (256, 344)); stroke(d, (168, 256), (344, 256))
 save(im, "bar-add-box.png")
 
+# the search under the playlists (#145): a magnifying glass, on its row and in the search box
+im, d = canvas()
+d.ellipse(p(56, 56, 368, 368), outline=255, width=34 * S)
+stroke(d, (338, 338), (448, 448), 38)
+save(im, "bar-search.png")
+
 # the gradient: 0 at the top, 0.72 at 45 % down, 1 at the bottom
 h = 256
 g = Image.new("RGBA", (4, h), (255, 255, 255, 0))
