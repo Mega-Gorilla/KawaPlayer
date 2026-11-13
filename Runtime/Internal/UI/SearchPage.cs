@@ -61,6 +61,10 @@ namespace Yamadev.YamaStream.UI
     private int[] _numbers = new int[0];
     private int _resultCount;
     private bool _handlerSpoke;
+    // How many frames the field has been waited for since the page opened,
+    // and when to give up (the page never showed).
+    private int _fieldWaits;
+    private const int FieldWaitFrames = 600;
     // The parts of the result lines, found once (as the UIController finds
     // its lists' lines' parts, #326).
     private Text[] _lineTitles;
@@ -122,10 +126,30 @@ namespace Yamadev.YamaStream.UI
       _animator.SetTrigger("HideFrontControl");
       _animator.SetTrigger("ShowPage");
       _animator.SetTrigger("HideVolume");
-      ResetField();
+      _fieldWaits = 0;
+      SendCustomEventDelayedFrames(nameof(_SetFieldWhenShown), 1);
       UpdateBoxText();
       UpdateHelp();
       DrawResults();
+    }
+
+    // The field gets its URL once it is really on. The pages' animator
+    // switches their parent on some frames after the trigger, and a URL
+    // given to a field that is off, or in the frame it comes on, is gone
+    // when it shows: in a VRChat client the first entry then had no URL in
+    // front of it. So this waits for the field, a frame at a time, and gives
+    // the URL then and once more two frames on.
+    public void _SetFieldWhenShown()
+    {
+      if (!IsOpen || !Utilities.IsValid(_inputField)) return;
+      if (_inputField.gameObject.activeInHierarchy)
+      {
+        ResetField();
+        SendCustomEventDelayedFrames(nameof(ResetField), 2);
+        return;
+      }
+      _fieldWaits++;
+      if (_fieldWaits < FieldWaitFrames) SendCustomEventDelayedFrames(nameof(_SetFieldWhenShown), 1);
     }
 
     // The settings' button was pressed: the search is not what shows.
@@ -143,9 +167,9 @@ namespace Yamadev.YamaStream.UI
       _animator.SetTrigger("TogglePlaylist");
     }
 
-    // The field is given its URL whenever it shows and after every entry: a
-    // value set while the field is off is gone when it shows, and what was
-    // typed stays in it otherwise.
+    // The field is given its URL once the page has opened and after every
+    // entry: a value set while the field is off, or as it comes on, is gone
+    // when it shows, and what was typed stays in it otherwise.
     public void ResetField()
     {
       if (!Utilities.IsValid(_inputField) || !Utilities.IsValid(_handler)) return;
