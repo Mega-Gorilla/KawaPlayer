@@ -1721,6 +1721,11 @@ namespace Yamadev.YamaStream.UI
       // stays the same; back and next follow the place in it too.
       UpdateTrackView();
       UpdateControlsView();
+      // The parts of this UI that show the world's playlists themselves
+      // (the search, which says whether the one it shows is added).
+      int len = _listeners.Length;
+      for (int i = 0; i < len; i++)
+        if (Utilities.IsValid(_listeners[i])) _listeners[i].SendCustomEvent(nameof(AfterPlaylistsUpdated));
     }
     // The playlist indexes can change without the track (deleting the
     // playlist that plays drops them), and reach this player apart from the

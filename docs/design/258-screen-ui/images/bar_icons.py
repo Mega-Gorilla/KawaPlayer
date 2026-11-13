@@ -93,6 +93,14 @@ d.ellipse(p(56, 56, 368, 368), outline=255, width=34 * S)
 stroke(d, (338, 338), (448, 448), 38)
 save(im, "bar-search.png")
 
+# the ring that turns while the search waits (#145): three quarters of a circle with round ends,
+# open at the top right, turned by an animator
+im, d = canvas()
+d.arc(p(76, 76, 436, 436), start=0, end=270, fill=255, width=40 * S)
+for x, y in ((416, 256), (256, 96)):
+    d.ellipse(p(x - 20, y - 20, x + 20, y + 20), fill=255)
+save(im, "bar-spinner.png")
+
 # the gradient: 0 at the top, 0.72 at 45 % down, 1 at the bottom
 h = 256
 g = Image.new("RGBA", (4, h), (255, 255, 255, 0))

@@ -8,14 +8,16 @@ namespace Yamadev.YamaStream.UI
 {
   // The search (issue #145): a row under the list's playlists opens a page
   // over the whole screen, as the settings are, with a box to type into and
-  // the results as rows, which load the playlist they stand for when pressed.
+  // the results as rows. A row pressed opens the playlist it stands for: its
+  // tracks, with a button that adds it and one that goes back to the results.
   //
   // This is only the view. What is searched, and what a result is, belong to
   // the module that answers (_handler, wired when the world is built, as the
   // refresh handler is): it is handed what was entered and hands back rows --
   // the texts to show, and for each a key and a number that go back to it,
-  // unread here, when the row is pressed. A UI the build gives no handler
-  // keeps the row that opens the search hidden, and this does nothing.
+  // unread here, when the row is pressed; then the playlist's tracks, and
+  // whether it is added already. A UI the build gives no handler keeps the
+  // row that opens the search hidden, and this does nothing.
   //
   // The page shares its place with the settings (Pages): the same animator
   // layer shows and hides both, the same back button closes both, and
@@ -50,6 +52,25 @@ namespace Yamadev.YamaStream.UI
     [SerializeField] private Text _statusText;
     [SerializeField] private LoopScroll _resultsScroll;
 
+    [Header("While waiting")]
+    // In the middle of the page, in place of the rows, while the handler
+    // fetches: a ring that turns (its own animator, which runs only while
+    // this shows) and a word on what is fetched.
+    [SerializeField] private GameObject _loading;
+    [SerializeField] private Text _loadingText;
+
+    [Header("A playlist opened from a result")]
+    // In place of the results: the playlist's name, what its row said under
+    // it and its track count, the two buttons, and its tracks.
+    [SerializeField] private GameObject _playlist;
+    [SerializeField] private Text _playlistTitle;
+    [SerializeField] private Text _playlistDetail;
+    [SerializeField] private Text _playlistCount;
+    [SerializeField, RegisterEvent(nameof(Button.onClick), nameof(BackToResults))] private Button _backButton;
+    [SerializeField, RegisterEvent(nameof(Button.onClick), nameof(AddPressed))] private Button _addButton;
+    [SerializeField] private Text _addLabel;
+    [SerializeField] private LoopScroll _tracksScroll;
+
     [SerializeField, HideInInspector] private UdonSharpBehaviour _handler;
 
     private UIController _uiController;
@@ -61,6 +82,24 @@ namespace Yamadev.YamaStream.UI
     private int[] _numbers = new int[0];
     private int _resultCount;
     private bool _handlerSpoke;
+    // What shows under the box and the status line: the results, the ring,
+    // or a playlist.
+    private const int ShowsResults = 0;
+    private const int ShowsLoading = 1;
+    private const int ShowsPlaylist = 2;
+    private int _shows = ShowsResults;
+    // What the handler last said of the search, put back when a playlist is
+    // left for the results.
+    private string _searchStatus = string.Empty;
+    // The playlist that is open: its key, which goes back to the handler
+    // with the add button, its tracks, and whether it is added already.
+    private string _playlistKey = string.Empty;
+    private string _pickedDetail = string.Empty;
+    private string[] _trackTitles = new string[0];
+    private int _trackCount;
+    private bool _added;
+    private Text[] _trackLineNumbers;
+    private Text[] _trackLineTitles;
     // How many frames the field has been waited for since the page opened,
     // and when to give up (the page never showed).
     private int _fieldWaits;
@@ -76,6 +115,8 @@ namespace Yamadev.YamaStream.UI
     [HideInInspector] public int pickedIndex = -1;
 
     public UIController Ui => _uiController;
+    // Whether the open playlist shows as added.
+    public bool Added => _added;
 
     private void Start()
     {
@@ -96,6 +137,7 @@ namespace Yamadev.YamaStream.UI
       if (Utilities.IsValid(_entryLabel)) _entryLabel.text = _uiController.GetTranslation("label.searchPlaylists");
       UpdateBoxText();
       UpdateHelp();
+      UpdateAddLabel();
     }
 
     private void UpdateBoxText()
@@ -130,7 +172,20 @@ namespace Yamadev.YamaStream.UI
       SendCustomEventDelayedFrames(nameof(_SetFieldWhenShown), 1);
       UpdateBoxText();
       UpdateHelp();
+      // Opened on the results, whatever it was closed on: a fetch that was
+      // under way has nothing to come back to, and a playlist left open
+      // would show as added or not by what was true then.
+      BackToResults();
       DrawResults();
+    }
+
+    // One of the three shows, the others are off.
+    private void Show(int what)
+    {
+      _shows = what;
+      if (Utilities.IsValid(_resultsScroll)) _resultsScroll.gameObject.SetActive(what == ShowsResults);
+      if (Utilities.IsValid(_loading)) _loading.SetActive(what == ShowsLoading);
+      if (Utilities.IsValid(_playlist)) _playlist.SetActive(what == ShowsPlaylist);
     }
 
     // The field gets its URL once it is really on. The pages' animator
@@ -200,12 +255,31 @@ namespace Yamadev.YamaStream.UI
       UpdateBoxText();
     }
 
-    // From the handler: the line under the box (searching, how many, what
-    // went wrong). Translated by the handler, whose words they are.
+    // From the handler: the line under the box on how the search went
+    // (how many, what went wrong). Translated by the handler, whose words
+    // they are. Kept, to be put back when a playlist is left.
     public void ShowStatus(string status)
     {
+      _searchStatus = status == null ? string.Empty : status;
+      ShowNote(_searchStatus);
+    }
+
+    // From the handler: the same line, for a word that is not the search's
+    // result (about the playlist that is open, or one that would not open).
+    public void ShowNote(string note)
+    {
       _handlerSpoke = true;
-      if (Utilities.IsValid(_statusText)) _statusText.text = status == null ? string.Empty : status;
+      if (Utilities.IsValid(_statusText)) _statusText.text = note == null ? string.Empty : note;
+    }
+
+    // From the handler: it is fetching. The ring shows in place of the rows
+    // with a word on what is fetched, and the line under the box is empty.
+    public void ShowLoading(string message)
+    {
+      _handlerSpoke = true;
+      if (Utilities.IsValid(_loadingText)) _loadingText.text = message == null ? string.Empty : message;
+      if (Utilities.IsValid(_statusText)) _statusText.text = string.Empty;
+      Show(ShowsLoading);
     }
 
     // From the handler: the rows. count of each array is used; keys and
@@ -218,7 +292,100 @@ namespace Yamadev.YamaStream.UI
       _keys = keys;
       _numbers = numbers;
       _resultCount = count;
+      Show(ShowsResults);
       DrawResults();
+    }
+
+    // From the handler: the playlist a pressed row stands for. key comes
+    // back with the add button; added is whether the list has it already.
+    public void ShowPlaylist(string title, string count, string[] trackTitles, int trackCount, string key, bool added)
+    {
+      _playlistKey = key == null ? string.Empty : key;
+      _trackTitles = trackTitles;
+      _trackCount = trackCount;
+      if (Utilities.IsValid(_playlistTitle)) _playlistTitle.text = title == null ? string.Empty : title;
+      if (Utilities.IsValid(_playlistDetail)) _playlistDetail.text = _pickedDetail;
+      if (Utilities.IsValid(_playlistCount)) _playlistCount.text = count == null ? string.Empty : count;
+      SetAdded(added);
+      Show(ShowsPlaylist);
+      if (Utilities.IsValid(_tracksScroll) && _tracksScroll.gameObject.activeInHierarchy)
+        _tracksScroll.SetUpAtTop(_trackCount, this, nameof(UpdateTracksContent));
+    }
+
+    // From the handler: whether the open playlist is in the list. One that
+    // is cannot be added again from here (the list refreshes it).
+    public void SetAdded(bool added)
+    {
+      _added = added;
+      if (Utilities.IsValid(_addButton)) _addButton.interactable = !added;
+      UpdateAddLabel();
+    }
+
+    private void UpdateAddLabel()
+    {
+      if (!Utilities.IsValid(_addLabel) || !Utilities.IsValid(_uiController)) return;
+      _addLabel.text = _uiController.GetTranslation(_added ? "label.playlistAdded" : "label.addPlaylist");
+    }
+
+    // The playlist's back button, and a fetch that brought nothing: the
+    // results show again as they were left, under what the search said.
+    public void BackToResults()
+    {
+      if (_shows == ShowsResults) return;
+      Show(ShowsResults);
+      if (Utilities.IsValid(_statusText)) _statusText.text = _searchStatus;
+      if (Utilities.IsValid(_uiController)) _uiController.TouchList();
+    }
+
+    // The playlist's add button: its key goes back to the handler, which
+    // adds what it fetched to show it.
+    public void AddPressed()
+    {
+      if (!Utilities.IsValid(_handler) || _shows != ShowsPlaylist || string.IsNullOrEmpty(_playlistKey)) return;
+      _handler.SetProgramVariable("searchSource", this);
+      _handler.SetProgramVariable("searchPickKey", _playlistKey);
+      _handler.SendCustomEvent("OnSearchAddPressed");
+    }
+
+    // The world's playlists changed (from the UIController): the handler
+    // says again whether the open one is among them, as it may have been
+    // added from here after a question, by someone else, or deleted.
+    public void AfterPlaylistsUpdated()
+    {
+      if (!Utilities.IsValid(_handler) || _shows != ShowsPlaylist || string.IsNullOrEmpty(_playlistKey)) return;
+      _handler.SetProgramVariable("searchSource", this);
+      _handler.SetProgramVariable("searchPickKey", _playlistKey);
+      _handler.SendCustomEvent("OnSearchPlaylistsChanged");
+    }
+
+    // Called by the tracks' LoopScroll when its lines are drawn.
+    public void UpdateTracksContent()
+    {
+      if (Utilities.IsValid(_uiController)) _uiController.TouchList();
+      if (_trackLineTitles == null || _trackLineTitles.Length != _tracksScroll.LineCount) FindTrackLineParts();
+      for (int i = 0; i < _tracksScroll.LineCount; i++)
+      {
+        int index = _tracksScroll.Indexes[i];
+        if (index == _tracksScroll.LastIndexes[i] || index == -1 || index >= _trackCount) continue;
+        if (Utilities.IsValid(_trackLineNumbers[i])) _trackLineNumbers[i].text = (index + 1).ToString();
+        if (Utilities.IsValid(_trackLineTitles[i])) _trackLineTitles[i].text = _trackTitles[index];
+      }
+    }
+
+    private void FindTrackLineParts()
+    {
+      int count = _tracksScroll.LineCount;
+      var content = _tracksScroll.GetComponent<ScrollRect>().content;
+      _trackLineNumbers = new Text[count];
+      _trackLineTitles = new Text[count];
+      for (int i = 0; i < count && i < content.childCount; i++)
+      {
+        Transform line = content.GetChild(i);
+        Transform number = line.Find("Number");
+        if (Utilities.IsValid(number)) _trackLineNumbers[i] = number.GetComponent<Text>();
+        Transform title = line.Find("Title");
+        if (Utilities.IsValid(title)) _trackLineTitles[i] = title.GetComponent<Text>();
+      }
     }
 
     // From the first row. Results that come while the page is closed are
@@ -266,11 +433,13 @@ namespace Yamadev.YamaStream.UI
       }
     }
 
-    // A result's row was pressed: its key and number go back to the handler.
-    // The results stay, so that another can be picked after it.
+    // A result's row was pressed: its key and number go back to the handler,
+    // which fetches the playlist and shows it (ShowPlaylist). The results
+    // are kept, to go back to.
     public void PickResult()
     {
       if (!Utilities.IsValid(_handler) || pickedIndex < 0 || pickedIndex >= _resultCount) return;
+      _pickedDetail = _details[pickedIndex];
       _handler.SetProgramVariable("searchSource", this);
       _handler.SetProgramVariable("searchPickKey", _keys[pickedIndex]);
       _handler.SetProgramVariable("searchPickNumber", _numbers[pickedIndex]);

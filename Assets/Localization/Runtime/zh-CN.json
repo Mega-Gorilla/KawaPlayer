@@ -6,6 +6,8 @@
   "label.searchPlaylists": "搜索 VHub Playlist",
   "label.searchHint": "按这里输入搜索词",
   "label.searchHelp": "在输入窗口中，请保留 URL，并在其后输入搜索词。",
+  "label.addPlaylist": "添加",
+  "label.playlistAdded": "已添加",
   "tab.playback": "播放",
   "label.videoPlayer": "视频播放器",
   "label.imageViewer": "图片查看器",

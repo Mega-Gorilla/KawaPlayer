@@ -380,7 +380,11 @@ MARKS = {
     "screen/search": dict(scale=0.667, marks=[
         dict(box=(38, 10, 106, 78), n=1),
         dict(box=(128, 15, 1200, 73), n=2),
-        dict(box=(133, 270, 1193, 337), n=3),
+        dict(box=(123, 208, 1199, 272), n=3),
+    ]),
+    "screen/search-playlist": dict(scale=0.667, marks=[
+        dict(box=(925, 153, 1114, 202), n=1),
+        dict(box=(1132, 151, 1185, 204), n=2),
     ]),
     "screen/playlist-vhub": dict(scale=0.667, marks=[
         dict(box=(1207, 93, 1251, 137), n=1),

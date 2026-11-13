@@ -6,6 +6,8 @@
   "label.searchPlaylists": "Buscar en VHub Playlist",
   "label.searchHint": "Pulsa para buscar",
   "label.searchHelp": "En la ventana de entrada, deja la URL y escribe después lo que buscas.",
+  "label.addPlaylist": "Añadir",
+  "label.playlistAdded": "Añadida",
   "tab.playback": "Reproducción",
   "label.videoPlayer": "Reproductor de video",
   "label.imageViewer": "Visor de imágenes",

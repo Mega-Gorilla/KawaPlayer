@@ -20,7 +20,7 @@
     "module.playlistLoader.errorReplacementChanged": "読み込みを中止しました。\n確認したプレイリストが、待っているあいだに別のものへ変わりました。もう一度お試しください。",
     "module.playlistLoader.errorIdentityChanged": "読み込みを中止しました。\nこのプレイリストは、もう一度検索すると読み込めます。",
     "module.playlistLoader.searchSearching": "検索しています…",
-    "module.playlistLoader.searchResults": "{0} 件見つかりました。押すと読み込みます。",
+    "module.playlistLoader.searchResults": "{0} 件見つかりました。押すと中身を見られます。",
     "module.playlistLoader.searchResultsTruncated": "多く見つかったので、上位 {0} 件を出しています。語を足すと絞れます。",
     "module.playlistLoader.searchNoResults": "見つかりませんでした。",
     "module.playlistLoader.searchKeepUrl": "URL は消さずに、その後ろに検索語を入力してください。",
@@ -30,6 +30,11 @@
     "module.playlistLoader.searchBusy": "前の検索の途中です。少し待ってからもう一度お試しください。",
     "module.playlistLoader.searchRateLimited": "検索の回数が多すぎます。1 分ほど待ってからお試しください。",
     "module.playlistLoader.searchFailed": "検索できませんでした。時間をおいてもう一度お試しください。",
+    "module.playlistLoader.searchOpening": "プレイリストを読み込んでいます…",
+    "module.playlistLoader.searchOpenFailed": "このプレイリストを開けませんでした。もう一度検索してください。",
+    "module.playlistLoader.searchAddHint": "「追加」を押すと、このプレイリストを一覧に追加します。",
+    "module.playlistLoader.searchAlreadyAdded": "このプレイリストは、すでに一覧にあります。",
+    "module.playlistLoader.searchAdded": "一覧に追加しました。",
     "module.playlistLoader.errorInternal": "プレイヤー内部エラーで読み込み先を確保できませんでした。"
   },
   "en": {
@@ -53,7 +58,7 @@
     "module.playlistLoader.errorReplacementChanged": "Load cancelled.\nThe playlist you were shown changed while you were deciding. Please try again.",
     "module.playlistLoader.errorIdentityChanged": "Load cancelled.\nSearch for this playlist again to load it.",
     "module.playlistLoader.searchSearching": "Searching…",
-    "module.playlistLoader.searchResults": "{0} found. Press one to load it.",
+    "module.playlistLoader.searchResults": "{0} found. Press one to see its tracks.",
     "module.playlistLoader.searchResultsTruncated": "Many found; showing the top {0}. Add a word to narrow it down.",
     "module.playlistLoader.searchNoResults": "Nothing found.",
     "module.playlistLoader.searchKeepUrl": "Leave the URL as it is and type after it.",
@@ -63,6 +68,11 @@
     "module.playlistLoader.searchBusy": "A search is still running. Try again in a moment.",
     "module.playlistLoader.searchRateLimited": "Too many searches. Try again in about a minute.",
     "module.playlistLoader.searchFailed": "The search failed. Try again later.",
+    "module.playlistLoader.searchOpening": "Loading the playlist…",
+    "module.playlistLoader.searchOpenFailed": "This playlist could not be opened. Search again.",
+    "module.playlistLoader.searchAddHint": "Press Add to add this playlist to the list.",
+    "module.playlistLoader.searchAlreadyAdded": "This playlist is already in the list.",
+    "module.playlistLoader.searchAdded": "Added to the list.",
     "module.playlistLoader.errorInternal": "An internal player error prevented loading the playlist."
   },
   "ko": {
@@ -86,7 +96,7 @@
     "module.playlistLoader.errorReplacementChanged": "불러오기를 취소했습니다.\n확인한 플레이리스트가 기다리는 동안 다른 것으로 바뀌었습니다. 다시 시도해 주세요.",
     "module.playlistLoader.errorIdentityChanged": "불러오기를 취소했습니다.\n이 플레이리스트는 다시 검색하면 불러올 수 있습니다.",
     "module.playlistLoader.searchSearching": "검색 중…",
-    "module.playlistLoader.searchResults": "{0}건을 찾았습니다. 누르면 불러옵니다.",
+    "module.playlistLoader.searchResults": "{0}건을 찾았습니다. 누르면 내용을 볼 수 있습니다.",
     "module.playlistLoader.searchResultsTruncated": "많이 찾아서 상위 {0}건만 표시합니다. 단어를 더하면 좁혀집니다.",
     "module.playlistLoader.searchNoResults": "찾지 못했습니다.",
     "module.playlistLoader.searchKeepUrl": "URL은 지우지 말고 그 뒤에 검색어를 입력해 주세요.",
@@ -96,6 +106,11 @@
     "module.playlistLoader.searchBusy": "이전 검색이 진행 중입니다. 잠시 후 다시 시도해 주세요.",
     "module.playlistLoader.searchRateLimited": "검색 횟수가 너무 많습니다. 1분쯤 뒤에 다시 시도해 주세요.",
     "module.playlistLoader.searchFailed": "검색하지 못했습니다. 잠시 후 다시 시도해 주세요.",
+    "module.playlistLoader.searchOpening": "플레이리스트를 불러오는 중…",
+    "module.playlistLoader.searchOpenFailed": "이 플레이리스트를 열 수 없습니다. 다시 검색해 주세요.",
+    "module.playlistLoader.searchAddHint": "「추가」를 누르면 이 플레이리스트가 목록에 추가됩니다.",
+    "module.playlistLoader.searchAlreadyAdded": "이 플레이리스트는 이미 목록에 있습니다.",
+    "module.playlistLoader.searchAdded": "목록에 추가했습니다.",
     "module.playlistLoader.errorInternal": "플레이어 내부 오류로 플레이리스트를 불러오지 못했습니다."
   },
   "zh-CN": {
@@ -119,7 +134,7 @@
     "module.playlistLoader.errorReplacementChanged": "已取消载入。\n您确认的播放列表在等待期间已被更改。请重试。",
     "module.playlistLoader.errorIdentityChanged": "已取消载入。\n重新搜索即可载入此播放列表。",
     "module.playlistLoader.searchSearching": "正在搜索…",
-    "module.playlistLoader.searchResults": "找到 {0} 个。按下即可载入。",
+    "module.playlistLoader.searchResults": "找到 {0} 个。按下即可查看内容。",
     "module.playlistLoader.searchResultsTruncated": "结果较多，仅显示前 {0} 个。可增加关键词缩小范围。",
     "module.playlistLoader.searchNoResults": "没有找到。",
     "module.playlistLoader.searchKeepUrl": "请保留 URL，在其后输入搜索词。",
@@ -129,6 +144,11 @@
     "module.playlistLoader.searchBusy": "上一次搜索尚未完成，请稍后再试。",
     "module.playlistLoader.searchRateLimited": "搜索次数过多，请约 1 分钟后再试。",
     "module.playlistLoader.searchFailed": "搜索失败，请稍后再试。",
+    "module.playlistLoader.searchOpening": "正在加载播放列表…",
+    "module.playlistLoader.searchOpenFailed": "无法打开此播放列表，请重新搜索。",
+    "module.playlistLoader.searchAddHint": "按「添加」可将此播放列表加入列表。",
+    "module.playlistLoader.searchAlreadyAdded": "此播放列表已在列表中。",
+    "module.playlistLoader.searchAdded": "已加入列表。",
     "module.playlistLoader.errorInternal": "播放器内部错误，无法载入播放列表。"
   },
   "zh-HK": {
@@ -152,7 +172,7 @@
     "module.playlistLoader.errorReplacementChanged": "已取消載入。\n您確認的播放清單在等待期間已被更改。請再試一次。",
     "module.playlistLoader.errorIdentityChanged": "已取消載入。\n重新搜尋即可載入此播放清單。",
     "module.playlistLoader.searchSearching": "正在搜尋…",
-    "module.playlistLoader.searchResults": "找到 {0} 個。按下即可載入。",
+    "module.playlistLoader.searchResults": "找到 {0} 個。按下即可查看內容。",
     "module.playlistLoader.searchResultsTruncated": "結果較多，僅顯示前 {0} 個。可增加關鍵詞縮小範圍。",
     "module.playlistLoader.searchNoResults": "沒有找到。",
     "module.playlistLoader.searchKeepUrl": "請保留 URL，在其後輸入搜尋詞。",
@@ -162,6 +182,11 @@
     "module.playlistLoader.searchBusy": "上一次搜尋尚未完成，請稍後再試。",
     "module.playlistLoader.searchRateLimited": "搜尋次數過多，請約 1 分鐘後再試。",
     "module.playlistLoader.searchFailed": "搜尋失敗，請稍後再試。",
+    "module.playlistLoader.searchOpening": "正在載入播放清單…",
+    "module.playlistLoader.searchOpenFailed": "無法開啟此播放清單，請重新搜尋。",
+    "module.playlistLoader.searchAddHint": "按「加入」可將此播放清單加入清單。",
+    "module.playlistLoader.searchAlreadyAdded": "此播放清單已在清單中。",
+    "module.playlistLoader.searchAdded": "已加入清單。",
     "module.playlistLoader.errorInternal": "播放器內部錯誤，無法載入播放清單。"
   },
   "es": {
@@ -185,7 +210,7 @@
     "module.playlistLoader.errorReplacementChanged": "Carga cancelada.\nLa lista de reproducción que se te mostró cambió mientras decidías. Inténtalo de nuevo.",
     "module.playlistLoader.errorIdentityChanged": "Carga cancelada.\nVuelve a buscar esta lista de reproducción para cargarla.",
     "module.playlistLoader.searchSearching": "Buscando…",
-    "module.playlistLoader.searchResults": "{0} encontradas. Pulsa una para cargarla.",
+    "module.playlistLoader.searchResults": "{0} encontradas. Pulsa una para ver sus pistas.",
     "module.playlistLoader.searchResultsTruncated": "Hay muchas; se muestran las {0} primeras. Añade una palabra para acotar.",
     "module.playlistLoader.searchNoResults": "No se encontró nada.",
     "module.playlistLoader.searchKeepUrl": "Deja la URL como está y escribe después de ella.",
@@ -195,6 +220,11 @@
     "module.playlistLoader.searchBusy": "Aún hay una búsqueda en curso. Inténtalo en un momento.",
     "module.playlistLoader.searchRateLimited": "Demasiadas búsquedas. Inténtalo en un minuto.",
     "module.playlistLoader.searchFailed": "La búsqueda falló. Inténtalo más tarde.",
+    "module.playlistLoader.searchOpening": "Cargando la lista…",
+    "module.playlistLoader.searchOpenFailed": "No se pudo abrir esta lista. Busca de nuevo.",
+    "module.playlistLoader.searchAddHint": "Pulsa Añadir para añadir esta lista.",
+    "module.playlistLoader.searchAlreadyAdded": "Esta lista ya está añadida.",
+    "module.playlistLoader.searchAdded": "Añadida a la lista.",
     "module.playlistLoader.errorInternal": "Un error interno del reproductor impidió cargar la lista de reproducción."
   },
   "it": {
@@ -218,7 +248,7 @@
     "module.playlistLoader.errorReplacementChanged": "Caricamento annullato.\nLa playlist mostrata è cambiata mentre decidevi. Riprova.",
     "module.playlistLoader.errorIdentityChanged": "Caricamento annullato.\nCerca di nuovo questa playlist per caricarla.",
     "module.playlistLoader.searchSearching": "Ricerca in corso…",
-    "module.playlistLoader.searchResults": "{0} trovate. Premi per caricarne una.",
+    "module.playlistLoader.searchResults": "{0} trovate. Premi per vederne i brani.",
     "module.playlistLoader.searchResultsTruncated": "Molti risultati; mostro i primi {0}. Aggiungi una parola per restringere.",
     "module.playlistLoader.searchNoResults": "Nessun risultato.",
     "module.playlistLoader.searchKeepUrl": "Lascia l'URL com'è e scrivi dopo di esso.",
@@ -228,6 +258,11 @@
     "module.playlistLoader.searchBusy": "C'è ancora una ricerca in corso. Riprova tra poco.",
     "module.playlistLoader.searchRateLimited": "Troppe ricerche. Riprova tra circa un minuto.",
     "module.playlistLoader.searchFailed": "Ricerca non riuscita. Riprova più tardi.",
+    "module.playlistLoader.searchOpening": "Caricamento della playlist…",
+    "module.playlistLoader.searchOpenFailed": "Impossibile aprire questa playlist. Cerca di nuovo.",
+    "module.playlistLoader.searchAddHint": "Premi Aggiungi per aggiungere questa playlist.",
+    "module.playlistLoader.searchAlreadyAdded": "Questa playlist è già nell'elenco.",
+    "module.playlistLoader.searchAdded": "Aggiunta all'elenco.",
     "module.playlistLoader.errorInternal": "Un errore interno del player ha impedito il caricamento della playlist."
   },
   "ru": {
@@ -251,7 +286,7 @@
     "module.playlistLoader.errorReplacementChanged": "Загрузка отменена.\nПлейлист, который вам показали, изменился, пока вы решали. Попробуйте ещё раз.",
     "module.playlistLoader.errorIdentityChanged": "Загрузка отменена.\nНайдите этот плейлист снова, чтобы загрузить его.",
     "module.playlistLoader.searchSearching": "Поиск…",
-    "module.playlistLoader.searchResults": "Найдено: {0}. Нажмите, чтобы загрузить.",
+    "module.playlistLoader.searchResults": "Найдено: {0}. Нажмите, чтобы посмотреть треки.",
     "module.playlistLoader.searchResultsTruncated": "Найдено много; показаны первые {0}. Добавьте слово, чтобы сузить поиск.",
     "module.playlistLoader.searchNoResults": "Ничего не найдено.",
     "module.playlistLoader.searchKeepUrl": "Не удаляйте URL, вводите запрос после него.",
@@ -261,6 +296,11 @@
     "module.playlistLoader.searchBusy": "Предыдущий поиск ещё идёт. Попробуйте чуть позже.",
     "module.playlistLoader.searchRateLimited": "Слишком много запросов. Попробуйте через минуту.",
     "module.playlistLoader.searchFailed": "Не удалось выполнить поиск. Попробуйте позже.",
+    "module.playlistLoader.searchOpening": "Загрузка плейлиста…",
+    "module.playlistLoader.searchOpenFailed": "Не удалось открыть этот плейлист. Повторите поиск.",
+    "module.playlistLoader.searchAddHint": "Нажмите «Добавить», чтобы добавить этот плейлист в список.",
+    "module.playlistLoader.searchAlreadyAdded": "Этот плейлист уже есть в списке.",
+    "module.playlistLoader.searchAdded": "Добавлено в список.",
     "module.playlistLoader.errorInternal": "Внутренняя ошибка плеера: не удалось загрузить плейлист."
   },
   "uk": {
@@ -284,7 +324,7 @@
     "module.playlistLoader.errorReplacementChanged": "Завантаження скасовано.\nПлейліст, який вам показали, змінився, поки ви вирішували. Спробуйте ще раз.",
     "module.playlistLoader.errorIdentityChanged": "Завантаження скасовано.\nЗнайдіть цей плейліст знову, щоб завантажити його.",
     "module.playlistLoader.searchSearching": "Пошук…",
-    "module.playlistLoader.searchResults": "Знайдено: {0}. Натисніть, щоб завантажити.",
+    "module.playlistLoader.searchResults": "Знайдено: {0}. Натисніть, щоб переглянути треки.",
     "module.playlistLoader.searchResultsTruncated": "Знайдено багато; показано перші {0}. Додайте слово, щоб звузити пошук.",
     "module.playlistLoader.searchNoResults": "Нічого не знайдено.",
     "module.playlistLoader.searchKeepUrl": "Не видаляйте URL, вводьте запит після нього.",
@@ -294,6 +334,11 @@
     "module.playlistLoader.searchBusy": "Попередній пошук ще триває. Спробуйте трохи пізніше.",
     "module.playlistLoader.searchRateLimited": "Забагато запитів. Спробуйте за хвилину.",
     "module.playlistLoader.searchFailed": "Не вдалося виконати пошук. Спробуйте пізніше.",
+    "module.playlistLoader.searchOpening": "Завантаження плейлиста…",
+    "module.playlistLoader.searchOpenFailed": "Не вдалося відкрити цей плейлист. Повторіть пошук.",
+    "module.playlistLoader.searchAddHint": "Натисніть «Додати», щоб додати цей плейлист до списку.",
+    "module.playlistLoader.searchAlreadyAdded": "Цей плейлист уже є у списку.",
+    "module.playlistLoader.searchAdded": "Додано до списку.",
     "module.playlistLoader.errorInternal": "Внутрішня помилка плеєра: не вдалося завантажити плейлист."
   }
 }

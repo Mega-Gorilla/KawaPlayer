@@ -10,8 +10,10 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
 {
   // Answers the search page (issue #145): takes what was entered in the
   // search box, asks VHub, and hands the results back as rows. A row pressed
-  // comes back with its key and its number, and is loaded the way a URL
-  // typed into the URL field is (PlaylistLoaderUI.LoadPlaylist).
+  // comes back with its key and its number: the playlist is fetched and its
+  // tracks shown, and the page's add button then adds what was fetched, the
+  // way the list's "+" adds a URL (PlaylistLoaderUI.LoadPlaylist): without
+  // playing it, and saying only what went wrong.
   //
   // The box holds searchFieldUrl, the address of VHub's search with nothing
   // after "q=", and the player types after it: a world cannot make a URL
@@ -31,16 +33,26 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
     [SerializeField] private PlaylistLoaderUI _loaderUi;
 
     // Contract with SearchPage: it reads searchFieldUrl for its box, writes
-    // searchSource and searchInput before OnSearchSubmitted, and searchSource,
-    // searchPickKey and searchPickNumber before OnSearchResultPicked.
+    // searchSource and searchInput before OnSearchSubmitted, searchSource,
+    // searchPickKey and searchPickNumber before OnSearchResultPicked, and
+    // searchSource and searchPickKey before OnSearchAddPressed and
+    // OnSearchPlaylistsChanged.
     [HideInInspector] public VRCUrl searchFieldUrl;
     [HideInInspector] public SearchPage searchSource;
     [HideInInspector] public VRCUrl searchInput;
     [HideInInspector] public string searchPickKey;
     [HideInInspector] public int searchPickNumber;
 
-    // One search at a time: the view that asked, what it asked with and for.
+    // One fetch at a time, a search or a playlist to show: the view that
+    // asked, what it asked with and for.
     private bool _searching;
+    private bool _opening;
+    private string _pendingKey = string.Empty;
+    // The playlist last fetched to be shown: its response, kept so that
+    // adding it fetches nothing, what fetched it, and which playlist it is.
+    private string _shownJson;
+    private VRCUrl _shownUrl;
+    private string _shownKey = string.Empty;
     private SearchPage _pendingView;
     private VRCUrl _pendingUrl;
     private string _pendingQuery = string.Empty;
@@ -58,7 +70,7 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
       // A playlist's own URL pasted into the box loads that playlist.
       if (_loader.IsOwnPlaylistUrl(entered))
       {
-        if (Utilities.IsValid(_loaderUi)) _loaderUi.LoadPlaylist(ui, searchInput, _loader.GetExpectedKey(searchInput), false);
+        if (Utilities.IsValid(_loaderUi)) _loaderUi.LoadPlaylist(ui, searchInput, null, _loader.GetExpectedKey(searchInput), false);
         return;
       }
 
@@ -66,14 +78,14 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
       // its URL back already (the view puts it back after every entry).
       if (string.IsNullOrEmpty(prefix) || !entered.StartsWith(prefix))
       {
-        view.ShowStatus(ui.GetTranslation("module.playlistLoader.searchKeepUrl"));
+        view.ShowNote(ui.GetTranslation("module.playlistLoader.searchKeepUrl"));
         return;
       }
 
       string query = entered.Substring(prefix.Length).Trim();
       if (query.Length == 0)
       {
-        view.ShowStatus(ui.GetTranslation("module.playlistLoader.searchEmpty"));
+        view.ShowNote(ui.GetTranslation("module.playlistLoader.searchEmpty"));
         return;
       }
       // VRChat sends nothing after a "#", and refuses to load a URL with a
@@ -81,17 +93,17 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
       // or for nothing, so neither is sent.
       if (query.Contains("#") || query.Contains("%"))
       {
-        view.ShowStatus(ui.GetTranslation("module.playlistLoader.searchBadCharacter"));
+        view.ShowNote(ui.GetTranslation("module.playlistLoader.searchBadCharacter"));
         return;
       }
       if (query.Length > MaxQueryLength)
       {
-        view.ShowStatus(ui.GetTranslation("module.playlistLoader.searchTooLong"));
+        view.ShowNote(ui.GetTranslation("module.playlistLoader.searchTooLong"));
         return;
       }
-      if (_searching)
+      if (_searching || _opening)
       {
-        view.ShowStatus(ui.GetTranslation("module.playlistLoader.searchBusy"));
+        view.ShowNote(ui.GetTranslation("module.playlistLoader.searchBusy"));
         return;
       }
 
@@ -100,13 +112,19 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
       _pendingUrl = searchInput;
       _pendingQuery = query;
       view.ShowQuery(query);
-      view.ShowStatus(ui.GetTranslation("module.playlistLoader.searchSearching"));
+      view.ShowLoading(ui.GetTranslation("module.playlistLoader.searchSearching"));
       VRCStringDownloader.LoadUrl(searchInput, (IUdonEventReceiver)this);
     }
 
     public override void OnStringLoadSuccess(IVRCStringDownload result)
     {
-      if (!_searching || !Utilities.IsValid(_pendingUrl) || result.Url.Get() != _pendingUrl.Get()) return;
+      if (!Utilities.IsValid(_pendingUrl) || result.Url.Get() != _pendingUrl.Get()) return;
+      if (_opening)
+      {
+        OnPlaylistFetched(result.Result);
+        return;
+      }
+      if (!_searching) return;
       var view = _pendingView;
       string query = _pendingQuery;
       EndSearch();
@@ -169,7 +187,16 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
 
     public override void OnStringLoadError(IVRCStringDownload result)
     {
-      if (!_searching || !Utilities.IsValid(_pendingUrl) || result.Url.Get() != _pendingUrl.Get()) return;
+      if (!Utilities.IsValid(_pendingUrl) || result.Url.Get() != _pendingUrl.Get()) return;
+      if (_opening)
+      {
+        var asked = _pendingView;
+        EndSearch();
+        Debug.LogWarning($"[PlaylistSearch] Fetching a result failed: {result.ErrorCode} {result.Error}");
+        NotOpened(asked, result.ErrorCode == 429 ? "module.playlistLoader.searchRateLimited" : "module.playlistLoader.searchOpenFailed");
+        return;
+      }
+      if (!_searching) return;
       var view = _pendingView;
       EndSearch();
       // The server's own words stay in the log; the view gets ours.
@@ -183,9 +210,11 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
     private void EndSearch()
     {
       _searching = false;
+      _opening = false;
       _pendingView = null;
       _pendingUrl = null;
       _pendingQuery = string.Empty;
+      _pendingKey = string.Empty;
     }
 
     // A search that brought nothing clears the rows of the one before: they
@@ -196,16 +225,97 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
       view.ShowStatus(status);
     }
 
-    // A result's row was pressed. Its number fetches the playlist and its key
-    // says which playlist that has to be: a number is used again, and if it
-    // has come to stand for another playlist, nothing is loaded.
+    // A result's row was pressed. Its number fetches the playlist, to be
+    // shown before it is added, and its key says which playlist that has to
+    // be: a number is used again, and if it has come to stand for another
+    // playlist, nothing is shown.
     public void OnSearchResultPicked()
     {
       var view = searchSource;
-      if (!Utilities.IsValid(view) || !Utilities.IsValid(_loader) || !Utilities.IsValid(_loaderUi)) return;
+      if (!Utilities.IsValid(view) || !Utilities.IsValid(_loader) || !Utilities.IsValid(view.Ui)) return;
+      var ui = view.Ui;
       var url = _loader.GetResolveUrl(searchPickNumber);
       if (!Utilities.IsValid(url) || string.IsNullOrEmpty(searchPickKey)) return;
-      _loaderUi.LoadPlaylist(view.Ui, url, searchPickKey, false);
+      if (_searching || _opening)
+      {
+        view.ShowNote(ui.GetTranslation("module.playlistLoader.searchBusy"));
+        return;
+      }
+
+      _opening = true;
+      _pendingView = view;
+      _pendingUrl = url;
+      _pendingKey = searchPickKey;
+      view.ShowLoading(ui.GetTranslation("module.playlistLoader.searchOpening"));
+      VRCStringDownloader.LoadUrl(url, (IUdonEventReceiver)this);
+    }
+
+    // The playlist a row stands for came: read as the loader would read it,
+    // and shown if it is the one the row meant. The response is kept, so
+    // that adding it fetches nothing.
+    private void OnPlaylistFetched(string json)
+    {
+      var view = _pendingView;
+      var url = _pendingUrl;
+      string key = _pendingKey;
+      EndSearch();
+      if (!Utilities.IsValid(view) || !Utilities.IsValid(view.Ui)) return;
+      var ui = view.Ui;
+
+      if (!_loader.ReadResponse(json, out string playlistName, out string sourceKey, out string[] titles) || sourceKey != key)
+      {
+        NotOpened(view, "module.playlistLoader.searchOpenFailed");
+        return;
+      }
+
+      _shownJson = json;
+      _shownUrl = url;
+      _shownKey = key;
+      bool added = _loader.HasPlaylist(key);
+      view.ShowPlaylist(string.IsNullOrEmpty(playlistName) ? PlaylistLoader.UnnamedPlaylistName : playlistName,
+          $"{titles.Length} {ui.GetTranslation("label.tracks")}", titles, titles.Length, key, added);
+      view.ShowNote(ui.GetTranslation(added ? "module.playlistLoader.searchAlreadyAdded" : "module.playlistLoader.searchAddHint"));
+    }
+
+    // A playlist that did not come: the results show again, with why.
+    private void NotOpened(SearchPage view, string messageKey)
+    {
+      if (!Utilities.IsValid(view) || !Utilities.IsValid(view.Ui)) return;
+      view.BackToResults();
+      view.ShowNote(view.Ui.GetTranslation(messageKey));
+    }
+
+    // The add button of the playlist that shows. What was fetched to show it
+    // is what is added, through the same permission, busy and replacement
+    // checks as a URL from the list's "+", and like it without playing; a
+    // failure is said in the dialog, and the button says when it is added.
+    public void OnSearchAddPressed()
+    {
+      var view = searchSource;
+      if (!Utilities.IsValid(view) || !Utilities.IsValid(_loader) || !Utilities.IsValid(_loaderUi) || !Utilities.IsValid(view.Ui)) return;
+      // Another UI of this player has opened another playlist since: what
+      // was fetched for this one is gone.
+      if (string.IsNullOrEmpty(searchPickKey) || searchPickKey != _shownKey || string.IsNullOrEmpty(_shownJson))
+      {
+        NotOpened(view, "module.playlistLoader.searchOpenFailed");
+        return;
+      }
+      _loaderUi.LoadPlaylist(view.Ui, _shownUrl, _shownJson, _shownKey, true);
+      // Added at once unless a question was asked first, in which case
+      // OnSearchPlaylistsChanged says so when it is.
+      OnSearchPlaylistsChanged();
+    }
+
+    // The world's playlists changed while a view shows a playlist: whether
+    // that one is among them now.
+    public void OnSearchPlaylistsChanged()
+    {
+      var view = searchSource;
+      if (!Utilities.IsValid(view) || !Utilities.IsValid(_loader) || !Utilities.IsValid(view.Ui) || string.IsNullOrEmpty(searchPickKey)) return;
+      bool added = _loader.HasPlaylist(searchPickKey);
+      if (added == view.Added) return;
+      view.SetAdded(added);
+      view.ShowNote(view.Ui.GetTranslation(added ? "module.playlistLoader.searchAdded" : "module.playlistLoader.searchAddHint"));
     }
 
     private string GetString(DataDictionary dict, string key)

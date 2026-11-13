@@ -59,6 +59,9 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
     // the load can refuse to overwrite anything else -- see
     // PlaylistLoader.LoadPlaylistWithFeedback.
     private VRCUrl _pendingLoadUrl;
+    // The response already fetched from that URL, when there is one (the
+    // search fetches a playlist to show it before it is added); else null.
+    private string _pendingFetched;
     private string _pendingExpectedKey = string.Empty;
     private DynamicPlaylist _pendingReplaced;
     private string _pendingReplacedKey = string.Empty;
@@ -113,7 +116,7 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
         return;
       }
 
-      RequestLoad(ui, interceptUrl, _loader.GetExpectedKey(interceptUrl), interceptAddOnly);
+      RequestLoad(ui, interceptUrl, null, _loader.GetExpectedKey(interceptUrl), interceptAddOnly);
     }
 
     // Loads a playlist the caller already knows (issue #145): a search
@@ -121,17 +124,19 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
     // search number from PlaylistLoader.GetResolveUrl -- and expectedKey
     // which playlist it is, from the same result. Goes the same way as a URL
     // typed into the field: permission, busy, and the question before a
-    // playlist is replaced, with the result reported on ui.
-    public void LoadPlaylist(UIController ui, VRCUrl url, string expectedKey, bool addOnly)
+    // playlist is replaced, with the result reported on ui. fetched is the
+    // response when the caller has fetched url already, which is then not
+    // fetched again; null to fetch it.
+    public void LoadPlaylist(UIController ui, VRCUrl url, string fetched, string expectedKey, bool addOnly)
     {
       if (!Utilities.IsValid(_loader) || !Utilities.IsValid(url) || string.IsNullOrEmpty(expectedKey)) return;
       if (!Utilities.IsValid(ui)) ui = _uiController;
       // The panel being asked is told nothing -- see OnUrlSubmitted.
       if (_awaitingConfirm && ui == _pendingUi) return;
-      RequestLoad(ui, url, expectedKey, addOnly);
+      RequestLoad(ui, url, fetched, expectedKey, addOnly);
     }
 
-    private void RequestLoad(UIController ui, VRCUrl url, string expectedKey, bool addOnly)
+    private void RequestLoad(UIController ui, VRCUrl url, string fetched, string expectedKey, bool addOnly)
     {
       // Permission first so a viewer without rights sees the permission
       // modal (shown by PermissionManagementUI) rather than a busy message.
@@ -162,7 +167,7 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
       var replaced = _loader.GetSlotToBeReplaced(expectedKey);
       if (Utilities.IsValid(replaced))
       {
-        if (AskBeforeReplacing(ui, url, expectedKey, replaced, addOnly)) return;
+        if (AskBeforeReplacing(ui, url, fetched, expectedKey, replaced, addOnly)) return;
 
         // Asking failed, and why decides what happens next. A panel with a
         // dialog could have asked and did not only because that dialog is
@@ -177,14 +182,22 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
       // Either nothing is lost, or there is no modal to ask with. Loading
       // anyway is what happens today, and refusing instead would strand a
       // player whose panel has no way to delete anything either.
-      _loader.LoadPlaylistWithFeedback(url, expectedKey, this, null, string.Empty, !addOnly);
+      StartLoad(url, fetched, expectedKey, null, string.Empty, addOnly);
     }
 
-    private bool AskBeforeReplacing(UIController ui, VRCUrl url, string expectedKey, DynamicPlaylist replaced, bool addOnly)
+    // A response fetched already is loaded as it is; else the URL is fetched.
+    private void StartLoad(VRCUrl url, string fetched, string expectedKey, DynamicPlaylist replaced, string replacedKey, bool addOnly)
+    {
+      if (string.IsNullOrEmpty(fetched)) _loader.LoadPlaylistWithFeedback(url, expectedKey, this, replaced, replacedKey, !addOnly);
+      else _loader.LoadFetchedWithFeedback(url, fetched, expectedKey, this, replaced, replacedKey, !addOnly);
+    }
+
+    private bool AskBeforeReplacing(UIController ui, VRCUrl url, string fetched, string expectedKey, DynamicPlaylist replaced, bool addOnly)
     {
       if (!Utilities.IsValid(ui)) return false;
 
       _pendingLoadUrl = url;
+      _pendingFetched = fetched;
       _pendingExpectedKey = expectedKey;
       _pendingUi = ui;
       _pendingReplaced = replaced;
@@ -217,6 +230,7 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
     public void ConfirmReplaceOldest()
     {
       var url = _pendingLoadUrl;
+      string fetched = _pendingFetched;
       string expectedKey = _pendingExpectedKey;
       var ui = _pendingUi;
       var replaced = _pendingReplaced;
@@ -242,7 +256,7 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
       // was asked, not to whatever touched the loader while they read.
       if (Utilities.IsValid(ui)) _resultUi = ui;
       _resultAddOnly = addOnly;
-      _loader.LoadPlaylistWithFeedback(url, expectedKey, this, replaced, replacedKey, !addOnly);
+      StartLoad(url, fetched, expectedKey, replaced, replacedKey, addOnly);
     }
 
     // Answered no. Nothing happens, but the question has to be let go of or
@@ -252,6 +266,7 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
     private void ClearPendingConfirm()
     {
       _pendingLoadUrl = null;
+      _pendingFetched = null;
       _pendingExpectedKey = string.Empty;
       _pendingUi = null;
       _pendingReplaced = null;
