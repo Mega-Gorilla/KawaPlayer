@@ -219,10 +219,7 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
         PrintWarning("Already loading a playlist.");
         return;
       }
-      _feedbackUi = feedbackUi;
-      _expectedReplaced = expectedReplaced;
-      _expectedReplacedKey = expectedReplacedKey == null ? string.Empty : expectedReplacedKey;
-      _playWhenStopped = playWhenStopped;
+      NoteFeedback(feedbackUi, expectedReplaced, expectedReplacedKey, playWhenStopped);
       StartLoad(resolveUrl, expectedKey);
     }
 
@@ -234,6 +231,16 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
 
       _isLoading = false;
       HandleResponse(result.Result);
+    }
+
+    // Who hears of the load about to start, what it may replace, and whether
+    // it may start playing: kept until its one result is reported.
+    private void NoteFeedback(PlaylistLoaderUI feedbackUi, DynamicPlaylist expectedReplaced, string expectedReplacedKey, bool playWhenStopped)
+    {
+      _feedbackUi = feedbackUi;
+      _expectedReplaced = expectedReplaced;
+      _expectedReplacedKey = expectedReplacedKey == null ? string.Empty : expectedReplacedKey;
+      _playWhenStopped = playWhenStopped;
     }
 
     // Loads a playlist from a response the caller already fetched (issue
@@ -250,10 +257,7 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
         PrintWarning("Already loading a playlist.");
         return;
       }
-      _feedbackUi = feedbackUi;
-      _expectedReplaced = expectedReplaced;
-      _expectedReplacedKey = expectedReplacedKey == null ? string.Empty : expectedReplacedKey;
-      _playWhenStopped = playWhenStopped;
+      NoteFeedback(feedbackUi, expectedReplaced, expectedReplacedKey, playWhenStopped);
       // Without a key nothing says which playlist the response should be,
       // and the slot needs a URL to refresh from.
       if (!Utilities.IsValid(resolveUrl) || string.IsNullOrEmpty(expectedKey))
