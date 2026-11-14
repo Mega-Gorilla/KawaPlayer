@@ -24,6 +24,10 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
     // The pool the search's numbers are in, at /vrcurl/{ResolvePoolId}/{i}.
     public const string ResolvePoolId = "resolve";
 
+    // The search, with nothing after "q=": the words are typed after it, and
+    // the server takes all that follows as the words.
+    public const string SearchPath = "/r/s?q=";
+
     // Accepts http and https so a pasted http playlist URL surfaces a
     // playlist-flavored error instead of a video-player error. Pass an empty
     // poolId to classify pool-agnostically (own pool then never matches).

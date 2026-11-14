@@ -203,9 +203,21 @@ namespace Yamadev.YamaStream.UI
       if (Utilities.IsValid(_playlistDeleteButton)) _playlistDeleteButton.gameObject.SetActive(isDynamic);
       if (Utilities.IsValid(_playlistRefreshButton))
         _playlistRefreshButton.gameObject.SetActive(isDynamic && Utilities.IsValid(_playlistRefreshHandler) && slot.CanRefresh);
-      if (Utilities.IsValid(_playlistUrlButton)) _playlistUrlButton.gameObject.SetActive(isDynamic && slot.CanRefresh);
+      if (Utilities.IsValid(_playlistUrlButton)) _playlistUrlButton.gameObject.SetActive(isDynamic && slot.CanRefresh && IsUrlToHandOut(slot));
       // Delete shows with any of them, so the strip is never empty.
       if (Utilities.IsValid(_playlistActionsButton)) _playlistActionsButton.gameObject.SetActive(isDynamic);
+    }
+
+    // Whether the slot's URL is one a player can pass on. Whoever fills the
+    // slots says (the refresh handler): a playlist picked from the search
+    // is fetched by a number the server uses again for another playlist,
+    // which is no URL to copy (issue #145). With nobody to ask, it is shown.
+    private bool IsUrlToHandOut(DynamicPlaylist slot)
+    {
+      if (!Utilities.IsValid(_playlistRefreshHandler)) return true;
+      _playlistRefreshHandler.SetProgramVariable("shareUrl", slot.SourceUrl);
+      _playlistRefreshHandler.SendCustomEvent("OnShareUrlAsked");
+      return (bool)_playlistRefreshHandler.GetProgramVariable("shareUrlOk");
     }
 
     // The "+" takes a VHub playlist's VRChat URL and adds the playlist to the

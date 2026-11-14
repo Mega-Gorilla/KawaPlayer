@@ -374,6 +374,20 @@ MARKS = {
         dict(box=(827, 163, 1253, 217), n=1, cap="曲を押す", at=(640, 190)),
         dict(box=(1207, 93, 1251, 137), n=2),
     ]),
+    "screen/search-entry": dict(scale=0.667, marks=[
+        dict(box=(819, 140, 1261, 190), n=1),
+    ]),
+    "screen/search": dict(scale=0.667, marks=[
+        dict(box=(38, 10, 106, 78), n=1),
+        dict(box=(128, 15, 1200, 73), n=2),
+        dict(box=(123, 199, 1040, 260), n=3),
+        dict(box=(1076, 207, 1122, 253), n=4),
+        dict(box=(1137, 207, 1183, 253), n=5),
+    ]),
+    "screen/search-playlist": dict(scale=0.667, marks=[
+        dict(box=(109, 415, 323, 490), n=1),
+        dict(box=(28, 415, 102, 490), n=2),
+    ]),
     "screen/playlist-vhub": dict(scale=0.667, marks=[
         dict(box=(1207, 93, 1251, 137), n=1),
         dict(box=(832, 172, 874, 214), n=2),

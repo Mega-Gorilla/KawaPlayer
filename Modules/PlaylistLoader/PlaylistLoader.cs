@@ -219,10 +219,7 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
         PrintWarning("Already loading a playlist.");
         return;
       }
-      _feedbackUi = feedbackUi;
-      _expectedReplaced = expectedReplaced;
-      _expectedReplacedKey = expectedReplacedKey == null ? string.Empty : expectedReplacedKey;
-      _playWhenStopped = playWhenStopped;
+      NoteFeedback(feedbackUi, expectedReplaced, expectedReplacedKey, playWhenStopped);
       StartLoad(resolveUrl, expectedKey);
     }
 
@@ -233,8 +230,71 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
         return;
 
       _isLoading = false;
+      HandleResponse(result.Result);
+    }
 
-      if (!TryParseResponse(result.Result, out DataList tracks, out string playlistName, out string sourceKey, out int failCode))
+    // Who hears of the load about to start, what it may replace, and whether
+    // it may start playing: kept until its one result is reported.
+    private void NoteFeedback(PlaylistLoaderUI feedbackUi, DynamicPlaylist expectedReplaced, string expectedReplacedKey, bool playWhenStopped)
+    {
+      _feedbackUi = feedbackUi;
+      _expectedReplaced = expectedReplaced;
+      _expectedReplacedKey = expectedReplacedKey == null ? string.Empty : expectedReplacedKey;
+      _playWhenStopped = playWhenStopped;
+    }
+
+    // Loads a playlist from a response the caller already fetched (issue
+    // #145): the search shows a playlist's tracks before it is added, from
+    // one download, and adding it then needs no second one. resolveUrl is
+    // what fetched it, which the slot keeps for refreshing; all else is as
+    // in LoadPlaylistWithFeedback, and the response goes through the same
+    // checks as one this downloaded itself.
+    public void LoadFetchedWithFeedback(VRCUrl resolveUrl, string json, string expectedKey, PlaylistLoaderUI feedbackUi,
+        DynamicPlaylist expectedReplaced, string expectedReplacedKey, bool playWhenStopped)
+    {
+      if (_isLoading)
+      {
+        PrintWarning("Already loading a playlist.");
+        return;
+      }
+      NoteFeedback(feedbackUi, expectedReplaced, expectedReplacedKey, playWhenStopped);
+      // Without a key nothing says which playlist the response should be,
+      // and the slot needs a URL to refresh from.
+      if (!Utilities.IsValid(resolveUrl) || string.IsNullOrEmpty(expectedKey))
+      {
+        NotifyResult(LoadResultIdentityChanged, "", 0, 0, 0, false);
+        return;
+      }
+      _pendingResolveUrl = resolveUrl;
+      _pendingExpectedKey = expectedKey;
+      HandleResponse(json);
+    }
+
+    // Reads a response without loading it: the playlist's name, its key and
+    // its tracks' titles, for a view that shows them first (issue #145).
+    // False for a response that could not be loaded either.
+    public bool ReadResponse(string json, out string playlistName, out string sourceKey, out string[] titles)
+    {
+      titles = new string[0];
+      if (!TryParseResponse(json, out DataList tracks, out playlistName, out sourceKey, out int failCode)) return false;
+      titles = new string[tracks.Count];
+      for (int i = 0; i < tracks.Count; i++)
+      {
+        titles[i] = string.Empty;
+        if (tracks[i].TokenType != TokenType.DataDictionary) continue;
+        if (tracks[i].DataDictionary.TryGetValue("title", out DataToken t) && t.TokenType == TokenType.String) titles[i] = t.String;
+      }
+      return true;
+    }
+
+    // Whether a playlist is in one of the slots now.
+    public bool HasPlaylist(string sourceKey) => Utilities.IsValid(FindSlotByKey(sourceKey));
+
+    // What a response becomes, however it was fetched: checked, built and
+    // put into a slot, with the result reported once.
+    private void HandleResponse(string json)
+    {
+      if (!TryParseResponse(json, out DataList tracks, out string playlistName, out string sourceKey, out int failCode))
       {
         NotifyResult(failCode, "", 0, 0, 0, false);
         return;

@@ -5,6 +5,8 @@ bar-circle.png is the round ground of the bar's buttons, bar-scrim.png the dark 
 (transparent at the top, opaque at the bottom; the Image's colour sets the darkness).
 Run from the repository root: python docs/design/258-screen-ui/images/bar_icons.py
 """
+import math
+
 from PIL import Image, ImageDraw
 
 S = 4                      # supersampling
@@ -86,6 +88,29 @@ im, d = canvas()
 d.rounded_rectangle(p(48, 48, 464, 464), radius=96 * S, outline=255, width=30 * S)
 stroke(d, (256, 168), (256, 344)); stroke(d, (168, 256), (344, 256))
 save(im, "bar-add-box.png")
+
+# the search under the playlists (#145): a magnifying glass, on its row and in the search box
+im, d = canvas()
+d.ellipse(p(56, 56, 368, 368), outline=255, width=34 * S)
+stroke(d, (338, 338), (448, 448), 38)
+save(im, "bar-search.png")
+
+# the wave that runs while the search waits (#145): five periods of a sine line with round ends, 640 x 64,
+# moved along by an animator inside a window two periods wide, so that it looks like running water
+wave = Image.new("L", (640 * S, 64 * S), 0)
+wd = ImageDraw.Draw(wave)
+pts = [(x, (32 + 18 * math.sin(2 * math.pi * x / (128 * S))) * S) for x in range(0, 640 * S + 1, 2)]
+wd.line(pts, fill=255, width=10 * S, joint="curve")
+wave = wave.resize((640, 64), Image.LANCZOS)
+wim = Image.new("RGBA", (640, 64), (255, 255, 255, 0))
+wim.putalpha(wave)
+wim.save(OUT + "bar-wave.png")
+
+# a check, for a playlist the search shows that is in the list already (#145)
+im, d = canvas()
+stroke(d, (104, 268), (212, 376), 38)
+stroke(d, (212, 376), (412, 150), 38)
+save(im, "bar-check.png")
 
 # the gradient: 0 at the top, 0.72 at 45 % down, 1 at the bottom
 h = 256
