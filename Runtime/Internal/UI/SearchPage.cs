@@ -71,6 +71,10 @@ namespace Yamadev.YamaStream.UI
     // buttons, and its tracks.
     [SerializeField] private GameObject _playlist;
     [SerializeField] private Text _playlistTitle;
+    // The name's height in the stack it stands in: as many lines as it
+    // needs, up to MaxTitleLines, so that what is under it stays on the
+    // page. A longer name is cut where it still fits, and ends in "…".
+    [SerializeField] private LayoutElement _playlistTitleLayout;
     [SerializeField] private Text _playlistDetail;
     [SerializeField, RegisterEvent(nameof(Button.onClick), nameof(BackToResults))] private Button _backButton;
     [SerializeField, RegisterEvent(nameof(Button.onClick), nameof(AddPressed))] private Button _addButton;
@@ -111,12 +115,19 @@ namespace Yamadev.YamaStream.UI
     private bool _added;
     private Text[] _trackLineNumbers;
     private Text[] _trackLineTitles;
+    // What moves a name or a title too long for its row while the row is
+    // pointed at (TitleMarquee, as on the list's track rows, #352). The row's
+    // animator switches it on; it is told when its row gets another text.
+    private TitleMarquee[] _lineMarquees;
+    private TitleMarquee[] _trackLineMarquees;
     // How many frames the field has been waited for since the page opened,
     // and when to give up (the page never showed).
     private int _fieldWaits;
     private const int FieldWaitFrames = 600;
     // How many of the first results show their place in the accent colour.
     private const int TopRanks = 3;
+    // How many lines the opened playlist's name may take.
+    private const int MaxTitleLines = 4;
     // The parts of the result lines, found once (as the UIController finds
     // its lists' lines' parts, #326).
     private Text[] _lineTitles;
@@ -335,7 +346,32 @@ namespace Yamadev.YamaStream.UI
       _playlistKey = key == null ? string.Empty : key;
       _trackTitles = trackTitles;
       _trackCount = trackCount;
-      if (Utilities.IsValid(_playlistTitle)) _playlistTitle.text = title == null ? string.Empty : title;
+      if (Utilities.IsValid(_playlistTitle))
+      {
+        // One line's height is asked of the text itself, as it depends on
+        // the language's font.
+        _playlistTitle.text = "A";
+        float max = _playlistTitle.preferredHeight * MaxTitleLines + 1f;
+        string name = title == null ? string.Empty : title;
+        _playlistTitle.text = name;
+        if (_playlistTitle.preferredHeight > max)
+        {
+          // The longest beginning that fits with "…" after it: halved down
+          // to it, a dozen tries for the longest name.
+          int fits = 0;
+          int over = name.Length;
+          while (over - fits > 1)
+          {
+            int half = (fits + over) / 2;
+            _playlistTitle.text = name.Substring(0, half) + "…";
+            if (_playlistTitle.preferredHeight <= max) fits = half;
+            else over = half;
+          }
+          _playlistTitle.text = name.Substring(0, fits).TrimEnd() + "…";
+        }
+        if (Utilities.IsValid(_playlistTitleLayout))
+          _playlistTitleLayout.preferredHeight = Mathf.Min(_playlistTitle.preferredHeight, max);
+      }
       if (Utilities.IsValid(_playlistDetail))
         _playlistDetail.text = string.IsNullOrEmpty(count) ? _pickedOwner
             : string.IsNullOrEmpty(_pickedOwner) ? count : $"{count}  ·  {_pickedOwner}";
@@ -420,6 +456,7 @@ namespace Yamadev.YamaStream.UI
         if (index == _tracksScroll.LastIndexes[i] || index == -1 || index >= _trackCount) continue;
         if (Utilities.IsValid(_trackLineNumbers[i])) _trackLineNumbers[i].text = (index + 1).ToString();
         if (Utilities.IsValid(_trackLineTitles[i])) _trackLineTitles[i].text = _trackTitles[index];
+        if (Utilities.IsValid(_trackLineMarquees[i]) && _trackLineMarquees[i].gameObject.activeInHierarchy) _trackLineMarquees[i].TitleChanged();
       }
     }
 
@@ -429,13 +466,16 @@ namespace Yamadev.YamaStream.UI
       var content = _tracksScroll.GetComponent<ScrollRect>().content;
       _trackLineNumbers = new Text[count];
       _trackLineTitles = new Text[count];
+      _trackLineMarquees = new TitleMarquee[count];
       for (int i = 0; i < count && i < content.childCount; i++)
       {
         Transform line = content.GetChild(i);
         Transform number = line.Find("Number");
         if (Utilities.IsValid(number)) _trackLineNumbers[i] = number.GetComponent<Text>();
-        Transform title = line.Find("Title");
+        Transform title = line.Find("TitleClip/Title");
         if (Utilities.IsValid(title)) _trackLineTitles[i] = title.GetComponent<Text>();
+        Transform marquee = line.Find("Marquee");
+        if (Utilities.IsValid(marquee)) _trackLineMarquees[i] = marquee.GetComponent<TitleMarquee>();
       }
     }
 
@@ -457,6 +497,7 @@ namespace Yamadev.YamaStream.UI
         int index = _resultsScroll.Indexes[i];
         if (index == _resultsScroll.LastIndexes[i] || index == -1 || index >= _resultCount) continue;
         if (Utilities.IsValid(_lineTitles[i])) _lineTitles[i].text = _titles[index];
+        if (Utilities.IsValid(_lineMarquees[i]) && _lineMarquees[i].gameObject.activeInHierarchy) _lineMarquees[i].TitleChanged();
         // Under the name: the track count, who made it and, for a result
         // found by one of its tracks, that track.
         if (Utilities.IsValid(_lineDetails[i]))
@@ -491,6 +532,7 @@ namespace Yamadev.YamaStream.UI
       var content = _resultsScroll.GetComponent<ScrollRect>().content;
       _lineTitles = new Text[count];
       _lineDetails = new Text[count];
+      _lineMarquees = new TitleMarquee[count];
       _lineTopRanks = new Text[count];
       _lineRanks = new Text[count];
       _lineTriggers = new IndexTrigger[count];
@@ -502,8 +544,10 @@ namespace Yamadev.YamaStream.UI
       for (int i = 0; i < count && i < content.childCount; i++)
       {
         Transform line = content.GetChild(i);
-        Transform title = line.Find("Title");
+        Transform title = line.Find("TitleClip/Title");
         if (Utilities.IsValid(title)) _lineTitles[i] = title.GetComponent<Text>();
+        Transform marquee = line.Find("Marquee");
+        if (Utilities.IsValid(marquee)) _lineMarquees[i] = marquee.GetComponent<TitleMarquee>();
         Transform detail = line.Find("Detail");
         if (Utilities.IsValid(detail)) _lineDetails[i] = detail.GetComponent<Text>();
         Transform topRank = line.Find("TopRank");
