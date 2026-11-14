@@ -101,6 +101,12 @@ for x, y in ((416, 256), (256, 96)):
     d.ellipse(p(x - 20, y - 20, x + 20, y + 20), fill=255)
 save(im, "bar-spinner.png")
 
+# a check, for a playlist the search shows that is in the list already (#145)
+im, d = canvas()
+stroke(d, (104, 268), (212, 376), 38)
+stroke(d, (212, 376), (412, 150), 38)
+save(im, "bar-check.png")
+
 # the gradient: 0 at the top, 0.72 at 45 % down, 1 at the bottom
 h = 256
 g = Image.new("RGBA", (4, h), (255, 255, 255, 0))

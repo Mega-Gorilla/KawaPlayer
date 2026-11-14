@@ -185,7 +185,18 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
               .Replace("{0}", count.ToString());
       view.ShowQuery(query);
       view.ShowResults(titles, details, counts, keys, numbers, count);
+      MarkAdded(view);
       view.ShowStatus(status);
+    }
+
+    // Tells a view which of its results are in the list now.
+    private void MarkAdded(SearchPage view)
+    {
+      int count = view.ResultCount;
+      string[] keys = view.ResultKeys;
+      var added = new bool[count];
+      for (int i = 0; i < count; i++) added[i] = _loader.HasPlaylist(keys[i]);
+      view.SetResultsAdded(added);
     }
 
     public override void OnStringLoadError(IVRCStringDownload result)
@@ -337,12 +348,14 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
       OnSearchPlaylistsChanged();
     }
 
-    // The world's playlists changed while a view shows a playlist: whether
-    // that one is among them now.
+    // The world's playlists changed: which of a view's results are among
+    // them now and, when it shows a playlist (its key), whether that one is.
     public void OnSearchPlaylistsChanged()
     {
       var view = searchSource;
-      if (!Utilities.IsValid(view) || !Utilities.IsValid(_loader) || !Utilities.IsValid(view.Ui) || string.IsNullOrEmpty(searchPickKey)) return;
+      if (!Utilities.IsValid(view) || !Utilities.IsValid(_loader) || !Utilities.IsValid(view.Ui)) return;
+      MarkAdded(view);
+      if (string.IsNullOrEmpty(searchPickKey)) return;
       bool added = _loader.HasPlaylist(searchPickKey);
       if (added == view.Added) return;
       view.SetAdded(added);

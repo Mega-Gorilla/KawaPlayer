@@ -10,8 +10,10 @@ namespace Yamadev.YamaStream.UI
   // over the whole screen, as the settings are, with a box to type into and
   // the results as rows. A row pressed opens the playlist it stands for: its
   // tracks, with a button that adds it and one that goes back to the results.
-  // A row pointed at shows two buttons of its own: one that opens it as a
-  // press on the row does, and one that adds the playlist without opening it.
+  // A row pointed at shows two buttons of its own, icons as on the list's
+  // rows: one that opens it as a press on the row does, and one that adds the
+  // playlist without opening it. A result that is in the list already says
+  // so, and has no add button.
   //
   // This is only the view. What is searched, and what a result is, belong to
   // the module that answers (_handler, wired when the world is built, as the
@@ -70,7 +72,10 @@ namespace Yamadev.YamaStream.UI
     [SerializeField] private Text _playlistCount;
     [SerializeField, RegisterEvent(nameof(Button.onClick), nameof(BackToResults))] private Button _backButton;
     [SerializeField, RegisterEvent(nameof(Button.onClick), nameof(AddPressed))] private Button _addButton;
-    [SerializeField] private Text _addLabel;
+    // The add button's icon: a plus, and a check once the playlist is added.
+    [SerializeField] private Image _addIcon;
+    [SerializeField] private Sprite _addSprite;
+    [SerializeField] private Sprite _addedSprite;
     [SerializeField] private LoopScroll _tracksScroll;
 
     [SerializeField, HideInInspector] private UdonSharpBehaviour _handler;
@@ -112,17 +117,24 @@ namespace Yamadev.YamaStream.UI
     private Text[] _lineDetails;
     private Text[] _lineCounts;
     private IndexTrigger[] _lineTriggers;
-    // The two buttons a line shows while pointed at, and their words.
+    // The two buttons a line shows while pointed at; the add button, and the
+    // mark that stands for it on a result that is in the list already.
     private IndexTrigger[] _lineDetailsTriggers;
     private IndexTrigger[] _lineAddTriggers;
-    private Text[] _lineDetailsLabels;
-    private Text[] _lineAddLabels;
+    private GameObject[] _lineAddButtons;
+    private GameObject[] _lineAddedMarks;
+    private Text[] _lineAddedLabels;
+    // Which results are in the list, as the handler last said.
+    private bool[] _resultAdded = new bool[0];
 
     // Set by a result's row or one of its two buttons (their IndexTriggers)
     // before PickResult or AddResult.
     [HideInInspector] public int pickedIndex = -1;
 
     public UIController Ui => _uiController;
+    // The results' keys, for the handler to say which are in the list.
+    public string[] ResultKeys => _keys;
+    public int ResultCount => _resultCount;
     // Whether the open playlist shows as added.
     public bool Added => _added;
 
@@ -145,22 +157,17 @@ namespace Yamadev.YamaStream.UI
       if (Utilities.IsValid(_entryLabel)) _entryLabel.text = _uiController.GetTranslation("label.searchPlaylists");
       UpdateBoxText();
       UpdateHelp();
-      UpdateAddLabel();
       UpdateLineLabels();
     }
 
-    // The words of the lines' own buttons, which the lines do not get with
-    // their rows.
+    // The word of the lines' mark for a result in the list, which the lines
+    // do not get with their rows.
     private void UpdateLineLabels()
     {
-      if (_lineDetailsLabels == null || !Utilities.IsValid(_uiController)) return;
-      string details = _uiController.GetTranslation("label.playlistDetails");
-      string add = _uiController.GetTranslation("label.addPlaylist");
-      for (int i = 0; i < _lineDetailsLabels.Length; i++)
-      {
-        if (Utilities.IsValid(_lineDetailsLabels[i])) _lineDetailsLabels[i].text = details;
-        if (Utilities.IsValid(_lineAddLabels[i])) _lineAddLabels[i].text = add;
-      }
+      if (_lineAddedLabels == null || !Utilities.IsValid(_uiController)) return;
+      string added = _uiController.GetTranslation("label.playlistAdded");
+      for (int i = 0; i < _lineAddedLabels.Length; i++)
+        if (Utilities.IsValid(_lineAddedLabels[i])) _lineAddedLabels[i].text = added;
     }
 
     private void UpdateBoxText()
@@ -341,13 +348,28 @@ namespace Yamadev.YamaStream.UI
     {
       _added = added;
       if (Utilities.IsValid(_addButton)) _addButton.interactable = !added;
-      UpdateAddLabel();
+      if (Utilities.IsValid(_addIcon)) _addIcon.sprite = added ? _addedSprite : _addSprite;
     }
 
-    private void UpdateAddLabel()
+    // From the handler: which of the results are in the list, in their
+    // order. Those show a mark, and no add button while pointed at.
+    public void SetResultsAdded(bool[] added)
     {
-      if (!Utilities.IsValid(_addLabel) || !Utilities.IsValid(_uiController)) return;
-      _addLabel.text = _uiController.GetTranslation(_added ? "label.playlistAdded" : "label.addPlaylist");
+      _resultAdded = added;
+      DrawAddedMarks();
+    }
+
+    private void DrawAddedMarks()
+    {
+      if (_lineAddedMarks == null || !Utilities.IsValid(_resultsScroll)) return;
+      for (int i = 0; i < _resultsScroll.LineCount && i < _lineAddedMarks.Length; i++)
+      {
+        int index = _resultsScroll.Indexes[i];
+        if (index < 0 || index >= _resultCount) continue;
+        bool added = index < _resultAdded.Length && _resultAdded[index];
+        if (Utilities.IsValid(_lineAddedMarks[i])) _lineAddedMarks[i].SetActive(added);
+        if (Utilities.IsValid(_lineAddButtons[i])) _lineAddButtons[i].SetActive(!added);
+      }
     }
 
     // The playlist's back button, and a fetch that brought nothing: the
@@ -371,13 +393,14 @@ namespace Yamadev.YamaStream.UI
     }
 
     // The world's playlists changed (from the UIController): the handler
-    // says again whether the open one is among them, as it may have been
-    // added from here after a question, by someone else, or deleted.
+    // says again which results are among them and, with its key, whether the
+    // open playlist is, as one may have been added from here after a
+    // question, by someone else, or deleted.
     public void AfterPlaylistsUpdated()
     {
-      if (!Utilities.IsValid(_handler) || _shows != ShowsPlaylist || string.IsNullOrEmpty(_playlistKey)) return;
+      if (!Utilities.IsValid(_handler)) return;
       _handler.SetProgramVariable("searchSource", this);
-      _handler.SetProgramVariable("searchPickKey", _playlistKey);
+      _handler.SetProgramVariable("searchPickKey", _shows == ShowsPlaylist ? _playlistKey : string.Empty);
       _handler.SendCustomEvent("OnSearchPlaylistsChanged");
     }
 
@@ -435,6 +458,7 @@ namespace Yamadev.YamaStream.UI
         if (Utilities.IsValid(_lineDetailsTriggers[i])) _lineDetailsTriggers[i].SetProgramVariable("_variableObject", index);
         if (Utilities.IsValid(_lineAddTriggers[i])) _lineAddTriggers[i].SetProgramVariable("_variableObject", index);
       }
+      DrawAddedMarks();
     }
 
     private void FindLineParts()
@@ -447,8 +471,9 @@ namespace Yamadev.YamaStream.UI
       _lineTriggers = new IndexTrigger[count];
       _lineDetailsTriggers = new IndexTrigger[count];
       _lineAddTriggers = new IndexTrigger[count];
-      _lineDetailsLabels = new Text[count];
-      _lineAddLabels = new Text[count];
+      _lineAddButtons = new GameObject[count];
+      _lineAddedMarks = new GameObject[count];
+      _lineAddedLabels = new Text[count];
       for (int i = 0; i < count && i < content.childCount; i++)
       {
         Transform line = content.GetChild(i);
@@ -460,16 +485,18 @@ namespace Yamadev.YamaStream.UI
         if (Utilities.IsValid(trackCount)) _lineCounts[i] = trackCount.GetComponent<Text>();
         _lineTriggers[i] = line.GetComponent<IndexTrigger>();
         Transform details = line.Find("Actions/Details");
-        if (Utilities.IsValid(details))
-        {
-          _lineDetailsTriggers[i] = details.GetComponent<IndexTrigger>();
-          _lineDetailsLabels[i] = details.GetComponentInChildren<Text>(true);
-        }
+        if (Utilities.IsValid(details)) _lineDetailsTriggers[i] = details.GetComponent<IndexTrigger>();
         Transform add = line.Find("Actions/Add");
         if (Utilities.IsValid(add))
         {
           _lineAddTriggers[i] = add.GetComponent<IndexTrigger>();
-          _lineAddLabels[i] = add.GetComponentInChildren<Text>(true);
+          _lineAddButtons[i] = add.gameObject;
+        }
+        Transform mark = line.Find("Added");
+        if (Utilities.IsValid(mark))
+        {
+          _lineAddedMarks[i] = mark.gameObject;
+          _lineAddedLabels[i] = mark.GetComponentInChildren<Text>(true);
         }
       }
       UpdateLineLabels();
