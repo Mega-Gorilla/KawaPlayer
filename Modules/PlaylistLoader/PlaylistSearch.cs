@@ -146,7 +146,8 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
       var items = itemsToken.DataList;
       int total = items.Count;
       var titles = new string[total];
-      var details = new string[total];
+      var owners = new string[total];
+      var matches = new string[total];
       var counts = new string[total];
       var keys = new string[total];
       var numbers = new int[total];
@@ -164,12 +165,10 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
         if (string.IsNullOrEmpty(id) || !Utilities.IsValid(_loader.GetResolveUrl(number))) continue;
 
         titles[count] = GetString(item, "name");
-        // Under the name: who made it, and the track that matched when the
-        // name itself does not hold the words (why else is it here?).
-        string detail = GetString(item, "ownerName");
-        string matched = GetString(item, "matchedTrack");
-        if (!string.IsNullOrEmpty(matched)) detail = string.IsNullOrEmpty(detail) ? $"♪ {matched}" : $"{detail}  ♪ {matched}";
-        details[count] = detail;
+        // Who made it, and the track that matched when the name itself
+        // does not hold the words (why else is it here?).
+        owners[count] = GetString(item, "ownerName");
+        matches[count] = GetString(item, "matchedTrack");
         int trackCount = GetInt(item, "trackCount", 0);
         counts[count] = trackCount > 0 ? $"{trackCount} {tracksWord}" : string.Empty;
         keys[count] = PlaylistUrlUtils.MakeSourceKey(_loader.PoolId, id);
@@ -184,7 +183,7 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
           : ui.GetTranslation(truncated ? "module.playlistLoader.searchResultsTruncated" : "module.playlistLoader.searchResults")
               .Replace("{0}", count.ToString());
       view.ShowQuery(query);
-      view.ShowResults(titles, details, counts, keys, numbers, count);
+      view.ShowResults(titles, owners, matches, counts, keys, numbers, count);
       MarkAdded(view);
       view.ShowStatus(status);
     }
@@ -236,7 +235,7 @@ namespace Yamadev.YamaStream.Modules.PlaylistLoader
     // would otherwise stand under words they do not answer.
     private void ShowNothing(SearchPage view, string status)
     {
-      view.ShowResults(new string[0], new string[0], new string[0], new string[0], new int[0], 0);
+      view.ShowResults(new string[0], new string[0], new string[0], new string[0], new string[0], new int[0], 0);
       view.ShowStatus(status);
     }
 

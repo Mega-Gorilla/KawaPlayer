@@ -385,8 +385,8 @@ MARKS = {
         dict(box=(1137, 207, 1183, 253), n=5),
     ]),
     "screen/search-playlist": dict(scale=0.667, marks=[
-        dict(box=(308, 413, 387, 492), n=1),
-        dict(box=(28, 418, 97, 487), n=2),
+        dict(box=(106, 348, 185, 427), n=1),
+        dict(box=(28, 353, 97, 422), n=2),
     ]),
     "screen/playlist-vhub": dict(scale=0.667, marks=[
         dict(box=(1207, 93, 1251, 137), n=1),

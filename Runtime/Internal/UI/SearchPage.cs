@@ -66,7 +66,7 @@ namespace Yamadev.YamaStream.UI
     [SerializeField] private Text _loadingText;
 
     [Header("A playlist opened from a result")]
-    // In place of the results: the playlist's name, what its row said under
+    // In place of the results: the playlist's name, who made it under
     // it and its track count, the two buttons, and its tracks.
     [SerializeField] private GameObject _playlist;
     [SerializeField] private Text _playlistTitle;
@@ -84,7 +84,10 @@ namespace Yamadev.YamaStream.UI
     private UIController _uiController;
     private string _query = string.Empty;
     private string[] _titles = new string[0];
-    private string[] _details = new string[0];
+    // Who made each result, and the track that matched it when its name
+    // does not hold what was searched (else empty).
+    private string[] _owners = new string[0];
+    private string[] _matches = new string[0];
     private string[] _counts = new string[0];
     private string[] _keys = new string[0];
     private int[] _numbers = new int[0];
@@ -102,7 +105,7 @@ namespace Yamadev.YamaStream.UI
     // The playlist that is open: its key, which goes back to the handler
     // with the add button, its tracks, and whether it is added already.
     private string _playlistKey = string.Empty;
-    private string _pickedDetail = string.Empty;
+    private string _pickedOwner = string.Empty;
     private string[] _trackTitles = new string[0];
     private int _trackCount;
     private bool _added;
@@ -307,11 +310,13 @@ namespace Yamadev.YamaStream.UI
     }
 
     // From the handler: the rows. count of each array is used; keys and
-    // numbers come back with a pressed row and are not read here.
-    public void ShowResults(string[] titles, string[] details, string[] counts, string[] keys, int[] numbers, int count)
+    // numbers come back with a pressed row and are not read here. matches
+    // holds, for a result found by one of its tracks, that track's title.
+    public void ShowResults(string[] titles, string[] owners, string[] matches, string[] counts, string[] keys, int[] numbers, int count)
     {
       _titles = titles;
-      _details = details;
+      _owners = owners;
+      _matches = matches;
       _counts = counts;
       _keys = keys;
       _numbers = numbers;
@@ -328,7 +333,7 @@ namespace Yamadev.YamaStream.UI
       _trackTitles = trackTitles;
       _trackCount = trackCount;
       if (Utilities.IsValid(_playlistTitle)) _playlistTitle.text = title == null ? string.Empty : title;
-      if (Utilities.IsValid(_playlistDetail)) _playlistDetail.text = _pickedDetail;
+      if (Utilities.IsValid(_playlistDetail)) _playlistDetail.text = _pickedOwner;
       if (Utilities.IsValid(_playlistCount)) _playlistCount.text = count == null ? string.Empty : count;
       SetAdded(added);
       Show(ShowsPlaylist);
@@ -447,11 +452,15 @@ namespace Yamadev.YamaStream.UI
         int index = _resultsScroll.Indexes[i];
         if (index == _resultsScroll.LastIndexes[i] || index == -1 || index >= _resultCount) continue;
         if (Utilities.IsValid(_lineTitles[i])) _lineTitles[i].text = _titles[index];
-        // Under the name: the track count, then what the handler said of
-        // the result (who made it, the track that matched).
+        // Under the name: the track count, who made it and, for a result
+        // found by one of its tracks, that track.
         if (Utilities.IsValid(_lineDetails[i]))
-          _lineDetails[i].text = string.IsNullOrEmpty(_counts[index]) ? _details[index]
-              : string.IsNullOrEmpty(_details[index]) ? _counts[index] : $"{_counts[index]}  ·  {_details[index]}";
+        {
+          string detail = _counts[index];
+          if (!string.IsNullOrEmpty(_owners[index])) detail = string.IsNullOrEmpty(detail) ? _owners[index] : $"{detail}  ·  {_owners[index]}";
+          if (!string.IsNullOrEmpty(_matches[index])) detail = string.IsNullOrEmpty(detail) ? $"♪ {_matches[index]}" : $"{detail}  ♪ {_matches[index]}";
+          _lineDetails[i].text = detail;
+        }
         bool top = index < TopRanks;
         string rank = (index + 1).ToString();
         if (Utilities.IsValid(_lineTopRanks[i]))
@@ -515,7 +524,7 @@ namespace Yamadev.YamaStream.UI
     public void PickResult()
     {
       if (!Utilities.IsValid(_handler) || pickedIndex < 0 || pickedIndex >= _resultCount) return;
-      _pickedDetail = _details[pickedIndex];
+      _pickedOwner = _owners[pickedIndex];
       _handler.SetProgramVariable("searchSource", this);
       _handler.SetProgramVariable("searchPickKey", _keys[pickedIndex]);
       _handler.SetProgramVariable("searchPickNumber", _numbers[pickedIndex]);
