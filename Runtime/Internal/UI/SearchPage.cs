@@ -12,8 +12,8 @@ namespace Yamadev.YamaStream.UI
   // tracks, with a button that adds it and one that goes back to the results.
   // A row pointed at shows two buttons of its own, icons as on the list's
   // rows: one that opens it as a press on the row does, and one that adds the
-  // playlist without opening it. A result that is in the list already says
-  // so, and has no add button.
+  // playlist without opening it. A result that is in the list already shows
+  // a check, with no word to translate, and has no add button.
   //
   // This is only the view. What is searched, and what a result is, belong to
   // the module that answers (_handler, wired when the world is built, as the
@@ -58,7 +58,7 @@ namespace Yamadev.YamaStream.UI
 
     [Header("While waiting")]
     // In the middle of the page, in place of the rows, while the handler
-    // fetches: a ring that turns (its own animator, which runs only while
+    // fetches: waves that run (their own animator, which runs only while
     // this shows) and a word on what is fetched.
     [SerializeField] private GameObject _loading;
     [SerializeField] private Text _loadingText;
@@ -72,10 +72,9 @@ namespace Yamadev.YamaStream.UI
     [SerializeField] private Text _playlistCount;
     [SerializeField, RegisterEvent(nameof(Button.onClick), nameof(BackToResults))] private Button _backButton;
     [SerializeField, RegisterEvent(nameof(Button.onClick), nameof(AddPressed))] private Button _addButton;
-    // The add button's icon: a plus, and a check once the playlist is added.
-    [SerializeField] private Image _addIcon;
-    [SerializeField] private Sprite _addSprite;
-    [SerializeField] private Sprite _addedSprite;
+    // The add button's icons: a plus, and a check once the playlist is added.
+    [SerializeField] private GameObject _addIcon;
+    [SerializeField] private GameObject _addedIcon;
     [SerializeField] private LoopScroll _tracksScroll;
 
     [SerializeField, HideInInspector] private UdonSharpBehaviour _handler;
@@ -123,7 +122,6 @@ namespace Yamadev.YamaStream.UI
     private IndexTrigger[] _lineAddTriggers;
     private GameObject[] _lineAddButtons;
     private GameObject[] _lineAddedMarks;
-    private Text[] _lineAddedLabels;
     // Which results are in the list, as the handler last said.
     private bool[] _resultAdded = new bool[0];
 
@@ -157,17 +155,6 @@ namespace Yamadev.YamaStream.UI
       if (Utilities.IsValid(_entryLabel)) _entryLabel.text = _uiController.GetTranslation("label.searchPlaylists");
       UpdateBoxText();
       UpdateHelp();
-      UpdateLineLabels();
-    }
-
-    // The word of the lines' mark for a result in the list, which the lines
-    // do not get with their rows.
-    private void UpdateLineLabels()
-    {
-      if (_lineAddedLabels == null || !Utilities.IsValid(_uiController)) return;
-      string added = _uiController.GetTranslation("label.playlistAdded");
-      for (int i = 0; i < _lineAddedLabels.Length; i++)
-        if (Utilities.IsValid(_lineAddedLabels[i])) _lineAddedLabels[i].text = added;
     }
 
     private void UpdateBoxText()
@@ -348,7 +335,8 @@ namespace Yamadev.YamaStream.UI
     {
       _added = added;
       if (Utilities.IsValid(_addButton)) _addButton.interactable = !added;
-      if (Utilities.IsValid(_addIcon)) _addIcon.sprite = added ? _addedSprite : _addSprite;
+      if (Utilities.IsValid(_addIcon)) _addIcon.SetActive(!added);
+      if (Utilities.IsValid(_addedIcon)) _addedIcon.SetActive(added);
     }
 
     // From the handler: which of the results are in the list, in their
@@ -473,7 +461,6 @@ namespace Yamadev.YamaStream.UI
       _lineAddTriggers = new IndexTrigger[count];
       _lineAddButtons = new GameObject[count];
       _lineAddedMarks = new GameObject[count];
-      _lineAddedLabels = new Text[count];
       for (int i = 0; i < count && i < content.childCount; i++)
       {
         Transform line = content.GetChild(i);
@@ -493,13 +480,8 @@ namespace Yamadev.YamaStream.UI
           _lineAddButtons[i] = add.gameObject;
         }
         Transform mark = line.Find("Added");
-        if (Utilities.IsValid(mark))
-        {
-          _lineAddedMarks[i] = mark.gameObject;
-          _lineAddedLabels[i] = mark.GetComponentInChildren<Text>(true);
-        }
+        if (Utilities.IsValid(mark)) _lineAddedMarks[i] = mark.gameObject;
       }
-      UpdateLineLabels();
     }
 
     // A result's row was pressed: its key and number go back to the handler,

@@ -93,13 +93,17 @@ d.ellipse(p(56, 56, 368, 368), outline=255, width=34 * S)
 stroke(d, (338, 338), (448, 448), 38)
 save(im, "bar-search.png")
 
-# the ring that turns while the search waits (#145): three quarters of a circle with round ends,
-# open at the top right, turned by an animator
-im, d = canvas()
-d.arc(p(76, 76, 436, 436), start=0, end=270, fill=255, width=40 * S)
-for x, y in ((416, 256), (256, 96)):
-    d.ellipse(p(x - 20, y - 20, x + 20, y + 20), fill=255)
-save(im, "bar-spinner.png")
+# the wave that runs while the search waits (#145): five periods of a sine line with round ends, 640 x 64,
+# moved along by an animator inside a window two periods wide, so that it looks like running water
+import math
+wave = Image.new("L", (640 * S, 64 * S), 0)
+wd = ImageDraw.Draw(wave)
+pts = [(x, (32 + 18 * math.sin(2 * math.pi * x / (128 * S))) * S) for x in range(0, 640 * S + 1, 2)]
+wd.line(pts, fill=255, width=10 * S, joint="curve")
+wave = wave.resize((640, 64), Image.LANCZOS)
+wim = Image.new("RGBA", (640, 64), (255, 255, 255, 0))
+wim.putalpha(wave)
+wim.save(OUT + "bar-wave.png")
 
 # a check, for a playlist the search shows that is in the list already (#145)
 im, d = canvas()
