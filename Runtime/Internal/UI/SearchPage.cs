@@ -66,12 +66,12 @@ namespace Yamadev.YamaStream.UI
     [SerializeField] private Text _loadingText;
 
     [Header("A playlist opened from a result")]
-    // In place of the results: the playlist's name, who made it under
-    // it and its track count, the two buttons, and its tracks.
+    // In place of the results: the playlist's name, under it its track
+    // count and who made it on one line (as on a result's row), the two
+    // buttons, and its tracks.
     [SerializeField] private GameObject _playlist;
     [SerializeField] private Text _playlistTitle;
     [SerializeField] private Text _playlistDetail;
-    [SerializeField] private Text _playlistCount;
     [SerializeField, RegisterEvent(nameof(Button.onClick), nameof(BackToResults))] private Button _backButton;
     [SerializeField, RegisterEvent(nameof(Button.onClick), nameof(AddPressed))] private Button _addButton;
     // The add button's icons: a plus, and a check once the playlist is added.
@@ -132,6 +132,9 @@ namespace Yamadev.YamaStream.UI
     private IndexTrigger[] _lineAddTriggers;
     private GameObject[] _lineAddButtons;
     private GameObject[] _lineAddedMarks;
+    // A line's arrow, which the mark stands in place of. Its object is the
+    // row animator's to switch, so the page switches its image.
+    private Image[] _lineArrows;
     // Which results are in the list, as the handler last said.
     private bool[] _resultAdded = new bool[0];
 
@@ -333,8 +336,9 @@ namespace Yamadev.YamaStream.UI
       _trackTitles = trackTitles;
       _trackCount = trackCount;
       if (Utilities.IsValid(_playlistTitle)) _playlistTitle.text = title == null ? string.Empty : title;
-      if (Utilities.IsValid(_playlistDetail)) _playlistDetail.text = _pickedOwner;
-      if (Utilities.IsValid(_playlistCount)) _playlistCount.text = count == null ? string.Empty : count;
+      if (Utilities.IsValid(_playlistDetail))
+        _playlistDetail.text = string.IsNullOrEmpty(count) ? _pickedOwner
+            : string.IsNullOrEmpty(_pickedOwner) ? count : $"{count}  ·  {_pickedOwner}";
       SetAdded(added);
       Show(ShowsPlaylist);
       if (Utilities.IsValid(_tracksScroll) && _tracksScroll.gameObject.activeInHierarchy)
@@ -369,6 +373,7 @@ namespace Yamadev.YamaStream.UI
         bool added = index < _resultAdded.Length && _resultAdded[index];
         if (Utilities.IsValid(_lineAddedMarks[i])) _lineAddedMarks[i].SetActive(added);
         if (Utilities.IsValid(_lineAddButtons[i])) _lineAddButtons[i].SetActive(!added);
+        if (Utilities.IsValid(_lineArrows[i])) _lineArrows[i].enabled = !added;
       }
     }
 
@@ -493,6 +498,7 @@ namespace Yamadev.YamaStream.UI
       _lineAddTriggers = new IndexTrigger[count];
       _lineAddButtons = new GameObject[count];
       _lineAddedMarks = new GameObject[count];
+      _lineArrows = new Image[count];
       for (int i = 0; i < count && i < content.childCount; i++)
       {
         Transform line = content.GetChild(i);
@@ -515,6 +521,8 @@ namespace Yamadev.YamaStream.UI
         }
         Transform mark = line.Find("Added");
         if (Utilities.IsValid(mark)) _lineAddedMarks[i] = mark.gameObject;
+        Transform arrow = line.Find("Opens");
+        if (Utilities.IsValid(arrow)) _lineArrows[i] = arrow.GetComponent<Image>();
       }
     }
 
