@@ -8,8 +8,10 @@ namespace Yamadev.YamaStream.UI
 {
   // The search (issue #145): a row under the list's playlists opens a page
   // over the whole screen, as the settings are, with a box to type into and
-  // the results as rows. A row pressed opens the playlist it stands for: its
-  // tracks, with a button that adds it and one that goes back to the results.
+  // the results as rows, in the order they came, each with its place (the
+  // first three in the accent colour, as the server sends the most loaded
+  // first). A row pressed opens the playlist it stands for: its tracks, with
+  // a button that adds it and one that goes back to the results.
   // A row pointed at shows two buttons of its own, icons as on the list's
   // rows: one that opens it as a press on the row does, and one that adds the
   // playlist without opening it. A result that is in the list already shows
@@ -110,11 +112,16 @@ namespace Yamadev.YamaStream.UI
     // and when to give up (the page never showed).
     private int _fieldWaits;
     private const int FieldWaitFrames = 600;
+    // How many of the first results show their place in the accent colour.
+    private const int TopRanks = 3;
     // The parts of the result lines, found once (as the UIController finds
     // its lists' lines' parts, #326).
     private Text[] _lineTitles;
     private Text[] _lineDetails;
-    private Text[] _lineCounts;
+    // A line's place in the results: one text for the first three, in the
+    // accent colour, and one for the rest. One of the two shows.
+    private Text[] _lineTopRanks;
+    private Text[] _lineRanks;
     private IndexTrigger[] _lineTriggers;
     // The two buttons a line shows while pointed at; the add button, and the
     // mark that stands for it on a result that is in the list already.
@@ -440,8 +447,23 @@ namespace Yamadev.YamaStream.UI
         int index = _resultsScroll.Indexes[i];
         if (index == _resultsScroll.LastIndexes[i] || index == -1 || index >= _resultCount) continue;
         if (Utilities.IsValid(_lineTitles[i])) _lineTitles[i].text = _titles[index];
-        if (Utilities.IsValid(_lineDetails[i])) _lineDetails[i].text = _details[index];
-        if (Utilities.IsValid(_lineCounts[i])) _lineCounts[i].text = _counts[index];
+        // Under the name: the track count, then what the handler said of
+        // the result (who made it, the track that matched).
+        if (Utilities.IsValid(_lineDetails[i]))
+          _lineDetails[i].text = string.IsNullOrEmpty(_counts[index]) ? _details[index]
+              : string.IsNullOrEmpty(_details[index]) ? _counts[index] : $"{_counts[index]}  ·  {_details[index]}";
+        bool top = index < TopRanks;
+        string rank = (index + 1).ToString();
+        if (Utilities.IsValid(_lineTopRanks[i]))
+        {
+          _lineTopRanks[i].gameObject.SetActive(top);
+          _lineTopRanks[i].text = rank;
+        }
+        if (Utilities.IsValid(_lineRanks[i]))
+        {
+          _lineRanks[i].gameObject.SetActive(!top);
+          _lineRanks[i].text = rank;
+        }
         if (Utilities.IsValid(_lineTriggers[i])) _lineTriggers[i].SetProgramVariable("_variableObject", index);
         if (Utilities.IsValid(_lineDetailsTriggers[i])) _lineDetailsTriggers[i].SetProgramVariable("_variableObject", index);
         if (Utilities.IsValid(_lineAddTriggers[i])) _lineAddTriggers[i].SetProgramVariable("_variableObject", index);
@@ -455,7 +477,8 @@ namespace Yamadev.YamaStream.UI
       var content = _resultsScroll.GetComponent<ScrollRect>().content;
       _lineTitles = new Text[count];
       _lineDetails = new Text[count];
-      _lineCounts = new Text[count];
+      _lineTopRanks = new Text[count];
+      _lineRanks = new Text[count];
       _lineTriggers = new IndexTrigger[count];
       _lineDetailsTriggers = new IndexTrigger[count];
       _lineAddTriggers = new IndexTrigger[count];
@@ -468,8 +491,10 @@ namespace Yamadev.YamaStream.UI
         if (Utilities.IsValid(title)) _lineTitles[i] = title.GetComponent<Text>();
         Transform detail = line.Find("Detail");
         if (Utilities.IsValid(detail)) _lineDetails[i] = detail.GetComponent<Text>();
-        Transform trackCount = line.Find("TrackCount");
-        if (Utilities.IsValid(trackCount)) _lineCounts[i] = trackCount.GetComponent<Text>();
+        Transform topRank = line.Find("TopRank");
+        if (Utilities.IsValid(topRank)) _lineTopRanks[i] = topRank.GetComponent<Text>();
+        Transform rank = line.Find("Rank");
+        if (Utilities.IsValid(rank)) _lineRanks[i] = rank.GetComponent<Text>();
         _lineTriggers[i] = line.GetComponent<IndexTrigger>();
         Transform details = line.Find("Actions/Details");
         if (Utilities.IsValid(details)) _lineDetailsTriggers[i] = details.GetComponent<IndexTrigger>();
