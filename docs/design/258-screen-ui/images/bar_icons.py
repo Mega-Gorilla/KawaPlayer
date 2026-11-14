@@ -5,6 +5,8 @@ bar-circle.png is the round ground of the bar's buttons, bar-scrim.png the dark 
 (transparent at the top, opaque at the bottom; the Image's colour sets the darkness).
 Run from the repository root: python docs/design/258-screen-ui/images/bar_icons.py
 """
+import math
+
 from PIL import Image, ImageDraw
 
 S = 4                      # supersampling
@@ -95,7 +97,6 @@ save(im, "bar-search.png")
 
 # the wave that runs while the search waits (#145): five periods of a sine line with round ends, 640 x 64,
 # moved along by an animator inside a window two periods wide, so that it looks like running water
-import math
 wave = Image.new("L", (640 * S, 64 * S), 0)
 wd = ImageDraw.Draw(wave)
 pts = [(x, (32 + 18 * math.sin(2 * math.pi * x / (128 * S))) * S) for x in range(0, 640 * S + 1, 2)]

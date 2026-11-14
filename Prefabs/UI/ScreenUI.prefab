@@ -18363,6 +18363,7 @@ GameObject:
   - component: {fileID: 8062467412939186754}
   - component: {fileID: 5690529294939350383}
   - component: {fileID: 745936841829998496}
+  - component: {fileID: 7389710697723483443}
   m_Layer: 0
   m_Name: Hover
   m_TagString: Untagged
@@ -20923,6 +20924,7 @@ GameObject:
   - component: {fileID: 2032370778077217373}
   - component: {fileID: 6955818720118034895}
   - component: {fileID: 98322319989004925}
+  - component: {fileID: 1441801765834121941}
   m_Layer: 0
   m_Name: Hover
   m_TagString: Untagged
@@ -21107,3 +21109,29 @@ MonoBehaviour:
   m_FlexibleWidth: -1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
+--- !u!114 &1441801765834121941
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3622772724612652589}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a40883b1bf6bf5543bb641824e65f870, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  colorType: 7
+--- !u!114 &7389710697723483443
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7985487174736793646}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a40883b1bf6bf5543bb641824e65f870, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  colorType: 7

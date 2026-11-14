@@ -97,7 +97,7 @@ namespace Yamadev.YamaStream.UI
     private int[] _numbers = new int[0];
     private int _resultCount;
     private bool _handlerSpoke;
-    // What shows under the box and the status line: the results, the ring,
+    // What shows under the box and the status line: the results, the waves,
     // or a playlist.
     private const int ShowsResults = 0;
     private const int ShowsLoading = 1;
@@ -313,7 +313,7 @@ namespace Yamadev.YamaStream.UI
       if (Utilities.IsValid(_statusText)) _statusText.text = note == null ? string.Empty : note;
     }
 
-    // From the handler: it is fetching. The ring shows in place of the rows
+    // From the handler: it is fetching. The waves show in place of the rows
     // with a word on what is fetched, and the line under the box is empty.
     public void ShowLoading(string message)
     {
